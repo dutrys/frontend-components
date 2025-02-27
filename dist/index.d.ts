@@ -5,7 +5,8 @@ import * as React$1 from 'react';
 import React__default from 'react';
 import { PaginateQuery as PaginateQuery$1 } from '@/utils/paginate';
 
-declare const DatePicker: ({ onChange, value, inputClassName, toggleClassName, allowEmpty, disabled, placeholder, }: {
+declare const DatePicker: ({ onChange, value, inputClassName, toggleClassName, required, allowEmpty, disabled, placeholder, }: {
+    required?: boolean;
     disabled?: boolean;
     value: Date | null;
     inputClassName?: string;
@@ -84,7 +85,7 @@ interface IInputProps<TName extends FieldPath<FieldValues>> {
     size?: "xs" | "sm" | "md" | "lg";
 }
 interface IInputRegisterProps<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>> extends IInputProps<TName> {
-    options?: RegisterOptions<TFieldValues, TName>;
+    options?: Omit<RegisterOptions<TFieldValues, TName>, "required" | "disabled">;
     register: UseFormRegister<TFieldValues>;
 }
 declare const TextInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName> & {

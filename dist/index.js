@@ -50,13 +50,13 @@ const formatDate = (date) => {
     }
     return format(date, "yyyy-MM-dd");
 };
-const DatePicker = ({ onChange, value, inputClassName = "input input-bordered", toggleClassName = "", allowEmpty, disabled, placeholder, }) => {
+const DatePicker = ({ onChange, value, inputClassName = "input input-bordered", toggleClassName = "", required, allowEmpty, disabled, placeholder, }) => {
     const [dateString, setDateString] = useState(value ? formatDate(value) : "");
     const params = useParams();
     useEffect(() => {
         setDateString(value ? formatDate(value) : "");
     }, [value]);
-    return (jsxs("div", { className: `w-full ${inputClassName}`, children: [jsx(Popover, { showOnClick: true, showOnFocus: true, showOnHover: false, popoverWidth: "", title: (ref, props) => (jsx("input", { ref: ref, ...props, value: dateString, className: "grow", disabled: disabled, placeholder: placeholder, onChange: (e) => {
+    return (jsxs("div", { className: `w-full ${inputClassName}`, children: [jsx(Popover, { showOnClick: true, showOnFocus: true, showOnHover: false, popoverWidth: "", title: (ref, props) => (jsx("input", { ref: ref, ...props, value: dateString, className: "grow", required: required, disabled: disabled, placeholder: placeholder, onChange: (e) => {
                         if (e.target.value.length > 10) {
                             return;
                         }
@@ -293,21 +293,36 @@ const stringToDate = (date, timeZone) => {
 };
 
 const TextInput = (props) => {
-    return (jsxs("div", { children: [jsxs("label", { className: "floating-label", children: [jsx("input", { id: props.id, type: props.type || "text", ...props.register(props.name, props.options), required: props.required, disabled: props.disabled, placeholder: props.label, className: cx("input input-bordered w-full", props.className, {
+    const options = {
+        required: props.required,
+        disabled: props.disabled,
+        ...(props.options || {}),
+    };
+    return (jsxs("div", { children: [jsxs("label", { className: "floating-label", children: [jsx("input", { id: props.id, type: props.type || "text", ...props.register(props.name, options), required: props.required, disabled: props.disabled, placeholder: props.label, className: cx("input input-bordered w-full", props.className, {
                             "input-xs": props.size === "xs",
                             "input-sm": props.size === "sm",
                             "input-error": props.error,
                         }) }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && jsx("div", { className: "text-xs mt-0.5 text-gray-500", children: props.desc }), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
 const SelectInput = (props) => {
-    return (jsxs("div", { children: [jsxs("label", { className: "floating-label", children: [jsx("select", { id: props.id, disabled: props.disabled, ...props.register(props.name, props.options), className: cx("select select-bordered w-full", props.className, {
+    const options = {
+        required: props.required,
+        disabled: props.disabled,
+        ...(props.options || {}),
+    };
+    return (jsxs("div", { children: [jsxs("label", { className: "floating-label", children: [jsx("select", { id: props.id, disabled: props.disabled, ...props.register(props.name, options), className: cx("select select-bordered w-full", props.className, {
                             "select-xs": props.size === "xs",
                             "select-sm": props.size === "sm",
                             "select-error": props.error,
                         }), children: props.children }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && jsx("div", { className: "text-xs mt-0.5 text-gray-500", children: props.desc }), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
 const TextareaInput = (props) => {
-    return (jsxs("div", { children: [jsxs("label", { className: "floating-label", children: [jsx("textarea", { id: props.id, disabled: props.disabled, ...props.register(props.name, props.options), className: cx("textarea textarea-bordered w-full", props.className, {
+    const options = {
+        required: props.required,
+        disabled: props.disabled,
+        ...(props.options || {}),
+    };
+    return (jsxs("div", { children: [jsxs("label", { className: "floating-label", children: [jsx("textarea", { id: props.id, disabled: props.disabled, ...props.register(props.name, options), className: cx("textarea textarea-bordered w-full", props.className, {
                             "textarea-xs": props.size === "xs",
                             "textarea-sm": props.size === "sm",
                             "textarea-error": props.error,
@@ -317,7 +332,12 @@ const Required = () => {
     return jsx("span", { className: "text-error align-bottom", children: "*" });
 };
 const CheckboxInput = (props) => {
-    return (jsxs("div", { children: [jsxs("label", { children: [jsx("input", { id: props.id, type: "checkbox", disabled: props.disabled, ...props.register(props.name, props.options), className: cx("toggle", {
+    const options = {
+        required: props.required,
+        disabled: props.disabled,
+        ...(props.options || {}),
+    };
+    return (jsxs("div", { children: [jsxs("label", { children: [jsx("input", { id: props.id, type: "checkbox", disabled: props.disabled, ...props.register(props.name, options), className: cx("toggle", {
                             "toggle-sm": props.size === "sm",
                             "toggle-xs": props.size === "xs",
                         }) }), jsx("span", { className: "text-sm text-gray-500 label-text grow pl-2", children: props.label })] }), props.desc && jsx("div", { className: "text-xs mt-0.5 text-gray-500", children: props.desc }), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
@@ -328,7 +348,7 @@ const DateInput = (props) => {
                                     "input-xs": props.size === "xs",
                                     "input-sm": props.size === "sm",
                                     "input-error": props.error,
-                                }), allowEmpty: props.allowEmpty, placeholder: props.label, value: field.value, onChange: (value) => {
+                                }), required: props.required, disabled: props.disabled, allowEmpty: props.allowEmpty, placeholder: props.label, value: field.value, onChange: (value) => {
                                     if (props.useDate) {
                                         field.onChange(value);
                                     }

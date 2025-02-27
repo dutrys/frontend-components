@@ -13,13 +13,13 @@ const formatDate = (date) => {
     }
     return format(date, "yyyy-MM-dd");
 };
-export const DatePicker = ({ onChange, value, inputClassName = "input input-bordered", toggleClassName = "", allowEmpty, disabled, placeholder, }) => {
+export const DatePicker = ({ onChange, value, inputClassName = "input input-bordered", toggleClassName = "", required, allowEmpty, disabled, placeholder, }) => {
     const [dateString, setDateString] = useState(value ? formatDate(value) : "");
     const params = useParams();
     useEffect(() => {
         setDateString(value ? formatDate(value) : "");
     }, [value]);
-    return (_jsxs("div", { className: `w-full ${inputClassName}`, children: [_jsx(Popover, { showOnClick: true, showOnFocus: true, showOnHover: false, popoverWidth: "", title: (ref, props) => (_jsx("input", { ref: ref, ...props, value: dateString, className: "grow", disabled: disabled, placeholder: placeholder, onChange: (e) => {
+    return (_jsxs("div", { className: `w-full ${inputClassName}`, children: [_jsx(Popover, { showOnClick: true, showOnFocus: true, showOnHover: false, popoverWidth: "", title: (ref, props) => (_jsx("input", { ref: ref, ...props, value: dateString, className: "grow", required: required, disabled: disabled, placeholder: placeholder, onChange: (e) => {
                         if (e.target.value.length > 10) {
                             return;
                         }

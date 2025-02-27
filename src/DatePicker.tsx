@@ -21,10 +21,12 @@ export const DatePicker = ({
   value,
   inputClassName = "input input-bordered",
   toggleClassName = "",
+  required,
   allowEmpty,
   disabled,
   placeholder,
 }: {
+  required?: boolean;
   disabled?: boolean;
   value: Date | null;
   inputClassName?: string;
@@ -52,6 +54,7 @@ export const DatePicker = ({
             {...props}
             value={dateString}
             className="grow"
+            required={required}
             disabled={disabled}
             placeholder={placeholder}
             onChange={(e) => {

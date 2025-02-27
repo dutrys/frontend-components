@@ -32,7 +32,7 @@ interface IInputRegisterProps<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 > extends IInputProps<TName> {
-  options?: RegisterOptions<TFieldValues, TName>;
+  options?: Omit<RegisterOptions<TFieldValues, TName>, "required" | "disabled">;
   register: UseFormRegister<TFieldValues>;
 }
 
@@ -42,13 +42,19 @@ export const TextInput = <
 >(
   props: IInputRegisterProps<TFieldValues, TName> & { type?: string },
 ) => {
+  const options = {
+    required: props.required,
+    disabled: props.disabled,
+    ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
+  };
+
   return (
     <div>
       <label className="floating-label">
         <input
           id={props.id}
           type={props.type || "text"}
-          {...props.register(props.name, props.options)}
+          {...props.register(props.name, options)}
           required={props.required}
           disabled={props.disabled}
           placeholder={props.label}
@@ -77,13 +83,19 @@ export const SelectInput = <
     children: React.ReactNode;
   },
 ) => {
+  const options = {
+    required: props.required,
+    disabled: props.disabled,
+    ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
+  };
+
   return (
     <div>
       <label className="floating-label">
         <select
           id={props.id}
           disabled={props.disabled}
-          {...props.register(props.name, props.options)}
+          {...props.register(props.name, options)}
           className={cx("select select-bordered w-full", props.className, {
             "select-xs": props.size === "xs",
             "select-sm": props.size === "sm",
@@ -109,13 +121,18 @@ export const TextareaInput = <
 >(
   props: IInputRegisterProps<TFieldValues, TName>,
 ) => {
+  const options = {
+    required: props.required,
+    disabled: props.disabled,
+    ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
+  };
   return (
     <div>
       <label className="floating-label">
         <textarea
           id={props.id}
           disabled={props.disabled}
-          {...props.register(props.name, props.options)}
+          {...props.register(props.name, options)}
           className={cx("textarea textarea-bordered w-full", props.className, {
             "textarea-xs": props.size === "xs",
             "textarea-sm": props.size === "sm",
@@ -143,6 +160,12 @@ export const CheckboxInput = <
 >(
   props: IInputRegisterProps<TFieldValues, TName>,
 ) => {
+  const options = {
+    required: props.required,
+    disabled: props.disabled,
+    ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
+  };
+
   return (
     <div>
       <label>
@@ -150,7 +173,7 @@ export const CheckboxInput = <
           id={props.id}
           type="checkbox"
           disabled={props.disabled}
-          {...props.register(props.name, props.options)}
+          {...props.register(props.name, options)}
           className={cx("toggle", {
             "toggle-sm": props.size === "sm",
             "toggle-xs": props.size === "xs",
@@ -188,6 +211,8 @@ export const DateInput = <
                   "input-sm": props.size === "sm",
                   "input-error": props.error,
                 })}
+                required={props.required}
+                disabled={props.disabled}
                 allowEmpty={props.allowEmpty}
                 placeholder={props.label}
                 value={field.value}
