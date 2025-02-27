@@ -1,0 +1,29 @@
+.DatePicker-module_dayPicker__OS6e0 .rdp-button_previous svg,
+.DatePicker-module_dayPicker__OS6e0 .rdp-button_next svg {
+  fill: white !important;
+}
+.DatePicker-module_dayPicker__OS6e0 .rdp-button_previous:hover,
+.DatePicker-module_dayPicker__OS6e0 .rdp-button_next:hover {
+  background: #2196f3 !important;
+}
+.DatePicker-module_dayPicker__OS6e0 .rdp-day_button:hover {
+  color: #000;
+}
+
+.DatePicker-module_dayPicker__OS6e0 .rdp-caption_label {
+  text-transform: capitalize;
+}
+.DatePicker-module_dayPicker__OS6e0 .rdp-dropdowns .rdp-chevron {
+  fill: white !important;
+}
+.DatePicker-module_dayPicker__OS6e0 .rdp-today .rdp-day_button {
+  background: none !important;
+  border: 1px solid #114b7a !important;
+}
+.DatePicker-module_dayPicker__OS6e0 .rdp-selected .rdp-day_button {
+  background: #2196f3 !important;
+}
+
+.DatePicker-module_dayPicker__OS6e0 .rdp-today {
+  background: transparent !important;
+}

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { format, isSameDay, isSameHour, isValid, parse } from "date-fns";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import styles from "*.module.css";
+import styles from "./DatePicker.module.css";
 import { ClockIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import * as React from "react";
 import { Popover } from "./Popover";

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { format, isValid, parse } from "date-fns";
-import styles from "./DatetimePicker.module.css";
+import styles from "./DatePicker.module.css";
 import { ClockIcon, XMarkIcon, CalendarIcon } from "@heroicons/react/24/outline";
 import { Popover } from "./Popover";
 import { useParams } from "next/navigation";
