@@ -4,5 +4,5 @@ export declare const LoadingComponent: ({ style, className, loadingClassName, si
     loadingClassName?: string;
     size?: "loading-lg" | "loading-md" | "loading-sm" | "loading-xs";
     style?: React.CSSProperties;
-}) => React.JSX.Element;
+}) => import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=Loading.d.ts.map
