@@ -5,7 +5,8 @@
   "scripts": {
     "build": "rimraf dist/ && tsc",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "postversion": "git push && git push --tags"
   },
   "main": "dist/index.js",
   "module": "dist/index.js",
