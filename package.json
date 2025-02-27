@@ -1,12 +1,14 @@
 {
   "name": "frontend-components",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
     "build": "tsc",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "author": "",
   "license": "ISC",
   "description": "",
