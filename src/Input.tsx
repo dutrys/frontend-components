@@ -12,8 +12,8 @@ import { DatePicker } from "./DatePicker";
 import { InputErrors } from "./Form";
 import { format } from "date-fns";
 import { SelectPaginatedFromApi } from "./SelectPaginatedFromApi";
-import { PaginateQuery } from "./utils/paginate.ts";
-import { stringToDate } from "./utils/datetime.ts";
+import { PaginateQuery } from "./utils/paginate";
+import { stringToDate } from "./utils/datetime";
 
 interface IInputProps<TName extends FieldPath<FieldValues>> {
   id?: string;

@@ -10,7 +10,7 @@ import {
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { Fragment, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { PaginateQuery } from "@/utils/paginate.ts";
+import { PaginateQuery } from "@/utils/paginate";
 
 const PAGINATE_LIMIT = 50;
 
