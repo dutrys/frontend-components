@@ -27,8 +27,10 @@ export const SelectPaginatedFromApi = <
   queryFunction,
   placeholder,
   valueFormat = (model) => (model as any).name,
+  inputClassName = "w-full mx-0 input input-bordered",
   ...rest
 }: {
+  inputClassName?: string;
   queryFunction?: (query: PaginateQuery<any>) => Promise<TModel | undefined>;
   queryKey: ReadonlyArray<any>;
   placeholder?: string;
@@ -80,7 +82,7 @@ export const SelectPaginatedFromApi = <
             data-testid="select-input"
             placeholder={placeholder}
             onFocus={(e) => e?.target?.select()}
-            className="w-full input mx-0 input-bordered focus:outline-none"
+            className={inputClassName}
             displayValue={(model: TModel["data"][0]) => (model ? valueFormat(model) : "")}
             onChange={(event) => setQuery(event.target.value)}
           />

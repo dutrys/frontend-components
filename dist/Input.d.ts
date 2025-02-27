@@ -9,6 +9,7 @@ interface IInputProps<TName extends FieldPath<FieldValues>> {
     className?: string;
     disabled?: boolean;
     desc?: string;
+    size?: "xs" | "sm" | "md" | "lg";
 }
 interface IInputRegisterProps<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>> extends IInputProps<TName> {
     options?: RegisterOptions<TFieldValues, TName>;
@@ -36,7 +37,7 @@ export declare const SelectPaginatedFromApiInput: <T extends {
         totalItems: number;
         totalPages: number;
     };
-}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, onChange, ...rest }: IInputProps<TName> & {
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     queryKey: ReadonlyArray<any>;
     queryFn: (query: PaginateQuery<any>) => Promise<T>;

@@ -81,6 +81,7 @@ interface IInputProps<TName extends FieldPath<FieldValues>> {
     className?: string;
     disabled?: boolean;
     desc?: string;
+    size?: "xs" | "sm" | "md" | "lg";
 }
 interface IInputRegisterProps<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>> extends IInputProps<TName> {
     options?: RegisterOptions<TFieldValues, TName>;
@@ -108,7 +109,7 @@ declare const SelectPaginatedFromApiInput: <T extends {
         totalItems: number;
         totalPages: number;
     };
-}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, onChange, ...rest }: IInputProps<TName> & {
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     queryKey: ReadonlyArray<any>;
     queryFn: (query: PaginateQuery<any>) => Promise<T>;
@@ -153,7 +154,8 @@ declare const SelectPaginatedFromApi: <TModel extends {
     data: {
         id: number;
     }[];
-}>({ onChange, disabled, required, value, className, queryKey, allowEmpty, queryFunction, placeholder, valueFormat, ...rest }: {
+}>({ onChange, disabled, required, value, className, queryKey, allowEmpty, queryFunction, placeholder, valueFormat, inputClassName, ...rest }: {
+    inputClassName?: string;
     queryFunction?: (query: PaginateQuery$1<any>) => Promise<TModel | undefined>;
     queryKey: ReadonlyArray<any>;
     placeholder?: string;

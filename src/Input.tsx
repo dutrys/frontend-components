@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { SelectPaginatedFromApi } from "./SelectPaginatedFromApi";
 import { PaginateQuery } from "./utils/paginate";
 import { stringToDate } from "./utils/datetime";
+import cx from "classnames";
 
 interface IInputProps<TName extends FieldPath<FieldValues>> {
   id?: string;
@@ -24,6 +25,7 @@ interface IInputProps<TName extends FieldPath<FieldValues>> {
   className?: string;
   disabled?: boolean;
   desc?: string;
+  size?: "xs" | "sm" | "md" | "lg";
 }
 
 interface IInputRegisterProps<
@@ -50,7 +52,11 @@ export const TextInput = <
           required={props.required}
           disabled={props.disabled}
           placeholder={props.label}
-          className={`input input-bordered w-full ${props.className || ""} ${props.error ? " input-error" : ""}`}
+          className={cx("input input-bordered w-full", props.className, {
+            "input-xs": props.size === "xs",
+            "input-sm": props.size === "sm",
+            "input-error": props.error,
+          })}
         />
         <span>
           {props.label}
@@ -78,7 +84,11 @@ export const SelectInput = <
           id={props.id}
           disabled={props.disabled}
           {...props.register(props.name, props.options)}
-          className={`select select-bordered w-full ${props.className || ""} ${props.error ? " select-error" : ""}`}
+          className={cx("select select-bordered w-full", props.className, {
+            "select-xs": props.size === "xs",
+            "select-sm": props.size === "sm",
+            "select-error": props.error,
+          })}
         >
           {props.children}
         </select>
@@ -106,7 +116,11 @@ export const TextareaInput = <
           id={props.id}
           disabled={props.disabled}
           {...props.register(props.name, props.options)}
-          className={`textarea textarea-bordered w-full ${props.className || ""} ${props.error ? " textarea-error" : ""}`}
+          className={cx("textarea textarea-bordered w-full", props.className, {
+            "textarea-xs": props.size === "xs",
+            "textarea-sm": props.size === "sm",
+            "textarea-error": props.error,
+          })}
         />
         <span>
           {props.label}
@@ -137,7 +151,10 @@ export const CheckboxInput = <
           type="checkbox"
           disabled={props.disabled}
           {...props.register(props.name, props.options)}
-          className="toggle"
+          className={cx("toggle", {
+            "toggle-sm": props.size === "sm",
+            "toggle-xs": props.size === "xs",
+          })}
         />
         <span className="text-sm text-gray-500 label-text grow pl-2">{props.label}</span>
       </label>
@@ -166,7 +183,11 @@ export const DateInput = <
           render={({ field }) => {
             return (
               <DatePicker
-                inputClassName={`input input-bordered ${props.className || ""} ${props.error ? " input-error" : ""}`}
+                inputClassName={cx("input input-bordered", props.className, {
+                  "input-xs": props.size === "xs",
+                  "input-sm": props.size === "sm",
+                  "input-error": props.error,
+                })}
                 allowEmpty={props.allowEmpty}
                 placeholder={props.label}
                 value={field.value}
@@ -207,6 +228,8 @@ export const SelectPaginatedFromApiInput = <
   required,
   disabled,
   error,
+  className,
+  size,
   onChange,
   ...rest
 }: IInputProps<TName> & {
@@ -227,6 +250,11 @@ export const SelectPaginatedFromApiInput = <
       rules={{ required: required === true }}
       render={({ field }) => (
         <SelectPaginatedFromApi<T>
+          inputClassName={cx("w-full mx-0 input input-bordered", className, {
+            "input-xs": size === "xs",
+            "input-sm": size === "sm",
+            "input-error": error,
+          })}
           required={required}
           disabled={disabled}
           placeholder={label}
@@ -266,7 +294,11 @@ export const DateTimeInput = <
           render={({ field }) => {
             return (
               <DateTimePicker
-                inputClassName={`input input-bordered ${props.className || ""} ${props.error ? " input-error" : ""}`}
+                inputClassName={cx("input input-bordered", props.className, {
+                  "input-xs": props.size === "xs",
+                  "input-sm": props.size === "sm",
+                  "input-error": props.error,
+                })}
                 required={props.required}
                 allowEmpty={props.allowEmpty}
                 placeholder={props.label}
