@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Hotkeys } from "./HotKeys";
 import { captureException } from "@sentry/nextjs";
 import { GeneralErrorsInToast, isServerError } from "./UseForm";
-import { ParallelDialog } from "./ParallelDialog";
+import { DialogWithBack } from "./DialogWithBack";
 
 type Include<T, U> = T extends U ? T : never;
 
@@ -63,7 +63,7 @@ export const Archive = <T,>({
   };
 
   return (
-    <ParallelDialog onClose={onClose} title={title}>
+    <DialogWithBack onClose={onClose} title={title}>
       <Hotkeys id="archive" hotKeys={[{ key: "Enter", description: t("archive.yes"), callback: doArchive }]} />
       {errors && formatErrors && <div className="alert alert-error my-4">{formatErrors(errors)}</div>}
       {t("archive.message")}
@@ -88,7 +88,7 @@ export const Archive = <T,>({
           </button>
         </div>
       </div>
-    </ParallelDialog>
+    </DialogWithBack>
   );
 };
 

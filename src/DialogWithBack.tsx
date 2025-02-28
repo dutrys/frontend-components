@@ -7,18 +7,14 @@ import { Tooltip } from "react-tooltip";
 
 export const TOOLTIP_PARALLEL_ID = "paralel-tooltip";
 
-export const ParallelDialog = ({
-  title,
-  children,
-  onClose,
-  className,
-  ...rest
-}: {
+type DialogWithBackProps = {
   onClose?: () => void;
   title?: string;
   className?: string;
   children: React.ReactNode;
-}) => {
+};
+
+export const DialogWithBack = ({ title, children, onClose, className, ...rest }: DialogWithBackProps) => {
   let [isOpen, setIsOpen] = useState(true);
   const pathname = usePathname();
   const searchParams = useSearchParams();
