@@ -15,6 +15,9 @@ import { SelectPaginatedFromApi } from "./SelectPaginatedFromApi";
 import { PaginateQuery } from "./utils/paginate";
 import { stringToDate } from "./utils/datetime";
 import cx from "classnames";
+import { TimeInput } from "./TimeInput";
+import { NumericFormat } from "react-number-format";
+import { NumericFormatProps } from "react-number-format/types/types";
 
 interface IInputProps<TName extends FieldPath<FieldValues>> {
   id?: string;
@@ -352,3 +355,94 @@ export const DateTimeInput = <
     </div>
   );
 };
+
+export const InputTime = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+>(
+  props: IInputProps<TName> & {
+    control: Control<TFieldValues>;
+    useDate?: boolean;
+    allowEmpty?: boolean;
+  },
+) => {
+  return (
+    <div>
+      <label className="floating-label">
+        {!props.disabled && (
+          <span>
+            {props.label}
+            {props.required && <Required />}
+          </span>
+        )}
+        <Controller
+          render={({ field }) => (
+            <TimeInput
+              value={field.value}
+              onChange={(v) => field.onChange(v)}
+              placeholder={props.label}
+              required={props.required}
+              disabled={props.disabled}
+              className={cx("input w-full", props.className, {
+                "input-xs": props.size === "xs",
+                "input-sm": props.size === "sm",
+                "input-error": props.error,
+              })}
+            />
+          )}
+          name={props.name}
+          control={props.control}
+        />
+      </label>
+      {props.desc && <div className="text-xs text-gray-500">{props.desc}</div>}
+      <InputErrors className="text-xs text-error mt-1" errors={props.error} />
+    </div>
+  );
+};
+
+export const NumberInput = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+>({
+  options,
+  ...props
+}: IInputProps<TName> & {
+  control: Control<TFieldValues>;
+  options?: NumericFormatProps;
+}) => (
+  <div>
+    <div className="floating-label">
+      {!props?.disabled && (
+        <span>
+          {props.label}
+          {props?.required && <Required />}
+        </span>
+      )}
+      <Controller
+        name={props.name}
+        control={props.control}
+        render={({ field }) => (
+          <NumericFormat
+            placeholder={props.label}
+            disabled={props?.disabled}
+            required={props?.required}
+            value={field.value}
+            className={`${props.size === "sm" ? "input-sm " : ""}w-full input input-bordered focus:outline-blue-400`}
+            onValueChange={(values) => field.onChange(values.floatValue)}
+          />
+        )}
+      />
+    </div>
+    {props.desc && <div className="text-xs text-gray-500">{props.desc}</div>}
+    {props.error && <InputErrors className="text-xs text-error mt-1" errors={props.error} />}
+  </div>
+);
+
+export const Label = ({ text, required }: { required?: boolean; size?: "sm"; text: React.ReactNode }) => (
+  <label className="label">
+    <span className="text-sm">
+      {text}
+      {required && <Required />}
+    </span>
+  </label>
+);

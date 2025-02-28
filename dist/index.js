@@ -15,6 +15,7 @@ import { Combobox, ComboboxInput, ComboboxButton, Transition, ComboboxOptions, C
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
 import 'date-fns-tz';
 import cx from 'classnames';
+import { NumericFormat } from 'react-number-format';
 
 var styles = {"dayPicker":"DatePicker-module_dayPicker__OS6e0"};
 
@@ -283,6 +284,15 @@ const SelectPaginatedFromApi = ({ onChange, disabled, required, value, className
                                         : t("nothing found") })) : (data?.data.map((model, i) => (jsx(ComboboxOption, { "data-testid": `select-option-${i}`, className: ({ active }) => `relative cursor-default select-none py-2 pl-4 pr-4 ${active ? "bg-primary-600 text-white" : "text-gray-900"}`, value: model, children: ({ selected, active }) => (jsxs(Fragment, { children: [jsx("span", { className: `block truncate ${active ? "text-white" : ""} ${selected ? "pr-3 font-bold" : "font-normal"}`, children: valueFormat(model) }), selected ? (jsx("span", { className: `absolute inset-y-0 right-1 flex items-center pl-3 ${active ? "text-white" : "text-teal-600"}`, children: jsx(CheckIcon, { className: "h-5 w-5", "aria-hidden": "true" }) })) : null] })) }, model.id))))] }) })] }) }));
 };
 
+const timeToDate = (date, format = "HH:mm:ss") => {
+    let parsed = parse(date, format, new Date());
+    if (isValid(parsed)) {
+        parsed.setMilliseconds(0);
+        return parsed;
+    }
+    return undefined;
+};
+const dateToTimeString = (date, timeFormat = "HH:mm:ss") => format(date, timeFormat);
 const stringToDate = (date, timeZone) => {
     let parsed = parse(date, "yyyy-MM-dd HH:mm:ss", new Date());
     if (isValid(parsed)) {
@@ -290,6 +300,22 @@ const stringToDate = (date, timeZone) => {
         return parsed;
     }
     return undefined;
+};
+
+const TimeInput = ({ className, value, onChange, placeholder, required, disabled, }) => {
+    const formatValue = (value) => value ? dateToTimeString(timeToDate(value) || new Date(), "HH:mm") : undefined;
+    const [innerValue, setInnerValue] = useState(formatValue(value) || "");
+    useEffect(() => {
+        setInnerValue(formatValue(value) || "");
+    }, [value]);
+    return (jsx("input", { placeholder: placeholder, type: "text", disabled: disabled, required: required, className: className, value: innerValue, onBlur: () => {
+            if (innerValue.match(/^\d{2}:\d{2}$/)) {
+                onChange({ target: { value: dateToTimeString(timeToDate(innerValue, "HH:mm") || new Date(), "HH:mm:ss") } });
+            }
+            else {
+                setInnerValue(formatValue(value) || "");
+            }
+        }, onChange: (e) => setInnerValue(e.target.value) }));
 };
 
 const TextInput = (props) => {
@@ -382,8 +408,17 @@ const DateTimeInput = (props) => {
                                 } }));
                         } }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && jsx("div", { className: "text-xs my-0.5 text-gray-500", children: props.desc }), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
+const InputTime = (props) => {
+    return (jsxs("div", { children: [jsxs("label", { className: "floating-label", children: [!props.disabled && (jsxs("span", { children: [props.label, props.required && jsx(Required, {})] })), jsx(Controller, { render: ({ field }) => (jsx(TimeInput, { value: field.value, onChange: (v) => field.onChange(v), placeholder: props.label, required: props.required, disabled: props.disabled, className: cx("input w-full", props.className, {
+                                "input-xs": props.size === "xs",
+                                "input-sm": props.size === "sm",
+                                "input-error": props.error,
+                            }) })), name: props.name, control: props.control })] }), props.desc && jsx("div", { className: "text-xs text-gray-500", children: props.desc }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+};
+const NumberInput = ({ options, ...props }) => (jsxs("div", { children: [jsxs("div", { className: "floating-label", children: [!props?.disabled && (jsxs("span", { children: [props.label, props?.required && jsx(Required, {})] })), jsx(Controller, { name: props.name, control: props.control, render: ({ field }) => (jsx(NumericFormat, { placeholder: props.label, disabled: props?.disabled, required: props?.required, value: field.value, className: `${props.size === "sm" ? "input-sm " : ""}w-full input input-bordered focus:outline-blue-400`, onValueChange: (values) => field.onChange(values.floatValue) })) })] }), props.desc && jsx("div", { className: "text-xs text-gray-500", children: props.desc }), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+const Label = ({ text, required }) => (jsx("label", { className: "label", children: jsxs("span", { className: "text-sm", children: [text, required && jsx(Required, {})] }) }));
 
 const LoadingComponent = ({ style, className, loadingClassName, size, }) => (jsx("div", { className: `flex justify-center ${className}`, style: style, children: jsx("span", { className: `${loadingClassName || "text-primary"} loading loading-spinner ${size}` }) }));
 
-export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, InputErrors, LoadingComponent, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, TextInput, TextareaInput, addServerErrors, isServerError, useFormSubmit };
+export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, InputErrors, InputTime, Label, LoadingComponent, NumberInput, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, TextInput, TextareaInput, addServerErrors, isServerError, useFormSubmit };
 //# sourceMappingURL=index.js.map

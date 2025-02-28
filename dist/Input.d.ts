@@ -1,5 +1,6 @@
 import { Control, FieldValues, FieldPath, FieldError, RegisterOptions, UseFormRegister } from "react-hook-form";
 import { PaginateQuery } from "./utils/paginate";
+import { NumericFormatProps } from "react-number-format/types/types";
 interface IInputProps<TName extends FieldPath<FieldValues>> {
     id?: string;
     label: string;
@@ -50,6 +51,20 @@ export declare const DateTimeInput: <TFieldValues extends FieldValues = FieldVal
     allowEmpty?: boolean;
     from?: Date;
     to?: Date;
+}) => import("react/jsx-runtime").JSX.Element;
+export declare const InputTime: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputProps<TName> & {
+    control: Control<TFieldValues>;
+    useDate?: boolean;
+    allowEmpty?: boolean;
+}) => import("react/jsx-runtime").JSX.Element;
+export declare const NumberInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ options, ...props }: IInputProps<TName> & {
+    control: Control<TFieldValues>;
+    options?: NumericFormatProps;
+}) => import("react/jsx-runtime").JSX.Element;
+export declare const Label: ({ text, required }: {
+    required?: boolean;
+    size?: "sm";
+    text: React.ReactNode;
 }) => import("react/jsx-runtime").JSX.Element;
 export {};
 //# sourceMappingURL=Input.d.ts.map

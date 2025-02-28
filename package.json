@@ -6,6 +6,7 @@
     "build": "rimraf dist/ && tsc && rollup -c",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "push": "npm run build && git add dist/ && git commit -m ",
     "postversion": "git push && git push --tags"
   },
   "main": "dist/index.js",
@@ -27,7 +28,8 @@
     "react-day-picker": "^9.5.1",
     "react-hook-form": "^7.54.2",
     "react-hot-toast": "^2.5.2",
-    "react-intersection-observer": "^9.15.1"
+    "react-intersection-observer": "^9.15.1",
+    "react-number-format": "^5.4.3"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^12.1.2",

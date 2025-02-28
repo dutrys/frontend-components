@@ -3,6 +3,7 @@ import * as react_hook_form from 'react-hook-form';
 import { FieldValues, UseFormProps, UseFormSetError, FieldPath, FieldError, RegisterOptions, UseFormRegister, Control } from 'react-hook-form';
 import * as React$1 from 'react';
 import React__default from 'react';
+import { NumericFormatProps } from 'react-number-format/types/types';
 import { PaginateQuery as PaginateQuery$1 } from '@/utils/paginate';
 
 declare const DatePicker: ({ onChange, value, inputClassName, toggleClassName, required, allowEmpty, disabled, placeholder, }: {
@@ -124,6 +125,20 @@ declare const DateTimeInput: <TFieldValues extends FieldValues = FieldValues, TN
     from?: Date;
     to?: Date;
 }) => react_jsx_runtime.JSX.Element;
+declare const InputTime: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputProps<TName> & {
+    control: Control<TFieldValues>;
+    useDate?: boolean;
+    allowEmpty?: boolean;
+}) => react_jsx_runtime.JSX.Element;
+declare const NumberInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ options, ...props }: IInputProps<TName> & {
+    control: Control<TFieldValues>;
+    options?: NumericFormatProps;
+}) => react_jsx_runtime.JSX.Element;
+declare const Label: ({ text, required }: {
+    required?: boolean;
+    size?: "sm";
+    text: React.ReactNode;
+}) => react_jsx_runtime.JSX.Element;
 
 declare const LoadingComponent: ({ style, className, loadingClassName, size, }: {
     className?: string;
@@ -169,4 +184,4 @@ declare const SelectPaginatedFromApi: <TModel extends {
     valueFormat?: (model: TModel["data"][0]) => string;
 }) => react_jsx_runtime.JSX.Element;
 
-export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, InputErrors, LoadingComponent, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, type ServerError, TextInput, TextareaInput, addServerErrors, isServerError, useFormSubmit };
+export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, InputErrors, InputTime, Label, LoadingComponent, NumberInput, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, type ServerError, TextInput, TextareaInput, addServerErrors, isServerError, useFormSubmit };

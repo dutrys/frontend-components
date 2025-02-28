@@ -7,6 +7,8 @@ import { format } from "date-fns";
 import { SelectPaginatedFromApi } from "./SelectPaginatedFromApi";
 import { stringToDate } from "./utils/datetime";
 import cx from "classnames";
+import { TimeInput } from "./TimeInput";
+import { NumericFormat } from "react-number-format";
 export const TextInput = (props) => {
     const options = {
         required: props.required,
@@ -97,4 +99,13 @@ export const DateTimeInput = (props) => {
                                 } }));
                         } }), _jsxs("span", { children: [props.label, props.required ? _jsx(Required, {}) : null] })] }), props.desc && _jsx("div", { className: "text-xs my-0.5 text-gray-500", children: props.desc }), props.error && _jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
+export const InputTime = (props) => {
+    return (_jsxs("div", { children: [_jsxs("label", { className: "floating-label", children: [!props.disabled && (_jsxs("span", { children: [props.label, props.required && _jsx(Required, {})] })), _jsx(Controller, { render: ({ field }) => (_jsx(TimeInput, { value: field.value, onChange: (v) => field.onChange(v), placeholder: props.label, required: props.required, disabled: props.disabled, className: cx("input w-full", props.className, {
+                                "input-xs": props.size === "xs",
+                                "input-sm": props.size === "sm",
+                                "input-error": props.error,
+                            }) })), name: props.name, control: props.control })] }), props.desc && _jsx("div", { className: "text-xs text-gray-500", children: props.desc }), _jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+};
+export const NumberInput = ({ options, ...props }) => (_jsxs("div", { children: [_jsxs("div", { className: "floating-label", children: [!props?.disabled && (_jsxs("span", { children: [props.label, props?.required && _jsx(Required, {})] })), _jsx(Controller, { name: props.name, control: props.control, render: ({ field }) => (_jsx(NumericFormat, { placeholder: props.label, disabled: props?.disabled, required: props?.required, value: field.value, className: `${props.size === "sm" ? "input-sm " : ""}w-full input input-bordered focus:outline-blue-400`, onValueChange: (values) => field.onChange(values.floatValue) })) })] }), props.desc && _jsx("div", { className: "text-xs text-gray-500", children: props.desc }), props.error && _jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+export const Label = ({ text, required }) => (_jsx("label", { className: "label", children: _jsxs("span", { className: "text-sm", children: [text, required && _jsx(Required, {})] }) }));
 //# sourceMappingURL=Input.js.map

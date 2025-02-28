@@ -26,6 +26,17 @@ export const stringToTime = (time: string): Date | undefined => {
   return undefined;
 };
 
+export const timeToDate = (date: string, format = "HH:mm:ss") => {
+  let parsed: Date = parse(date, format, new Date());
+  if (isValid(parsed)) {
+    parsed.setMilliseconds(0);
+    return parsed;
+  }
+  return undefined;
+};
+
+export const dateToTimeString = (date: Date, timeFormat = "HH:mm:ss") => format(date, timeFormat);
+
 export const stringToDate = (date: string, timeZone?: string): Date | undefined => {
   let parsed: Date = parse(date, "yyyy-MM-dd HH:mm:ss", new Date());
   if (timeZone) {
