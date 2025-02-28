@@ -1,22 +1,36 @@
 import React from "react";
-import { FieldValues, UseFormProps, UseFormSetError } from "react-hook-form";
+import { FieldErrors, FieldValues, UseFormProps, UseFormSetError } from "react-hook-form";
+export declare const GeneralErrorsInToast: <T extends Record<string, any>>({ errors, translateId, except, className, }: {
+    except?: (keyof T)[];
+    translateId?: string;
+    errors: Record<string, string[]>;
+    className?: string;
+}) => import("react/jsx-runtime").JSX.Element;
+export declare const mapToDot: <T extends Record<string, any>>(errors: FieldErrors<T>) => Record<string, string[]>;
+export declare const GeneralErrors: <T extends FieldValues>(props: {
+    except?: (keyof T)[];
+    translateId?: string;
+    errors: FieldErrors<T>;
+    className?: string;
+}) => import("react/jsx-runtime").JSX.Element;
 export declare const InputErrors: ({ errors, className, }: {
     className?: string;
     errors: any;
 }) => import("react/jsx-runtime").JSX.Element | null;
 export type ServerError<T> = {
-    errors: Record<keyof T, string[]>;
+    errors: Record<keyof T | "general", string[]>;
 };
 export declare const isServerError: (error: any) => error is ServerError<any>;
-export declare function useFormSubmit<T extends FieldValues, R = unknown>(doSubmitCallback: (data: T) => Promise<ServerError<T> | R>, formOptions: UseFormProps<T>, options?: {
+export declare const useFormSubmit: <T extends FieldValues, R = unknown>(doSubmitCallback: (data: T) => Promise<ServerError<T> | R>, formOptions?: UseFormProps<T> & {
+    translateErrors?: string;
     returnBack?: boolean;
     reportProgress?: boolean;
     onSuccess?: (data: R) => void;
     onError?: (data: ServerError<T>) => void;
-}): {
+    loadingText?: string;
+    savedText?: string;
+}) => {
     handleSubmit: () => (e?: React.BaseSyntheticEvent) => Promise<void>;
-    isLoading: boolean;
-    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
     watch: import("react-hook-form").UseFormWatch<T>;
     getValues: import("react-hook-form").UseFormGetValues<T>;
     getFieldState: import("react-hook-form").UseFormGetFieldState<T>;
@@ -32,7 +46,5 @@ export declare function useFormSubmit<T extends FieldValues, R = unknown>(doSubm
     register: import("react-hook-form").UseFormRegister<T>;
     setFocus: import("react-hook-form").UseFormSetFocus<T>;
 };
-export declare function addServerErrors<T extends FieldValues>(errors: {
-    [P in keyof T]?: string[];
-}, setError: UseFormSetError<T>): void;
+export declare const addServerErrors: <T extends FieldValues>(errors: { [P in keyof T]?: string[]; }, setError: UseFormSetError<T>) => void;
 //# sourceMappingURL=Form.d.ts.map

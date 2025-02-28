@@ -1,6 +1,6 @@
 import * as react_jsx_runtime from 'react/jsx-runtime';
 import * as react_hook_form from 'react-hook-form';
-import { FieldValues, UseFormProps, UseFormSetError, FieldPath, FieldError, RegisterOptions, UseFormRegister, Control } from 'react-hook-form';
+import { FieldErrors, FieldValues, UseFormProps, UseFormSetError, FieldPath, FieldError, RegisterOptions, UseFormRegister, Control } from 'react-hook-form';
 import * as React$1 from 'react';
 import React__default from 'react';
 import { NumericFormatProps } from 'react-number-format/types/types';
@@ -30,23 +30,37 @@ declare function DateTimePicker({ value, onChange, allowEmpty, disabled, require
     onChange: (value: Date | null) => void;
 }): react_jsx_runtime.JSX.Element;
 
+declare const GeneralErrorsInToast: <T extends Record<string, any>>({ errors, translateId, except, className, }: {
+    except?: (keyof T)[];
+    translateId?: string;
+    errors: Record<string, string[]>;
+    className?: string;
+}) => react_jsx_runtime.JSX.Element;
+declare const mapToDot: <T extends Record<string, any>>(errors: FieldErrors<T>) => Record<string, string[]>;
+declare const GeneralErrors: <T extends FieldValues>(props: {
+    except?: (keyof T)[];
+    translateId?: string;
+    errors: FieldErrors<T>;
+    className?: string;
+}) => react_jsx_runtime.JSX.Element;
 declare const InputErrors: ({ errors, className, }: {
     className?: string;
     errors: any;
 }) => react_jsx_runtime.JSX.Element | null;
 type ServerError<T> = {
-    errors: Record<keyof T, string[]>;
+    errors: Record<keyof T | "general", string[]>;
 };
 declare const isServerError: (error: any) => error is ServerError<any>;
-declare function useFormSubmit<T extends FieldValues, R = unknown>(doSubmitCallback: (data: T) => Promise<ServerError<T> | R>, formOptions: UseFormProps<T>, options?: {
+declare const useFormSubmit: <T extends FieldValues, R = unknown>(doSubmitCallback: (data: T) => Promise<ServerError<T> | R>, formOptions?: UseFormProps<T> & {
+    translateErrors?: string;
     returnBack?: boolean;
     reportProgress?: boolean;
     onSuccess?: (data: R) => void;
     onError?: (data: ServerError<T>) => void;
-}): {
+    loadingText?: string;
+    savedText?: string;
+}) => {
     handleSubmit: () => (e?: React__default.BaseSyntheticEvent) => Promise<void>;
-    isLoading: boolean;
-    setIsLoading: React__default.Dispatch<React__default.SetStateAction<boolean>>;
     watch: react_hook_form.UseFormWatch<T>;
     getValues: react_hook_form.UseFormGetValues<T>;
     getFieldState: react_hook_form.UseFormGetFieldState<T>;
@@ -62,9 +76,7 @@ declare function useFormSubmit<T extends FieldValues, R = unknown>(doSubmitCallb
     register: react_hook_form.UseFormRegister<T>;
     setFocus: react_hook_form.UseFormSetFocus<T>;
 };
-declare function addServerErrors<T extends FieldValues>(errors: {
-    [P in keyof T]?: string[];
-}, setError: UseFormSetError<T>): void;
+declare const addServerErrors: <T extends FieldValues>(errors: { [P in keyof T]?: string[]; }, setError: UseFormSetError<T>) => void;
 
 type PaginateQuery<T> = {
     page?: number;
@@ -184,4 +196,4 @@ declare const SelectPaginatedFromApi: <TModel extends {
     valueFormat?: (model: TModel["data"][0]) => string;
 }) => react_jsx_runtime.JSX.Element;
 
-export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, InputErrors, Label, LoadingComponent, NumberInput, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, type ServerError, TextInput, TextareaInput, TimeInput, addServerErrors, isServerError, useFormSubmit };
+export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, GeneralErrors, GeneralErrorsInToast, InputErrors, Label, LoadingComponent, NumberInput, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, type ServerError, TextInput, TextareaInput, TimeInput, addServerErrors, isServerError, mapToDot, useFormSubmit };

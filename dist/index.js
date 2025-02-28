@@ -1,5 +1,5 @@
 import { jsxs, Fragment, jsx } from 'react/jsx-runtime';
-import { useState, useRef, useEffect, Fragment as Fragment$1 } from 'react';
+import React, { useState, useRef, useEffect, Fragment as Fragment$1 } from 'react';
 import { parse, isValid, format, isSameDay, isSameHour } from 'date-fns';
 import { XMarkIcon, ClockIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import { useFloating, offset, flip, arrow, autoUpdate, useFocus, useHover, safePolygon, useClick, useDismiss, useInteractions, FloatingPortal, FloatingArrow } from '@floating-ui/react';
@@ -175,6 +175,37 @@ function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from,
                                 }, children: t("datePicker.ok") }) })] })) }), allowEmpty ? (jsx("button", { disabled: allowEmpty && !value, className: toggleClassName, onClick: () => onChange(null), children: value ? jsx(XMarkIcon, { className: "size-4" }) : jsx(ClockIcon, { className: "size-4" }) })) : (jsx("div", { className: `cursor-pointer ${toggleClassName}`, children: jsx(ClockIcon, { className: "size-4" }) }))] }));
 }
 
+const GeneralErrorsInToast = ({ errors, translateId, except = [], className = "", }) => {
+    const t = useTranslations();
+    return (jsx("ul", { className: "list list-disc pl-4", children: Object.keys(errors)
+            .filter((key) => !except.includes(key))
+            .map((key) => {
+            const error = errors[key];
+            return (jsx(React.Fragment, { children: error.map((error) => (jsxs("li", { children: [translateId && t.has(`${translateId}.${key}`) && (jsxs("span", { className: className || "text-red-800", children: [t(`${translateId}.${key}`), ": "] })), jsx("span", { className: className || "text-red-500", children: error })] }, error))) }, key));
+        }) }));
+};
+const isError = (error) => typeof error === "object" && typeof error.type === "string" && typeof error.message === "string";
+const mapToDot = (errors) => {
+    const r = {};
+    for (const key of Object.keys(errors)) {
+        const error = errors[key];
+        if (isError(error)) {
+            r[key] = r[key] || [];
+            if (typeof error.message === "string") {
+                r[key].push(error.message);
+            }
+        }
+        else {
+            // @ts-ignore
+            const dot = mapToDot(error);
+            for (const k of Object.keys(dot)) {
+                r[`${key}.${k}`] = dot[k];
+            }
+        }
+    }
+    return r;
+};
+const GeneralErrors = (props) => jsx(GeneralErrorsInToast, { ...props, errors: mapToDot(props.errors) });
 const InputErrors = ({ errors, className = "text-xs text-primary-700", }) => {
     if (!errors) {
         return null;
@@ -185,7 +216,7 @@ const InputErrors = ({ errors, className = "text-xs text-primary-700", }) => {
     }
     return (jsx("ul", { className: "pl-4 list-disc", children: messages.map((message) => (jsx("li", { className: className, children: message }, message))) }));
 };
-function formatError(errors) {
+const formatError = (errors) => {
     const formattedErrors = [];
     if (typeof errors === "object") {
         if (typeof errors.message === "string") {
@@ -201,58 +232,56 @@ function formatError(errors) {
         errors.forEach((error) => formattedErrors.push(...formatError(error)));
     }
     return formattedErrors;
-}
-const isServerError = (error) => {
-    return typeof error === "object" && typeof error.errors === "object";
 };
-function useFormSubmit(doSubmitCallback, formOptions, options = {}) {
+const isServerError = (error) => typeof error === "object" && typeof error.errors === "object";
+const useFormSubmit = (doSubmitCallback, formOptions = {}) => {
     const t = useTranslations();
     const router = useRouter();
-    const formProps = useForm(formOptions);
-    const [isLoading, setIsLoading] = useState(false);
+    const { returnBack, reportProgress, onError, onSuccess, loadingText, savedText, ...options } = formOptions;
+    const formProps = useForm(options);
     return {
         ...formProps,
         handleSubmit: () => formProps.handleSubmit((values) => {
-            setIsLoading(true);
-            const toastId = options.reportProgress !== false ? toast.loading(t("general.loading"), { duration: 10000 }) : "";
-            doSubmitCallback(values)
+            const promise = doSubmitCallback(values)
                 .then((data) => {
                 if (isServerError(data)) {
-                    if (options.reportProgress !== false) {
-                        toast.error(t("general.validateError"), { id: toastId, duration: 1000 });
+                    if (typeof onError === "function") {
+                        onError(data);
                     }
-                    if (typeof options.onError === "function") {
-                        options.onError(data);
-                    }
-                    return addServerErrors(data.errors, formProps.setError);
+                    addServerErrors(data.errors, formProps.setError);
+                    throw data;
                 }
-                if (typeof options.onSuccess === "function") {
-                    options.onSuccess(data);
+                if (typeof onSuccess === "function") {
+                    onSuccess(data);
                 }
-                if (options.returnBack !== false) {
+                if (returnBack !== false) {
                     router.back();
-                }
-                if (options.reportProgress !== false) {
-                    toast.success(t("general.successSave"), { id: toastId, duration: 1000 });
                 }
             })
                 .catch((e) => {
-                toast.error(t("general.error"), { id: toastId, duration: 1000 });
                 captureException(e);
                 throw e;
-            })
-                .finally(() => setIsLoading(false));
+            });
+            if (reportProgress !== false) {
+                void toast.promise(promise, {
+                    loading: loadingText || t("general.saving"),
+                    success: savedText || t("general.saved"),
+                    error: (data) => {
+                        if (isServerError(data)) {
+                            return (jsxs(Fragment, { children: [t("general.validateError"), ":", " ", jsx(GeneralErrors, { className: "text-gray-500", translateId: options.translateErrors, errors: formProps.formState.errors })] }));
+                        }
+                        return t("general.error");
+                    },
+                }, { id: "form-submit" });
+            }
+            return promise;
         }),
-        isLoading,
-        setIsLoading,
     };
-}
-function addServerErrors(errors, setError) {
-    return Object.entries(errors).forEach(([key, value]) => {
-        const array = Array.isArray(value) ? value : [errors];
-        setError(key, { type: "server", message: array?.join(", ") || "" });
-    });
-}
+};
+const addServerErrors = (errors, setError) => Object.entries(errors).forEach(([key, value]) => {
+    const array = Array.isArray(value) ? value : [errors];
+    setError(key, { type: "server", message: array?.join(", ") || "" });
+});
 
 const PAGINATE_LIMIT = 50;
 const SelectPaginatedFromApi = ({ onChange, disabled, required, value, className, queryKey, allowEmpty, queryFunction, placeholder, valueFormat = (model) => model.name, inputClassName = "w-full mx-0 input input-bordered", ...rest }) => {
@@ -420,5 +449,5 @@ const Label = ({ text, required }) => (jsx("label", { className: "label", childr
 
 const LoadingComponent = ({ style, className, loadingClassName, size, }) => (jsx("div", { className: `flex justify-center ${className}`, style: style, children: jsx("span", { className: `${loadingClassName || "text-primary"} loading loading-spinner ${size}` }) }));
 
-export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, InputErrors, Label, LoadingComponent, NumberInput, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, TextInput, TextareaInput, TimeInput, addServerErrors, isServerError, useFormSubmit };
+export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, GeneralErrors, GeneralErrorsInToast, InputErrors, Label, LoadingComponent, NumberInput, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, TextInput, TextareaInput, TimeInput, addServerErrors, isServerError, mapToDot, useFormSubmit };
 //# sourceMappingURL=index.js.map
