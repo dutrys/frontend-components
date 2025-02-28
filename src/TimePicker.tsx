@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { dateToTimeString, timeToDate } from "@/utils/datetime";
 
-export const TimeInput = ({
+export const TimePicker = ({
   className,
   value,
   onChange,

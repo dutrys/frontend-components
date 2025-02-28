@@ -1,7 +1,7 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import { useEffect, useState } from "react";
 import { dateToTimeString, timeToDate } from "@/utils/datetime";
-export const TimeInput = ({ className, value, onChange, placeholder, required, disabled, }) => {
+export const TimePicker = ({ className, value, onChange, placeholder, required, disabled, }) => {
     const formatValue = (value) => value ? dateToTimeString(timeToDate(value) || new Date(), "HH:mm") : undefined;
     const [innerValue, setInnerValue] = useState(formatValue(value) || "");
     useEffect(() => {
@@ -16,4 +16,4 @@ export const TimeInput = ({ className, value, onChange, placeholder, required, d
             }
         }, onChange: (e) => setInnerValue(e.target.value) }));
 };
-//# sourceMappingURL=TimeInput.js.map
+//# sourceMappingURL=TimePicker.js.map

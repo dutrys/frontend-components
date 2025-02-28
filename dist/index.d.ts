@@ -125,7 +125,7 @@ declare const DateTimeInput: <TFieldValues extends FieldValues = FieldValues, TN
     from?: Date;
     to?: Date;
 }) => react_jsx_runtime.JSX.Element;
-declare const InputTime: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputProps<TName> & {
+declare const TimeInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
     allowEmpty?: boolean;
@@ -184,4 +184,4 @@ declare const SelectPaginatedFromApi: <TModel extends {
     valueFormat?: (model: TModel["data"][0]) => string;
 }) => react_jsx_runtime.JSX.Element;
 
-export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, InputErrors, InputTime, Label, LoadingComponent, NumberInput, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, type ServerError, TextInput, TextareaInput, addServerErrors, isServerError, useFormSubmit };
+export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, InputErrors, Label, LoadingComponent, NumberInput, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, type ServerError, TextInput, TextareaInput, TimeInput, addServerErrors, isServerError, useFormSubmit };

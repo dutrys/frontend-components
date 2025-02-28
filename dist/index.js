@@ -302,7 +302,7 @@ const stringToDate = (date, timeZone) => {
     return undefined;
 };
 
-const TimeInput = ({ className, value, onChange, placeholder, required, disabled, }) => {
+const TimePicker = ({ className, value, onChange, placeholder, required, disabled, }) => {
     const formatValue = (value) => value ? dateToTimeString(timeToDate(value) || new Date(), "HH:mm") : undefined;
     const [innerValue, setInnerValue] = useState(formatValue(value) || "");
     useEffect(() => {
@@ -408,8 +408,8 @@ const DateTimeInput = (props) => {
                                 } }));
                         } }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && jsx("div", { className: "text-xs my-0.5 text-gray-500", children: props.desc }), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
-const InputTime = (props) => {
-    return (jsxs("div", { children: [jsxs("label", { className: "floating-label", children: [!props.disabled && (jsxs("span", { children: [props.label, props.required && jsx(Required, {})] })), jsx(Controller, { render: ({ field }) => (jsx(TimeInput, { value: field.value, onChange: (v) => field.onChange(v), placeholder: props.label, required: props.required, disabled: props.disabled, className: cx("input w-full", props.className, {
+const TimeInput = (props) => {
+    return (jsxs("div", { children: [jsxs("label", { className: "floating-label", children: [!props.disabled && (jsxs("span", { children: [props.label, props.required && jsx(Required, {})] })), jsx(Controller, { render: ({ field }) => (jsx(TimePicker, { value: field.value, onChange: (v) => field.onChange(v), placeholder: props.label, required: props.required, disabled: props.disabled, className: cx("input w-full", props.className, {
                                 "input-xs": props.size === "xs",
                                 "input-sm": props.size === "sm",
                                 "input-error": props.error,
@@ -420,5 +420,5 @@ const Label = ({ text, required }) => (jsx("label", { className: "label", childr
 
 const LoadingComponent = ({ style, className, loadingClassName, size, }) => (jsx("div", { className: `flex justify-center ${className}`, style: style, children: jsx("span", { className: `${loadingClassName || "text-primary"} loading loading-spinner ${size}` }) }));
 
-export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, InputErrors, InputTime, Label, LoadingComponent, NumberInput, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, TextInput, TextareaInput, addServerErrors, isServerError, useFormSubmit };
+export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, InputErrors, Label, LoadingComponent, NumberInput, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, TextInput, TextareaInput, TimeInput, addServerErrors, isServerError, useFormSubmit };
 //# sourceMappingURL=index.js.map

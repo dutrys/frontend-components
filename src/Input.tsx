@@ -15,7 +15,7 @@ import { SelectPaginatedFromApi } from "./SelectPaginatedFromApi";
 import { PaginateQuery } from "./utils/paginate";
 import { stringToDate } from "./utils/datetime";
 import cx from "classnames";
-import { TimeInput } from "./TimeInput";
+import { TimePicker } from "./TimePicker";
 import { NumericFormat } from "react-number-format";
 import { NumericFormatProps } from "react-number-format/types/types";
 
@@ -356,7 +356,7 @@ export const DateTimeInput = <
   );
 };
 
-export const InputTime = <
+export const TimeInput = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >(
@@ -377,7 +377,7 @@ export const InputTime = <
         )}
         <Controller
           render={({ field }) => (
-            <TimeInput
+            <TimePicker
               value={field.value}
               onChange={(v) => field.onChange(v)}
               placeholder={props.label}

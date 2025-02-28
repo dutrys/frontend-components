@@ -6,7 +6,7 @@
     "build": "rimraf dist/ && tsc && rollup -c",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "push": "npm run build && git add dist/ && git commit -m ",
+    "push": "npm run build && git add dist/ && git add src/ && git commit -m ",
     "postversion": "git push && git push --tags"
   },
   "main": "dist/index.js",

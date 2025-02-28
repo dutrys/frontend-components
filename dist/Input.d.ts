@@ -52,7 +52,7 @@ export declare const DateTimeInput: <TFieldValues extends FieldValues = FieldVal
     from?: Date;
     to?: Date;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const InputTime: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputProps<TName> & {
+export declare const TimeInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
     allowEmpty?: boolean;

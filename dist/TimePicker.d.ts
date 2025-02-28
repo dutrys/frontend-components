@@ -1,4 +1,4 @@
-export declare const TimeInput: ({ className, value, onChange, placeholder, required, disabled, }: {
+export declare const TimePicker: ({ className, value, onChange, placeholder, required, disabled, }: {
     required?: boolean;
     disabled?: boolean;
     placeholder?: string;
@@ -6,4 +6,4 @@ export declare const TimeInput: ({ className, value, onChange, placeholder, requ
     className?: string;
     value: string | undefined | null;
 }) => import("react/jsx-runtime").JSX.Element;
-//# sourceMappingURL=TimeInput.d.ts.map
+//# sourceMappingURL=TimePicker.d.ts.map
