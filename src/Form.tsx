@@ -1,7 +1,8 @@
 import React from "react";
 import toast from "react-hot-toast";
 import { useTranslations } from "next-intl";
-import { FieldErrors, FieldPath, FieldValues, useForm, UseFormProps, UseFormSetError } from "react-hook-form";
+import { FieldErrors, FieldPath, FieldValues, UseFormProps, UseFormSetError } from "react-hook-form";
+import { useForm } from "react-hook-form/dist/useForm";
 import { captureException } from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 
