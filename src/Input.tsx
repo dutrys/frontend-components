@@ -424,6 +424,7 @@ export const NumberInput = <
         render={({ field }) => (
           <NumericFormat
             placeholder={props.label}
+            {...options}
             disabled={props?.disabled}
             required={props?.required}
             value={field.value}
