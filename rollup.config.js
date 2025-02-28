@@ -19,7 +19,7 @@ export default [
         extract: true, // Sukuria atskirą `dist/index.css` failą
       }),
     ],
-    external: ["react"],
+    external: ["react", "react-hook-form", "react-tooltip", "next/navigation"],
   },
   {
     input: "dist/index.d.ts",
