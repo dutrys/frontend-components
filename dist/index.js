@@ -1,21 +1,265 @@
 import { jsxs, Fragment, jsx } from 'react/jsx-runtime';
-import React, { useState, useRef, useEffect, Fragment as Fragment$1 } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, Fragment as Fragment$1 } from 'react';
+import toast from 'react-hot-toast';
+import { useRouter, usePathname, useSearchParams, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { captureException } from '@sentry/nextjs';
+import { useForm, Controller } from 'react-hook-form';
+import { Tooltip } from 'react-tooltip';
 import { parse, isValid, format, isSameDay, isSameHour } from 'date-fns';
 import { XMarkIcon, ClockIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import { useFloating, offset, flip, arrow, autoUpdate, useFocus, useHover, safePolygon, useClick, useDismiss, useInteractions, FloatingPortal, FloatingArrow } from '@floating-ui/react';
-import { useParams, useRouter } from 'next/navigation';
 import { DayPicker } from 'react-day-picker';
 import { lt, enGB } from 'react-day-picker/locale';
-import { useTranslations } from 'next-intl';
-import toast from 'react-hot-toast';
-import { useForm, Controller } from 'react-hook-form';
-import { captureException } from '@sentry/nextjs';
 import { useQuery } from '@tanstack/react-query';
 import { Combobox, ComboboxInput, ComboboxButton, Transition, ComboboxOptions, ComboboxOption } from '@headlessui/react';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
 import 'date-fns-tz';
 import cx from 'classnames';
 import { NumericFormat } from 'react-number-format';
+
+const HotKeysViewer = () => {
+    const hotkeysContext = useContext(HotkeysContext);
+    const hotkeys = hotkeysContext.getHotKeys();
+    const [keys, setKeys] = useState({});
+    const t = useTranslations();
+    useEffect(() => {
+        const handleKeyDown = (e) => setKeys({ metaKey: e.metaKey, altKey: e.altKey, ctrlKey: e.ctrlKey, key: e.key });
+        const handleKeyUp = (e) => setKeys({ metaKey: e.metaKey, altKey: e.altKey, ctrlKey: e.ctrlKey, key: "" });
+        document.addEventListener("keydown", handleKeyDown);
+        document.addEventListener("keyup", handleKeyUp);
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+            document.removeEventListener("keyup", handleKeyUp);
+        };
+    }, [hotkeys]);
+    const isMac = navigator.userAgent.indexOf("Mac OS X") !== -1;
+    return (jsxs("div", { className: "absolute bottom-4 left-28 bg-base-200 rounded-xl p-4 shadow-xl", style: { zIndex: 1200 }, children: [jsxs("div", { className: "text-center text-lg", children: ["Schedules (", process.env.NEXT_PUBLIC_VERSION, ")"] }), navigator.maxTouchPoints === 0 && (jsxs(Fragment, { children: [jsx("div", { className: "divider my-1" }), jsxs("div", { className: "text-center mb-2 text-gray-500", children: [t("help.keyboardShortcuts"), ":"] }), Object.values(hotkeys).map((hotkeys) => hotkeys.map((hotKey) => (jsxs("div", { className: "pb-2 text-sm", children: [hotKey.metaKey && (jsxs(Fragment, { children: [jsx("kbd", { className: `kbd bg-white kbd-sm ${keys.metaKey ? "text-primary" : ""}`, children: isMac ? ("⌘") : (jsxs("svg", { version: "1.1", viewBox: "0 0 15.5 16.433", className: "w-3 h-3", xmlns: "http://www.w3.org/2000/svg", children: [jsx("path", { d: "m6.2696 1.7012-6.1 0.9384c-0.0976 0.015-0.1696 0.099-0.1696 0.1977v4.9218c0 0.1105 0.0895 0.2 0.2 0.2h6.1c0.1105 0 0.2-0.0895 0.2-0.2v-5.8602c0-0.1226-0.1093-0.2164-0.2304-0.1977z", fill: "#222" }), jsx("path", { d: "m7.5 7.7591v-6.134c0-0.0963 0.0685-0.1789 0.1631-0.1966l7.6-1.425c0.1231-0.0231 0.2369 0.0714 0.2369 0.1966v7.559c0 0.1105-0.0895 0.2-0.2 0.2h-7.6c-0.1105 0-0.2-0.0895-0.2-0.2z", fill: "#222" }), jsx("path", { d: "m0 13.945v-4.7863c0-0.1105 0.0895-0.2 0.2-0.2h6.1c0.1105 0 0.2 0.0895 0.2 0.2v5.7248c0 0.1226-0.1093 0.2163-0.2304 0.1977l-6.1-0.9385c-0.0976-0.015-0.1696-0.099-0.1696-0.1977z", fill: "#222" }), jsx("path", { d: "m7.5 15.282v-6.1234c0-0.1105 0.0895-0.2 0.2-0.2h7.6c0.1105 0 0.2 0.0895 0.2 0.2v7.0734c0 0.1203-0.1054 0.2134-0.2248 0.1985l-7.6-0.95c-0.1001-0.0125-0.1752-0.0976-0.1752-0.1985z", fill: "#222" })] })) }), " ", "+", " "] })), hotKey.ctrlKey && (jsxs(Fragment, { children: [jsx("kbd", { className: `kbd bg-white kbd-sm ${keys.ctrlKey ? "text-primary" : ""}`, children: "ctrl" }), " +", " "] })), hotKey.altKey && (jsxs(Fragment, { children: [jsx("kbd", { className: `kbd bg-white kbd-sm ${keys.altKey ? "text-primary" : ""}`, children: "alt" }), " +", " "] })), jsx("kbd", { className: `kbd bg-white kbd-sm ${keys.key === hotKey.key ? "text-primary" : ""}`, children: hotKey.key }), " ", "- ", jsx("span", { className: "text-gray-500", children: hotKey.description })] }, hotKey.key))))] }))] }));
+};
+const HotkeysContext = createContext({
+    addHotKey: () => { },
+    removeHotKey: () => { },
+    getHotKeys: () => ({}),
+});
+
+const Hotkeys = ({ hotKeys, id }) => {
+    const mapping = useContext(HotkeysContext);
+    useEffect(() => {
+        const handleKeyPress = (e) => {
+            for (let i = 0; i < hotKeys.length; i++) {
+                const metaKey = hotKeys[i].metaKey ?? false;
+                const ctrlKey = hotKeys[i].ctrlKey ?? false;
+                const altKey = hotKeys[i].altKey ?? false;
+                if (hotKeys[i].key === e.key && metaKey === e.metaKey && ctrlKey === e.ctrlKey && altKey === e.altKey) {
+                    toast.custom(jsxs("div", { className: "bg-black/50 text-white rounded-md py-2 px-4 text-sm", children: [metaKey && (jsxs(Fragment, { children: [jsx("kbd", { className: "kbd text-gray-700 kbd-sm", children: "\u2318" }), " +"] })), ctrlKey && (jsxs(Fragment, { children: [jsx("kbd", { className: "kbd text-gray-700 kbd-sm", children: "ctrl" }), " +"] })), altKey && (jsxs(Fragment, { children: [jsx("kbd", { className: "kbd text-gray-700 kbd-sm", children: "alt" }), " +"] })), jsx("kbd", { className: "kbd text-gray-700 kbd-sm mr-2", children: hotKeys[i].key }, "key"), hotKeys[i].description] }), {
+                        duration: 50,
+                        position: "bottom-center",
+                    });
+                    hotKeys[i].callback();
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+            }
+        };
+        mapping.addHotKey(id, hotKeys);
+        document.addEventListener("keydown", handleKeyPress);
+        return () => {
+            mapping.removeHotKey(id);
+            document.removeEventListener("keydown", handleKeyPress);
+        };
+    }, [mapping, hotKeys, id]);
+    return null;
+};
+
+const GeneralErrorsInToast = ({ errors, translateId, except = [], className = "", }) => {
+    const t = useTranslations();
+    return (jsx("ul", { className: "list list-disc pl-4", children: Object.keys(errors)
+            .filter((key) => !except.includes(key))
+            .map((key) => {
+            const error = errors[key];
+            return (jsx(React.Fragment, { children: error.map((error) => (jsxs("li", { children: [translateId && t.has(`${translateId}.${key}`) && (jsxs("span", { className: className || "text-red-800", children: [t(`${translateId}.${key}`), ": "] })), jsx("span", { className: className || "text-red-500", children: error })] }, error))) }, key));
+        }) }));
+};
+const isError = (error) => typeof error === "object" && typeof error.type === "string" && typeof error.message === "string";
+const mapToDot = (errors) => {
+    const r = {};
+    for (const key of Object.keys(errors)) {
+        const error = errors[key];
+        if (isError(error)) {
+            r[key] = r[key] || [];
+            if (typeof error.message === "string") {
+                r[key].push(error.message);
+            }
+        }
+        else {
+            // @ts-ignore
+            const dot = mapToDot(error);
+            for (const k of Object.keys(dot)) {
+                r[`${key}.${k}`] = dot[k];
+            }
+        }
+    }
+    return r;
+};
+const GeneralErrors = (props) => jsx(GeneralErrorsInToast, { ...props, errors: mapToDot(props.errors) });
+const InputErrors = ({ errors, className = "text-xs text-primary-700", }) => {
+    if (!errors) {
+        return null;
+    }
+    const messages = Array.from(new Set(formatError(errors)));
+    if (messages.length === 1) {
+        return (jsx("span", { className: className, children: messages[0] }, messages[0]));
+    }
+    return (jsx("ul", { className: "pl-4 list-disc", children: messages.map((message) => (jsx("li", { className: className, children: message }, message))) }));
+};
+const formatError = (errors) => {
+    const formattedErrors = [];
+    if (typeof errors === "object") {
+        if (typeof errors.message === "string") {
+            errors.message.split(", ").forEach((s) => {
+                formattedErrors.push(s);
+            });
+        }
+        if (typeof errors.ref === "undefined") {
+            Object.keys(errors).forEach((key) => formattedErrors.push(...formatError(errors[key])));
+        }
+    }
+    if (Array.isArray(errors)) {
+        errors.forEach((error) => formattedErrors.push(...formatError(error)));
+    }
+    return formattedErrors;
+};
+const isServerError = (error) => typeof error === "object" && typeof error.errors === "object";
+const useFormSubmit = (doSubmitCallback, formOptions = {}) => {
+    const t = useTranslations();
+    const router = useRouter();
+    const { returnBack, reportProgress, onError, onSuccess, loadingText, savedText, ...options } = formOptions;
+    const formProps = useForm(options);
+    return {
+        ...formProps,
+        handleSubmit: () => formProps.handleSubmit((values) => {
+            const promise = doSubmitCallback(values)
+                .then((data) => {
+                if (isServerError(data)) {
+                    if (typeof onError === "function") {
+                        onError(data);
+                    }
+                    addServerErrors(data.errors, formProps.setError);
+                    throw data;
+                }
+                if (typeof onSuccess === "function") {
+                    onSuccess(data);
+                }
+                if (returnBack !== false) {
+                    router.back();
+                }
+            })
+                .catch((e) => {
+                captureException(e);
+                throw e;
+            });
+            if (reportProgress !== false) {
+                void toast.promise(promise, {
+                    loading: loadingText || t("general.saving"),
+                    success: savedText || t("general.saved"),
+                    error: (data) => {
+                        if (isServerError(data)) {
+                            return (jsxs(Fragment, { children: [t("general.validateError"), ":", " ", jsx(GeneralErrors, { className: "text-gray-500", translateId: options.translateErrors, errors: formProps.formState.errors })] }));
+                        }
+                        return t("general.error");
+                    },
+                }, { id: "form-submit" });
+            }
+            return promise;
+        }),
+    };
+};
+const addServerErrors = (errors, setError) => Object.entries(errors).forEach(([key, value]) => {
+    const array = Array.isArray(value) ? value : [errors];
+    setError(key, { type: "server", message: array?.join(", ") || "" });
+});
+
+const TOOLTIP_PARALLEL_ID = "paralel-tooltip";
+const ParallelDialog = ({ title, children, onClose, className, ...rest }) => {
+    let [isOpen, setIsOpen] = useState(true);
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const closeModal = () => {
+        setIsOpen(false);
+        if (onClose) {
+            onClose();
+            return;
+        }
+        if (history.length > 2) {
+            router.back();
+            return;
+        }
+        // Match /[lang]/bucket/[id]/[module]
+        const matchBucket = pathname.match(/^(\/(en|lt)\/buckets\/\d+\/[\w-]+)\/.*/);
+        if (matchBucket && matchBucket[1]) {
+            router.push(`${matchBucket[1]}?${searchParams.toString()}`);
+            return;
+        }
+        // Match /[lang]/admin/[module]
+        const matchAdmin = pathname.match(/^(\/(en|lt)\/admin\/[\w-]+)\/.*/);
+        if (matchAdmin && matchAdmin[1]) {
+            router.push(`${matchAdmin[1]}?${searchParams.toString()}`);
+            return;
+        }
+        if (/\/(en|lt)\/buckets\/\d+\/[\w-]+/.test(pathname) || /\/(en|lt)\/admin\/[\w-]+/.test(pathname)) {
+            router.push(pathname);
+            return;
+        }
+    };
+    return (jsxs("dialog", { onKeyDown: (e) => e.key === "Escape" && closeModal(), className: `modal overflow-y-auto ${isOpen ? "modal-open" : ""}`, style: { zIndex: 1100 }, "data-testid": "modal-dialog", ...rest, children: [jsxs("div", { className: `modal-box my-4 overflow-y-visible max-h-none ${className}`, children: [title && (jsx("h3", { className: "font-bold text-lg", "data-testid": "modal-dialog-title", children: title })), children] }), jsx("form", { method: "dialog", className: "modal-backdrop", children: jsx("button", { onClick: closeModal, children: "close" }) }), jsx(Tooltip, { id: TOOLTIP_PARALLEL_ID, place: "top" })] }));
+};
+
+const Archive = ({ title, archive, onClose, formatErrors, translateId, }) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+    const t = useTranslations();
+    const [errors, setErrors] = useState(null);
+    const doArchive = () => {
+        setIsLoading(true);
+        const promise = new Promise((resolve, reject) => {
+            archive()
+                .then((response) => {
+                if (isServerError(response)) {
+                    if (formatErrors) {
+                        setErrors(response);
+                    }
+                    reject(response);
+                    return;
+                }
+                resolve(true);
+                onClose ? onClose() : router.back();
+            })
+                .catch((e) => {
+                captureException(e);
+                reject(undefined);
+                throw e;
+            })
+                .finally(() => setIsLoading(false));
+        });
+        void toast.promise(promise, {
+            loading: t("general.deleting"),
+            success: t("general.deleted"),
+            error: (response) => {
+                if (response) {
+                    return jsx(GeneralErrorsInToast, { errors: response.errors, translateId: translateId, className: "text-gray-500" });
+                }
+                return t("general.error");
+            },
+        });
+    };
+    return (jsxs(ParallelDialog, { onClose: onClose, title: title, children: [jsx(Hotkeys, { id: "archive", hotKeys: [{ key: "Enter", description: t("archive.yes"), callback: doArchive }] }), errors && formatErrors && jsx("div", { className: "alert alert-error my-4", children: formatErrors(errors) }), t("archive.message"), jsx("br", {}), jsx("br", {}), jsx("div", { className: "w-full text-center", children: jsxs("div", { className: "mx-auto", children: [jsx("button", { onClick: doArchive, className: "btn btn-error uppercase", disabled: isLoading, "data-testid": "button-archive", children: t("archive.yes") }), " ", jsx("button", { className: "btn uppercase", onClick: () => (onClose ? onClose() : router.back()), "data-testid": "button-cancel", children: t("archive.no") })] }) })] }));
+};
+const ArchiveButton = ({ title, archive, children, formatErrors, }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    return (jsxs(Fragment, { children: [isOpen && (jsx(Archive, { title: title, archive: archive, onClose: () => setIsOpen(false), formatErrors: formatErrors })), children(() => setIsOpen(!isOpen))] }));
+};
 
 var styles = {"dayPicker":"DatePicker-module_dayPicker__OS6e0"};
 
@@ -174,114 +418,6 @@ function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from,
                                     close();
                                 }, children: t("datePicker.ok") }) })] })) }), allowEmpty ? (jsx("button", { disabled: allowEmpty && !value, className: toggleClassName, onClick: () => onChange(null), children: value ? jsx(XMarkIcon, { className: "size-4" }) : jsx(ClockIcon, { className: "size-4" }) })) : (jsx("div", { className: `cursor-pointer ${toggleClassName}`, children: jsx(ClockIcon, { className: "size-4" }) }))] }));
 }
-
-const GeneralErrorsInToast = ({ errors, translateId, except = [], className = "", }) => {
-    const t = useTranslations();
-    return (jsx("ul", { className: "list list-disc pl-4", children: Object.keys(errors)
-            .filter((key) => !except.includes(key))
-            .map((key) => {
-            const error = errors[key];
-            return (jsx(React.Fragment, { children: error.map((error) => (jsxs("li", { children: [translateId && t.has(`${translateId}.${key}`) && (jsxs("span", { className: className || "text-red-800", children: [t(`${translateId}.${key}`), ": "] })), jsx("span", { className: className || "text-red-500", children: error })] }, error))) }, key));
-        }) }));
-};
-const isError = (error) => typeof error === "object" && typeof error.type === "string" && typeof error.message === "string";
-const mapToDot = (errors) => {
-    const r = {};
-    for (const key of Object.keys(errors)) {
-        const error = errors[key];
-        if (isError(error)) {
-            r[key] = r[key] || [];
-            if (typeof error.message === "string") {
-                r[key].push(error.message);
-            }
-        }
-        else {
-            // @ts-ignore
-            const dot = mapToDot(error);
-            for (const k of Object.keys(dot)) {
-                r[`${key}.${k}`] = dot[k];
-            }
-        }
-    }
-    return r;
-};
-const GeneralErrors = (props) => jsx(GeneralErrorsInToast, { ...props, errors: mapToDot(props.errors) });
-const InputErrors = ({ errors, className = "text-xs text-primary-700", }) => {
-    if (!errors) {
-        return null;
-    }
-    const messages = Array.from(new Set(formatError(errors)));
-    if (messages.length === 1) {
-        return (jsx("span", { className: className, children: messages[0] }, messages[0]));
-    }
-    return (jsx("ul", { className: "pl-4 list-disc", children: messages.map((message) => (jsx("li", { className: className, children: message }, message))) }));
-};
-const formatError = (errors) => {
-    const formattedErrors = [];
-    if (typeof errors === "object") {
-        if (typeof errors.message === "string") {
-            errors.message.split(", ").forEach((s) => {
-                formattedErrors.push(s);
-            });
-        }
-        if (typeof errors.ref === "undefined") {
-            Object.keys(errors).forEach((key) => formattedErrors.push(...formatError(errors[key])));
-        }
-    }
-    if (Array.isArray(errors)) {
-        errors.forEach((error) => formattedErrors.push(...formatError(error)));
-    }
-    return formattedErrors;
-};
-const isServerError = (error) => typeof error === "object" && typeof error.errors === "object";
-const useFormSubmit = (doSubmitCallback, formOptions = {}) => {
-    const t = useTranslations();
-    const router = useRouter();
-    const { returnBack, reportProgress, onError, onSuccess, loadingText, savedText, ...options } = formOptions;
-    const formProps = useForm(options);
-    return {
-        ...formProps,
-        handleSubmit: () => formProps.handleSubmit((values) => {
-            const promise = doSubmitCallback(values)
-                .then((data) => {
-                if (isServerError(data)) {
-                    if (typeof onError === "function") {
-                        onError(data);
-                    }
-                    addServerErrors(data.errors, formProps.setError);
-                    throw data;
-                }
-                if (typeof onSuccess === "function") {
-                    onSuccess(data);
-                }
-                if (returnBack !== false) {
-                    router.back();
-                }
-            })
-                .catch((e) => {
-                captureException(e);
-                throw e;
-            });
-            if (reportProgress !== false) {
-                void toast.promise(promise, {
-                    loading: loadingText || t("general.saving"),
-                    success: savedText || t("general.saved"),
-                    error: (data) => {
-                        if (isServerError(data)) {
-                            return (jsxs(Fragment, { children: [t("general.validateError"), ":", " ", jsx(GeneralErrors, { className: "text-gray-500", translateId: options.translateErrors, errors: formProps.formState.errors })] }));
-                        }
-                        return t("general.error");
-                    },
-                }, { id: "form-submit" });
-            }
-            return promise;
-        }),
-    };
-};
-const addServerErrors = (errors, setError) => Object.entries(errors).forEach(([key, value]) => {
-    const array = Array.isArray(value) ? value : [errors];
-    setError(key, { type: "server", message: array?.join(", ") || "" });
-});
 
 const PAGINATE_LIMIT = 50;
 const SelectPaginatedFromApi = ({ onChange, disabled, required, value, className, queryKey, allowEmpty, queryFunction, placeholder, valueFormat = (model) => model.name, inputClassName = "w-full mx-0 input input-bordered", ...rest }) => {
@@ -449,5 +585,5 @@ const Label = ({ text, required }) => (jsx("label", { className: "label", childr
 
 const LoadingComponent = ({ style, className, loadingClassName, size, }) => (jsx("div", { className: `flex justify-center ${className}`, style: style, children: jsx("span", { className: `${loadingClassName || "text-primary"} loading loading-spinner ${size}` }) }));
 
-export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, GeneralErrors, GeneralErrorsInToast, InputErrors, Label, LoadingComponent, NumberInput, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, TextInput, TextareaInput, TimeInput, addServerErrors, isServerError, mapToDot, useFormSubmit };
+export { Archive, ArchiveButton, CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, GeneralErrors, GeneralErrorsInToast, HotKeysViewer, Hotkeys, HotkeysContext, InputErrors, Label, LoadingComponent, NumberInput, ParallelDialog, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, TOOLTIP_PARALLEL_ID, TextInput, TextareaInput, TimeInput, TimePicker, addServerErrors, isServerError, mapToDot, useFormSubmit };
 //# sourceMappingURL=index.js.map

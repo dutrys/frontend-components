@@ -1,4 +1,3 @@
-"use client";
 import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import { useContext, useEffect } from "react";
 import { HotkeysContext } from "./HotKeysProvider";

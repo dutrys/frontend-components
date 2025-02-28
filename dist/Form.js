@@ -1,4 +1,3 @@
-"use client";
 import { jsxs as _jsxs, jsx as _jsx, Fragment as _Fragment } from "react/jsx-runtime";
 import React from "react";
 import toast from "react-hot-toast";

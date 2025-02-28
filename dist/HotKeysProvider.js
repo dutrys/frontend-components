@@ -1,4 +1,3 @@
-"use client";
 import { jsxs as _jsxs, jsx as _jsx, Fragment as _Fragment } from "react/jsx-runtime";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";

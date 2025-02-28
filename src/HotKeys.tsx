@@ -1,5 +1,3 @@
-"use client";
-
 import { useContext, useEffect } from "react";
 import { Hotkey, HotkeysContext } from "./HotKeysProvider";
 import toast from "react-hot-toast";

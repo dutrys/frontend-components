@@ -1,10 +1,29 @@
 import * as react_jsx_runtime from 'react/jsx-runtime';
-import * as react_hook_form from 'react-hook-form';
-import { FieldErrors, FieldValues, UseFormProps, UseFormSetError, FieldPath, FieldError, RegisterOptions, UseFormRegister, Control } from 'react-hook-form';
 import * as React$1 from 'react';
 import React__default from 'react';
+import * as react_hook_form from 'react-hook-form';
+import { FieldErrors, FieldValues, UseFormProps, UseFormSetError, FieldPath, FieldError, RegisterOptions, UseFormRegister, Control } from 'react-hook-form';
 import { NumericFormatProps } from 'react-number-format/types/types';
 import { PaginateQuery as PaginateQuery$1 } from '@/utils/paginate';
+
+type Include<T, U> = T extends U ? T : never;
+declare const Archive: <T>({ title, archive, onClose, formatErrors, translateId, }: {
+    title: string;
+    archive: () => Promise<T>;
+    onClose?: () => void;
+    formatErrors?: (errors: Include<T, {
+        errors: Record<string, string[]>;
+    }>) => React__default.ReactNode;
+    translateId?: string;
+}) => react_jsx_runtime.JSX.Element;
+declare const ArchiveButton: <T = unknown>({ title, archive, children, formatErrors, }: {
+    children: (onClick: () => void) => React__default.ReactNode;
+    title: string;
+    archive: () => Promise<T>;
+    formatErrors?: (errors: Include<T, {
+        errors: Record<string, string[]>;
+    }>) => React__default.ReactNode;
+}) => react_jsx_runtime.JSX.Element;
 
 declare const DatePicker: ({ onChange, value, inputClassName, toggleClassName, required, allowEmpty, disabled, placeholder, }: {
     required?: boolean;
@@ -77,6 +96,27 @@ declare const useFormSubmit: <T extends FieldValues, R = unknown>(doSubmitCallba
     setFocus: react_hook_form.UseFormSetFocus<T>;
 };
 declare const addServerErrors: <T extends FieldValues>(errors: { [P in keyof T]?: string[]; }, setError: UseFormSetError<T>) => void;
+
+type Hotkey = {
+    callback: () => void;
+    key: string;
+    metaKey?: boolean;
+    ctrlKey?: boolean;
+    altKey?: boolean;
+    description: string;
+};
+declare const HotKeysViewer: () => react_jsx_runtime.JSX.Element;
+type HotkeysContextType = {
+    getHotKeys: () => Record<string, Hotkey[]>;
+    addHotKey: (id: string, hotkeys: Hotkey[]) => void;
+    removeHotKey: (id: string) => void;
+};
+declare const HotkeysContext: React$1.Context<HotkeysContextType>;
+
+declare const Hotkeys: ({ hotKeys, id }: {
+    id: string;
+    hotKeys: Hotkey[];
+}) => null;
 
 type PaginateQuery<T> = {
     page?: number;
@@ -159,6 +199,14 @@ declare const LoadingComponent: ({ style, className, loadingClassName, size, }: 
     style?: React__default.CSSProperties;
 }) => react_jsx_runtime.JSX.Element;
 
+declare const TOOLTIP_PARALLEL_ID = "paralel-tooltip";
+declare const ParallelDialog: ({ title, children, onClose, className, ...rest }: {
+    onClose?: () => void;
+    title?: string;
+    className?: string;
+    children: React$1.ReactNode;
+}) => react_jsx_runtime.JSX.Element;
+
 declare const Popover: ({ title, children, popoverClassName, onShow, open: openProp, showOnHover, showOnClick, showOnFocus, popoverWidth, bgColor, borderColor, }: {
     open?: boolean;
     showOnHover?: boolean;
@@ -196,4 +244,13 @@ declare const SelectPaginatedFromApi: <TModel extends {
     valueFormat?: (model: TModel["data"][0]) => string;
 }) => react_jsx_runtime.JSX.Element;
 
-export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, GeneralErrors, GeneralErrorsInToast, InputErrors, Label, LoadingComponent, NumberInput, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, type ServerError, TextInput, TextareaInput, TimeInput, addServerErrors, isServerError, mapToDot, useFormSubmit };
+declare const TimePicker: ({ className, value, onChange, placeholder, required, disabled, }: {
+    required?: boolean;
+    disabled?: boolean;
+    placeholder?: string;
+    onChange: (e: any) => void;
+    className?: string;
+    value: string | undefined | null;
+}) => react_jsx_runtime.JSX.Element;
+
+export { Archive, ArchiveButton, CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, GeneralErrors, GeneralErrorsInToast, HotKeysViewer, type Hotkey, Hotkeys, HotkeysContext, InputErrors, Label, LoadingComponent, NumberInput, ParallelDialog, Popover, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, type ServerError, TOOLTIP_PARALLEL_ID, TextInput, TextareaInput, TimeInput, TimePicker, addServerErrors, isServerError, mapToDot, useFormSubmit };

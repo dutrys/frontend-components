@@ -1,1 +1,1 @@
-{"version":3,"file":"HotKeys.d.ts","sourceRoot":"","sources":["../src/HotKeys.tsx"],"names":[],"mappings":"AAGA,OAAO,EAAE,MAAM,EAAkB,MAAM,mBAAmB,CAAC;AAG3D,eAAO,MAAM,OAAO,oBAAqB;IAAE,EAAE,EAAE,MAAM,CAAC;IAAC,OAAO,EAAE,MAAM,EAAE,CAAA;CAAE,SAqDzE,CAAC"}
+{"version":3,"file":"HotKeys.d.ts","sourceRoot":"","sources":["../src/HotKeys.tsx"],"names":[],"mappings":"AACA,OAAO,EAAE,MAAM,EAAkB,MAAM,mBAAmB,CAAC;AAG3D,eAAO,MAAM,OAAO,oBAAqB;IAAE,EAAE,EAAE,MAAM,CAAC;IAAC,OAAO,EAAE,MAAM,EAAE,CAAA;CAAE,SAqDzE,CAAC"}
