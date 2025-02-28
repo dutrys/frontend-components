@@ -127,19 +127,19 @@ const formatError = (errors: any): string[] => {
   return formattedErrors;
 };
 
-export type ServerError<T> = { errors: Record<keyof T | "general", string[]> };
+export type ServerError = { errors: Record<string, string[]> };
 
-export const isServerError = (error: any): error is ServerError<any> =>
+export const isServerError = (error: any): error is ServerError =>
   typeof error === "object" && typeof error.errors === "object";
 
 export const useFormSubmit = <T extends FieldValues, R = unknown>(
-  doSubmitCallback: (data: T) => Promise<ServerError<T> | R>,
+  doSubmitCallback: (data: T) => Promise<ServerError | R>,
   formOptions: UseFormProps<T> & {
     translateErrors?: string;
     returnBack?: boolean;
     reportProgress?: boolean;
     onSuccess?: (data: R) => void;
-    onError?: (data: ServerError<T>) => void;
+    onError?: (data: ServerError) => void;
     loadingText?: string;
     savedText?: string;
   } = {},

@@ -47,16 +47,16 @@ declare const InputErrors: ({ errors, className, }: {
     className?: string;
     errors: any;
 }) => react_jsx_runtime.JSX.Element | null;
-type ServerError<T> = {
-    errors: Record<keyof T | "general", string[]>;
+type ServerError = {
+    errors: Record<string, string[]>;
 };
-declare const isServerError: (error: any) => error is ServerError<any>;
-declare const useFormSubmit: <T extends FieldValues, R = unknown>(doSubmitCallback: (data: T) => Promise<ServerError<T> | R>, formOptions?: UseFormProps<T> & {
+declare const isServerError: (error: any) => error is ServerError;
+declare const useFormSubmit: <T extends FieldValues, R = unknown>(doSubmitCallback: (data: T) => Promise<ServerError | R>, formOptions?: UseFormProps<T> & {
     translateErrors?: string;
     returnBack?: boolean;
     reportProgress?: boolean;
     onSuccess?: (data: R) => void;
-    onError?: (data: ServerError<T>) => void;
+    onError?: (data: ServerError) => void;
     loadingText?: string;
     savedText?: string;
 }) => {

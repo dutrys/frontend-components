@@ -17,16 +17,16 @@ export declare const InputErrors: ({ errors, className, }: {
     className?: string;
     errors: any;
 }) => import("react/jsx-runtime").JSX.Element | null;
-export type ServerError<T> = {
-    errors: Record<keyof T | "general", string[]>;
+export type ServerError = {
+    errors: Record<string, string[]>;
 };
-export declare const isServerError: (error: any) => error is ServerError<any>;
-export declare const useFormSubmit: <T extends FieldValues, R = unknown>(doSubmitCallback: (data: T) => Promise<ServerError<T> | R>, formOptions?: UseFormProps<T> & {
+export declare const isServerError: (error: any) => error is ServerError;
+export declare const useFormSubmit: <T extends FieldValues, R = unknown>(doSubmitCallback: (data: T) => Promise<ServerError | R>, formOptions?: UseFormProps<T> & {
     translateErrors?: string;
     returnBack?: boolean;
     reportProgress?: boolean;
     onSuccess?: (data: R) => void;
-    onError?: (data: ServerError<T>) => void;
+    onError?: (data: ServerError) => void;
     loadingText?: string;
     savedText?: string;
 }) => {
