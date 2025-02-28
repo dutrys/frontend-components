@@ -15,11 +15,11 @@ export default [
     plugins: [
       typescript(),
       postcss({
-        modules: true, // Įjungia CSS modulius
-        extract: true, // Sukuria atskirą `dist/index.css` failą
+        modules: true,
+        extract: true,
       }),
     ],
-    external: ["react", "react-hook-form", "react-tooltip", "next/navigation"],
+    external: ["@floating-ui/react", "react", "react-hook-form", "react-tooltip", "next/navigation"],
   },
   {
     input: "dist/index.d.ts",

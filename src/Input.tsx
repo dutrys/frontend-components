@@ -9,7 +9,7 @@ import {
 } from "react-hook-form";
 import { DateTimePicker } from "./DateTimePicker";
 import { DatePicker } from "./DatePicker";
-import { InputErrors } from "./Form";
+import { InputErrors } from "./UseForm";
 import { format } from "date-fns";
 import { SelectPaginatedFromApi } from "./SelectPaginatedFromApi";
 import { PaginateQuery } from "./utils/paginate";

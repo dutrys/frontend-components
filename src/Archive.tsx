@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Hotkeys } from "./HotKeys";
 import { captureException } from "@sentry/nextjs";
-import { GeneralErrorsInToast, isServerError } from "./Form";
+import { GeneralErrorsInToast, isServerError } from "./UseForm";
 import { ParallelDialog } from "./ParallelDialog";
 
 type Include<T, U> = T extends U ? T : never;
