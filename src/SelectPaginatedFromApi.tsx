@@ -12,7 +12,7 @@ import { Fragment, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { PaginateQuery } from "@/utils/paginate";
 
-const PAGINATE_LIMIT = 50;
+const SEARCH_FROM_QUERY_LENGTH = 3;
 
 export const SelectPaginatedFromApi = <
   TModel extends { meta: { currentPage: number; totalItems: number; totalPages: number }; data: { id: number }[] },
@@ -23,7 +23,6 @@ export const SelectPaginatedFromApi = <
   value,
   className,
   queryKey,
-  allowEmpty,
   queryFunction,
   placeholder,
   valueFormat = (model) => (model as any).name,
@@ -31,12 +30,11 @@ export const SelectPaginatedFromApi = <
   ...rest
 }: {
   inputClassName?: string;
-  queryFunction?: (query: PaginateQuery<any>) => Promise<TModel | undefined>;
+  queryFunction?: (query: PaginateQuery<any>) => Promise<TModel | null>;
   queryKey: ReadonlyArray<any>;
   placeholder?: string;
   value: number | null;
   className?: string;
-  allowEmpty?: boolean | string;
   onChange: (model: TModel["data"][0]) => void;
   disabled?: boolean;
   required?: boolean;
@@ -45,7 +43,7 @@ export const SelectPaginatedFromApi = <
   const [query, setQuery] = useState("");
   const { isLoading, data, refetch } = useQuery({
     enabled: !disabled,
-    queryKey: [...queryKey, query],
+    queryKey: [...queryKey, query.length < SEARCH_FROM_QUERY_LENGTH ? "" : query],
     queryFn: ({ queryKey }) => {
       if (!queryFunction) {
         return null;
@@ -55,12 +53,12 @@ export const SelectPaginatedFromApi = <
         return queryFunction({ limit: 100 });
       }
 
-      return search.length >= PAGINATE_LIMIT ? queryFunction({ search, limit: 100 }) : null;
+      return search.length >= SEARCH_FROM_QUERY_LENGTH ? queryFunction({ search, limit: 100 }) : null;
     },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
-  const t = useTranslations("SelectFromApi");
+  const t = useTranslations("selectFromApi");
 
   useEffect(() => {
     void refetch();
@@ -92,44 +90,44 @@ export const SelectPaginatedFromApi = <
         </div>
         <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
           <ComboboxOptions className="absolute z-10 mt-2 max-h-96 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/50 focus:outline-hidden sm:text-sm">
-            {allowEmpty && (
+            {!required && (
               <ComboboxOption
                 data-testid="select-option-empty"
                 key="empty"
-                className={({ active }) =>
+                className={({ focus }) =>
                   `relative cursor-default select-none py-2 pl-4 pr-4 ${
-                    active ? "bg-primary-600 text-white" : "text-gray-900"
+                    focus ? "bg-primary text-white" : "text-gray-900"
                   }`
                 }
-                value={undefined}
+                value={null}
               >
-                <span className="block truncate">{typeof allowEmpty === "string" ? allowEmpty : t("empty")}</span>
+                <span className="block truncate">{t("empty")}</span>
               </ComboboxOption>
             )}
             {isLoading || !data?.data || data?.data?.length === 0 ? (
               <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                {query.length > 0 && query.length < PAGINATE_LIMIT
-                  ? t("enter more symbols", { value: PAGINATE_LIMIT })
+                {query.length > 0 && query.length < SEARCH_FROM_QUERY_LENGTH
+                  ? t("enterMoreSymbols", { value: SEARCH_FROM_QUERY_LENGTH })
                   : isLoading || data?.data === null
                     ? t("searching")
-                    : t("nothing found")}
+                    : t("nothingFound")}
               </div>
             ) : (
               data?.data.map((model: TModel["data"][0], i: number) => (
                 <ComboboxOption
                   data-testid={`select-option-${i}`}
                   key={model.id}
-                  className={({ active }) =>
+                  className={({ focus }) =>
                     `relative cursor-default select-none py-2 pl-4 pr-4 ${
-                      active ? "bg-primary-600 text-white" : "text-gray-900"
+                      focus ? "bg-primary text-white" : "text-gray-900"
                     }`
                   }
                   value={model}
                 >
-                  {({ selected, active }) => (
+                  {({ selected, focus }) => (
                     <>
                       <span
-                        className={`block truncate ${active ? "text-white" : ""} ${
+                        className={`block truncate ${focus ? "text-white" : ""} ${
                           selected ? "pr-3 font-bold" : "font-normal"
                         }`}
                       >
@@ -138,7 +136,7 @@ export const SelectPaginatedFromApi = <
                       {selected ? (
                         <span
                           className={`absolute inset-y-0 right-1 flex items-center pl-3 ${
-                            active ? "text-white" : "text-teal-600"
+                            focus ? "text-white" : "text-teal-600"
                           }`}
                         >
                           <CheckIcon className="h-5 w-5" aria-hidden="true" />

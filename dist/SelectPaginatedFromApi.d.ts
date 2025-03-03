@@ -8,14 +8,13 @@ export declare const SelectPaginatedFromApi: <TModel extends {
     data: {
         id: number;
     }[];
-}>({ onChange, disabled, required, value, className, queryKey, allowEmpty, queryFunction, placeholder, valueFormat, inputClassName, ...rest }: {
+}>({ onChange, disabled, required, value, className, queryKey, queryFunction, placeholder, valueFormat, inputClassName, ...rest }: {
     inputClassName?: string;
-    queryFunction?: (query: PaginateQuery<any>) => Promise<TModel | undefined>;
+    queryFunction?: (query: PaginateQuery<any>) => Promise<TModel | null>;
     queryKey: ReadonlyArray<any>;
     placeholder?: string;
     value: number | null;
     className?: string;
-    allowEmpty?: boolean | string;
     onChange: (model: TModel["data"][0]) => void;
     disabled?: boolean;
     required?: boolean;
