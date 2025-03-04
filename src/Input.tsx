@@ -26,6 +26,7 @@ interface IInputProps<TName extends FieldPath<FieldValues>> {
   error?: FieldError;
   required?: boolean;
   className?: string;
+  fieldSetClassName?: string;
   disabled?: boolean;
   desc?: string;
   size?: "xs" | "sm" | "md" | "lg";
@@ -52,7 +53,7 @@ export const TextInput = <
   };
 
   return (
-    <div>
+    <div className={props.fieldSetClassName}>
       <label className="floating-label">
         <input
           id={props.id}
@@ -93,7 +94,7 @@ export const SelectInput = <
   };
 
   return (
-    <div>
+    <div className={props.fieldSetClassName}>
       <label className="floating-label">
         <select
           id={props.id}
@@ -130,7 +131,7 @@ export const TextareaInput = <
     ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
   };
   return (
-    <div>
+    <div className={props.fieldSetClassName}>
       <label className="floating-label">
         <textarea
           id={props.id}
@@ -170,7 +171,7 @@ export const CheckboxInput = <
   };
 
   return (
-    <div>
+    <div className={props.fieldSetClassName}>
       <label>
         <input
           id={props.id}
@@ -201,7 +202,7 @@ export const DateInput = <
   },
 ) => {
   return (
-    <div>
+    <div className={props.fieldSetClassName}>
       <label className="floating-label">
         <Controller
           control={props.control}
@@ -259,6 +260,7 @@ export const SelectPaginatedFromApiInput = <
   className,
   size,
   onChange,
+  fieldSetClassName,
   ...rest
 }: IInputProps<TName> & {
   control: Control<TFieldValues>;
@@ -267,37 +269,39 @@ export const SelectPaginatedFromApiInput = <
   valueFormat: (model: T["data"][0]) => string;
   onChange?: (model: T["data"][0]) => unknown;
 }) => (
-  <div {...rest} className="floating-label">
-    <span>
-      {label}
-      {required ? <Required /> : null}
-    </span>
-    <Controller
-      control={control}
-      name={name}
-      rules={{ required: required === true }}
-      render={({ field }) => (
-        <SelectPaginatedFromApi<T>
-          inputClassName={cx("w-full mx-0 input input-bordered", className, {
-            "input-xs": size === "xs",
-            "input-sm": size === "sm",
-            "input-error": error,
-          })}
-          required={required}
-          disabled={disabled}
-          placeholder={label}
-          queryKey={queryKey}
-          queryFunction={queryFn}
-          value={field.value}
-          valueFormat={valueFormat}
-          onChange={(model) => {
-            field.onChange(model?.id || null);
-            onChange?.(model || null);
-          }}
-        />
-      )}
-    />
-    <InputErrors className="text-xs text-error mt-1" errors={error} />
+  <div className={fieldSetClassName}>
+    <div {...rest} className="floating-label">
+      <span>
+        {label}
+        {required ? <Required /> : null}
+      </span>
+      <Controller
+        control={control}
+        name={name}
+        rules={{ required: required === true }}
+        render={({ field }) => (
+          <SelectPaginatedFromApi<T>
+            inputClassName={cx("w-full mx-0 input input-bordered", className, {
+              "input-xs": size === "xs",
+              "input-sm": size === "sm",
+              "input-error": error,
+            })}
+            required={required}
+            disabled={disabled}
+            placeholder={label}
+            queryKey={queryKey}
+            queryFunction={queryFn}
+            value={field.value}
+            valueFormat={valueFormat}
+            onChange={(model) => {
+              field.onChange(model?.id || null);
+              onChange?.(model || null);
+            }}
+          />
+        )}
+      />
+      <InputErrors className="text-xs text-error mt-1" errors={error} />
+    </div>
   </div>
 );
 
@@ -314,7 +318,7 @@ export const DateTimeInput = <
   },
 ) => {
   return (
-    <div>
+    <div className={props.fieldSetClassName}>
       <label className="floating-label">
         <Controller
           control={props.control}
@@ -367,7 +371,7 @@ export const TimeInput = <
   },
 ) => {
   return (
-    <div>
+    <div className={props.fieldSetClassName}>
       <label className="floating-label">
         {!props.disabled && (
           <span>
@@ -410,7 +414,7 @@ export const NumberInput = <
   control: Control<TFieldValues>;
   options?: NumericFormatProps;
 }) => (
-  <div>
+  <div className={props.fieldSetClassName}>
     <div className="floating-label">
       {!props?.disabled && (
         <span>

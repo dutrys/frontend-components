@@ -74,7 +74,7 @@ export const SelectPaginatedFromApi = <
       {...rest}
     >
       <div className={`relative ${className}`}>
-        <div className="w-full relative input p-0">
+        <div className="w-full relative p-0">
           <ComboboxInput
             required={required}
             data-testid="select-input"
@@ -89,15 +89,13 @@ export const SelectPaginatedFromApi = <
           </ComboboxButton>
         </div>
         <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-          <ComboboxOptions className="absolute z-10 mt-2 max-h-96 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/50 focus:outline-hidden sm:text-sm">
-            {!required && (
+          <ComboboxOptions className="absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm">
+            {!required && data && data?.meta?.totalItems !== 0 && (
               <ComboboxOption
                 data-testid="select-option-empty"
                 key="empty"
                 className={({ focus }) =>
-                  `relative cursor-default select-none py-2 pl-4 pr-4 ${
-                    focus ? "bg-primary text-white" : "text-gray-900"
-                  }`
+                  `relative select-none py-2 pl-4 pr-4 ${focus ? "bg-primary text-white" : "text-gray-900"}`
                 }
                 value={null}
               >
@@ -106,11 +104,13 @@ export const SelectPaginatedFromApi = <
             )}
             {isLoading || !data?.data || data?.data?.length === 0 ? (
               <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                {query.length > 0 && query.length < SEARCH_FROM_QUERY_LENGTH
-                  ? t("enterMoreSymbols", { value: SEARCH_FROM_QUERY_LENGTH })
-                  : isLoading || data?.data === null
-                    ? t("searching")
-                    : t("nothingFound")}
+                <span>
+                  {query.length > 0 && query.length < SEARCH_FROM_QUERY_LENGTH
+                    ? t("enterMoreSymbols", { value: SEARCH_FROM_QUERY_LENGTH })
+                    : isLoading || data?.data === null
+                      ? t("searching")
+                      : t("nothingFound")}
+                </span>
               </div>
             ) : (
               data?.data.map((model: TModel["data"][0], i: number) => (
