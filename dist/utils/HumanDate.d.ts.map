@@ -1,0 +1,1 @@
+{"version":3,"file":"HumanDate.d.ts","sourceRoot":"","sources":["../../src/utils/HumanDate.tsx"],"names":[],"mappings":"AAOA;;;;;GAKG;AACH,eAAO,MAAM,SAAS,+DAMnB;IACD,cAAc,CAAC,EAAE,OAAO,CAAC;IACzB,SAAS,CAAC,EAAE,MAAM,CAAC;IACnB,cAAc,CAAC,EAAE,OAAO,CAAC;IACzB,IAAI,CAAC,EAAE,IAAI,CAAC;IACZ,IAAI,EAAE,MAAM,GAAG,IAAI,CAAC;CACrB,mDA2DA,CAAC"}
