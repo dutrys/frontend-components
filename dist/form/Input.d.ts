@@ -1,18 +1,7 @@
 import { Control, FieldValues, FieldPath, FieldError, RegisterOptions, UseFormRegister } from "react-hook-form";
 import { PaginateQuery } from "../utils/paginate";
 import { NumericFormatProps } from "react-number-format/types/types";
-interface IInputProps<TName extends FieldPath<FieldValues>> {
-    id?: string;
-    label: string;
-    name: TName;
-    error?: FieldError;
-    required?: boolean;
-    className?: string;
-    fieldSetClassName?: string;
-    disabled?: boolean;
-    desc?: string;
-    size?: "xs" | "sm" | "md" | "lg";
-}
+import React from "react";
 interface IInputRegisterProps<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>> extends IInputProps<TName> {
     options?: Omit<RegisterOptions<TFieldValues, TName>, "required" | "disabled">;
     register: UseFormRegister<TFieldValues>;
@@ -67,5 +56,34 @@ export declare const Label: ({ text, required }: {
     size?: "sm";
     text: React.ReactNode;
 }) => import("react/jsx-runtime").JSX.Element;
+export declare const SelectPaginatedFromApiWithLabel: <T extends {
+    data: {
+        id: number;
+    }[];
+    meta: {
+        currentPage: number;
+        totalItems: number;
+        totalPages: number;
+    };
+}>({ label, queryFn, queryKey, desc, name, valueFormat, required, disabled, error, className, size, value, onChange, fieldSetClassName, ...rest }: IInputProps<any> & {
+    queryKey: ReadonlyArray<any>;
+    queryFn: (query: PaginateQuery<any>) => Promise<T>;
+    valueFormat: (model: T["data"][0]) => string;
+    onChange?: (model: T["data"][0]) => unknown;
+    value: number | null;
+}) => import("react/jsx-runtime").JSX.Element;
+export interface IInputProps<TName extends FieldPath<FieldValues>> {
+    id?: string;
+    label: string;
+    name: TName;
+    error?: FieldError;
+    required?: boolean;
+    className?: string;
+    fieldSetClassName?: string;
+    disabled?: boolean;
+    desc?: React.ReactNode;
+    size?: "xs" | "sm" | "md" | "lg";
+}
+export declare const Required: () => import("react/jsx-runtime").JSX.Element;
 export {};
 //# sourceMappingURL=Input.d.ts.map

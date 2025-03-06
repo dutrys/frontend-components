@@ -125,7 +125,7 @@ const addServerErrors = (errors, setError) => Object.entries(errors).forEach(([k
     setError(key, { type: "server", message: array?.join(", ") || "" });
 });
 
-var styles = {"dayPicker":"DatePicker-module_dayPicker__VRSSY"};
+var styles$1 = {"dayPicker":"DatePicker-module_dayPicker__VRSSY"};
 
 const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: openProp, showOnHover = true, showOnClick = false, showOnFocus = false, popoverWidth, bgColor = "#1e293b", borderColor = "#1e293b", }) => {
     const [isOpen, setIsOpen] = useState(openProp || false);
@@ -223,7 +223,7 @@ function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from,
                         }
                         catch (_) { }
                     }
-                }, showOnClick: true, showOnFocus: true, showOnHover: false, popoverWidth: "", children: (close) => (jsxs(Fragment, { children: [jsxs("div", { className: "flex", children: [jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles.dayPicker}`, captionLayout: "dropdown", mode: "single", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, weekStartsOn: 1, disabled: matcher, selected: valueTemp || undefined, defaultMonth: valueTemp || new Date(), onSelect: (day) => {
+                }, showOnClick: true, showOnFocus: true, showOnHover: false, popoverWidth: "", children: (close) => (jsxs(Fragment, { children: [jsxs("div", { className: "flex", children: [jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$1.dayPicker}`, captionLayout: "dropdown", mode: "single", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, weekStartsOn: 1, disabled: matcher, selected: valueTemp || undefined, defaultMonth: valueTemp || new Date(), onSelect: (day) => {
                                         day?.setHours((valueTemp || new Date()).getHours(), (valueTemp || new Date()).getMinutes() || 0);
                                         if (from && day && from > day) {
                                             day.setHours(from.getHours(), from.getMinutes());
@@ -277,7 +277,7 @@ const DatePicker = ({ onChange, value, inputClassName = "input input-bordered", 
                         if (isValid(date)) {
                             onChange(date);
                         }
-                    } })), children: (close) => (jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles.dayPicker}`, captionLayout: "dropdown", mode: "single", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, weekStartsOn: 1, selected: value || undefined, onSelect: (day) => {
+                    } })), children: (close) => (jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$1.dayPicker}`, captionLayout: "dropdown", mode: "single", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, weekStartsOn: 1, selected: value || undefined, onSelect: (day) => {
                         onChange(day || null);
                         close();
                     } })) }), allowEmpty ? (jsx("button", { disabled: allowEmpty && !value, className: toggleClassName, onClick: () => onChange(null), children: value ? jsx(XMarkIcon, { className: "size-4" }) : jsx(ClockIcon, { className: "size-4" }) })) : (jsx("div", { className: `cursor-pointer ${toggleClassName}`, children: jsx(CalendarIcon, { className: "size-4" }) }))] }));
@@ -347,6 +347,8 @@ const TimePicker = ({ className, value, onChange, placeholder, required, disable
         }, onChange: (e) => setInnerValue(e.target.value) }));
 };
 
+var styles = {"desc":"Input-module_desc__3D3hV"};
+
 const TextInput = (props) => {
     const options = {
         required: props.required,
@@ -357,7 +359,7 @@ const TextInput = (props) => {
                             "input-xs": props.size === "xs",
                             "input-sm": props.size === "sm",
                             "input-error": props.error,
-                        }) }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && jsx("div", { className: "text-xs mt-0.5 text-gray-500", children: props.desc }), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+                        }) }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
 const SelectInput = (props) => {
     const options = {
@@ -369,7 +371,7 @@ const SelectInput = (props) => {
                             "select-xs": props.size === "xs",
                             "select-sm": props.size === "sm",
                             "select-error": props.error,
-                        }), children: props.children }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && jsx("div", { className: "text-xs mt-0.5 text-gray-500", children: props.desc }), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+                        }), children: props.children }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
 const TextareaInput = (props) => {
     const options = {
@@ -381,10 +383,7 @@ const TextareaInput = (props) => {
                             "textarea-xs": props.size === "xs",
                             "textarea-sm": props.size === "sm",
                             "textarea-error": props.error,
-                        }) }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && jsx("div", { className: "text-xs mt-0.5 text-gray-500", children: props.desc }), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
-};
-const Required = () => {
-    return jsx("span", { className: "text-error align-bottom", children: "*" });
+                        }) }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
 const CheckboxInput = (props) => {
     const options = {
@@ -395,7 +394,7 @@ const CheckboxInput = (props) => {
     return (jsxs("div", { className: props.fieldSetClassName, children: [jsxs("label", { children: [jsx("input", { id: props.id, type: "checkbox", disabled: props.disabled, ...props.register(props.name, options), className: cx("toggle", {
                             "toggle-sm": props.size === "sm",
                             "toggle-xs": props.size === "xs",
-                        }) }), jsx("span", { className: "text-sm text-gray-500 label-text grow pl-2", children: props.label })] }), props.desc && jsx("div", { className: "text-xs mt-0.5 text-gray-500", children: props.desc }), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+                        }) }), jsx("span", { className: "text-sm text-gray-500 label-text grow pl-2", children: props.label })] }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
 const DateInput = (props) => {
     return (jsxs("div", { className: props.fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(Controller, { control: props.control, name: props.name, render: ({ field }) => {
@@ -411,7 +410,7 @@ const DateInput = (props) => {
                                         field.onChange(value ? format(value, "yyyy-MM-dd") : null);
                                     }
                                 } }));
-                        } }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && jsx("div", { className: "text-xs mt-0.5 text-gray-500", children: props.desc }), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+                        } }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
 const SelectPaginatedFromApiInput = ({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, ...rest }) => (jsx("div", { className: fieldSetClassName, children: jsxs("div", { ...rest, className: "floating-label", children: [jsxs("span", { children: [label, required ? jsx(Required, {}) : null] }), jsx(Controller, { control: control, name: name, rules: { required: required === true }, render: ({ field }) => (jsx(SelectPaginatedFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
                         "input-xs": size === "xs",
@@ -435,17 +434,27 @@ const DateTimeInput = (props) => {
                                         field.onChange(value ? format(value, "yyyy-MM-dd HH:mm:ss") : null);
                                     }
                                 } }));
-                        } }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && jsx("div", { className: "text-xs my-0.5 text-gray-500", children: props.desc }), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+                        } }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && (jsx("div", { className: "text-xs my-0.5 text-gray-500", children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
 const TimeInput = (props) => {
     return (jsxs("div", { className: props.fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [!props.disabled && (jsxs("span", { children: [props.label, props.required && jsx(Required, {})] })), jsx(Controller, { render: ({ field }) => (jsx(TimePicker, { value: field.value, onChange: (v) => field.onChange(v), placeholder: props.label, required: props.required, disabled: props.disabled, className: cx("input w-full", props.className, {
                                 "input-xs": props.size === "xs",
                                 "input-sm": props.size === "sm",
                                 "input-error": props.error,
-                            }) })), name: props.name, control: props.control })] }), props.desc && jsx("div", { className: "text-xs text-gray-500", children: props.desc }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+                            }) })), name: props.name, control: props.control })] }), props.desc && (jsx("div", { className: "text-xs text-gray-500", children: jsx("span", { children: props.desc }) })), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
-const NumberInput = ({ options, ...props }) => (jsxs("div", { className: props.fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [!props?.disabled && (jsxs("span", { children: [props.label, props?.required && jsx(Required, {})] })), jsx(Controller, { name: props.name, control: props.control, render: ({ field }) => (jsx(NumericFormat, { placeholder: props.label, ...options, disabled: props?.disabled, required: props?.required, value: field.value, className: `${props.size === "sm" ? "input-sm " : ""}w-full input input-bordered focus:outline-blue-400`, onValueChange: (values) => field.onChange(values.floatValue) })) })] }), props.desc && jsx("div", { className: "text-xs text-gray-500", children: props.desc }), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+const NumberInput = ({ options, ...props }) => (jsxs("div", { className: props.fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [!props?.disabled && (jsxs("span", { children: [props.label, props?.required && jsx(Required, {})] })), jsx(Controller, { name: props.name, control: props.control, render: ({ field }) => (jsx(NumericFormat, { placeholder: props.label, ...options, disabled: props?.disabled, required: props?.required, value: field.value, className: `${props.size === "sm" ? "input-sm " : ""}w-full input input-bordered focus:outline-blue-400`, onValueChange: (values) => field.onChange(values.floatValue) })) })] }), props.desc && (jsx("div", { className: "text-xs text-gray-500", children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 const Label = ({ text, required }) => (jsx("label", { className: "label", children: jsxs("span", { className: "text-sm", children: [text, required && jsx(Required, {})] }) }));
+const SelectPaginatedFromApiWithLabel = ({ label, queryFn, queryKey, desc, name, valueFormat, required, disabled, error, className, size, value, onChange, fieldSetClassName, ...rest }) => {
+    return (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { ...rest, className: "floating-label", children: [jsxs("span", { children: [label, required ? jsx(Required, {}) : null] }), jsx(SelectPaginatedFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
+                            "input-xs": size === "xs",
+                            "input-sm": size === "sm",
+                            "input-error": error,
+                        }), required: required, disabled: disabled, placeholder: label, queryKey: queryKey, queryFunction: queryFn, value: value, valueFormat: valueFormat, onChange: (model) => onChange?.(model || null) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+};
+const Required = () => {
+    return jsx("span", { className: "text-error align-bottom", children: "*" });
+};
 
-export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, GeneralErrors, GeneralErrorsInToast, InputErrors, Label, NumberInput, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, TextInput, TextareaInput, TimeInput, TimePicker, addServerErrors, isServerError, mapToDot, useFormSubmit };
+export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, GeneralErrors, GeneralErrorsInToast, InputErrors, Label, NumberInput, Required, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, TextInput, TextareaInput, TimeInput, TimePicker, addServerErrors, isServerError, mapToDot, useFormSubmit };
 //# sourceMappingURL=index.js.map

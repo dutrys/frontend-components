@@ -6,6 +6,7 @@ import {
   FieldError,
   RegisterOptions,
   UseFormRegister,
+  FieldErrors,
 } from "react-hook-form";
 import { DateTimePicker } from "./DateTimePicker";
 import { DatePicker } from "./DatePicker";
@@ -16,21 +17,10 @@ import { PaginateQuery } from "../utils/paginate";
 import { stringToDate } from "../utils/datetime";
 import cx from "classnames";
 import { TimePicker } from "./TimePicker";
+import styles from "./Input.module.css";
 import { NumericFormat } from "react-number-format";
 import { NumericFormatProps } from "react-number-format/types/types";
-
-interface IInputProps<TName extends FieldPath<FieldValues>> {
-  id?: string;
-  label: string;
-  name: TName;
-  error?: FieldError;
-  required?: boolean;
-  className?: string;
-  fieldSetClassName?: string;
-  disabled?: boolean;
-  desc?: string;
-  size?: "xs" | "sm" | "md" | "lg";
-}
+import React from "react";
 
 interface IInputRegisterProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -73,7 +63,11 @@ export const TextInput = <
           {props.required ? <Required /> : null}
         </span>
       </label>
-      {props.desc && <div className="text-xs mt-0.5 text-gray-500">{props.desc}</div>}
+      {props.desc && (
+        <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
+          <span>{props.desc}</span>
+        </div>
+      )}
       {props.error && <InputErrors className="text-xs text-error mt-1" errors={props.error} />}
     </div>
   );
@@ -113,7 +107,11 @@ export const SelectInput = <
           {props.required ? <Required /> : null}
         </span>
       </label>
-      {props.desc && <div className="text-xs mt-0.5 text-gray-500">{props.desc}</div>}
+      {props.desc && (
+        <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
+          <span>{props.desc}</span>
+        </div>
+      )}
       {props.error && <InputErrors className="text-xs text-error mt-1" errors={props.error} />}
     </div>
   );
@@ -148,14 +146,14 @@ export const TextareaInput = <
           {props.required ? <Required /> : null}
         </span>
       </label>
-      {props.desc && <div className="text-xs mt-0.5 text-gray-500">{props.desc}</div>}
+      {props.desc && (
+        <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
+          <span>{props.desc}</span>
+        </div>
+      )}
       {props.error && <InputErrors className="text-xs text-error mt-1" errors={props.error} />}
     </div>
   );
-};
-
-const Required = () => {
-  return <span className="text-error align-bottom">*</span>;
 };
 
 export const CheckboxInput = <
@@ -185,7 +183,11 @@ export const CheckboxInput = <
         />
         <span className="text-sm text-gray-500 label-text grow pl-2">{props.label}</span>
       </label>
-      {props.desc && <div className="text-xs mt-0.5 text-gray-500">{props.desc}</div>}
+      {props.desc && (
+        <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
+          <span>{props.desc}</span>
+        </div>
+      )}
       {props.error && <InputErrors className="text-xs text-error mt-1" errors={props.error} />}
     </div>
   );
@@ -236,7 +238,11 @@ export const DateInput = <
           {props.required ? <Required /> : null}
         </span>
       </label>
-      {props.desc && <div className="text-xs mt-0.5 text-gray-500">{props.desc}</div>}
+      {props.desc && (
+        <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
+          <span>{props.desc}</span>
+        </div>
+      )}
       {props.error && <InputErrors className="text-xs text-error mt-1" errors={props.error} />}
     </div>
   );
@@ -354,7 +360,11 @@ export const DateTimeInput = <
           {props.required ? <Required /> : null}
         </span>
       </label>
-      {props.desc && <div className="text-xs my-0.5 text-gray-500">{props.desc}</div>}
+      {props.desc && (
+        <div className="text-xs my-0.5 text-gray-500">
+          <span>{props.desc}</span>
+        </div>
+      )}
       {props.error && <InputErrors className="text-xs text-error mt-1" errors={props.error} />}
     </div>
   );
@@ -398,7 +408,11 @@ export const TimeInput = <
           control={props.control}
         />
       </label>
-      {props.desc && <div className="text-xs text-gray-500">{props.desc}</div>}
+      {props.desc && (
+        <div className="text-xs text-gray-500">
+          <span>{props.desc}</span>
+        </div>
+      )}
       <InputErrors className="text-xs text-error mt-1" errors={props.error} />
     </div>
   );
@@ -438,7 +452,11 @@ export const NumberInput = <
         )}
       />
     </div>
-    {props.desc && <div className="text-xs text-gray-500">{props.desc}</div>}
+    {props.desc && (
+      <div className="text-xs text-gray-500">
+        <span>{props.desc}</span>
+      </div>
+    )}
     {props.error && <InputErrors className="text-xs text-error mt-1" errors={props.error} />}
   </div>
 );
@@ -451,3 +469,73 @@ export const Label = ({ text, required }: { required?: boolean; size?: "sm"; tex
     </span>
   </label>
 );
+
+export const SelectPaginatedFromApiWithLabel = <
+  T extends { data: { id: number }[]; meta: { currentPage: number; totalItems: number; totalPages: number } },
+>({
+  label,
+  queryFn,
+  queryKey,
+  desc,
+  name,
+  valueFormat,
+  required,
+  disabled,
+  error,
+  className,
+  size,
+  value,
+  onChange,
+  fieldSetClassName,
+  ...rest
+}: IInputProps<any> & {
+  queryKey: ReadonlyArray<any>;
+  queryFn: (query: PaginateQuery<any>) => Promise<T>;
+  valueFormat: (model: T["data"][0]) => string;
+  onChange?: (model: T["data"][0]) => unknown;
+  value: number | null;
+}) => {
+  return (
+    <div className={fieldSetClassName}>
+      <div {...rest} className="floating-label">
+        <span>
+          {label}
+          {required ? <Required /> : null}
+        </span>
+        <SelectPaginatedFromApi<T>
+          inputClassName={cx("w-full mx-0 input input-bordered", className, {
+            "input-xs": size === "xs",
+            "input-sm": size === "sm",
+            "input-error": error,
+          })}
+          required={required}
+          disabled={disabled}
+          placeholder={label}
+          queryKey={queryKey}
+          queryFunction={queryFn}
+          value={value}
+          valueFormat={valueFormat}
+          onChange={(model) => onChange?.(model || null)}
+        />
+      </div>
+      <InputErrors className="text-xs text-error mt-1" errors={error} />
+    </div>
+  );
+};
+
+export interface IInputProps<TName extends FieldPath<FieldValues>> {
+  id?: string;
+  label: string;
+  name: TName;
+  error?: FieldError;
+  required?: boolean;
+  className?: string;
+  fieldSetClassName?: string;
+  disabled?: boolean;
+  desc?: React.ReactNode;
+  size?: "xs" | "sm" | "md" | "lg";
+}
+
+export const Required = () => {
+  return <span className="text-error align-bottom">*</span>;
+};
