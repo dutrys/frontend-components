@@ -1,6 +1,7 @@
 import typescript from "@rollup/plugin-typescript";
 import postcss from "rollup-plugin-postcss";
 import dts from "rollup-plugin-dts";
+import useClient from "./useClient.js";
 
 export default [
   {
@@ -49,10 +50,39 @@ export default [
     ],
   },
   {
-    input: "src/form.ts",
+    input: "src/utils/index.ts",
     output: [
       {
-        file: "dist/form.js",
+        file: "dist/utils/index.js",
+        format: "es",
+        sourcemap: true,
+      },
+    ],
+    plugins: [
+      typescript(),
+      postcss({
+        modules: true,
+        extract: true,
+      }),
+      useClient(),
+    ],
+    external: [
+      "react/jsx-runtime",
+      "date-fns",
+      "date-fns/locale",
+      "next-intl",
+      "@heroicons/react/24/outline",
+      "react",
+      "next/navigation",
+      "react-tooltip",
+      "react-hot-toast",
+    ],
+  },
+  {
+    input: "src/form/index.ts",
+    output: [
+      {
+        file: "dist/form/index.js",
         format: "es",
         sourcemap: true,
       },

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import styles from "./DatePicker.module.css";
 import { ClockIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import * as React from "react";
-import { Popover } from "./Popover";
+import { Popover } from "../Popover";
 import { DayPicker, Matcher } from "react-day-picker";
 import { enGB, lt } from "react-day-picker/locale";
 
