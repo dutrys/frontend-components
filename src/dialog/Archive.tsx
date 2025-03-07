@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Hotkeys } from "./HotKeys";
+import { Hotkeys } from "../HotKeys";
 import { captureException } from "@sentry/nextjs";
-import { GeneralErrorsInToast, isServerError } from "./form/UseForm";
+import { GeneralErrorsInToast, isServerError } from "../form/UseForm";
 import { DialogWithBack } from "./DialogWithBack";
 
 type Include<T, U> = T extends U ? T : never;

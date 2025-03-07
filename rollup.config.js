@@ -23,10 +23,10 @@ export default [
     external: ["react/jsx-runtime", "react", "@floating-ui/react"],
   },
   {
-    input: "src/dialog.ts",
+    input: "src/dialog/index.ts",
     output: [
       {
-        file: "dist/dialog.js",
+        file: "dist/dialog/index.js",
         format: "es",
         sourcemap: true,
       },

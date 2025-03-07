@@ -1,2 +1,2 @@
 export * from "./Loading";
-export * from "./Popover";
+export * from "./dialog/Popover";
