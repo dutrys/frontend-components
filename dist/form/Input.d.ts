@@ -82,7 +82,7 @@ export interface IInputProps<TName extends FieldPath<FieldValues>> {
     fieldSetClassName?: string;
     disabled?: boolean;
     desc?: React.ReactNode;
-    size?: "xs" | "sm" | "md" | "lg";
+    size?: "xs" | "sm";
 }
 export declare const Required: () => import("react/jsx-runtime").JSX.Element;
 export {};

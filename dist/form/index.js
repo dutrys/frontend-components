@@ -14,8 +14,8 @@ import 'react-tooltip';
 import { useQuery } from '@tanstack/react-query';
 import { Combobox, ComboboxInput, ComboboxButton, Transition, ComboboxOptions, ComboboxOption } from '@headlessui/react';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
-import 'date-fns-tz';
 import cx from 'classnames';
+import 'date-fns-tz';
 import { NumericFormat } from 'react-number-format';
 
 const GeneralErrorsInToast = ({ errors, translateId, except = [], className = "", }) => {
@@ -295,20 +295,20 @@ const DatePicker = ({ onChange, value, inputClassName = "input input-bordered", 
 };
 
 const SEARCH_FROM_QUERY_LENGTH = 3;
-const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, value, className, queryKey, queryFunction, placeholder, optionsClassName, empty, valueFormat = (model) => model.name, inputClassName = "w-full mx-0 input input-bordered", ...rest }) => {
+const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, value, size, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat = (model) => model.name, inputClassName = "w-full mx-0 input input-bordered", ...rest }) => {
     const [query, setQuery] = useState("");
     const { isLoading, data, refetch } = useQuery({
         enabled: !disabled,
         queryKey: [...queryKey, query.length < SEARCH_FROM_QUERY_LENGTH ? "" : query],
         queryFn: ({ queryKey }) => {
-            if (!queryFunction) {
+            if (!queryFn) {
                 return null;
             }
             const search = queryKey[queryKey.length - 1] || "";
             if (search === "") {
-                return queryFunction({ limit: 100 });
+                return queryFn({ limit: 100 });
             }
-            return search.length >= SEARCH_FROM_QUERY_LENGTH ? queryFunction({ search, limit: 100 }) : null;
+            return search.length >= SEARCH_FROM_QUERY_LENGTH ? queryFn({ search, limit: 100 }) : null;
         },
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
@@ -317,11 +317,19 @@ const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, value,
     useEffect(() => {
         void refetch();
     }, [refetch, query]);
-    return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: (data?.data || []).find((b) => b.id === value) || null, onChange: onChange, ...rest, children: jsxs("div", { className: `relative ${className}`, children: [jsxs("div", { className: "w-full relative p-0", children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), className: inputClassName, displayValue: (model) => (model ? valueFormat(model) : ""), onChange: (event) => setQuery(event.target.value) }), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "absolute inset-y-0 right-0 flex items-center pr-2", children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsxs(ComboboxOptions, { className: `absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`, children: [!required && data && data?.meta?.totalItems !== 0 && (jsx(ComboboxOption, { "data-testid": "select-option-empty", className: ({ focus }) => `relative select-none py-2 pl-4 pr-4 ${focus ? "bg-primary text-white" : "text-gray-900"}`, value: null, children: jsx("span", { className: "block truncate", children: empty || t("empty") }) }, "empty")), isLoading || !data?.data || data?.data?.length === 0 ? (jsx("div", { className: "relative cursor-default select-none py-2 px-4 text-gray-700", children: jsx("span", { children: query.length > 0 && query.length < SEARCH_FROM_QUERY_LENGTH
+    return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: (data?.data || []).find((b) => b.id === value) || null, onChange: onChange, ...rest, children: jsxs("div", { className: `relative ${className}`, children: [jsxs("div", { className: "w-full relative p-0", children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), className: cx(inputClassName, {
+                                "input-sm": size === "sm",
+                                "input-xs": size === "xs",
+                            }), displayValue: (model) => (model ? valueFormat(model) : ""), onChange: (event) => setQuery(event.target.value) }), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "absolute inset-y-0 right-0 flex items-center pr-2", children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsxs(ComboboxOptions, { className: `absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`, children: [!required && data && data?.meta?.totalItems !== 0 && (jsx(ComboboxOption, { "data-testid": "select-option-empty", className: ({ focus }) => `relative select-none py-2 pl-4 pr-4 ${focus ? "bg-primary text-white" : "text-gray-900"}`, value: null, children: jsx("span", { className: cx("block truncate", { "text-xs": "xs" === size || "sm" === size }), children: empty || t("empty") }) }, "empty")), isLoading || !data?.data || data?.data?.length === 0 ? (jsx("div", { className: "relative cursor-default select-none py-2 px-4 text-gray-700", children: jsx("span", { className: cx({ "text-xs": "xs" === size || "sm" === size }), children: query.length > 0 && query.length < SEARCH_FROM_QUERY_LENGTH
                                         ? t("enterMoreSymbols", { value: SEARCH_FROM_QUERY_LENGTH })
                                         : isLoading || data?.data === null
                                             ? t("searching")
-                                            : t("nothingFound") }) })) : (data?.data.map((model, i) => (jsx(ComboboxOption, { "data-testid": `select-option-${i}`, className: ({ focus }) => `relative cursor-default select-none py-2 pl-4 pr-4 ${focus ? "bg-primary text-white" : "text-gray-900"}`, value: model, children: ({ selected, focus }) => (jsxs(Fragment, { children: [jsx("span", { className: `block truncate ${focus ? "text-white" : ""} ${selected ? "pr-3 font-bold" : "font-normal"}`, children: valueFormat(model) }), selected ? (jsx("span", { className: `absolute inset-y-0 right-1 flex items-center pl-3 ${focus ? "text-white" : "text-teal-600"}`, children: jsx(CheckIcon, { className: "h-5 w-5", "aria-hidden": "true" }) })) : null] })) }, model.id))))] }) })] }) }));
+                                            : t("nothingFound") }) })) : (data?.data.map((model, i) => (jsx(ComboboxOption, { "data-testid": `select-option-${i}`, className: ({ focus }) => `relative cursor-default select-none py-2 pl-4 pr-4 ${focus ? "bg-primary text-white" : "text-gray-900"}`, value: model, children: ({ selected, focus }) => (jsxs(Fragment, { children: [jsx("span", { className: cx("block truncate", {
+                                                "text-white": focus,
+                                                "pr-3 font-bold": selected,
+                                                "font-normal": !selected,
+                                                "text-xs": "xs" === size || "sm" === size,
+                                            }), children: valueFormat(model) }), selected ? (jsx("span", { className: `absolute inset-y-0 right-1 flex items-center pl-3 ${focus ? "text-white" : "text-teal-600"}`, children: jsx(CheckIcon, { className: "h-5 w-5", "aria-hidden": "true" }) })) : null] })) }, model.id))))] }) })] }) }));
 };
 
 const timeToDate = (date, format = "HH:mm:ss") => {
@@ -423,14 +431,12 @@ const DateInput = (props) => {
                                 } }));
                         } }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
-const SelectPaginatedFromApiInput = ({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, ...rest }) => (jsx("div", { className: fieldSetClassName, children: jsxs("div", { ...rest, className: "floating-label", children: [jsxs("span", { children: [label, required ? jsx(Required, {}) : null] }), jsx(Controller, { control: control, name: name, rules: { required: required === true }, render: ({ field }) => (jsx(SelectPaginatedFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
-                        "input-xs": size === "xs",
-                        "input-sm": size === "sm",
-                        "input-error": error,
-                    }), required: required, disabled: disabled, placeholder: label, queryKey: queryKey, queryFunction: queryFn, value: field.value, valueFormat: valueFormat, onChange: (model) => {
-                        field.onChange(model?.id || null);
-                        onChange?.(model || null);
-                    } })) }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }) }));
+const SelectPaginatedFromApiInput = ({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { ...rest, className: "floating-label", children: [jsxs("span", { children: [label, required ? jsx(Required, {}) : null] }), jsx(Controller, { control: control, name: name, rules: { required: required === true }, render: ({ field }) => (jsx(SelectPaginatedFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
+                            "input-error": error,
+                        }), size: size, required: required, disabled: disabled, placeholder: label, queryKey: queryKey, queryFn: queryFn, value: field.value, valueFormat: valueFormat, onChange: (model) => {
+                            field.onChange(model?.id || null);
+                            onChange?.(model || null);
+                        } })) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 const DateTimeInput = (props) => {
     return (jsxs("div", { className: props.fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(Controller, { control: props.control, name: props.name, render: ({ field }) => {
                             return (jsx(DateTimePicker, { inputClassName: cx("input input-bordered", props.className, {
@@ -465,7 +471,7 @@ const SelectPaginatedFromApiWithLabel = ({ label, queryFn, queryKey, desc, name,
                             "input-xs": size === "xs",
                             "input-sm": size === "sm",
                             "input-error": error,
-                        }), required: required, disabled: disabled, placeholder: label, queryKey: queryKey, queryFunction: queryFn, value: value, valueFormat: valueFormat, onChange: (model) => onChange?.(model || null) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+                        }), size: size, required: required, disabled: disabled, placeholder: label, queryKey: queryKey, queryFn: queryFn, value: value, valueFormat: valueFormat, onChange: (model) => onChange?.(model || null) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 };
 const Required = () => {
     return jsx("span", { className: "text-error align-bottom", children: "*" });

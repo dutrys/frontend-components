@@ -11,6 +11,7 @@ import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import React, { Fragment, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { PaginateQuery } from "@/utils/paginate";
+import cx from "classnames";
 
 const SEARCH_FROM_QUERY_LENGTH = 3;
 
@@ -22,9 +23,10 @@ export const SelectPaginatedFromApi = <
   required,
   inputRef,
   value,
+  size,
   className,
   queryKey,
-  queryFunction,
+  queryFn,
   placeholder,
   optionsClassName,
   empty,
@@ -32,9 +34,10 @@ export const SelectPaginatedFromApi = <
   inputClassName = "w-full mx-0 input input-bordered",
   ...rest
 }: {
+  size?: "sm" | "xs";
   inputClassName?: string;
   inputRef?: any;
-  queryFunction?: (query: PaginateQuery<any>) => Promise<TModel | null>;
+  queryFn?: (query: PaginateQuery<any>) => Promise<TModel>;
   queryKey: ReadonlyArray<any>;
   placeholder?: string;
   optionsClassName?: string;
@@ -51,15 +54,15 @@ export const SelectPaginatedFromApi = <
     enabled: !disabled,
     queryKey: [...queryKey, query.length < SEARCH_FROM_QUERY_LENGTH ? "" : query],
     queryFn: ({ queryKey }) => {
-      if (!queryFunction) {
+      if (!queryFn) {
         return null;
       }
       const search = queryKey[queryKey.length - 1] || "";
       if (search === "") {
-        return queryFunction({ limit: 100 });
+        return queryFn({ limit: 100 });
       }
 
-      return search.length >= SEARCH_FROM_QUERY_LENGTH ? queryFunction({ search, limit: 100 }) : null;
+      return search.length >= SEARCH_FROM_QUERY_LENGTH ? queryFn({ search, limit: 100 }) : null;
     },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -87,7 +90,10 @@ export const SelectPaginatedFromApi = <
             data-testid="select-input"
             placeholder={placeholder}
             onFocus={(e) => e?.target?.select()}
-            className={inputClassName}
+            className={cx(inputClassName, {
+              "input-sm": size === "sm",
+              "input-xs": size === "xs",
+            })}
             displayValue={(model: TModel["data"][0]) => (model ? valueFormat(model) : "")}
             onChange={(event) => setQuery(event.target.value)}
           />
@@ -108,12 +114,14 @@ export const SelectPaginatedFromApi = <
                 }
                 value={null}
               >
-                <span className="block truncate">{empty || t("empty")}</span>
+                <span className={cx("block truncate", { "text-xs": "xs" === size || "sm" === size })}>
+                  {empty || t("empty")}
+                </span>
               </ComboboxOption>
             )}
             {isLoading || !data?.data || data?.data?.length === 0 ? (
               <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                <span>
+                <span className={cx({ "text-xs": "xs" === size || "sm" === size })}>
                   {query.length > 0 && query.length < SEARCH_FROM_QUERY_LENGTH
                     ? t("enterMoreSymbols", { value: SEARCH_FROM_QUERY_LENGTH })
                     : isLoading || data?.data === null
@@ -136,9 +144,12 @@ export const SelectPaginatedFromApi = <
                   {({ selected, focus }) => (
                     <>
                       <span
-                        className={`block truncate ${focus ? "text-white" : ""} ${
-                          selected ? "pr-3 font-bold" : "font-normal"
-                        }`}
+                        className={cx("block truncate", {
+                          "text-white": focus,
+                          "pr-3 font-bold": selected,
+                          "font-normal": !selected,
+                          "text-xs": "xs" === size || "sm" === size,
+                        })}
                       >
                         {valueFormat(model)}
                       </span>

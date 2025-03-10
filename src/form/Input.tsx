@@ -287,15 +287,14 @@ export const SelectPaginatedFromApiInput = <
         render={({ field }) => (
           <SelectPaginatedFromApi<T>
             inputClassName={cx("w-full mx-0 input input-bordered", className, {
-              "input-xs": size === "xs",
-              "input-sm": size === "sm",
               "input-error": error,
             })}
+            size={size}
             required={required}
             disabled={disabled}
             placeholder={label}
             queryKey={queryKey}
-            queryFunction={queryFn}
+            queryFn={queryFn}
             value={field.value}
             valueFormat={valueFormat}
             onChange={(model) => {
@@ -305,8 +304,8 @@ export const SelectPaginatedFromApiInput = <
           />
         )}
       />
-      <InputErrors className="text-xs text-error mt-1" errors={error} />
     </div>
+    <InputErrors className="text-xs text-error mt-1" errors={error} />
   </div>
 );
 
@@ -511,11 +510,12 @@ export const SelectPaginatedFromApiWithLabel = <
             "input-sm": size === "sm",
             "input-error": error,
           })}
+          size={size}
           required={required}
           disabled={disabled}
           placeholder={label}
           queryKey={queryKey}
-          queryFunction={queryFn}
+          queryFn={queryFn}
           value={value}
           valueFormat={valueFormat}
           onChange={(model) => onChange?.(model || null)}
@@ -536,7 +536,7 @@ export interface IInputProps<TName extends FieldPath<FieldValues>> {
   fieldSetClassName?: string;
   disabled?: boolean;
   desc?: React.ReactNode;
-  size?: "xs" | "sm" | "md" | "lg";
+  size?: "xs" | "sm";
 }
 
 export const Required = () => {
