@@ -1,5 +1,5 @@
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
-import React, { useState, useRef, useEffect, Fragment as Fragment$1 } from 'react';
+import React, { useState, useRef, useEffect, createContext, Fragment as Fragment$1 } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
 import { useForm, Controller } from 'react-hook-form';
@@ -10,6 +10,7 @@ import { XMarkIcon, ClockIcon, CalendarIcon } from '@heroicons/react/24/outline'
 import { useFloating, offset, flip, arrow, autoUpdate, useFocus, useHover, safePolygon, useClick, useDismiss, useInteractions, FloatingPortal, FloatingArrow } from '@floating-ui/react';
 import { DayPicker } from 'react-day-picker';
 import { lt, enGB } from 'react-day-picker/locale';
+import 'react-tooltip';
 import { useQuery } from '@tanstack/react-query';
 import { Combobox, ComboboxInput, ComboboxButton, Transition, ComboboxOptions, ComboboxOption } from '@headlessui/react';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
@@ -84,25 +85,29 @@ const useFormSubmit = (doSubmitCallback, formOptions = {}) => {
     return {
         ...formProps,
         handleSubmit: () => formProps.handleSubmit((values) => {
-            const promise = doSubmitCallback(values)
-                .then((data) => {
-                if (isServerError(data)) {
-                    if (typeof onError === "function") {
-                        onError(data);
+            const promise = new Promise((res, rej) => {
+                doSubmitCallback(values)
+                    .then((data) => {
+                    if (isServerError(data)) {
+                        if (typeof onError === "function") {
+                            onError(data);
+                        }
+                        addServerErrors(data.errors, formProps.setError);
+                        rej(data);
+                        return;
                     }
-                    addServerErrors(data.errors, formProps.setError);
-                    throw data;
-                }
-                if (typeof onSuccess === "function") {
-                    onSuccess(data);
-                }
-                if (returnBack !== false) {
-                    router.back();
-                }
-            })
-                .catch((e) => {
-                captureException(e);
-                throw e;
+                    if (typeof onSuccess === "function") {
+                        onSuccess(data);
+                    }
+                    res(data);
+                    if (returnBack !== false) {
+                        router.back();
+                    }
+                })
+                    .catch((e) => {
+                    captureException(e, { extra: { formValues: values } });
+                    rej(e);
+                });
             });
             if (reportProgress !== false) {
                 void toast.promise(promise, {
@@ -248,6 +253,12 @@ function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from,
                                 }, children: t("datePicker.ok") }) })] })) }), allowEmpty ? (jsx("button", { disabled: allowEmpty && !value, className: toggleClassName, onClick: () => onChange(null), children: value ? jsx(XMarkIcon, { className: "size-4" }) : jsx(ClockIcon, { className: "size-4" }) })) : (jsx("div", { className: `cursor-pointer ${toggleClassName}`, children: jsx(ClockIcon, { className: "size-4" }) }))] }));
 }
 
+createContext({
+    addHotKey: () => { },
+    removeHotKey: () => { },
+    getHotKeys: () => ({}),
+});
+
 const formatDate = (date) => {
     if (!date) {
         return "";
@@ -284,7 +295,7 @@ const DatePicker = ({ onChange, value, inputClassName = "input input-bordered", 
 };
 
 const SEARCH_FROM_QUERY_LENGTH = 3;
-const SelectPaginatedFromApi = ({ onChange, disabled, required, value, className, queryKey, queryFunction, placeholder, valueFormat = (model) => model.name, inputClassName = "w-full mx-0 input input-bordered", ...rest }) => {
+const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, value, className, queryKey, queryFunction, placeholder, optionsClassName, empty, valueFormat = (model) => model.name, inputClassName = "w-full mx-0 input input-bordered", ...rest }) => {
     const [query, setQuery] = useState("");
     const { isLoading, data, refetch } = useQuery({
         enabled: !disabled,
@@ -306,7 +317,7 @@ const SelectPaginatedFromApi = ({ onChange, disabled, required, value, className
     useEffect(() => {
         void refetch();
     }, [refetch, query]);
-    return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: (data?.data || []).find((b) => b.id === value) || null, onChange: onChange, ...rest, children: jsxs("div", { className: `relative ${className}`, children: [jsxs("div", { className: "w-full relative p-0", children: [jsx(ComboboxInput, { required: required, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), className: inputClassName, displayValue: (model) => (model ? valueFormat(model) : ""), onChange: (event) => setQuery(event.target.value) }), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "absolute inset-y-0 right-0 flex items-center pr-2", children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsxs(ComboboxOptions, { className: "absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm", children: [!required && data && data?.meta?.totalItems !== 0 && (jsx(ComboboxOption, { "data-testid": "select-option-empty", className: ({ focus }) => `relative select-none py-2 pl-4 pr-4 ${focus ? "bg-primary text-white" : "text-gray-900"}`, value: null, children: jsx("span", { className: "block truncate", children: t("empty") }) }, "empty")), isLoading || !data?.data || data?.data?.length === 0 ? (jsx("div", { className: "relative cursor-default select-none py-2 px-4 text-gray-700", children: jsx("span", { children: query.length > 0 && query.length < SEARCH_FROM_QUERY_LENGTH
+    return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: (data?.data || []).find((b) => b.id === value) || null, onChange: onChange, ...rest, children: jsxs("div", { className: `relative ${className}`, children: [jsxs("div", { className: "w-full relative p-0", children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), className: inputClassName, displayValue: (model) => (model ? valueFormat(model) : ""), onChange: (event) => setQuery(event.target.value) }), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "absolute inset-y-0 right-0 flex items-center pr-2", children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsxs(ComboboxOptions, { className: `absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`, children: [!required && data && data?.meta?.totalItems !== 0 && (jsx(ComboboxOption, { "data-testid": "select-option-empty", className: ({ focus }) => `relative select-none py-2 pl-4 pr-4 ${focus ? "bg-primary text-white" : "text-gray-900"}`, value: null, children: jsx("span", { className: "block truncate", children: empty || t("empty") }) }, "empty")), isLoading || !data?.data || data?.data?.length === 0 ? (jsx("div", { className: "relative cursor-default select-none py-2 px-4 text-gray-700", children: jsx("span", { children: query.length > 0 && query.length < SEARCH_FROM_QUERY_LENGTH
                                         ? t("enterMoreSymbols", { value: SEARCH_FROM_QUERY_LENGTH })
                                         : isLoading || data?.data === null
                                             ? t("searching")

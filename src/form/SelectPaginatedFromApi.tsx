@@ -20,24 +20,30 @@ export const SelectPaginatedFromApi = <
   onChange,
   disabled,
   required,
+  inputRef,
   value,
   className,
   queryKey,
   queryFunction,
   placeholder,
+  optionsClassName,
+  empty,
   valueFormat = (model) => (model as any).name,
   inputClassName = "w-full mx-0 input input-bordered",
   ...rest
 }: {
   inputClassName?: string;
+  inputRef?: any;
   queryFunction?: (query: PaginateQuery<any>) => Promise<TModel | null>;
   queryKey: ReadonlyArray<any>;
   placeholder?: string;
+  optionsClassName?: string;
   value: number | null;
   className?: string;
   onChange: (model: TModel["data"][0]) => void;
   disabled?: boolean;
   required?: boolean;
+  empty?: string;
   valueFormat?: (model: TModel["data"][0]) => string;
 }) => {
   const [query, setQuery] = useState("");
@@ -77,6 +83,7 @@ export const SelectPaginatedFromApi = <
         <div className="w-full relative p-0">
           <ComboboxInput
             required={required}
+            ref={inputRef}
             data-testid="select-input"
             placeholder={placeholder}
             onFocus={(e) => e?.target?.select()}
@@ -89,7 +96,9 @@ export const SelectPaginatedFromApi = <
           </ComboboxButton>
         </div>
         <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-          <ComboboxOptions className="absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm">
+          <ComboboxOptions
+            className={`absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`}
+          >
             {!required && data && data?.meta?.totalItems !== 0 && (
               <ComboboxOption
                 data-testid="select-option-empty"
@@ -99,7 +108,7 @@ export const SelectPaginatedFromApi = <
                 }
                 value={null}
               >
-                <span className="block truncate">{t("empty")}</span>
+                <span className="block truncate">{empty || t("empty")}</span>
               </ComboboxOption>
             )}
             {isLoading || !data?.data || data?.data?.length === 0 ? (

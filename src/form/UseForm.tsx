@@ -150,26 +150,30 @@ export const useFormSubmit = <T extends FieldValues, R = unknown>(
     ...formProps,
     handleSubmit: () =>
       formProps.handleSubmit((values) => {
-        const promise = doSubmitCallback(values)
-          .then((data) => {
-            if (isServerError(data)) {
-              if (typeof onError === "function") {
-                onError(data);
+        const promise = new Promise((res, rej) => {
+          doSubmitCallback(values)
+            .then((data) => {
+              if (isServerError(data)) {
+                if (typeof onError === "function") {
+                  onError(data);
+                }
+                addServerErrors(data.errors, formProps.setError);
+                rej(data);
+                return;
               }
-              addServerErrors(data.errors, formProps.setError);
-              throw data;
-            }
-            if (typeof onSuccess === "function") {
-              onSuccess(data);
-            }
-            if (returnBack !== false) {
-              router.back();
-            }
-          })
-          .catch((e) => {
-            captureException(e);
-            throw e;
-          });
+              if (typeof onSuccess === "function") {
+                onSuccess(data);
+              }
+              res(data);
+              if (returnBack !== false) {
+                router.back();
+              }
+            })
+            .catch((e) => {
+              captureException(e, { extra: { formValues: values } });
+              rej(e);
+            });
+        });
 
         if (reportProgress !== false) {
           void toast.promise(
