@@ -6,7 +6,6 @@ import {
   FieldError,
   RegisterOptions,
   UseFormRegister,
-  FieldErrors,
 } from "react-hook-form";
 import { DateTimePicker } from "./DateTimePicker";
 import { DatePicker } from "./DatePicker";
@@ -51,7 +50,7 @@ export const TextInput = <
           {...props.register(props.name, options)}
           required={props.required}
           disabled={props.disabled}
-          placeholder={props.label}
+          placeholder={props.required ? `${props.label}*` : props.label}
           className={cx("input input-bordered w-full", props.className, {
             "input-xs": props.size === "xs",
             "input-sm": props.size === "sm",
@@ -446,7 +445,11 @@ export const NumberInput = <
             disabled={props?.disabled}
             required={props?.required}
             value={field.value}
-            className={`${props.size === "sm" ? "input-sm " : ""}w-full input input-bordered focus:outline-blue-400`}
+            className={cx("w-full input input-bordered focus:outline-blue-400", {
+              "input-xs": props.size === "xs",
+              "input-sm": props.size === "sm",
+              "input-error": props.error,
+            })}
             onValueChange={(values) => field.onChange(values.floatValue)}
           />
         )}
