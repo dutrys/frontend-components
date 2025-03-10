@@ -98,6 +98,7 @@ export default [
       "@heroicons/react/24/outline",
       "react-day-picker",
       "date-fns",
+      "react-intersection-observer",
       "react-day-picker/locale",
       "@tanstack/react-query",
       "@headlessui/react",

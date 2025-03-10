@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   Combobox,
   ComboboxButton,
@@ -12,6 +12,8 @@ import React, { Fragment, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { PaginateQuery } from "@/utils/paginate";
 import cx from "classnames";
+import { LoadingComponent } from "@/Loading";
+import { useInView } from "react-intersection-observer";
 
 const SEARCH_FROM_QUERY_LENGTH = 3;
 
@@ -37,7 +39,7 @@ export const SelectPaginatedFromApi = <
   size?: "sm" | "xs";
   inputClassName?: string;
   inputRef?: any;
-  queryFn?: (query: PaginateQuery<any>) => Promise<TModel>;
+  queryFn: (query: PaginateQuery<any>) => Promise<TModel>;
   queryKey: ReadonlyArray<any>;
   placeholder?: string;
   optionsClassName?: string;
@@ -50,35 +52,49 @@ export const SelectPaginatedFromApi = <
   valueFormat?: (model: TModel["data"][0]) => string;
 }) => {
   const [query, setQuery] = useState("");
-  const { isLoading, data, refetch } = useQuery({
+  const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<TModel>({
+    getPreviousPageParam: ({ meta }) => (meta.currentPage === 1 ? undefined : meta.currentPage - 1),
+    getNextPageParam: ({ meta }) => (meta.currentPage >= meta.totalPages ? undefined : meta.currentPage + 1),
     enabled: !disabled,
     queryKey: [...queryKey, query.length < SEARCH_FROM_QUERY_LENGTH ? "" : query],
-    queryFn: ({ queryKey }) => {
-      if (!queryFn) {
-        return null;
-      }
+    initialPageParam: 1,
+    queryFn: ({ queryKey, pageParam }) => {
+      let page = typeof pageParam === "number" ? pageParam : undefined;
       const search = queryKey[queryKey.length - 1] || "";
-      if (search === "") {
-        return queryFn({ limit: 100 });
+      if (typeof search !== "string" || search === "" || search.length < SEARCH_FROM_QUERY_LENGTH) {
+        return queryFn({ page });
       }
 
-      return search.length >= SEARCH_FROM_QUERY_LENGTH ? queryFn({ search, limit: 100 }) : null;
+      return queryFn({ search, page });
     },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
-  const t = useTranslations("selectFromApi");
+  const t = useTranslations();
 
   useEffect(() => {
     void refetch();
   }, [refetch, query]);
+
+  const { ref, inView } = useInView({ threshold: 0.5 });
+
+  useEffect(() => {
+    if (inView) {
+      void fetchNextPage();
+    }
+  }, [fetchNextPage, inView]);
 
   return (
     <Combobox<TModel["data"][0] | null>
       immediate
       data-testid="select"
       disabled={disabled}
-      value={(data?.data || []).find((b: TModel["data"][0]) => b.id === value) || null}
+      value={
+        (data?.pages || [])
+          .map((d) => d?.data || [])
+          .flat()
+          .find((b: TModel["data"][0]) => b.id === value) || null
+      }
       onChange={onChange}
       {...rest}
     >
@@ -105,7 +121,7 @@ export const SelectPaginatedFromApi = <
           <ComboboxOptions
             className={`absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`}
           >
-            {!required && data && data?.meta?.totalItems !== 0 && (
+            {!required && data && data?.pages?.[0]?.meta?.totalItems !== 0 && (
               <ComboboxOption
                 data-testid="select-option-empty"
                 key="empty"
@@ -115,57 +131,68 @@ export const SelectPaginatedFromApi = <
                 value={null}
               >
                 <span className={cx("block truncate", { "text-xs": "xs" === size || "sm" === size })}>
-                  {empty || t("empty")}
+                  {empty || t("selectFromApi.empty")}
                 </span>
               </ComboboxOption>
             )}
-            {isLoading || !data?.data || data?.data?.length === 0 ? (
+            {data?.pages?.[0]?.meta?.totalItems === 0 ? (
               <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                 <span className={cx({ "text-xs": "xs" === size || "sm" === size })}>
-                  {query.length > 0 && query.length < SEARCH_FROM_QUERY_LENGTH
-                    ? t("enterMoreSymbols", { value: SEARCH_FROM_QUERY_LENGTH })
-                    : isLoading || data?.data === null
-                      ? t("searching")
-                      : t("nothingFound")}
+                  {t("selectFromApi.nothingFound")}
                 </span>
               </div>
             ) : (
-              data?.data.map((model: TModel["data"][0], i: number) => (
-                <ComboboxOption
-                  data-testid={`select-option-${i}`}
-                  key={model.id}
-                  className={({ focus }) =>
-                    `relative cursor-default select-none py-2 pl-4 pr-4 ${
-                      focus ? "bg-primary text-white" : "text-gray-900"
-                    }`
-                  }
-                  value={model}
-                >
-                  {({ selected, focus }) => (
-                    <>
-                      <span
-                        className={cx("block truncate", {
-                          "text-white": focus,
-                          "pr-3 font-bold": selected,
-                          "font-normal": !selected,
-                          "text-xs": "xs" === size || "sm" === size,
-                        })}
-                      >
-                        {valueFormat(model)}
-                      </span>
-                      {selected ? (
+              data?.pages
+                ?.map((d) => d.data || [])
+                .flat()
+                .map((model: TModel["data"][0], i: number) => (
+                  <ComboboxOption
+                    data-testid={`select-option-${i}`}
+                    key={model.id}
+                    className={({ focus }) =>
+                      `relative cursor-default select-none py-2 pl-4 pr-4 ${
+                        focus ? "bg-primary text-white" : "text-gray-900"
+                      }`
+                    }
+                    value={model}
+                  >
+                    {({ selected, focus }) => (
+                      <>
                         <span
-                          className={`absolute inset-y-0 right-1 flex items-center pl-3 ${
-                            focus ? "text-white" : "text-teal-600"
-                          }`}
+                          className={cx("block truncate", {
+                            "text-white": focus,
+                            "pr-3 font-bold": selected,
+                            "font-normal": !selected,
+                            "text-xs": "xs" === size || "sm" === size,
+                          })}
                         >
-                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                          {valueFormat(model)}
                         </span>
-                      ) : null}
-                    </>
-                  )}
-                </ComboboxOption>
-              ))
+                        {selected ? (
+                          <span
+                            className={`absolute inset-y-0 right-1 flex items-center pl-3 ${
+                              focus ? "text-white" : "text-teal-600"
+                            }`}
+                          >
+                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                          </span>
+                        ) : null}
+                      </>
+                    )}
+                  </ComboboxOption>
+                ))
+            )}
+
+            {isFetchingNextPage || isLoading ? (
+              <LoadingComponent className="my-2" />
+            ) : (
+              hasNextPage && (
+                <div className="text-center">
+                  <button ref={ref} className="btn btn-ghost btn-xs my-1 btn-wide" onClick={() => fetchNextPage()}>
+                    {t("infiniteScroll.loadMore")}
+                  </button>
+                </div>
+              )
             )}
           </ComboboxOptions>
         </Transition>

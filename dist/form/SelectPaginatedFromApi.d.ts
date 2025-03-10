@@ -12,7 +12,7 @@ export declare const SelectPaginatedFromApi: <TModel extends {
     size?: "sm" | "xs";
     inputClassName?: string;
     inputRef?: any;
-    queryFn?: (query: PaginateQuery<any>) => Promise<TModel>;
+    queryFn: (query: PaginateQuery<any>) => Promise<TModel>;
     queryKey: ReadonlyArray<any>;
     placeholder?: string;
     optionsClassName?: string;
