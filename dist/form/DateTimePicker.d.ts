@@ -1,4 +1,4 @@
-export declare function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from, to, placeholder, inputClassName, toggleClassName, }: {
+export declare function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from, to, placeholder, inputClassName, toggleClassName, ...rest }: {
     required?: boolean;
     disabled?: boolean;
     allowEmpty?: boolean;

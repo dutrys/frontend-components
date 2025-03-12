@@ -208,7 +208,7 @@ export const DateInput = <
   className,
   fieldSetClassName,
   name,
-  ...props
+  ...rest
 }: IInputProps<TName> & {
   control: Control<TFieldValues>;
   useDate?: boolean;
@@ -240,7 +240,7 @@ export const DateInput = <
                     field.onChange(value ? format(value, "yyyy-MM-dd") : null);
                   }
                 }}
-                {...props}
+                {...rest}
               />
             );
           }}
@@ -325,58 +325,73 @@ export const SelectPaginatedFromApiInput = <
 export const DateTimeInput = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->(
-  props: IInputProps<TName> & {
-    control: Control<TFieldValues>;
-    useDate?: boolean;
-    allowEmpty?: boolean;
-    from?: Date;
-    to?: Date;
-  },
-) => {
+>({
+  label,
+  desc,
+  control,
+  name,
+  required,
+  disabled,
+  error,
+  useDate,
+  className,
+  size,
+  allowEmpty,
+  from,
+  to,
+  fieldSetClassName,
+  ...rest
+}: IInputProps<TName> & {
+  control: Control<TFieldValues>;
+  useDate?: boolean;
+  allowEmpty?: boolean;
+  from?: Date;
+  to?: Date;
+}) => {
   return (
-    <div className={props.fieldSetClassName}>
+    <div className={fieldSetClassName}>
       <label className="floating-label">
         <Controller
-          control={props.control}
-          name={props.name}
+          control={control}
+          name={name}
           render={({ field }) => {
             return (
               <DateTimePicker
-                inputClassName={cx("input input-bordered", props.className, {
-                  "input-xs": props.size === "xs",
-                  "input-sm": props.size === "sm",
-                  "input-error": props.error,
+                inputClassName={cx("input input-bordered", className, {
+                  "input-xs": size === "xs",
+                  "input-sm": size === "sm",
+                  "input-error": error,
                 })}
-                required={props.required}
-                allowEmpty={props.allowEmpty}
-                placeholder={props.required ? `${props.label}*` : props.label}
-                from={props.from}
-                disabled={props.disabled}
-                to={props.to}
-                value={field.value ? (props.useDate ? field.value : stringToDate(field.value)) || null : null}
+                required={required}
+                allowEmpty={allowEmpty}
+                placeholder={required ? `${label}*` : label}
+                from={from}
+                disabled={disabled}
+                to={to}
+                value={field.value ? (useDate ? field.value : stringToDate(field.value)) || null : null}
                 onChange={(value) => {
-                  if (props.useDate) {
+                  if (useDate) {
                     field.onChange(value);
                   } else {
                     field.onChange(value ? format(value, "yyyy-MM-dd HH:mm:ss") : null);
                   }
                 }}
+                {...rest}
               />
             );
           }}
         />
         <span>
-          {props.label}
-          {props.required ? <Required /> : null}
+          {label}
+          {required ? <Required /> : null}
         </span>
       </label>
-      {props.desc && (
+      {desc && (
         <div className="text-xs my-0.5 text-gray-500">
-          <span>{props.desc}</span>
+          <span>{desc}</span>
         </div>
       )}
-      {props.error && <InputErrors className="text-xs text-error mt-1" errors={props.error} />}
+      {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
     </div>
   );
 };

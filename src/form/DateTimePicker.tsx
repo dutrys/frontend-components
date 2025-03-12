@@ -20,6 +20,7 @@ export function DateTimePicker({
   placeholder,
   inputClassName = "input input-bordered",
   toggleClassName = "",
+  ...rest
 }: {
   required?: boolean;
   disabled?: boolean;
@@ -76,6 +77,7 @@ export function DateTimePicker({
         title={(ref, props) => (
           <input
             required={required}
+            {...rest}
             value={dateString}
             className="grow"
             disabled={disabled}

@@ -14,7 +14,7 @@ export declare const SelectInput: <TFieldValues extends FieldValues = FieldValue
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const TextareaInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName>) => import("react/jsx-runtime").JSX.Element;
 export declare const CheckboxInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName>) => import("react/jsx-runtime").JSX.Element;
-export declare const DateInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, useDate, allowEmpty, label, error, disabled, desc, required, size, className, fieldSetClassName, name, ...props }: IInputProps<TName> & {
+export declare const DateInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, useDate, allowEmpty, label, error, disabled, desc, required, size, className, fieldSetClassName, name, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
     allowEmpty?: boolean;
@@ -35,7 +35,7 @@ export declare const SelectPaginatedFromApiInput: <T extends {
     valueFormat: (model: T["data"][0]) => string;
     onChange?: (model: T["data"][0]) => unknown;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const DateTimeInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputProps<TName> & {
+export declare const DateTimeInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, required, disabled, error, useDate, className, size, allowEmpty, from, to, fieldSetClassName, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
     allowEmpty?: boolean;

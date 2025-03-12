@@ -159,7 +159,7 @@ const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: ope
     return (jsxs(Fragment, { children: [title(refs.setReference, getReferenceProps()), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100, borderColor, backgroundColor: bgColor }, ...getFloatingProps(), className: `${popoverClassName} border rounded-sm shadow-lg shadow-gray-400`, children: [jsx(FloatingArrow, { strokeWidth: 1, fill: bgColor, stroke: borderColor, context: context, ref: arrowRef }), jsx("div", { className: popoverWidth, children: children(() => setIsOpen(false)) })] }) }))] }));
 };
 
-function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from, to, placeholder, inputClassName = "input input-bordered", toggleClassName = "", }) {
+function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from, to, placeholder, inputClassName = "input input-bordered", toggleClassName = "", ...rest }) {
     const [dateString, setDateString] = useState(value ? format(value, "yyyy-MM-dd HH:mm") : "");
     const params = useParams();
     useEffect(() => {
@@ -196,7 +196,7 @@ function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from,
     if (to) {
         matcher = { after: to };
     }
-    return (jsxs("label", { className: `w-full ${inputClassName}`, children: [jsx(Popover, { title: (ref, props) => (jsx("input", { required: required, value: dateString, className: "grow", disabled: disabled, ref: ref, placeholder: placeholder, onChange: (e) => {
+    return (jsxs("label", { className: `w-full ${inputClassName}`, children: [jsx(Popover, { title: (ref, props) => (jsx("input", { required: required, ...rest, value: dateString, className: "grow", disabled: disabled, ref: ref, placeholder: placeholder, onChange: (e) => {
                         setDateString(e.target.value);
                         if (e.target.value.length !== 16) {
                             return;
@@ -432,7 +432,7 @@ const CheckboxInput = (props) => {
                             "toggle-xs": props.size === "xs",
                         }) }), jsx("span", { className: "text-sm text-gray-500 label-text grow pl-2", children: props.label })] }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
-const DateInput = ({ control, useDate, allowEmpty, label, error, disabled, desc, required, size, className, fieldSetClassName, name, ...props }) => {
+const DateInput = ({ control, useDate, allowEmpty, label, error, disabled, desc, required, size, className, fieldSetClassName, name, ...rest }) => {
     return (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(Controller, { control: control, name: name, render: ({ field }) => {
                             return (jsx(DatePicker, { inputClassName: cx("input input-bordered", className, {
                                     "input-xs": size === "xs",
@@ -445,7 +445,7 @@ const DateInput = ({ control, useDate, allowEmpty, label, error, disabled, desc,
                                     else {
                                         field.onChange(value ? format(value, "yyyy-MM-dd") : null);
                                     }
-                                }, ...props }));
+                                }, ...rest }));
                         } }), jsxs("span", { children: [label, required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 };
 const SelectPaginatedFromApiInput = ({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { ...rest, className: "floating-label", children: [jsxs("span", { children: [label, required ? jsx(Required, {}) : null] }), jsx(Controller, { control: control, name: name, rules: { required: required === true }, render: ({ field }) => (jsx(SelectPaginatedFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
@@ -454,21 +454,21 @@ const SelectPaginatedFromApiInput = ({ label, queryFn, queryKey, desc, control, 
                             field.onChange(model?.id || null);
                             onChange?.(model || null);
                         } })) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
-const DateTimeInput = (props) => {
-    return (jsxs("div", { className: props.fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(Controller, { control: props.control, name: props.name, render: ({ field }) => {
-                            return (jsx(DateTimePicker, { inputClassName: cx("input input-bordered", props.className, {
-                                    "input-xs": props.size === "xs",
-                                    "input-sm": props.size === "sm",
-                                    "input-error": props.error,
-                                }), required: props.required, allowEmpty: props.allowEmpty, placeholder: props.required ? `${props.label}*` : props.label, from: props.from, disabled: props.disabled, to: props.to, value: field.value ? (props.useDate ? field.value : stringToDate(field.value)) || null : null, onChange: (value) => {
-                                    if (props.useDate) {
+const DateTimeInput = ({ label, desc, control, name, required, disabled, error, useDate, className, size, allowEmpty, from, to, fieldSetClassName, ...rest }) => {
+    return (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(Controller, { control: control, name: name, render: ({ field }) => {
+                            return (jsx(DateTimePicker, { inputClassName: cx("input input-bordered", className, {
+                                    "input-xs": size === "xs",
+                                    "input-sm": size === "sm",
+                                    "input-error": error,
+                                }), required: required, allowEmpty: allowEmpty, placeholder: required ? `${label}*` : label, from: from, disabled: disabled, to: to, value: field.value ? (useDate ? field.value : stringToDate(field.value)) || null : null, onChange: (value) => {
+                                    if (useDate) {
                                         field.onChange(value);
                                     }
                                     else {
                                         field.onChange(value ? format(value, "yyyy-MM-dd HH:mm:ss") : null);
                                     }
-                                } }));
-                        } }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && (jsx("div", { className: "text-xs my-0.5 text-gray-500", children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+                                }, ...rest }));
+                        } }), jsxs("span", { children: [label, required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: "text-xs my-0.5 text-gray-500", children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 };
 const TimeInput = (props) => {
     return (jsxs("div", { className: props.fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [!props.disabled && (jsxs("span", { children: [props.label, props.required && jsx(Required, {})] })), jsx(Controller, { render: ({ field }) => (jsx(TimePicker, { value: field.value, onChange: (v) => field.onChange(v), placeholder: props.required ? `${props.label}*` : props.label, required: props.required, disabled: props.disabled, className: cx("input w-full", props.className, {
