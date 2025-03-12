@@ -1,3 +1,4 @@
+'use client';
 import { jsxs, Fragment, jsx } from 'react/jsx-runtime';
 import React, { useState, useRef, useEffect, createContext, useContext } from 'react';
 import { useFloating, offset, flip, arrow, autoUpdate, useFocus, useHover, safePolygon, useClick, useDismiss, useInteractions, FloatingPortal, FloatingArrow } from '@floating-ui/react';
@@ -35,7 +36,7 @@ const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: ope
 };
 
 const TOOLTIP_PARALLEL_ID = "paralel-tooltip";
-const DialogWithBack = ({ title, children, onClose, className, ...rest }) => {
+const ParallelDialog = ({ title, children, onClose, className, ...rest }) => {
     let [isOpen, setIsOpen] = useState(true);
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -155,12 +156,12 @@ const Archive = ({ title, archive, onClose, formatErrors, translateId, }) => {
             },
         });
     };
-    return (jsxs(DialogWithBack, { onClose: onClose, title: title, children: [jsx(Hotkeys, { id: "archive", hotKeys: [{ key: "Enter", description: t("archive.yes"), callback: doArchive }] }), errors && formatErrors && jsx("div", { className: "alert alert-error my-4", children: formatErrors(errors) }), t("archive.message"), jsx("br", {}), jsx("br", {}), jsx("div", { className: "w-full text-center", children: jsxs("div", { className: "mx-auto", children: [jsx("button", { onClick: doArchive, className: "btn btn-error uppercase", disabled: isLoading, "data-testid": "button-archive", children: t("archive.yes") }), " ", jsx("button", { className: "btn uppercase", onClick: () => (onClose ? onClose() : router.back()), "data-testid": "button-cancel", children: t("archive.no") })] }) })] }));
+    return (jsxs(ParallelDialog, { onClose: onClose, title: title, children: [jsx(Hotkeys, { id: "archive", hotKeys: [{ key: "Enter", description: t("archive.yes"), callback: doArchive }] }), errors && formatErrors && jsx("div", { className: "alert alert-error my-4", children: formatErrors(errors) }), t("archive.message"), jsx("br", {}), jsx("br", {}), jsx("div", { className: "w-full text-center", children: jsxs("div", { className: "mx-auto", children: [jsx("button", { onClick: doArchive, className: "btn btn-error uppercase", disabled: isLoading, "data-testid": "button-archive", children: t("archive.yes") }), " ", jsx("button", { className: "btn uppercase", onClick: () => (onClose ? onClose() : router.back()), "data-testid": "button-cancel", children: t("archive.no") })] }) })] }));
 };
 const ArchiveButton = ({ title, archive, children, formatErrors, }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (jsxs(Fragment, { children: [isOpen && (jsx(Archive, { title: title, archive: archive, onClose: () => setIsOpen(false), formatErrors: formatErrors })), children(() => setIsOpen(!isOpen))] }));
 };
 
-export { Archive, ArchiveButton, DialogWithBack, Popover, TOOLTIP_PARALLEL_ID };
+export { Archive, ArchiveButton, ParallelDialog, Popover, TOOLTIP_PARALLEL_ID };
 //# sourceMappingURL=index.js.map

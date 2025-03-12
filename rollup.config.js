@@ -37,6 +37,7 @@ export default [
         modules: true,
         extract: true,
       }),
+      useClient(),
     ],
     external: [
       "react/jsx-runtime",

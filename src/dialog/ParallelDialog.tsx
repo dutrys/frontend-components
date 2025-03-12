@@ -13,7 +13,7 @@ type DialogWithBackProps = {
   children: React.ReactNode;
 };
 
-export const DialogWithBack = ({ title, children, onClose, className, ...rest }: DialogWithBackProps) => {
+export const ParallelDialog = ({ title, children, onClose, className, ...rest }: DialogWithBackProps) => {
   let [isOpen, setIsOpen] = useState(true);
   const pathname = usePathname();
   const searchParams = useSearchParams();

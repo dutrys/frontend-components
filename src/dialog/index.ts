@@ -1,3 +1,3 @@
 export * from "./Popover";
-export * from "./DialogWithBack";
+export * from "./ParallelDialog";
 export * from "./Archive";
