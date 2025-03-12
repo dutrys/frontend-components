@@ -32,42 +32,54 @@ interface IInputRegisterProps<
 export const TextInput = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->(
-  props: IInputRegisterProps<TFieldValues, TName> & { type?: string },
-) => {
-  const options = {
-    required: props.required,
-    disabled: props.disabled,
-    ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
-  };
-
+>({
+  required,
+  disabled,
+  error,
+  className,
+  id,
+  type,
+  register,
+  label,
+  size,
+  options,
+  desc,
+  name,
+  fieldSetClassName,
+  ...rest
+}: IInputRegisterProps<TFieldValues, TName> & { type?: string }) => {
   return (
-    <div className={props.fieldSetClassName}>
+    <div className={fieldSetClassName}>
       <label className="floating-label">
         <input
-          id={props.id}
-          type={props.type || "text"}
-          {...props.register(props.name, options)}
-          required={props.required}
-          disabled={props.disabled}
-          placeholder={props.required ? `${props.label}*` : props.label}
-          className={cx("input input-bordered w-full", props.className, {
-            "input-xs": props.size === "xs",
-            "input-sm": props.size === "sm",
-            "input-error": props.error,
+          id={id}
+          type={type || "text"}
+          {...register(name, {
+            required: required,
+            disabled: disabled,
+            ...((options as RegisterOptions<TFieldValues, TName>) || {}),
           })}
+          required={required}
+          disabled={disabled}
+          placeholder={required ? `${label}*` : label}
+          className={cx("input input-bordered w-full", className, {
+            "input-xs": size === "xs",
+            "input-sm": size === "sm",
+            "input-error": error,
+          })}
+          {...rest}
         />
         <span>
-          {props.label}
-          {props.required ? <Required /> : null}
+          {label}
+          {required ? <Required /> : null}
         </span>
       </label>
-      {props.desc && (
+      {desc && (
         <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
-          <span>{props.desc}</span>
+          <span>{desc}</span>
         </div>
       )}
-      {props.error && <InputErrors className="text-xs text-error mt-1" errors={props.error} />}
+      {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
     </div>
   );
 };
@@ -75,43 +87,55 @@ export const TextInput = <
 export const SelectInput = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->(
-  props: IInputRegisterProps<TFieldValues, TName> & {
-    children: React.ReactNode;
-  },
-) => {
-  const options = {
-    required: props.required,
-    disabled: props.disabled,
-    ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
-  };
-
+>({
+  id,
+  disabled,
+  fieldSetClassName,
+  label,
+  register,
+  required,
+  name,
+  error,
+  desc,
+  options,
+  size,
+  className,
+  children,
+  ...rest
+}: IInputRegisterProps<TFieldValues, TName> & {
+  children: React.ReactNode;
+}) => {
   return (
-    <div className={props.fieldSetClassName}>
+    <div className={fieldSetClassName}>
       <label className="floating-label">
         <select
-          id={props.id}
-          disabled={props.disabled}
-          {...props.register(props.name, options)}
-          className={cx("select select-bordered w-full", props.className, {
-            "select-xs": props.size === "xs",
-            "select-sm": props.size === "sm",
-            "select-error": props.error,
+          id={id}
+          disabled={disabled}
+          {...register(name, {
+            required: required,
+            disabled: disabled,
+            ...((options as RegisterOptions<TFieldValues, TName>) || {}),
           })}
+          className={cx("select select-bordered w-full", className, {
+            "select-xs": size === "xs",
+            "select-sm": size === "sm",
+            "select-error": error,
+          })}
+          {...rest}
         >
-          {props.children}
+          {children}
         </select>
         <span>
-          {props.label}
-          {props.required ? <Required /> : null}
+          {label}
+          {required ? <Required /> : null}
         </span>
       </label>
-      {props.desc && (
+      {desc && (
         <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
-          <span>{props.desc}</span>
+          <span>{desc}</span>
         </div>
       )}
-      {props.error && <InputErrors className="text-xs text-error mt-1" errors={props.error} />}
+      {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
     </div>
   );
 };
@@ -288,7 +312,7 @@ export const SelectPaginatedFromApiInput = <
   onChange?: (model: T["data"][0]) => unknown;
 }) => (
   <div className={fieldSetClassName}>
-    <div {...rest} className="floating-label">
+    <div className="floating-label">
       <span>
         {label}
         {required ? <Required /> : null}
@@ -302,6 +326,7 @@ export const SelectPaginatedFromApiInput = <
             inputClassName={cx("w-full mx-0 input input-bordered", className, {
               "input-error": error,
             })}
+            {...rest}
             size={size}
             required={required}
             disabled={disabled}
