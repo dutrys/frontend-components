@@ -25,6 +25,7 @@ export const DatePicker = ({
   allowEmpty,
   disabled,
   placeholder,
+  ...props
 }: {
   required?: boolean;
   disabled?: boolean;
@@ -48,10 +49,11 @@ export const DatePicker = ({
         showOnFocus
         showOnHover={false}
         popoverWidth=""
-        title={(ref, props) => (
+        title={(ref, popoverProps) => (
           <input
             ref={ref}
             {...props}
+            {...popoverProps}
             value={dateString}
             className="grow"
             required={required}

@@ -195,54 +195,67 @@ export const CheckboxInput = <
 export const DateInput = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->(
-  props: IInputProps<TName> & {
-    control: Control<TFieldValues>;
-    useDate?: boolean;
-    allowEmpty?: boolean;
-  },
-) => {
+>({
+  control,
+  useDate,
+  allowEmpty,
+  label,
+  error,
+  disabled,
+  desc,
+  required,
+  size,
+  className,
+  fieldSetClassName,
+  name,
+  ...props
+}: IInputProps<TName> & {
+  control: Control<TFieldValues>;
+  useDate?: boolean;
+  allowEmpty?: boolean;
+}) => {
   return (
-    <div className={props.fieldSetClassName}>
+    <div className={fieldSetClassName}>
       <label className="floating-label">
         <Controller
-          control={props.control}
-          name={props.name}
+          control={control}
+          name={name}
           render={({ field }) => {
             return (
               <DatePicker
-                inputClassName={cx("input input-bordered", props.className, {
-                  "input-xs": props.size === "xs",
-                  "input-sm": props.size === "sm",
-                  "input-error": props.error,
+                inputClassName={cx("input input-bordered", className, {
+                  "input-xs": size === "xs",
+                  "input-sm": size === "sm",
+                  "input-error": error,
                 })}
-                required={props.required}
-                disabled={props.disabled}
-                allowEmpty={props.allowEmpty}
-                placeholder={props.required ? `${props.label}*` : props.label}
+                required={required}
+                disabled={disabled}
+                allowEmpty={allowEmpty}
+                placeholder={required ? `${label}*` : label}
                 value={field.value}
                 onChange={(value) => {
-                  if (props.useDate) {
+                  if (useDate) {
                     field.onChange(value);
                   } else {
                     field.onChange(value ? format(value, "yyyy-MM-dd") : null);
                   }
                 }}
+                {...props}
               />
             );
           }}
         />
         <span>
-          {props.label}
-          {props.required ? <Required /> : null}
+          {label}
+          {required ? <Required /> : null}
         </span>
       </label>
-      {props.desc && (
+      {desc && (
         <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
-          <span>{props.desc}</span>
+          <span>{desc}</span>
         </div>
       )}
-      {props.error && <InputErrors className="text-xs text-error mt-1" errors={props.error} />}
+      {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
     </div>
   );
 };

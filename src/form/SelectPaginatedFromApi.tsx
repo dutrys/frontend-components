@@ -109,6 +109,7 @@ export const SelectPaginatedFromApi = <
             data-testid="select-input"
             placeholder={placeholder}
             onFocus={(e) => e?.target?.select()}
+            autoComplete="off"
             className={cx(inputClassName, {
               "input-sm": size === "sm",
               "input-xs": size === "xs",
@@ -116,7 +117,13 @@ export const SelectPaginatedFromApi = <
             displayValue={(model: TModel["data"][0]) => (model ? valueFormat(model) : "")}
             onChange={(event) => setQuery(event.target.value)}
           />
-          <ComboboxButton data-testid="select-input-btn" className="absolute inset-y-0 right-0 flex items-center pr-2">
+          <ComboboxButton
+            data-testid="select-input-btn"
+            className="absolute inset-y-0 right-0 flex items-center pr-2"
+            onClick={(e) => {
+              (e.target as HTMLButtonElement)?.parentNode?.parentNode?.querySelector("input")?.select();
+            }}
+          >
             <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </ComboboxButton>
         </div>
