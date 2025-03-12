@@ -86,7 +86,7 @@ export const SelectPaginatedFromApi = <
       void fetchNextPage();
     }
   }, [fetchNextPage, inView]);
-  console.log("RESSSSS", rest);
+
   return (
     <Combobox<TModel["data"][0] | null>
       immediate

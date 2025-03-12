@@ -330,7 +330,6 @@ const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, value,
             void fetchNextPage();
         }
     }, [fetchNextPage, inView]);
-    console.log("RESSSSS", rest);
     return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: (data?.pages || [])
             .map((d) => d?.data || [])
             .flat()
