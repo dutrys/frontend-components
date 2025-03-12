@@ -219,7 +219,7 @@ export const DateInput = <
                 required={props.required}
                 disabled={props.disabled}
                 allowEmpty={props.allowEmpty}
-                placeholder={props.label}
+                placeholder={props.required ? `${props.label}*` : props.label}
                 value={field.value}
                 onChange={(value) => {
                   if (props.useDate) {
@@ -292,7 +292,7 @@ export const SelectPaginatedFromApiInput = <
             size={size}
             required={required}
             disabled={disabled}
-            placeholder={label}
+            placeholder={required ? `${label}*` : label}
             queryKey={queryKey}
             queryFn={queryFn}
             value={field.value}
@@ -337,7 +337,7 @@ export const DateTimeInput = <
                 })}
                 required={props.required}
                 allowEmpty={props.allowEmpty}
-                placeholder={props.label}
+                placeholder={props.required ? `${props.label}*` : props.label}
                 from={props.from}
                 disabled={props.disabled}
                 to={props.to}
@@ -392,7 +392,7 @@ export const TimeInput = <
             <TimePicker
               value={field.value}
               onChange={(v) => field.onChange(v)}
-              placeholder={props.label}
+              placeholder={props.required ? `${props.label}*` : props.label}
               required={props.required}
               disabled={props.disabled}
               className={cx("input w-full", props.className, {
@@ -439,7 +439,7 @@ export const NumberInput = <
         control={props.control}
         render={({ field }) => (
           <NumericFormat
-            placeholder={props.label}
+            placeholder={props.required ? `${props.label}*` : props.label}
             {...options}
             disabled={props?.disabled}
             required={props?.required}
@@ -513,7 +513,7 @@ export const SelectPaginatedFromApiWithLabel = <
           size={size}
           required={required}
           disabled={disabled}
-          placeholder={label}
+          placeholder={required ? `${label}*` : label}
           queryKey={queryKey}
           queryFn={queryFn}
           value={value}

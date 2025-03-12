@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import {
   Combobox,
   ComboboxButton,
@@ -53,12 +53,15 @@ export const SelectPaginatedFromApi = <
 }) => {
   const [query, setQuery] = useState("");
   const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<TModel>({
-    getPreviousPageParam: ({ meta }) => (meta.currentPage === 1 ? undefined : meta.currentPage - 1),
-    getNextPageParam: ({ meta }) => (meta.currentPage >= meta.totalPages ? undefined : meta.currentPage + 1),
+    getPreviousPageParam: (m) => (m.meta.currentPage === 1 ? undefined : m.meta.currentPage - 1),
+    getNextPageParam: (m) => (m.meta.currentPage >= m.meta.totalPages ? undefined : m.meta.currentPage + 1),
     enabled: !disabled,
     queryKey: [...queryKey, query.length < SEARCH_FROM_QUERY_LENGTH ? "" : query],
     initialPageParam: 1,
     queryFn: ({ queryKey, pageParam }) => {
+      if (disabled) {
+        return Promise.reject();
+      }
       let page = typeof pageParam === "number" ? pageParam : undefined;
       const search = queryKey[queryKey.length - 1] || "";
       if (typeof search !== "string" || search === "" || search.length < SEARCH_FROM_QUERY_LENGTH) {
@@ -131,7 +134,7 @@ export const SelectPaginatedFromApi = <
                 value={null}
               >
                 <span className={cx("block truncate", { "text-xs": "xs" === size || "sm" === size })}>
-                  {empty || t("selectFromApi.empty")}
+                  {empty || t("selectFromApi.select")}
                 </span>
               </ComboboxOption>
             )}
