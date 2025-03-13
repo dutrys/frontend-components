@@ -14,7 +14,7 @@ type DialogWithBackProps = {
 };
 
 export const ParallelDialog = ({ title, children, onClose, className, ...rest }: DialogWithBackProps) => {
-  let [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(true);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();

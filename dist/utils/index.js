@@ -53,7 +53,7 @@ function Toaster() {
 const HumanDate = ({ date, from = new Date(), includeSeconds = false, tooltipId = TOOLTIP_GLOBAL_ID, disableTooltip, }) => {
     const params = useParams();
     const t = useTranslations();
-    let dateDate = typeof date === "string" ? parseJSON(date) : date;
+    const dateDate = typeof date === "string" ? parseJSON(date) : date;
     const [show, setShow] = useState(false);
     const formatDateTime = useCallback(() => {
         if (!dateDate || !isValid(dateDate)) {
@@ -85,7 +85,9 @@ const HumanDate = ({ date, from = new Date(), includeSeconds = false, tooltipId 
         }
         setShow(true);
         return () => {
-            typeof interval === "number" && clearInterval(interval);
+            if (typeof interval === "number") {
+                clearInterval(interval);
+            }
         };
     }, [includeSeconds, dateString, dateDate, setDateString, from, formatDateTime]);
     if (!dateDate || !isValid(dateDate) || !show) {

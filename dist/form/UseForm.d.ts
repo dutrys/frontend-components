@@ -1,6 +1,6 @@
 import React from "react";
 import { FieldErrors, FieldValues, UseFormProps, UseFormSetError } from "react-hook-form";
-export declare const GeneralErrorsInToast: <T extends Record<string, any>>({ errors, translateId, except, className, }: {
+export declare const GeneralErrorsInToast: <T extends Record<string, unknown>>({ errors, translateId, except, className, }: {
     except?: (keyof T)[];
     translateId?: string;
     errors: Record<string, string[]>;

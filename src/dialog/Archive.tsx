@@ -40,7 +40,11 @@ export const Archive = <T,>({
             return;
           }
           resolve(true);
-          onClose ? onClose() : router.back();
+          if (onClose) {
+            onClose();
+          } else {
+            router.back();
+          }
         })
         .catch((e) => {
           captureException(e);

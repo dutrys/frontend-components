@@ -37,7 +37,7 @@ const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: ope
 
 const TOOLTIP_PARALLEL_ID = "paralel-tooltip";
 const ParallelDialog = ({ title, children, onClose, className, ...rest }) => {
-    let [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(true);
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -136,7 +136,12 @@ const Archive = ({ title, archive, onClose, formatErrors, translateId, }) => {
                     return;
                 }
                 resolve(true);
-                onClose ? onClose() : router.back();
+                if (onClose) {
+                    onClose();
+                }
+                else {
+                    router.back();
+                }
             })
                 .catch((e) => {
                 captureException(e);

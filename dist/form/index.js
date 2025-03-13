@@ -28,7 +28,7 @@ const GeneralErrorsInToast = ({ errors, translateId, except = [], className = ""
             return (jsx(React.Fragment, { children: error.map((error) => (jsxs("li", { children: [translateId && t.has(`${translateId}.${key}`) && (jsxs("span", { className: className || "text-red-800", children: [t(`${translateId}.${key}`), ": "] })), jsx("span", { className: className || "text-red-500", children: error })] }, error))) }, key));
         }) }));
 };
-const isError = (error) => typeof error === "object" && typeof error.type === "string" && typeof error.message === "string";
+const isError = (error) => typeof error === "object" && !!error && typeof error.type === "string" && typeof error.message === "string";
 const mapToDot = (errors) => {
     const r = {};
     for (const key of Object.keys(errors)) {
@@ -40,7 +40,7 @@ const mapToDot = (errors) => {
             }
         }
         else {
-            // @ts-ignore
+            // @ts-expect-error TS2345
             const dot = mapToDot(error);
             for (const k of Object.keys(dot)) {
                 r[`${key}.${k}`] = dot[k];
@@ -183,7 +183,9 @@ function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from,
                     ?.scrollIntoView({ behavior: "smooth", block: "center" });
             }
         }
-        catch (_) { }
+        catch (_) {
+            /* empty */
+        }
     }, [valueTemp]);
     const t = useTranslations();
     let matcher = undefined;
@@ -196,7 +198,7 @@ function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from,
     if (to) {
         matcher = { after: to };
     }
-    return (jsxs("label", { className: `w-full ${inputClassName}`, children: [jsx(Popover, { title: (ref, props) => (jsx("input", { required: required, ...rest, value: dateString, className: "grow", disabled: disabled, ref: ref, placeholder: placeholder, onChange: (e) => {
+    return (jsxs("label", { className: `w-full ${inputClassName}`, children: [jsx(Popover, { title: (ref, popoverProps) => (jsx("input", { required: required, ...rest, value: dateString, className: "grow", disabled: disabled, ref: ref, placeholder: placeholder, onChange: (e) => {
                         setDateString(e.target.value);
                         if (e.target.value.length !== 16) {
                             return;
@@ -205,13 +207,13 @@ function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from,
                         if (isValid(date)) {
                             setValueTemp(date);
                         }
-                    }, ...props, onBlur: (e) => {
+                    }, ...popoverProps, onBlur: (e) => {
                         const date = parse(dateString, "yyyy-MM-dd HH:mm", new Date());
                         if (isValid(date)) {
                             onChange(date);
                         }
-                        if (typeof props?.onBlur === "function") {
-                            props.onBlur(e);
+                        if (typeof popoverProps?.onBlur === "function") {
+                            popoverProps.onBlur(e);
                         }
                     } })), onShow: (open) => {
                     if (!open) {
@@ -227,7 +229,9 @@ function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from,
                                 .querySelector(`[data-hour="${valueTemp.getHours() || 0}"]`)
                                 ?.scrollIntoView({ behavior: "instant", block: "center" });
                         }
-                        catch (_) { }
+                        catch (_) {
+                            /* empty */
+                        }
                     }
                 }, showOnClick: true, showOnFocus: true, showOnHover: false, popoverWidth: "", children: (close) => (jsxs(Fragment, { children: [jsxs("div", { className: "flex", children: [jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$1.dayPicker}`, captionLayout: "dropdown", mode: "single", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, weekStartsOn: 1, disabled: matcher, selected: valueTemp || undefined, defaultMonth: valueTemp || new Date(), onSelect: (day) => {
                                         day?.setHours((valueTemp || new Date()).getHours(), (valueTemp || new Date()).getMinutes() || 0);
@@ -301,8 +305,20 @@ const SEARCH_FROM_QUERY_LENGTH = 3;
 const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, value, size, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat = (model) => model.name, inputClassName = "w-full mx-0 input input-bordered", ...rest }) => {
     const [query, setQuery] = useState("");
     const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-        getPreviousPageParam: (m) => (m.meta.currentPage === 1 ? undefined : m.meta.currentPage - 1),
-        getNextPageParam: (m) => (m.meta.currentPage >= m.meta.totalPages ? undefined : m.meta.currentPage + 1),
+        getPreviousPageParam: (m) => {
+            if (!m || !m.meta) {
+                captureException("No meta in model", { extra: { data: m } });
+                return undefined;
+            }
+            return m.meta.currentPage === 1 ? undefined : m.meta.currentPage - 1;
+        },
+        getNextPageParam: (m) => {
+            if (!m || !m.meta) {
+                captureException("No meta in model", { extra: { data: m } });
+                return undefined;
+            }
+            return m.meta.currentPage >= m.meta.totalPages ? undefined : m.meta.currentPage + 1;
+        },
         enabled: !disabled,
         queryKey: [...queryKey, query.length < SEARCH_FROM_QUERY_LENGTH ? "" : query],
         initialPageParam: 1,
@@ -310,7 +326,7 @@ const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, value,
             if (disabled) {
                 return Promise.reject();
             }
-            let page = typeof pageParam === "number" ? pageParam : undefined;
+            const page = typeof pageParam === "number" ? pageParam : undefined;
             const search = queryKey[queryKey.length - 1] || "";
             if (typeof search !== "string" || search === "" || search.length < SEARCH_FROM_QUERY_LENGTH) {
                 return queryFn({ page });
@@ -350,7 +366,7 @@ const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, value,
 };
 
 const timeToDate = (date, format = "HH:mm:ss") => {
-    let parsed = parse(date, format, new Date());
+    const parsed = parse(date, format, new Date());
     if (isValid(parsed)) {
         parsed.setMilliseconds(0);
         return parsed;

@@ -57,7 +57,9 @@ export function DateTimePicker({
           ?.querySelector(`[data-hour="${valueTemp.getHours() || 0}"]`)
           ?.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-    } catch (_) {}
+    } catch (_) {
+      /* empty */
+    }
   }, [valueTemp]);
 
   const t = useTranslations();
@@ -74,7 +76,7 @@ export function DateTimePicker({
   return (
     <label className={`w-full ${inputClassName}`}>
       <Popover
-        title={(ref, props) => (
+        title={(ref, popoverProps) => (
           <input
             required={required}
             {...rest}
@@ -93,14 +95,14 @@ export function DateTimePicker({
                 setValueTemp(date);
               }
             }}
-            {...props}
+            {...popoverProps}
             onBlur={(e) => {
               const date = parse(dateString, "yyyy-MM-dd HH:mm", new Date());
               if (isValid(date)) {
                 onChange(date);
               }
-              if (typeof props?.onBlur === "function") {
-                props.onBlur(e);
+              if (typeof popoverProps?.onBlur === "function") {
+                popoverProps.onBlur(e);
               }
             }}
           />
@@ -118,7 +120,9 @@ export function DateTimePicker({
               hoursRef.current
                 .querySelector(`[data-hour="${valueTemp.getHours() || 0}"]`)
                 ?.scrollIntoView({ behavior: "instant", block: "center" });
-            } catch (_) {}
+            } catch (_) {
+              /* empty */
+            }
           }
         }}
         showOnClick

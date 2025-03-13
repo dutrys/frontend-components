@@ -5,7 +5,7 @@ import { FieldErrors, FieldPath, FieldValues, useForm, UseFormProps, UseFormSetE
 import { captureException } from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 
-export const GeneralErrorsInToast = <T extends Record<string, any>>({
+export const GeneralErrorsInToast = <T extends Record<string, unknown>>({
   errors,
   translateId,
   except = [],
@@ -41,7 +41,7 @@ export const GeneralErrorsInToast = <T extends Record<string, any>>({
 };
 
 const isError = (error: any): error is FieldErrors =>
-  typeof error === "object" && typeof error.type === "string" && typeof error.message === "string";
+  typeof error === "object" && !!error && typeof error.type === "string" && typeof error.message === "string";
 
 export const mapToDot = <T extends Record<string, any>>(errors: FieldErrors<T>) => {
   const r: Record<string, string[]> = {};
@@ -54,7 +54,7 @@ export const mapToDot = <T extends Record<string, any>>(errors: FieldErrors<T>) 
         r[key].push(error.message);
       }
     } else {
-      // @ts-ignore
+      // @ts-expect-error TS2345
       const dot = mapToDot(error);
       for (const k of Object.keys(dot)) {
         r[`${key}.${k}`] = dot[k];

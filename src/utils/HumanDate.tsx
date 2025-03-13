@@ -1,3 +1,4 @@
+import React from "react";
 import { differenceInMinutes, differenceInSeconds, format, formatDistance, isValid, parseJSON } from "date-fns";
 import { lt } from "date-fns/locale";
 import { useParams } from "next/navigation";
@@ -26,7 +27,7 @@ export const HumanDate = ({
 }) => {
   const params = useParams();
   const t = useTranslations();
-  let dateDate: Date = typeof date === "string" ? parseJSON(date) : date;
+  const dateDate: Date = typeof date === "string" ? parseJSON(date) : date;
   const [show, setShow] = useState(false);
   const formatDateTime = useCallback(() => {
     if (!dateDate || !isValid(dateDate)) {
@@ -62,7 +63,9 @@ export const HumanDate = ({
     }
     setShow(true);
     return () => {
-      typeof interval === "number" && clearInterval(interval);
+      if (typeof interval === "number") {
+        clearInterval(interval);
+      }
     };
   }, [includeSeconds, dateString, dateDate, setDateString, from, formatDateTime]);
 

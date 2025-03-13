@@ -18,7 +18,7 @@ export function convertTimeToUtcString(time: string, timeFormat = "HH:mm:ss"): s
 }
 
 export const stringToTime = (time: string): Date | undefined => {
-  let parsed: Date = parse(time, "yyyy-MM-dd HH:mm:ss", new Date());
+  const parsed: Date = parse(time, "yyyy-MM-dd HH:mm:ss", new Date());
   if (isValid(parsed)) {
     parsed.setMilliseconds(0);
     return parsed;
@@ -27,7 +27,7 @@ export const stringToTime = (time: string): Date | undefined => {
 };
 
 export const timeToDate = (date: string, format = "HH:mm:ss") => {
-  let parsed: Date = parse(date, format, new Date());
+  const parsed: Date = parse(date, format, new Date());
   if (isValid(parsed)) {
     parsed.setMilliseconds(0);
     return parsed;

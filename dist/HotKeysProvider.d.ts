@@ -1,3 +1,4 @@
+import React from "react";
 export type Hotkey = {
     callback: () => void;
     key: string;
@@ -12,6 +13,6 @@ type HotkeysContextType = {
     addHotKey: (id: string, hotkeys: Hotkey[]) => void;
     removeHotKey: (id: string) => void;
 };
-export declare const HotkeysContext: import("react").Context<HotkeysContextType>;
+export declare const HotkeysContext: React.Context<HotkeysContextType>;
 export {};
 //# sourceMappingURL=HotKeysProvider.d.ts.map

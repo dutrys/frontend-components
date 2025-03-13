@@ -14,6 +14,7 @@ import { PaginateQuery } from "@/utils/paginate";
 import cx from "classnames";
 import { LoadingComponent } from "@/Loading";
 import { useInView } from "react-intersection-observer";
+import { captureException } from "@sentry/nextjs";
 
 const SEARCH_FROM_QUERY_LENGTH = 3;
 
@@ -53,8 +54,20 @@ export const SelectPaginatedFromApi = <
 }) => {
   const [query, setQuery] = useState("");
   const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<TModel>({
-    getPreviousPageParam: (m) => (m.meta.currentPage === 1 ? undefined : m.meta.currentPage - 1),
-    getNextPageParam: (m) => (m.meta.currentPage >= m.meta.totalPages ? undefined : m.meta.currentPage + 1),
+    getPreviousPageParam: (m) => {
+      if (!m || !m.meta) {
+        captureException("No meta in model", { extra: { data: m } });
+        return undefined;
+      }
+      return m.meta.currentPage === 1 ? undefined : m.meta.currentPage - 1;
+    },
+    getNextPageParam: (m) => {
+      if (!m || !m.meta) {
+        captureException("No meta in model", { extra: { data: m } });
+        return undefined;
+      }
+      return m.meta.currentPage >= m.meta.totalPages ? undefined : m.meta.currentPage + 1;
+    },
     enabled: !disabled,
     queryKey: [...queryKey, query.length < SEARCH_FROM_QUERY_LENGTH ? "" : query],
     initialPageParam: 1,
@@ -62,7 +75,7 @@ export const SelectPaginatedFromApi = <
       if (disabled) {
         return Promise.reject();
       }
-      let page = typeof pageParam === "number" ? pageParam : undefined;
+      const page = typeof pageParam === "number" ? pageParam : undefined;
       const search = queryKey[queryKey.length - 1] || "";
       if (typeof search !== "string" || search === "" || search.length < SEARCH_FROM_QUERY_LENGTH) {
         return queryFn({ page });
