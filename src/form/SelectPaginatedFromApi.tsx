@@ -25,6 +25,7 @@ export const SelectPaginatedFromApi = <
   disabled,
   required,
   inputRef,
+  name,
   value,
   size,
   className,
@@ -39,6 +40,7 @@ export const SelectPaginatedFromApi = <
 }: {
   size?: "sm" | "xs";
   inputClassName?: string;
+  name?: string;
   inputRef?: any;
   queryFn: (query: PaginateQuery<any>) => Promise<TModel>;
   queryKey: ReadonlyArray<any>;
@@ -123,6 +125,7 @@ export const SelectPaginatedFromApi = <
             placeholder={placeholder}
             onFocus={(e) => e?.target?.select()}
             autoComplete="off"
+            name={name}
             className={cx(inputClassName, {
               "input-sm": size === "sm",
               "input-xs": size === "xs",

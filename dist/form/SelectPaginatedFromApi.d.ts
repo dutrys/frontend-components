@@ -8,9 +8,10 @@ export declare const SelectPaginatedFromApi: <TModel extends {
     data: {
         id: number;
     }[];
-}>({ onChange, disabled, required, inputRef, value, size, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat, inputClassName, ...rest }: {
+}>({ onChange, disabled, required, inputRef, name, value, size, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat, inputClassName, ...rest }: {
     size?: "sm" | "xs";
     inputClassName?: string;
+    name?: string;
     inputRef?: any;
     queryFn: (query: PaginateQuery<any>) => Promise<TModel>;
     queryKey: ReadonlyArray<any>;

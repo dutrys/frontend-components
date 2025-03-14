@@ -146,18 +146,17 @@ export const TextareaInput = <
 >(
   props: IInputRegisterProps<TFieldValues, TName>,
 ) => {
-  const options = {
-    required: props.required,
-    disabled: props.disabled,
-    ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
-  };
   return (
     <div className={props.fieldSetClassName}>
       <label className="floating-label">
         <textarea
           id={props.id}
           disabled={props.disabled}
-          {...props.register(props.name, options)}
+          {...props.register(props.name, {
+            required: props.required,
+            disabled: props.disabled,
+            ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
+          })}
           className={cx("textarea textarea-bordered w-full", props.className, {
             "textarea-xs": props.size === "xs",
             "textarea-sm": props.size === "sm",
@@ -192,27 +191,29 @@ export const CheckboxInput = <
   };
 
   return (
-    <div className={props.fieldSetClassName}>
-      <label>
-        <input
-          id={props.id}
-          type="checkbox"
-          disabled={props.disabled}
-          {...props.register(props.name, options)}
-          className={cx("toggle", {
-            "toggle-sm": props.size === "sm",
-            "toggle-xs": props.size === "xs",
-          })}
-        />
-        <span className="text-sm text-gray-500 label-text grow pl-2">{props.label}</span>
-      </label>
+    <>
+      <div className={props.fieldSetClassName}>
+        <label>
+          <input
+            id={props.id}
+            type="checkbox"
+            disabled={props.disabled}
+            {...props.register(props.name, options)}
+            className={cx("toggle", {
+              "toggle-sm": props.size === "sm",
+              "toggle-xs": props.size === "xs",
+            })}
+          />
+          <span className="text-sm text-gray-500 label-text grow pl-2">{props.label}</span>
+        </label>
+      </div>
       {props.desc && (
         <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
           <span>{props.desc}</span>
         </div>
       )}
       {props.error && <InputErrors className="text-xs text-error mt-1" errors={props.error} />}
-    </div>
+    </>
   );
 };
 
@@ -326,6 +327,7 @@ export const SelectPaginatedFromApiInput = <
             inputClassName={cx("w-full mx-0 input input-bordered", className, {
               "input-error": error,
             })}
+            name={name}
             {...rest}
             size={size}
             required={required}
