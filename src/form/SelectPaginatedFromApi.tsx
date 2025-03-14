@@ -71,7 +71,7 @@ export const SelectPaginatedFromApi = <
       return m.meta.currentPage >= m.meta.totalPages ? undefined : m.meta.currentPage + 1;
     },
     enabled: !disabled,
-    queryKey: [...queryKey, query.length < SEARCH_FROM_QUERY_LENGTH ? "" : query],
+    queryKey: [...queryKey, disabled, query.length < SEARCH_FROM_QUERY_LENGTH ? "" : query],
     initialPageParam: 1,
     queryFn: ({ queryKey, pageParam }) => {
       if (disabled) {
