@@ -15,12 +15,14 @@ export const Archive = <T,>({
   onClose,
   formatErrors,
   translateId,
+  onSuccess,
 }: {
   title: string;
   archive: () => Promise<T>;
   onClose?: () => void;
   formatErrors?: (errors: Include<T, { errors: Record<string, string[]> }>) => React.ReactNode;
   translateId?: string;
+  onSuccess?: () => unknown;
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -40,6 +42,7 @@ export const Archive = <T,>({
             return;
           }
           resolve(true);
+          onSuccess?.();
           if (onClose) {
             onClose();
           } else {
@@ -101,19 +104,35 @@ export const ArchiveButton = <T = unknown,>({
   archive,
   children,
   formatErrors,
+  onSuccess,
 }: {
-  children: (onClick: () => void) => React.ReactNode;
+  children: (onClick: () => void, isLoading: boolean) => React.ReactNode;
   title: string;
   archive: () => Promise<T>;
   formatErrors?: (errors: Include<T, { errors: Record<string, string[]> }>) => React.ReactNode;
+  onSuccess?: () => unknown;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   return (
     <>
       {isOpen && (
-        <Archive<T> title={title} archive={archive} onClose={() => setIsOpen(false)} formatErrors={formatErrors} />
+        <Archive<T>
+          onSuccess={onSuccess}
+          title={title}
+          archive={async () => {
+            setIsLoading(true);
+            try {
+              return await archive();
+            } finally {
+              setIsLoading(false);
+            }
+          }}
+          onClose={() => setIsOpen(false)}
+          formatErrors={formatErrors}
+        />
       )}
-      {children(() => setIsOpen(!isOpen))}
+      {children(() => setIsOpen(!isOpen), isLoading)}
     </>
   );
 };

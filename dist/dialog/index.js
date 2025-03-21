@@ -118,7 +118,7 @@ const GeneralErrorsInToast = ({ errors, translateId, except = [], className = ""
 };
 const isServerError = (error) => typeof error === "object" && typeof error.errors === "object";
 
-const Archive = ({ title, archive, onClose, formatErrors, translateId, }) => {
+const Archive = ({ title, archive, onClose, formatErrors, translateId, onSuccess, }) => {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const t = useTranslations();
@@ -136,6 +136,7 @@ const Archive = ({ title, archive, onClose, formatErrors, translateId, }) => {
                     return;
                 }
                 resolve(true);
+                onSuccess?.();
                 if (onClose) {
                     onClose();
                 }
@@ -163,9 +164,18 @@ const Archive = ({ title, archive, onClose, formatErrors, translateId, }) => {
     };
     return (jsxs(ParallelDialog, { onClose: onClose, title: title, children: [jsx(Hotkeys, { id: "archive", hotKeys: [{ key: "Enter", description: t("archive.yes"), callback: doArchive }] }), errors && formatErrors && jsx("div", { className: "alert alert-error my-4", children: formatErrors(errors) }), t("archive.message"), jsx("br", {}), jsx("br", {}), jsx("div", { className: "w-full text-center", children: jsxs("div", { className: "mx-auto", children: [jsx("button", { onClick: doArchive, className: "btn btn-error uppercase", disabled: isLoading, "data-testid": "button-archive", children: t("archive.yes") }), " ", jsx("button", { className: "btn uppercase", onClick: () => (onClose ? onClose() : router.back()), "data-testid": "button-cancel", children: t("archive.no") })] }) })] }));
 };
-const ArchiveButton = ({ title, archive, children, formatErrors, }) => {
+const ArchiveButton = ({ title, archive, children, formatErrors, onSuccess, }) => {
     const [isOpen, setIsOpen] = useState(false);
-    return (jsxs(Fragment, { children: [isOpen && (jsx(Archive, { title: title, archive: archive, onClose: () => setIsOpen(false), formatErrors: formatErrors })), children(() => setIsOpen(!isOpen))] }));
+    const [isLoading, setIsLoading] = useState(false);
+    return (jsxs(Fragment, { children: [isOpen && (jsx(Archive, { onSuccess: onSuccess, title: title, archive: async () => {
+                    setIsLoading(true);
+                    try {
+                        return await archive();
+                    }
+                    finally {
+                        setIsLoading(false);
+                    }
+                }, onClose: () => setIsOpen(false), formatErrors: formatErrors })), children(() => setIsOpen(!isOpen), isLoading)] }));
 };
 
 export { Archive, ArchiveButton, ParallelDialog, Popover, TOOLTIP_PARALLEL_ID };
