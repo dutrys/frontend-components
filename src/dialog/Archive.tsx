@@ -16,10 +16,12 @@ export const Archive = <T,>({
   formatErrors,
   translateId,
   onSuccess,
+  children,
 }: {
   title: string;
   archive: () => Promise<T>;
   onClose?: () => void;
+  children?: React.ReactNode;
   formatErrors?: (errors: Include<T, { errors: Record<string, string[]> }>) => React.ReactNode;
   translateId?: string;
   onSuccess?: () => unknown;
@@ -76,6 +78,7 @@ export const Archive = <T,>({
       {t("archive.message")}
       <br />
       <br />
+      {children}
       <div className="w-full text-center">
         <div className="mx-auto">
           <button

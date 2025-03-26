@@ -169,7 +169,7 @@ export const SelectPaginatedFromApi = <
               </div>
             ) : (
               data?.pages
-                ?.map((d) => d.data || [])
+                ?.map((d) => d?.data || [])
                 .flat()
                 .map((model: TModel["data"][0], i: number) => (
                   <ComboboxOption

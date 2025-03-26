@@ -184,12 +184,7 @@ export const CheckboxInput = <
 >(
   props: IInputRegisterProps<TFieldValues, TName>,
 ) => {
-  const options = {
-    required: props.required,
-    disabled: props.disabled,
-    ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
-  };
-
+  console.log("CheckboxInput", props);
   return (
     <>
       <div className={props.fieldSetClassName}>
@@ -198,7 +193,11 @@ export const CheckboxInput = <
             id={props.id}
             type="checkbox"
             disabled={props.disabled}
-            {...props.register(props.name, options)}
+            {...props.register(props.name, {
+              required: props.required,
+              disabled: props.disabled,
+              ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
+            })}
             className={cx("toggle", {
               "toggle-sm": props.size === "sm",
               "toggle-xs": props.size === "xs",

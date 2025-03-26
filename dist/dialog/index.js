@@ -118,7 +118,7 @@ const GeneralErrorsInToast = ({ errors, translateId, except = [], className = ""
 };
 const isServerError = (error) => typeof error === "object" && typeof error.errors === "object";
 
-const Archive = ({ title, archive, onClose, formatErrors, translateId, onSuccess, }) => {
+const Archive = ({ title, archive, onClose, formatErrors, translateId, onSuccess, children, }) => {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const t = useTranslations();
@@ -162,7 +162,7 @@ const Archive = ({ title, archive, onClose, formatErrors, translateId, onSuccess
             },
         });
     };
-    return (jsxs(ParallelDialog, { onClose: onClose, title: title, children: [jsx(Hotkeys, { id: "archive", hotKeys: [{ key: "Enter", description: t("archive.yes"), callback: doArchive }] }), errors && formatErrors && jsx("div", { className: "alert alert-error my-4", children: formatErrors(errors) }), t("archive.message"), jsx("br", {}), jsx("br", {}), jsx("div", { className: "w-full text-center", children: jsxs("div", { className: "mx-auto", children: [jsx("button", { onClick: doArchive, className: "btn btn-error uppercase", disabled: isLoading, "data-testid": "button-archive", children: t("archive.yes") }), " ", jsx("button", { className: "btn uppercase", onClick: () => (onClose ? onClose() : router.back()), "data-testid": "button-cancel", children: t("archive.no") })] }) })] }));
+    return (jsxs(ParallelDialog, { onClose: onClose, title: title, children: [jsx(Hotkeys, { id: "archive", hotKeys: [{ key: "Enter", description: t("archive.yes"), callback: doArchive }] }), errors && formatErrors && jsx("div", { className: "alert alert-error my-4", children: formatErrors(errors) }), t("archive.message"), jsx("br", {}), jsx("br", {}), children, jsx("div", { className: "w-full text-center", children: jsxs("div", { className: "mx-auto", children: [jsx("button", { onClick: doArchive, className: "btn btn-error uppercase", disabled: isLoading, "data-testid": "button-archive", children: t("archive.yes") }), " ", jsx("button", { className: "btn uppercase", onClick: () => (onClose ? onClose() : router.back()), "data-testid": "button-cancel", children: t("archive.no") })] }) })] }));
 };
 const ArchiveButton = ({ title, archive, children, formatErrors, onSuccess, }) => {
     const [isOpen, setIsOpen] = useState(false);

@@ -1,9 +1,10 @@
 import React from "react";
 type Include<T, U> = T extends U ? T : never;
-export declare const Archive: <T>({ title, archive, onClose, formatErrors, translateId, onSuccess, }: {
+export declare const Archive: <T>({ title, archive, onClose, formatErrors, translateId, onSuccess, children, }: {
     title: string;
     archive: () => Promise<T>;
     onClose?: () => void;
+    children?: React.ReactNode;
     formatErrors?: (errors: Include<T, {
         errors: Record<string, string[]>;
     }>) => React.ReactNode;
