@@ -29,7 +29,13 @@ export declare const useFormSubmit: <T extends FieldValues, R = unknown>(doSubmi
     onError?: (data: ServerError) => void;
     loadingText?: string;
     savedText?: string;
+    confirm?: boolean;
 }) => {
+    confirm: {
+        needsConfirm: boolean;
+        setNeedsConfirm: (success: boolean) => void;
+        showDialog: () => void;
+    } | undefined;
     handleSubmit: () => (e?: React.BaseSyntheticEvent) => Promise<void>;
     watch: import("react-hook-form").UseFormWatch<T>;
     getValues: import("react-hook-form").UseFormGetValues<T>;
@@ -46,5 +52,8 @@ export declare const useFormSubmit: <T extends FieldValues, R = unknown>(doSubmi
     register: import("react-hook-form").UseFormRegister<T>;
     setFocus: import("react-hook-form").UseFormSetFocus<T>;
 };
+export declare const ConfirmSave: ({ onConfirm }: {
+    onConfirm: (success: boolean) => void;
+}) => import("react/jsx-runtime").JSX.Element;
 export declare const addServerErrors: <T extends FieldValues>(errors: { [P in keyof T]?: string[]; }, setError: UseFormSetError<T>) => void;
 //# sourceMappingURL=UseForm.d.ts.map

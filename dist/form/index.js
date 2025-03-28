@@ -1,5 +1,5 @@
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
-import React, { useState, useRef, useEffect, createContext, Fragment as Fragment$1 } from 'react';
+import React, { useRef, useState, useEffect, createContext, Fragment as Fragment$1 } from 'react';
 import toast from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
 import { useForm, Controller } from 'react-hook-form';
@@ -83,48 +83,87 @@ const useFormSubmit = (doSubmitCallback, formOptions = {}) => {
     const router = useRouter();
     const { returnBack, reportProgress, onError, onSuccess, loadingText, savedText, ...options } = formOptions;
     const formProps = useForm(options);
+    const handleSubmit = () => formProps.handleSubmit((values) => {
+        const promise = new Promise((res, rej) => {
+            if (formOptions.confirm && !isConfirmed.current) {
+                setNeedsConfirm(true);
+                return rej("Form confirmation is required");
+            }
+            setNeedsConfirm(false);
+            isConfirmed.current = false;
+            doSubmitCallback(values)
+                .then((data) => {
+                if (isServerError(data)) {
+                    if (typeof onError === "function") {
+                        onError(data);
+                    }
+                    addServerErrors(data.errors, formProps.setError);
+                    rej(data);
+                    return;
+                }
+                if (typeof onSuccess === "function") {
+                    onSuccess(data);
+                }
+                res(data);
+                if (returnBack !== false) {
+                    router.back();
+                }
+            })
+                .catch((e) => {
+                captureException(e, { extra: { formValues: values } });
+                rej(e);
+            });
+        });
+        if (reportProgress !== false) {
+            void toast.promise(promise, {
+                loading: loadingText || t("general.saving"),
+                success: savedText || t("general.saved"),
+                error: (data) => {
+                    if (isServerError(data)) {
+                        return (jsxs(Fragment, { children: [t("general.validateError"), ":", " ", jsx(GeneralErrors, { className: "text-gray-500", translateId: options.translateErrors, errors: formProps.formState.errors })] }));
+                    }
+                    return t("general.error");
+                },
+            }, { id: "form-submit" });
+        }
+        return promise;
+    });
+    const isConfirmed = useRef(false);
+    const [needsConfirm, setNeedsConfirm] = useState(false);
     return {
         ...formProps,
-        handleSubmit: () => formProps.handleSubmit((values) => {
-            const promise = new Promise((res, rej) => {
-                doSubmitCallback(values)
-                    .then((data) => {
-                    if (isServerError(data)) {
-                        if (typeof onError === "function") {
-                            onError(data);
-                        }
-                        addServerErrors(data.errors, formProps.setError);
-                        rej(data);
+        confirm: formOptions.confirm
+            ? {
+                needsConfirm,
+                setNeedsConfirm: (success) => {
+                    if (success) {
+                        isConfirmed.current = true;
+                    }
+                    else {
+                        isConfirmed.current = false;
+                        setNeedsConfirm(false);
+                    }
+                },
+                showDialog: () => {
+                    if (needsConfirm) {
                         return;
                     }
-                    if (typeof onSuccess === "function") {
-                        onSuccess(data);
-                    }
-                    res(data);
-                    if (returnBack !== false) {
-                        router.back();
-                    }
-                })
-                    .catch((e) => {
-                    captureException(e, { extra: { formValues: values } });
-                    rej(e);
-                });
-            });
-            if (reportProgress !== false) {
-                void toast.promise(promise, {
-                    loading: loadingText || t("general.saving"),
-                    success: savedText || t("general.saved"),
-                    error: (data) => {
-                        if (isServerError(data)) {
-                            return (jsxs(Fragment, { children: [t("general.validateError"), ":", " ", jsx(GeneralErrors, { className: "text-gray-500", translateId: options.translateErrors, errors: formProps.formState.errors })] }));
-                        }
-                        return t("general.error");
-                    },
-                }, { id: "form-submit" });
+                    setNeedsConfirm(true);
+                },
             }
-            return promise;
-        }),
+            : undefined,
+        handleSubmit,
     };
+};
+const ConfirmSave = ({ onConfirm }) => {
+    const t = useTranslations();
+    const buttonRef = useRef(null);
+    useEffect(() => {
+        if (buttonRef.current) {
+            buttonRef.current.focus();
+        }
+    }, [buttonRef]);
+    return (jsx("div", { className: "modal modal-open", role: "dialog", children: jsx("div", { className: "modal-box", children: jsxs("div", { className: "modal-action", children: [jsx("h3", { className: "text-lg font-bold mb-4", children: t("frontendComponents.saveConfirm") }), jsxs("div", { className: "grid grid-cols-2 gap-2", children: [jsx("button", { ref: buttonRef, className: "btn btn-primary", onClick: () => onConfirm(true), children: t("frontendComponents.save") }), jsx("a", { className: "btn", onClick: () => onConfirm(false), children: t("frontendComponents.cancel") })] })] }) }) }));
 };
 const addServerErrors = (errors, setError) => Object.entries(errors).forEach(([key, value]) => {
     const array = Array.isArray(value) ? value : [errors];
@@ -507,5 +546,5 @@ const Required = () => {
     return jsx("span", { className: "text-error align-bottom", children: "*" });
 };
 
-export { CheckboxInput, DateInput, DatePicker, DateTimeInput, DateTimePicker, GeneralErrors, GeneralErrorsInToast, InputErrors, Label, NumberInput, Required, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, TextInput, TextareaInput, TimeInput, TimePicker, addServerErrors, isServerError, mapToDot, useFormSubmit };
+export { CheckboxInput, ConfirmSave, DateInput, DatePicker, DateTimeInput, DateTimePicker, GeneralErrors, GeneralErrorsInToast, InputErrors, Label, NumberInput, Required, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, TextInput, TextareaInput, TimeInput, TimePicker, addServerErrors, isServerError, mapToDot, useFormSubmit };
 //# sourceMappingURL=index.js.map
