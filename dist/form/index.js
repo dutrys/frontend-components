@@ -163,7 +163,7 @@ const ConfirmSave = ({ onConfirm }) => {
             buttonRef.current.focus();
         }
     }, [buttonRef]);
-    return (jsx("div", { className: "modal modal-open", role: "dialog", children: jsx("div", { className: "modal-box", children: jsxs("div", { className: "modal-action", children: [jsx("h3", { className: "text-lg font-bold mb-4", children: t("frontendComponents.saveConfirm") }), jsxs("div", { className: "grid grid-cols-2 gap-2", children: [jsx("button", { ref: buttonRef, className: "btn btn-primary", onClick: () => onConfirm(true), children: t("frontendComponents.save") }), jsx("a", { className: "btn", onClick: () => onConfirm(false), children: t("frontendComponents.cancel") })] })] }) }) }));
+    return (jsx("div", { className: "modal modal-open", role: "dialog", children: jsxs("div", { className: "modal-box", children: [jsx("h3", { className: "text-lg font-bold mb-4", children: t("frontendComponents.saveConfirm") }), jsxs("div", { className: "modal-action grid grid-cols-2 gap-2", children: [jsx("button", { ref: buttonRef, className: "btn btn-primary", onClick: () => onConfirm(true), children: t("frontendComponents.save") }), jsx("a", { className: "btn", onClick: () => onConfirm(false), children: t("frontendComponents.cancel") })] })] }) }));
 };
 const addServerErrors = (errors, setError) => Object.entries(errors).forEach(([key, value]) => {
     const array = Array.isArray(value) ? value : [errors];

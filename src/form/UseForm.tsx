@@ -250,16 +250,14 @@ export const ConfirmSave = ({ onConfirm }: { onConfirm: (success: boolean) => vo
   return (
     <div className="modal modal-open" role="dialog">
       <div className="modal-box">
-        <div className="modal-action">
-          <h3 className="text-lg font-bold mb-4">{t("frontendComponents.saveConfirm")}</h3>
-          <div className="grid grid-cols-2 gap-2">
-            <button ref={buttonRef} className="btn btn-primary" onClick={() => onConfirm(true)}>
-              {t("frontendComponents.save")}
-            </button>
-            <a className="btn" onClick={() => onConfirm(false)}>
-              {t("frontendComponents.cancel")}
-            </a>
-          </div>
+        <h3 className="text-lg font-bold mb-4">{t("frontendComponents.saveConfirm")}</h3>
+        <div className="modal-action grid grid-cols-2 gap-2">
+          <button ref={buttonRef} className="btn btn-primary" onClick={() => onConfirm(true)}>
+            {t("frontendComponents.save")}
+          </button>
+          <a className="btn" onClick={() => onConfirm(false)}>
+            {t("frontendComponents.cancel")}
+          </a>
         </div>
       </div>
     </div>
