@@ -316,6 +316,11 @@ const DatePicker = ({ onChange, value, inputClassName = "input input-bordered", 
         setDateString(value ? formatDate(value) : "");
     }, [value]);
     return (jsxs("div", { className: `w-full ${inputClassName}`, children: [jsx(Popover, { showOnClick: true, showOnFocus: true, showOnHover: false, popoverWidth: "", title: (ref, popoverProps) => (jsx("input", { ref: ref, ...props, ...popoverProps, value: dateString, className: "grow", required: required, disabled: disabled, placeholder: placeholder, onChange: (e) => {
+                        if (e.target.value.length === 0) {
+                            setDateString("");
+                            onChange(null);
+                            return;
+                        }
                         if (e.target.value.length > 10) {
                             return;
                         }

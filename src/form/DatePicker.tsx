@@ -60,6 +60,11 @@ export const DatePicker = ({
             disabled={disabled}
             placeholder={placeholder}
             onChange={(e) => {
+              if (e.target.value.length === 0) {
+                setDateString("");
+                onChange(null);
+                return;
+              }
               if (e.target.value.length > 10) {
                 return;
               }
