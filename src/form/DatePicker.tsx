@@ -103,7 +103,12 @@ export const DatePicker = ({
         )}
       </Popover>
       {allowEmpty ? (
-        <button disabled={allowEmpty && !value} className={toggleClassName} onClick={() => onChange(null)}>
+        <button
+          type="button"
+          disabled={allowEmpty && !value}
+          className={toggleClassName}
+          onClick={() => onChange(null)}
+        >
           {value ? <XMarkIcon className="size-4" /> : <ClockIcon className="size-4" />}
         </button>
       ) : (
