@@ -140,7 +140,7 @@ export function DateTimePicker({
                 weekStartsOn={1}
                 disabled={matcher}
                 selected={valueTemp || undefined}
-                defaultMonth={valueTemp || new Date()}
+                defaultMonth={valueTemp || undefined}
                 onSelect={(day) => {
                   day?.setHours((valueTemp || new Date()).getHours(), (valueTemp || new Date()).getMinutes() || 0);
                   if (from && day && from > day) {

@@ -109,6 +109,7 @@ export const DatePicker = ({
             disabled={matcher}
             weekStartsOn={1}
             selected={value || undefined}
+            defaultMonth={value || undefined}
             onSelect={(day) => {
               onChange(day || null);
               close();
