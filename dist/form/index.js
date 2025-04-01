@@ -343,26 +343,17 @@ const DatePicker = ({ onChange, value, inputClassName = "input input-bordered", 
                     } })) }), allowEmpty ? (jsx("button", { type: "button", disabled: allowEmpty && !value, className: toggleClassName, onClick: () => onChange(null), children: value ? jsx(XMarkIcon, { className: "size-4" }) : jsx(ClockIcon, { className: "size-4" }) })) : (jsx("div", { className: `cursor-pointer ${toggleClassName}`, children: jsx(CalendarIcon, { className: "size-4" }) }))] }));
 };
 
+const getPreviousPageParam = (page) => !page?.meta || page?.meta?.currentPage === 1 ? undefined : page.meta.currentPage - 1;
+const getNextPageParam = (page) => !page?.meta || page?.meta?.currentPage >= page.meta?.totalPages ? undefined : page.meta.currentPage + 1;
+
 const LoadingComponent = ({ style, className, loadingClassName, size, }) => (jsx("div", { className: `flex justify-center ${className}`, style: style, children: jsx("span", { className: `${loadingClassName || "text-primary"} loading loading-spinner ${size}` }) }));
 
 const SEARCH_FROM_QUERY_LENGTH = 3;
 const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, name, value, size, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat = (model) => model.name, inputClassName = "w-full mx-0 input input-bordered", ...rest }) => {
     const [query, setQuery] = useState("");
     const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
-        getPreviousPageParam: (m) => {
-            if (!m || !m.meta) {
-                captureException("No meta in model", { extra: { data: m } });
-                return undefined;
-            }
-            return m.meta.currentPage === 1 ? undefined : m.meta.currentPage - 1;
-        },
-        getNextPageParam: (m) => {
-            if (!m || !m.meta) {
-                captureException("No meta in model", { extra: { data: m } });
-                return undefined;
-            }
-            return m.meta.currentPage >= m.meta.totalPages ? undefined : m.meta.currentPage + 1;
-        },
+        getPreviousPageParam,
+        getNextPageParam,
         enabled: !disabled,
         queryKey: [...queryKey, disabled, query.length < SEARCH_FROM_QUERY_LENGTH ? "" : query],
         initialPageParam: 1,

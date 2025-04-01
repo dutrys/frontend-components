@@ -96,5 +96,8 @@ const HumanDate = ({ date, from = new Date(), includeSeconds = false, tooltipId 
     return (jsx(Fragment, { children: jsx("span", { "data-testid": "datewithtooltip", className: `date-with-tooltip-${dateDate.getTime()}`, "data-tooltip-id": disableTooltip ? undefined : tooltipId, "data-tooltip-content": disableTooltip ? undefined : format(dateDate, "yyyy-MM-dd HH:mm:ss"), children: dateString }) }));
 };
 
-export { HumanDate, TOOLTIP_GLOBAL_ID, Toaster };
+const getPreviousPageParam = (page) => !page?.meta || page?.meta?.currentPage === 1 ? undefined : page.meta.currentPage - 1;
+const getNextPageParam = (page) => !page?.meta || page?.meta?.currentPage >= page.meta?.totalPages ? undefined : page.meta.currentPage + 1;
+
+export { HumanDate, TOOLTIP_GLOBAL_ID, Toaster, getNextPageParam, getPreviousPageParam };
 //# sourceMappingURL=index.js.map

@@ -1,10 +1,6 @@
-import { PaginateQuery } from "@/utils/paginate";
+import { PaginateQuery, ResponseMeta } from "@/utils/paginate";
 export declare const SelectPaginatedFromApi: <TModel extends {
-    meta: {
-        currentPage: number;
-        totalItems: number;
-        totalPages: number;
-    };
+    meta: ResponseMeta;
     data: {
         id: number;
     }[];

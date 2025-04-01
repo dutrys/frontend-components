@@ -12,7 +12,7 @@ import { DatePicker } from "./DatePicker";
 import { InputErrors } from "./UseForm";
 import { format } from "date-fns";
 import { SelectPaginatedFromApi } from "./SelectPaginatedFromApi";
-import { PaginateQuery } from "../utils/paginate";
+import { PaginateQuery, ResponseMeta } from "../utils/paginate";
 import { stringToDate } from "../utils/datetime";
 import cx from "classnames";
 import { TimePicker } from "./TimePicker";
@@ -285,7 +285,7 @@ export const DateInput = <
 };
 
 export const SelectPaginatedFromApiInput = <
-  T extends { data: { id: number }[]; meta: { currentPage: number; totalItems: number; totalPages: number } },
+  T extends { data: { id: number }[]; meta: ResponseMeta },
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
@@ -526,9 +526,7 @@ export const Label = ({ text, required }: { required?: boolean; size?: "sm"; tex
   </label>
 );
 
-export const SelectPaginatedFromApiWithLabel = <
-  T extends { data: { id: number }[]; meta: { currentPage: number; totalItems: number; totalPages: number } },
->({
+export const SelectPaginatedFromApiWithLabel = <T extends { data: { id: number }[]; meta: ResponseMeta }>({
   label,
   queryFn,
   queryKey,

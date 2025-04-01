@@ -10,17 +10,14 @@ import {
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import React, { Fragment, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { PaginateQuery } from "@/utils/paginate";
+import { getNextPageParam, getPreviousPageParam, PaginateQuery, ResponseMeta } from "@/utils/paginate";
 import cx from "classnames";
 import { LoadingComponent } from "@/Loading";
 import { useInView } from "react-intersection-observer";
-import { captureException } from "@sentry/nextjs";
 
 const SEARCH_FROM_QUERY_LENGTH = 3;
 
-export const SelectPaginatedFromApi = <
-  TModel extends { meta: { currentPage: number; totalItems: number; totalPages: number }; data: { id: number }[] },
->({
+export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data: { id: number }[] }>({
   onChange,
   disabled,
   required,
@@ -56,20 +53,8 @@ export const SelectPaginatedFromApi = <
 }) => {
   const [query, setQuery] = useState("");
   const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<TModel>({
-    getPreviousPageParam: (m) => {
-      if (!m || !m.meta) {
-        captureException("No meta in model", { extra: { data: m } });
-        return undefined;
-      }
-      return m.meta.currentPage === 1 ? undefined : m.meta.currentPage - 1;
-    },
-    getNextPageParam: (m) => {
-      if (!m || !m.meta) {
-        captureException("No meta in model", { extra: { data: m } });
-        return undefined;
-      }
-      return m.meta.currentPage >= m.meta.totalPages ? undefined : m.meta.currentPage + 1;
-    },
+    getPreviousPageParam,
+    getNextPageParam,
     enabled: !disabled,
     queryKey: [...queryKey, disabled, query.length < SEARCH_FROM_QUERY_LENGTH ? "" : query],
     initialPageParam: 1,
