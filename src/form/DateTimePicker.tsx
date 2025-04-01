@@ -66,11 +66,9 @@ export function DateTimePicker({
   let matcher: Matcher | undefined = undefined;
   if (from && to) {
     matcher = { before: from, after: to };
-  }
-  if (from) {
+  } else if (from) {
     matcher = { before: from };
-  }
-  if (to) {
+  } else if (to) {
     matcher = { after: to };
   }
   return (

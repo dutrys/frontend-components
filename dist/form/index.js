@@ -231,10 +231,10 @@ function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from,
     if (from && to) {
         matcher = { before: from, after: to };
     }
-    if (from) {
+    else if (from) {
         matcher = { before: from };
     }
-    if (to) {
+    else if (to) {
         matcher = { after: to };
     }
     return (jsxs("label", { className: `w-full ${inputClassName}`, children: [jsx(Popover, { title: (ref, popoverProps) => (jsx("input", { required: required, ...rest, value: dateString, className: "grow", disabled: disabled, ref: ref, placeholder: placeholder, onChange: (e) => {
@@ -309,12 +309,22 @@ const formatDate = (date) => {
     }
     return format(date, "yyyy-MM-dd");
 };
-const DatePicker = ({ onChange, value, inputClassName = "input input-bordered", toggleClassName = "", required, allowEmpty, disabled, placeholder, ...props }) => {
+const DatePicker = ({ onChange, value, inputClassName = "input input-bordered", toggleClassName = "", required, allowEmpty, disabled, placeholder, from, to, ...props }) => {
     const [dateString, setDateString] = useState(value ? formatDate(value) : "");
     const params = useParams();
     useEffect(() => {
         setDateString(value ? formatDate(value) : "");
     }, [value]);
+    let matcher = undefined;
+    if (from && to) {
+        matcher = { before: from, after: to };
+    }
+    else if (from) {
+        matcher = { before: from };
+    }
+    else if (to) {
+        matcher = { after: to };
+    }
     return (jsxs("div", { className: `w-full ${inputClassName}`, children: [jsx(Popover, { showOnClick: true, showOnFocus: true, showOnHover: false, popoverWidth: "", title: (ref, popoverProps) => (jsx("input", { ref: ref, ...props, ...popoverProps, value: dateString, className: "grow", required: required, disabled: disabled, placeholder: placeholder, onChange: (e) => {
                         if (e.target.value.length === 0) {
                             setDateString("");
@@ -337,7 +347,7 @@ const DatePicker = ({ onChange, value, inputClassName = "input input-bordered", 
                         if (isValid(date)) {
                             onChange(date);
                         }
-                    } })), children: (close) => (jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$1.dayPicker}`, captionLayout: "dropdown", mode: "single", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, weekStartsOn: 1, selected: value || undefined, onSelect: (day) => {
+                    } })), children: (close) => (jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$1.dayPicker}`, captionLayout: "dropdown", mode: "single", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, disabled: matcher, weekStartsOn: 1, selected: value || undefined, onSelect: (day) => {
                         onChange(day || null);
                         close();
                     } })) }), allowEmpty ? (jsx("button", { type: "button", disabled: allowEmpty && !value, className: toggleClassName, onClick: () => onChange(null), children: value ? jsx(XMarkIcon, { className: "size-4" }) : jsx(ClockIcon, { className: "size-4" }) })) : (jsx("div", { className: `cursor-pointer ${toggleClassName}`, children: jsx(CalendarIcon, { className: "size-4" }) }))] }));
@@ -470,7 +480,6 @@ const TextareaInput = (props) => {
                         }) }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
 const CheckboxInput = (props) => {
-    console.log("CheckboxInput", props);
     return (jsxs(Fragment, { children: [jsx("div", { className: props.fieldSetClassName, children: jsxs("label", { children: [jsx("input", { id: props.id, type: "checkbox", disabled: props.disabled, ...props.register(props.name, {
                                 required: props.required,
                                 disabled: props.disabled,
@@ -480,13 +489,13 @@ const CheckboxInput = (props) => {
                                 "toggle-xs": props.size === "xs",
                             }) }), jsx("span", { className: "text-sm text-gray-500 label-text grow pl-2", children: props.label })] }) }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
-const DateInput = ({ control, useDate, allowEmpty, label, error, disabled, desc, required, size, className, fieldSetClassName, name, ...rest }) => {
+const DateInput = ({ control, useDate, allowEmpty, label, error, disabled, desc, required, size, className, fieldSetClassName, name, from, to, ...rest }) => {
     return (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(Controller, { control: control, name: name, render: ({ field }) => {
                             return (jsx(DatePicker, { inputClassName: cx("input input-bordered", className, {
                                     "input-xs": size === "xs",
                                     "input-sm": size === "sm",
                                     "input-error": error,
-                                }), required: required, disabled: disabled, allowEmpty: allowEmpty, placeholder: required ? `${label}*` : label, value: field.value, onChange: (value) => {
+                                }), from: from, to: to, required: required, disabled: disabled, allowEmpty: allowEmpty, placeholder: required ? `${label}*` : label, value: field.value, onChange: (value) => {
                                     if (useDate) {
                                         field.onChange(value);
                                     }

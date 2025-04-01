@@ -1,4 +1,6 @@
-export declare const DatePicker: ({ onChange, value, inputClassName, toggleClassName, required, allowEmpty, disabled, placeholder, ...props }: {
+export declare const DatePicker: ({ onChange, value, inputClassName, toggleClassName, required, allowEmpty, disabled, placeholder, from, to, ...props }: {
+    from?: Date;
+    to?: Date;
     required?: boolean;
     disabled?: boolean;
     value: Date | null;

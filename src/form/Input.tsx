@@ -184,7 +184,6 @@ export const CheckboxInput = <
 >(
   props: IInputRegisterProps<TFieldValues, TName>,
 ) => {
-  console.log("CheckboxInput", props);
   return (
     <>
       <div className={props.fieldSetClassName}>
@@ -232,11 +231,15 @@ export const DateInput = <
   className,
   fieldSetClassName,
   name,
+  from,
+  to,
   ...rest
 }: IInputProps<TName> & {
   control: Control<TFieldValues>;
   useDate?: boolean;
   allowEmpty?: boolean;
+  from?: Date;
+  to?: Date;
 }) => {
   return (
     <div className={fieldSetClassName}>
@@ -252,6 +255,8 @@ export const DateInput = <
                   "input-sm": size === "sm",
                   "input-error": error,
                 })}
+                from={from}
+                to={to}
                 required={required}
                 disabled={disabled}
                 allowEmpty={allowEmpty}

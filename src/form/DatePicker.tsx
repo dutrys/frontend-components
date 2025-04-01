@@ -5,7 +5,7 @@ import styles from "./DatePicker.module.css";
 import { ClockIcon, XMarkIcon, CalendarIcon } from "@heroicons/react/24/outline";
 import { Popover } from "@/dialog";
 import { useParams } from "next/navigation";
-import { DayPicker } from "react-day-picker";
+import { DayPicker, Matcher } from "react-day-picker";
 import { enGB, lt } from "react-day-picker/locale";
 
 const formatDate = (date: Date | null | undefined) => {
@@ -25,8 +25,12 @@ export const DatePicker = ({
   allowEmpty,
   disabled,
   placeholder,
+  from,
+  to,
   ...props
 }: {
+  from?: Date;
+  to?: Date;
   required?: boolean;
   disabled?: boolean;
   value: Date | null;
@@ -41,6 +45,15 @@ export const DatePicker = ({
   useEffect(() => {
     setDateString(value ? formatDate(value) : "");
   }, [value]);
+
+  let matcher: Matcher | undefined = undefined;
+  if (from && to) {
+    matcher = { before: from, after: to };
+  } else if (from) {
+    matcher = { before: from };
+  } else if (to) {
+    matcher = { after: to };
+  }
 
   return (
     <div className={`w-full ${inputClassName}`}>
@@ -93,6 +106,7 @@ export const DatePicker = ({
             mode="single"
             locale={params.locale === "lt" ? lt : enGB}
             showOutsideDays
+            disabled={matcher}
             weekStartsOn={1}
             selected={value || undefined}
             onSelect={(day) => {

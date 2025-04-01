@@ -14,10 +14,12 @@ export declare const SelectInput: <TFieldValues extends FieldValues = FieldValue
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const TextareaInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName>) => import("react/jsx-runtime").JSX.Element;
 export declare const CheckboxInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName>) => import("react/jsx-runtime").JSX.Element;
-export declare const DateInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, useDate, allowEmpty, label, error, disabled, desc, required, size, className, fieldSetClassName, name, ...rest }: IInputProps<TName> & {
+export declare const DateInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, useDate, allowEmpty, label, error, disabled, desc, required, size, className, fieldSetClassName, name, from, to, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
     allowEmpty?: boolean;
+    from?: Date;
+    to?: Date;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const SelectPaginatedFromApiInput: <T extends {
     data: {
