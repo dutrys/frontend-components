@@ -20,6 +20,9 @@ import styles from "./Input.module.css";
 import { NumericFormat } from "react-number-format";
 import { NumericFormatProps } from "react-number-format/types/types";
 import React from "react";
+import { useTranslations } from "next-intl";
+import { CheckIcon } from "@heroicons/react/20/solid";
+import { LoadingComponent } from "@/Loading";
 
 interface IInputRegisterProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -598,4 +601,48 @@ export interface IInputProps<TName extends FieldPath<FieldValues>> {
 
 export const Required = () => {
   return <span className="text-error align-bottom">*</span>;
+};
+
+export const SaveButton = ({
+  isLoading,
+  text,
+  icon,
+  disabled,
+  className = "btn-block",
+  onClick,
+  size,
+  type = "submit",
+  ...props
+}: {
+  type?: "submit" | "button";
+  size?: "sm";
+  onClick?: () => unknown;
+  className?: string;
+  icon?: React.ElementType;
+  text?: string;
+  isLoading?: boolean;
+  disabled?: boolean;
+}) => {
+  const t = useTranslations();
+  const Icon = icon || CheckIcon;
+
+  return (
+    <button
+      type={type}
+      className={`btn btn-primary ${size === "sm" ? "btn-sm" : ""} ${className}`}
+      color="primary"
+      disabled={isLoading || disabled}
+      data-testid={type === "submit" ? "submit" : undefined}
+      onClick={(e) => {
+        if (onClick) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      {...props}
+    >
+      {text || t("general.saveButton")}
+      {isLoading ? <LoadingComponent className="size-4" /> : <Icon className="size-4" />}
+    </button>
+  );
 };
