@@ -79,5 +79,15 @@ export interface IInputProps<TName extends FieldPath<FieldValues>> {
     size?: "xs" | "sm";
 }
 export declare const Required: () => import("react/jsx-runtime").JSX.Element;
+export declare const SaveButton: ({ isLoading, text, icon, disabled, className, onClick, size, type, ...props }: {
+    type?: "submit" | "button";
+    size?: "sm";
+    onClick?: () => unknown;
+    className?: string;
+    icon?: React.ElementType;
+    text?: string;
+    isLoading?: boolean;
+    disabled?: boolean;
+}) => import("react/jsx-runtime").JSX.Element;
 export {};
 //# sourceMappingURL=Input.d.ts.map

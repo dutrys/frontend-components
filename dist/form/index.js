@@ -550,6 +550,16 @@ const SelectPaginatedFromApiWithLabel = ({ label, queryFn, queryKey, desc, name,
 const Required = () => {
     return jsx("span", { className: "text-error align-bottom", children: "*" });
 };
+const SaveButton = ({ isLoading, text, icon, disabled, className = "btn-block", onClick, size, type = "submit", ...props }) => {
+    const t = useTranslations();
+    const Icon = icon || CheckIcon;
+    return (jsxs("button", { type: type, className: `btn btn-primary ${size === "sm" ? "btn-sm" : ""} ${className}`, color: "primary", disabled: isLoading || disabled, "data-testid": type === "submit" ? "submit" : undefined, onClick: (e) => {
+            if (onClick) {
+                e.preventDefault();
+                onClick();
+            }
+        }, ...props, children: [text || t("general.saveButton"), isLoading ? jsx(LoadingComponent, { className: "size-4" }) : jsx(Icon, { className: "size-4" })] }));
+};
 
-export { CheckboxInput, ConfirmSave, DateInput, DatePicker, DateTimeInput, DateTimePicker, GeneralErrors, GeneralErrorsInToast, InputErrors, Label, NumberInput, Required, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, TextInput, TextareaInput, TimeInput, TimePicker, addServerErrors, isServerError, mapToDot, useFormSubmit };
+export { CheckboxInput, ConfirmSave, DateInput, DatePicker, DateTimeInput, DateTimePicker, GeneralErrors, GeneralErrorsInToast, InputErrors, Label, NumberInput, Required, SaveButton, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, TextInput, TextareaInput, TimeInput, TimePicker, addServerErrors, isServerError, mapToDot, useFormSubmit };
 //# sourceMappingURL=index.js.map
