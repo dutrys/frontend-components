@@ -8,13 +8,13 @@ import { useRouter, useParams } from 'next/navigation';
 import { format, isSameDay, isSameHour, parse, isValid } from 'date-fns';
 import { XMarkIcon, ClockIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import { useFloating, offset, flip, arrow, autoUpdate, useFocus, useHover, safePolygon, useClick, useDismiss, useInteractions, FloatingPortal, FloatingArrow } from '@floating-ui/react';
+import cx from 'classnames';
 import { DayPicker } from 'react-day-picker';
 import { lt, enGB } from 'react-day-picker/locale';
 import 'react-tooltip';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Combobox, ComboboxInput, ComboboxButton, Transition, ComboboxOptions, ComboboxOption } from '@headlessui/react';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
-import cx from 'classnames';
 import { useInView } from 'react-intersection-observer';
 import 'date-fns-tz';
 import { NumericFormat } from 'react-number-format';
@@ -172,7 +172,7 @@ const addServerErrors = (errors, setError) => Object.entries(errors).forEach(([k
 
 var styles$1 = {"dayPicker":"DatePicker-module_dayPicker__VRSSY"};
 
-const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: openProp, showOnHover = true, showOnClick = false, showOnFocus = false, popoverWidth, bgColor = "#1e293b", borderColor = "#1e293b", }) => {
+const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: openProp, showOnHover = true, showOnClick = false, showOnFocus = false, popoverWidth, backgroundColor = "bg-slate-800", borderColor = "border-slate-600", }) => {
     const [isOpen, setIsOpen] = useState(openProp || false);
     const arrowRef = useRef(null);
     const { refs, floatingStyles, context } = useFloating({
@@ -195,7 +195,7 @@ const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: ope
     const click = useClick(context, { enabled: showOnClick, keyboardHandlers: false });
     const dismiss = useDismiss(context, { escapeKey: false, bubbles: true });
     const { getReferenceProps, getFloatingProps } = useInteractions([dismiss, hover, click, focus]);
-    return (jsxs(Fragment, { children: [title(refs.setReference, getReferenceProps()), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100, borderColor, backgroundColor: bgColor }, ...getFloatingProps(), className: `${popoverClassName} border rounded-sm shadow-lg shadow-gray-400`, children: [jsx(FloatingArrow, { strokeWidth: 1, fill: bgColor, stroke: borderColor, context: context, ref: arrowRef }), jsx("div", { className: popoverWidth, children: children(() => setIsOpen(false)) })] }) }))] }));
+    return (jsxs(Fragment, { children: [title(refs.setReference, getReferenceProps()), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100 }, ...getFloatingProps(), className: cx("border rounded-sm shadow-lg shadow-base-100 border-1", popoverClassName, backgroundColor, borderColor), children: [jsx(FloatingArrow, { strokeWidth: 1, fill: `var(--color-${backgroundColor.replace("bg-", "")})`, stroke: `var(--color-${borderColor.replace("border-", "")})`, context: context, ref: arrowRef }), jsx("div", { className: popoverWidth, children: children(() => setIsOpen(false)) })] }) }))] }));
 };
 
 function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from, to, placeholder, inputClassName = "input input-bordered", toggleClassName = "", ...rest }) {

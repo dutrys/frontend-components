@@ -15,6 +15,7 @@ import {
   useHover,
   useInteractions,
 } from "@floating-ui/react";
+import cx from "classnames";
 
 export const Popover = ({
   title,
@@ -26,8 +27,8 @@ export const Popover = ({
   showOnClick = false,
   showOnFocus = false,
   popoverWidth,
-  bgColor = "#1e293b",
-  borderColor = "#1e293b",
+  backgroundColor = "bg-slate-800",
+  borderColor = "border-slate-600",
 }: {
   open?: boolean;
   showOnHover?: boolean;
@@ -38,8 +39,8 @@ export const Popover = ({
   title: (ref: (node: HTMLElement | null) => void, props: Record<string, unknown>) => React.ReactNode;
   children: (close: () => void) => React.ReactNode;
   onShow?: (show: boolean) => void;
-  bgColor?: string;
-  borderColor?: string;
+  borderColor?: `border-${string}`;
+  backgroundColor?: `bg-${string}`;
 }) => {
   const [isOpen, setIsOpen] = useState(openProp || false);
   const arrowRef = useRef(null);
@@ -75,11 +76,22 @@ export const Popover = ({
         <FloatingPortal>
           <div
             ref={refs.setFloating}
-            style={{ ...floatingStyles, zIndex: 1100, borderColor, backgroundColor: bgColor }}
+            style={{ ...floatingStyles, zIndex: 1100 }}
             {...getFloatingProps()}
-            className={`${popoverClassName} border rounded-sm shadow-lg shadow-gray-400`}
+            className={cx(
+              "border rounded-sm shadow-lg shadow-base-100 border-1",
+              popoverClassName,
+              backgroundColor,
+              borderColor,
+            )}
           >
-            <FloatingArrow strokeWidth={1} fill={bgColor} stroke={borderColor} context={context} ref={arrowRef} />
+            <FloatingArrow
+              strokeWidth={1}
+              fill={`var(--color-${backgroundColor.replace("bg-", "")})`}
+              stroke={`var(--color-${borderColor.replace("border-", "")})`}
+              context={context}
+              ref={arrowRef}
+            />
             <div className={popoverWidth}>{children(() => setIsOpen(false))}</div>
           </div>
         </FloatingPortal>

@@ -9,7 +9,7 @@ declare const LoadingComponent: ({ style, className, loadingClassName, size, }: 
     style?: React__default.CSSProperties;
 }) => react_jsx_runtime.JSX.Element;
 
-declare const Popover: ({ title, children, popoverClassName, onShow, open: openProp, showOnHover, showOnClick, showOnFocus, popoverWidth, bgColor, borderColor, }: {
+declare const Popover: ({ title, children, popoverClassName, onShow, open: openProp, showOnHover, showOnClick, showOnFocus, popoverWidth, backgroundColor, borderColor, }: {
     open?: boolean;
     showOnHover?: boolean;
     showOnClick?: boolean;
@@ -19,8 +19,8 @@ declare const Popover: ({ title, children, popoverClassName, onShow, open: openP
     title: (ref: (node: HTMLElement | null) => void, props: Record<string, unknown>) => React.ReactNode;
     children: (close: () => void) => React.ReactNode;
     onShow?: (show: boolean) => void;
-    bgColor?: string;
-    borderColor?: string;
+    borderColor?: `border-${string}`;
+    backgroundColor?: `bg-${string}`;
 }) => react_jsx_runtime.JSX.Element;
 
 export { LoadingComponent, Popover };
