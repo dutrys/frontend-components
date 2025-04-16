@@ -581,6 +581,7 @@ export const SelectPaginatedFromApiWithLabel = <T extends { data: { id: number }
           onChange={(model) => onChange?.(model || null)}
         />
       </div>
+      {desc}
       <InputErrors className="text-xs text-error mt-1" errors={error} />
     </div>
   );

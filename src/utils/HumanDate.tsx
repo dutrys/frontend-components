@@ -1,10 +1,19 @@
 import React from "react";
-import { differenceInMinutes, differenceInSeconds, format, formatDistance, isValid, parseJSON } from "date-fns";
+import {
+  differenceInDays,
+  differenceInMinutes,
+  differenceInSeconds,
+  format,
+  formatDistance,
+  isValid,
+  parseJSON,
+} from "date-fns";
 import { lt } from "date-fns/locale";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { TOOLTIP_GLOBAL_ID } from "./Toaster";
+import { dateToStringDate } from "@/utils/datetime";
 
 /**
  * Displays date with tooltip
@@ -73,15 +82,18 @@ export const HumanDate = ({
     return null;
   }
 
+  const displayDate = dateDate && differenceInDays(new Date(), dateDate) > 7;
   return (
     <>
       <span
         data-testid="datewithtooltip"
         className={`date-with-tooltip-${dateDate.getTime()}`}
         data-tooltip-id={disableTooltip ? undefined : tooltipId}
-        data-tooltip-content={disableTooltip ? undefined : format(dateDate, "yyyy-MM-dd HH:mm:ss")}
+        data-tooltip-content={
+          disableTooltip ? undefined : format(dateDate, displayDate ? "HH:mm:ss" : "yyyy-MM-dd HH:mm:ss")
+        }
       >
-        {dateString}
+        {displayDate ? dateToStringDate(dateDate) : dateString}
       </span>
     </>
   );

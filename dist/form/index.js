@@ -545,7 +545,7 @@ const SelectPaginatedFromApiWithLabel = ({ label, queryFn, queryKey, desc, name,
                             "input-xs": size === "xs",
                             "input-sm": size === "sm",
                             "input-error": error,
-                        }), size: size, required: required, disabled: disabled, placeholder: required ? `${label}*` : label, queryKey: queryKey, queryFn: queryFn, value: value, valueFormat: valueFormat, onChange: (model) => onChange?.(model || null) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+                        }), size: size, required: required, disabled: disabled, placeholder: required ? `${label}*` : label, queryKey: queryKey, queryFn: queryFn, value: value, valueFormat: valueFormat, onChange: (model) => onChange?.(model || null) })] }), desc, jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 };
 const Required = () => {
     return jsx("span", { className: "text-error align-bottom", children: "*" });

@@ -1,6 +1,6 @@
 'use client';
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
-import { parseJSON, isValid, differenceInSeconds, formatDistance, differenceInMinutes, format } from 'date-fns';
+import { format, parseJSON, isValid, differenceInSeconds, formatDistance, differenceInMinutes, differenceInDays } from 'date-fns';
 import { lt } from 'date-fns/locale';
 import { useParams } from 'next/navigation';
 import * as React from 'react';
@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl';
 import toast, { useToasterStore, Toaster as Toaster$1, resolveValue } from 'react-hot-toast';
 import { ExclamationTriangleIcon, CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from 'react-tooltip';
+import 'date-fns-tz';
 
 const options = {
     loading: {
@@ -43,6 +44,10 @@ function Toaster() {
                     return (jsxs("div", { "data-testid": "toast", onClick: () => toast.remove(t.id), className: "cursor-pointer flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow-sm dark:text-gray-400 dark:bg-gray-800", role: "alert", children: [t.icon ? (t.icon) : (jsxs("div", { className: `inline-flex items-center justify-center shrink-0 w-8 h-8 rounded-lg ${type.classNames} ${t.className}`, children: [type.icon, jsx("span", { className: "sr-only", children: t.type })] })), jsx("div", { className: "ml-3 text-sm font-normal sentry-unmask", children: resolveValue(t.message, t) })] }));
                 } })] }));
 }
+
+const dateToStringDate = (date) => {
+    return format(date, "yyyy-MM-dd");
+};
 
 /**
  * Displays date with tooltip
@@ -93,7 +98,8 @@ const HumanDate = ({ date, from = new Date(), includeSeconds = false, tooltipId 
     if (!dateDate || !isValid(dateDate) || !show) {
         return null;
     }
-    return (jsx(Fragment, { children: jsx("span", { "data-testid": "datewithtooltip", className: `date-with-tooltip-${dateDate.getTime()}`, "data-tooltip-id": disableTooltip ? undefined : tooltipId, "data-tooltip-content": disableTooltip ? undefined : format(dateDate, "yyyy-MM-dd HH:mm:ss"), children: dateString }) }));
+    const displayDate = dateDate && differenceInDays(new Date(), dateDate) > 7;
+    return (jsx(Fragment, { children: jsx("span", { "data-testid": "datewithtooltip", className: `date-with-tooltip-${dateDate.getTime()}`, "data-tooltip-id": disableTooltip ? undefined : tooltipId, "data-tooltip-content": disableTooltip ? undefined : format(dateDate, displayDate ? "HH:mm:ss" : "yyyy-MM-dd HH:mm:ss"), children: displayDate ? dateToStringDate(dateDate) : dateString }) }));
 };
 
 const getPreviousPageParam = (page) => !page?.meta || page?.meta?.currentPage === 1 ? undefined : page.meta.currentPage - 1;
