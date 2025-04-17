@@ -6,6 +6,7 @@ import {
   FieldError,
   RegisterOptions,
   UseFormRegister,
+  Merge,
 } from "react-hook-form";
 import { DateTimePicker } from "./DateTimePicker";
 import { DatePicker } from "./DatePicker";
@@ -591,7 +592,7 @@ export interface IInputProps<TName extends FieldPath<FieldValues>> {
   id?: string;
   label: string;
   name: TName;
-  error?: FieldError;
+  error?: FieldError | Merge<FieldError, (FieldError | undefined)[]>;
   required?: boolean;
   className?: string;
   fieldSetClassName?: string;

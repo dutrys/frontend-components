@@ -1,4 +1,4 @@
-import { Control, FieldValues, FieldPath, FieldError, RegisterOptions, UseFormRegister } from "react-hook-form";
+import { Control, FieldValues, FieldPath, FieldError, RegisterOptions, UseFormRegister, Merge } from "react-hook-form";
 import { PaginateQuery, ResponseMeta } from "../utils/paginate";
 import { NumericFormatProps } from "react-number-format/types/types";
 import React from "react";
@@ -70,7 +70,7 @@ export interface IInputProps<TName extends FieldPath<FieldValues>> {
     id?: string;
     label: string;
     name: TName;
-    error?: FieldError;
+    error?: FieldError | Merge<FieldError, (FieldError | undefined)[]>;
     required?: boolean;
     className?: string;
     fieldSetClassName?: string;
