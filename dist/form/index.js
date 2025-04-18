@@ -574,6 +574,21 @@ const SaveButton = ({ isLoading, text, icon, disabled, className = "btn-block", 
             }
         }, ...props, children: [text || t("general.saveButton"), isLoading ? jsx(LoadingComponent, { className: "size-4" }) : jsx(Icon, { className: "size-4" })] }));
 };
+const IndeterminateCheckbox = ({ checked, className = "checkbox checkbox-xs", indeterminate, onChange, }) => {
+    const checkboxRef = useRef(null);
+    useEffect(() => {
+        if (!checkboxRef.current) {
+            return;
+        }
+        if (indeterminate === true) {
+            checkboxRef.current.indeterminate = true;
+        }
+        else {
+            checkboxRef.current.indeterminate = false;
+        }
+    }, [indeterminate, checked]);
+    return (jsx("input", { type: "checkbox", ref: checkboxRef, className: className, onChange: onChange, checked: checked || false }));
+};
 
-export { CheckboxInput, ConfirmSave, DateInput, DatePicker, DateTimeInput, DateTimePicker, GeneralErrors, GeneralErrorsInToast, InputErrors, Label, NumberInput, Required, SaveButton, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, TextInput, TextareaInput, TimeInput, TimePicker, addServerErrors, isServerError, mapToDot, useFormSubmit };
+export { CheckboxInput, ConfirmSave, DateInput, DatePicker, DateTimeInput, DateTimePicker, GeneralErrors, GeneralErrorsInToast, IndeterminateCheckbox, InputErrors, Label, NumberInput, Required, SaveButton, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, TextInput, TextareaInput, TimeInput, TimePicker, addServerErrors, isServerError, mapToDot, useFormSubmit };
 //# sourceMappingURL=index.js.map

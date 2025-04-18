@@ -84,7 +84,7 @@ export const HeaderResponsive = <T extends object>({
             )}
           >
             {() => (
-              <div className="h-96 overflow-y-auto">
+              <div className="max-h-96 overflow-y-auto">
                 <ul tabIndex={0} className="menu px-1 py-0">
                   {[...elements].splice(showItems).map(renderDropdown)}
                 </ul>

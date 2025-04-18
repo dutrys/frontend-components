@@ -1,3 +1,4 @@
+'use client';
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import React, { useState, useRef, useEffect, useCallback, createContext, useContext } from 'react';
 import { useFloating, offset, flip, arrow, autoUpdate, useFocus, useHover, safePolygon, useClick, useDismiss, useInteractions, FloatingPortal, FloatingArrow } from '@floating-ui/react';
@@ -13,6 +14,13 @@ import 'react-tooltip';
 import 'date-fns-tz';
 import '@sentry/nextjs';
 import 'react-hook-form';
+import 'react-day-picker';
+import 'react-day-picker/locale';
+import '@tanstack/react-query';
+import '@headlessui/react';
+import '@heroicons/react/20/solid';
+import 'react-intersection-observer';
+import 'react-number-format';
 
 const LoadingComponent = ({ style, className, loadingClassName, size, }) => (jsx("div", { className: `flex justify-center ${className}`, style: style, children: jsx("span", { className: `${loadingClassName || "text-primary"} loading loading-spinner ${size}` }) }));
 
@@ -282,7 +290,7 @@ const HeaderResponsive = ({ renderVisible, renderDropdown, heightClassName, elem
             window.removeEventListener("resize", checkNavbarWidth);
         };
     }, [showItems, bar, elWidth]);
-    return (jsxs(Fragment, { children: [jsx("div", { className: "overflow-hidden grow", style: { overflow: "hidden" }, children: jsx("div", { ref: bar, className: "flex overflow-hidden", children: jsx("div", { className: `${heightClassName || ""} w-full`, children: jsx("ul", { className: `flex flex-nowrap shrink justify-end flex-row ${heightClassName || ""} items-center`, children: elements.map((elementCollection, i) => (jsx("li", { className: `item pr-2 shrink-0 flex-nowrap flex flex-row ${i >= showItems ? "hidden" : ""}`, children: renderVisible(elementCollection, i) }, i))) }) }) }) }), showItems < elements.length && (jsx("div", { style: { width: MORE_WIDTH }, className: "pr-2", children: jsx(Popover, { borderColor: "border-base-300", backgroundColor: "bg-base-200", title: (ref, props) => (jsx("a", { tabIndex: 0, ref: ref, ...props, role: "button", className: "btn btn-xs w-full", children: jsx(EllipsisHorizontalIcon, { className: "h-3 w-3" }) })), children: () => (jsx("div", { className: "h-96 overflow-y-auto", children: jsx("ul", { tabIndex: 0, className: "menu px-1 py-0", children: [...elements].splice(showItems).map(renderDropdown) }) })) }) }))] }));
+    return (jsxs(Fragment, { children: [jsx("div", { className: "overflow-hidden grow", style: { overflow: "hidden" }, children: jsx("div", { ref: bar, className: "flex overflow-hidden", children: jsx("div", { className: `${heightClassName || ""} w-full`, children: jsx("ul", { className: `flex flex-nowrap shrink justify-end flex-row ${heightClassName || ""} items-center`, children: elements.map((elementCollection, i) => (jsx("li", { className: `item pr-2 shrink-0 flex-nowrap flex flex-row ${i >= showItems ? "hidden" : ""}`, children: renderVisible(elementCollection, i) }, i))) }) }) }) }), showItems < elements.length && (jsx("div", { style: { width: MORE_WIDTH }, className: "pr-2", children: jsx(Popover, { borderColor: "border-base-300", backgroundColor: "bg-base-200", title: (ref, props) => (jsx("a", { tabIndex: 0, ref: ref, ...props, role: "button", className: "btn btn-xs w-full", children: jsx(EllipsisHorizontalIcon, { className: "h-3 w-3" }) })), children: () => (jsx("div", { className: "max-h-96 overflow-y-auto", children: jsx("ul", { tabIndex: 0, className: "menu px-1 py-0", children: [...elements].splice(showItems).map(renderDropdown) }) })) }) }))] }));
 };
 
 const Pagination = ({ page, visiblePages, onClick, }) => {
@@ -303,6 +311,22 @@ const Pagination = ({ page, visiblePages, onClick, }) => {
 };
 
 var styles = {"table":"PaginatedTable-module_table__efs0Y","selectedRow":"PaginatedTable-module_selectedRow__Xi-QH","thead":"PaginatedTable-module_thead__Jb-pD"};
+
+const IndeterminateCheckbox = ({ checked, className = "checkbox checkbox-xs", indeterminate, onChange, }) => {
+    const checkboxRef = useRef(null);
+    useEffect(() => {
+        if (!checkboxRef.current) {
+            return;
+        }
+        if (indeterminate === true) {
+            checkboxRef.current.indeterminate = true;
+        }
+        else {
+            checkboxRef.current.indeterminate = false;
+        }
+    }, [indeterminate, checked]);
+    return (jsx("input", { type: "checkbox", ref: checkboxRef, className: className, onChange: onChange, checked: checked || false }));
+};
 
 const limits = [10, 20, 50, 100];
 function isActionColumn(column) {
@@ -337,7 +361,10 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, pa
                     router.push((path + setPartialParams({ search, page: 1 }, searchParams)).replace(/^\/(en|lt)\//, "/"));
                 }, children: [" ", jsxs("div", { className: "join w-full pr-4", children: [jsx("input", { type: "text", value: search, onChange: (e) => setSearch(e.target.value), name: "search", className: "join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500", placeholder: t("pagination.searchPlaceholder") }), jsx("button", { className: "join-item btn btn-neutral btn-xs uppercase", type: "submit", children: jsx(MagnifyingGlassIcon, { className: "w-4 h-4" }) })] })] }) }));
     };
-    const heading = (jsx(Fragment, { children: jsxs("div", { className: "flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]", children: [jsx("h1", { className: `pl-4 pb-3 pt-3 font-bold mr-2 ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), extraHeading, jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (searchableShortcuts.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsive, { heightClassName: "h-12", elements: [[{ link: { bulk: "bulk" }, text: "" }], ...searchableShortcuts], renderDropdown: (shortcuts, i) => {
+    const elements = bulkActions && bulkActions?.length > 0
+        ? [[{ link: { bulk: "bulk" }, text: "" }], ...searchableShortcuts]
+        : searchableShortcuts;
+    const heading = (jsx(Fragment, { children: jsxs("div", { className: "flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]", children: [jsx("h1", { className: `pl-4 pb-3 pt-3 font-bold mr-2 ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), extraHeading, jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (searchableShortcuts.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsive, { heightClassName: "h-12", elements: elements, renderDropdown: (shortcuts, i) => {
                         return (jsxs(React.Fragment, { children: [i !== 0 && jsx("li", { className: "disabled" }), shortcuts.map(({ link, text }) => {
                                     if (bulkActions && bulkActions.length > 0 && link.bulk === "bulk") {
                                         return (jsxs(Fragment, { children: [jsx("li", { className: "menu-disabled", children: jsx("span", { children: t("pagination.bulkActions") }) }), jsx(BulkDropDownActions, { disabled: selected.length === 0, bulkActions: bulkActions.map((b) => ({
@@ -387,9 +414,9 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, pa
     if (pagination.meta.totalItems === 0) {
         return (jsxs(Fragment, { children: [heading, jsxs("div", { className: "text-center mt-20", children: [jsxs("span", { className: "text-gray-400", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addNew, children: [jsx(PlusIcon, { width: 20 }), " ", t("pagination.tryCreatingOne")] }) }))] })] }));
     }
-    return (jsxs("div", { "data-testid": "paginate-table", className: "relative h-full", "data-test-sort": (pagination.meta.sortBy || []).flat().join("-"), children: [heading, jsx("div", { className: "overflow-x-auto max-h-[calc(100%-7rem)] w-[calc(100vw)] sm:w-[calc(100vw-6rem)]", children: jsxs("table", { className: `${styles.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [jsx("thead", { children: jsxs("tr", { children: [bulkActions && (jsx("th", { children: jsx("input", { type: "checkbox", className: "checkbox checkbox-xs", onChange: (e) => {
+    return (jsxs("div", { "data-testid": "paginate-table", className: "relative h-full", "data-test-sort": (pagination.meta.sortBy || []).flat().join("-"), children: [heading, jsx("div", { className: "overflow-x-auto max-h-[calc(100%-7rem)] w-[calc(100vw)] sm:w-[calc(100vw-6rem)]", children: jsxs("table", { className: `${styles.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [jsx("thead", { children: jsxs("tr", { children: [bulkActions && (jsx("th", { children: jsx(IndeterminateCheckbox, { className: "checkbox checkbox-xs", onChange: (e) => {
                                                 setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);
-                                            }, checked: pagination.data.every((model) => selected.includes(model.id)) }) })), columns.map((column, i) => {
+                                            }, indeterminate: selected.length > 0 && selected.length < pagination.data.length, checked: pagination.data.every((model) => selected.includes(model.id)) }) })), columns.map((column, i) => {
                                         if (isActionColumn(column)) {
                                             return (jsx("th", { className: `${styles.thead} w-12 max-w-24 text-xs`, children: "\u00A0" }, `actions-${i}`));
                                         }
@@ -428,21 +455,21 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, pa
                                                 archive = column.archive(model);
                                             }
                                             else {
-                                                archive = typeof column.archive === "undefined" ? true : column.archive;
+                                                archive = typeof column.archive === "undefined" ? false : column.archive;
                                             }
                                             let edit;
                                             if (typeof column.edit === "function") {
                                                 edit = column.edit(model);
                                             }
                                             else {
-                                                edit = typeof column.edit === "undefined" ? true : column.edit;
+                                                edit = typeof column.edit === "undefined" ? false : column.edit;
                                             }
                                             let view;
                                             if (typeof column.view === "function") {
                                                 view = column.view(model);
                                             }
                                             else {
-                                                view = typeof column.view === "undefined" ? true : column.view;
+                                                view = typeof column.view === "undefined" ? false : column.view;
                                             }
                                             return (jsxs("th", { className: "whitespace-nowrap", children: [column.extraButtons?.map((Button, i) => (jsx(React.Fragment, { children: Button(model) }, `${model[column.idField]}-${i}`))), jsx(ActionButtons, { archive: archive, pathname: pathname, view: view, edit: edit, id: idFieldValue })] }, `actions-td-${i}`));
                                         }

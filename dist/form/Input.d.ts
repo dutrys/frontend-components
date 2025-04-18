@@ -1,7 +1,7 @@
 import { Control, FieldValues, FieldPath, FieldError, RegisterOptions, UseFormRegister, Merge } from "react-hook-form";
 import { PaginateQuery, ResponseMeta } from "../utils/paginate";
 import { NumericFormatProps } from "react-number-format/types/types";
-import React from "react";
+import React, { ChangeEvent } from "react";
 interface IInputRegisterProps<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>> extends IInputProps<TName> {
     options?: Omit<RegisterOptions<TFieldValues, TName>, "required" | "disabled">;
     register: UseFormRegister<TFieldValues>;
@@ -88,6 +88,12 @@ export declare const SaveButton: ({ isLoading, text, icon, disabled, className, 
     text?: string;
     isLoading?: boolean;
     disabled?: boolean;
+}) => import("react/jsx-runtime").JSX.Element;
+export declare const IndeterminateCheckbox: ({ checked, className, indeterminate, onChange, }: {
+    onChange: (e: ChangeEvent<HTMLInputElement>) => unknown;
+    checked: boolean;
+    className: string;
+    indeterminate?: boolean;
 }) => import("react/jsx-runtime").JSX.Element;
 export {};
 //# sourceMappingURL=Input.d.ts.map

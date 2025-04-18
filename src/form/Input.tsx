@@ -20,7 +20,7 @@ import { TimePicker } from "./TimePicker";
 import styles from "./Input.module.css";
 import { NumericFormat } from "react-number-format";
 import { NumericFormatProps } from "react-number-format/types/types";
-import React from "react";
+import React, { ChangeEvent, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import { LoadingComponent } from "@/Loading";
@@ -646,5 +646,34 @@ export const SaveButton = ({
       {text || t("general.saveButton")}
       {isLoading ? <LoadingComponent className="size-4" /> : <Icon className="size-4" />}
     </button>
+  );
+};
+
+export const IndeterminateCheckbox = ({
+  checked,
+  className = "checkbox checkbox-xs",
+  indeterminate,
+  onChange,
+}: {
+  onChange: (e: ChangeEvent<HTMLInputElement>) => unknown;
+  checked: boolean;
+  className: string;
+  indeterminate?: boolean;
+}) => {
+  const checkboxRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!checkboxRef.current) {
+      return;
+    }
+    if (indeterminate === true) {
+      checkboxRef.current.indeterminate = true;
+    } else {
+      checkboxRef.current.indeterminate = false;
+    }
+  }, [indeterminate, checked]);
+
+  return (
+    <input type="checkbox" ref={checkboxRef} className={className} onChange={onChange} checked={checked || false} />
   );
 };

@@ -13,6 +13,7 @@ import { BulkActions, BulkDropDownActions } from "./BulkActions";
 import { ResponseMeta } from "@/utils";
 import { Link } from "./Link";
 import { Hotkeys } from "@/HotKeys";
+import { IndeterminateCheckbox } from "@/form";
 
 const limits = [10, 20, 50, 100];
 
@@ -134,6 +135,11 @@ export const PaginatedTable = <TModel extends { id: number }>({
     );
   };
 
+  const elements =
+    bulkActions && bulkActions?.length > 0
+      ? [[{ link: { bulk: "bulk" }, text: "" }], ...searchableShortcuts]
+      : searchableShortcuts;
+
   const heading = (
     <>
       <div className="flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]">
@@ -144,7 +150,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
         {(searchableShortcuts.length > 0 || (bulkActions && bulkActions?.length > 0)) && (
           <HeaderResponsive
             heightClassName="h-12"
-            elements={[[{ link: { bulk: "bulk" }, text: "" }], ...searchableShortcuts]}
+            elements={elements}
             renderDropdown={(shortcuts, i) => {
               return (
                 <React.Fragment key={i}>
@@ -286,12 +292,12 @@ export const PaginatedTable = <TModel extends { id: number }>({
             <tr>
               {bulkActions && (
                 <th>
-                  <input
-                    type="checkbox"
+                  <IndeterminateCheckbox
                     className="checkbox checkbox-xs"
                     onChange={(e) => {
                       setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);
                     }}
+                    indeterminate={selected.length > 0 && selected.length < pagination.data.length}
                     checked={pagination.data.every((model) => selected.includes(model.id))}
                   />
                 </th>
@@ -380,21 +386,21 @@ export const PaginatedTable = <TModel extends { id: number }>({
                     if (typeof column.archive === "function") {
                       archive = column.archive(model);
                     } else {
-                      archive = typeof column.archive === "undefined" ? true : column.archive;
+                      archive = typeof column.archive === "undefined" ? false : column.archive;
                     }
 
                     let edit: boolean;
                     if (typeof column.edit === "function") {
                       edit = column.edit(model);
                     } else {
-                      edit = typeof column.edit === "undefined" ? true : column.edit;
+                      edit = typeof column.edit === "undefined" ? false : column.edit;
                     }
 
                     let view: boolean;
                     if (typeof column.view === "function") {
                       view = column.view(model);
                     } else {
-                      view = typeof column.view === "undefined" ? true : column.view;
+                      view = typeof column.view === "undefined" ? false : column.view;
                     }
 
                     return (
