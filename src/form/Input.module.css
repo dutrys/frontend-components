@@ -1,11 +1,11 @@
 .desc {
-    display: table;
-    table-layout: fixed;
-    width: 100%;
+  display: table;
+  table-layout: fixed;
+  width: 100%;
 }
 .desc span {
-    display: table-cell;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+  display: table-cell;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }

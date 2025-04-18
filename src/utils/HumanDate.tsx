@@ -13,7 +13,7 @@ import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { TOOLTIP_GLOBAL_ID } from "./Toaster";
-import { dateToStringDate } from "@/utils/datetime";
+import { dateToStringDate } from "@/utils/date";
 
 /**
  * Displays date with tooltip

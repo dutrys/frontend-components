@@ -29,14 +29,16 @@ export const Popover = ({
   popoverWidth,
   backgroundColor = "bg-slate-800",
   borderColor = "border-slate-600",
+  disabled,
 }: {
+  disabled?: boolean;
   open?: boolean;
   showOnHover?: boolean;
   showOnClick?: boolean;
   showOnFocus?: boolean;
   popoverClassName?: string;
   popoverWidth?: string;
-  title: (ref: (node: HTMLElement | null) => void, props: Record<string, unknown>) => React.ReactNode;
+  title: (ref: ((node: HTMLElement | null) => void) | null, props: Record<string, unknown>) => React.ReactNode;
   children: (close: () => void) => React.ReactNode;
   onShow?: (show: boolean) => void;
   borderColor?: `border-${string}`;
@@ -67,6 +69,10 @@ export const Popover = ({
   const dismiss = useDismiss(context, { escapeKey: false, bubbles: true });
 
   const { getReferenceProps, getFloatingProps } = useInteractions([dismiss, hover, click, focus]);
+
+  if (disabled) {
+    return title(null, {});
+  }
 
   return (
     <>

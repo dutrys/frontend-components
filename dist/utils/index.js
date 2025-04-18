@@ -104,6 +104,41 @@ const HumanDate = ({ date, from = new Date(), includeSeconds = false, tooltipId 
 
 const getPreviousPageParam = (page) => !page?.meta || page?.meta?.currentPage === 1 ? undefined : page.meta.currentPage - 1;
 const getNextPageParam = (page) => !page?.meta || page?.meta?.currentPage >= page.meta?.totalPages ? undefined : page.meta.currentPage + 1;
+const setPartialParams = (partialParams, searchParams) => {
+    const params = new URLSearchParams(Array.from(searchParams?.entries() || []));
+    Object.keys(partialParams).forEach((key) => {
+        const value = partialParams[key].toString();
+        if (value === "" || !value) {
+            params.delete(key);
+        }
+        else {
+            params.set(key, value);
+        }
+    });
+    return `?${params}`;
+};
+const isParamActive = (link, searchParams) => {
+    for (const key in link) {
+        if (link[key] === "" && !searchParams.has(key)) {
+            continue;
+        }
+        if (link[key] !== searchParams.get(key)) {
+            return false;
+        }
+    }
+    return true;
+};
 
-export { HumanDate, TOOLTIP_GLOBAL_ID, Toaster, getNextPageParam, getPreviousPageParam };
+const DateTime = ({ date, format: format$1 = "yyyy-MM-dd HH:mm:ss" }) => {
+    const [formattedDate, setFormattedDate] = useState(null);
+    useEffect(() => {
+        const fromDate = parseJSON(date);
+        if (isValid(fromDate)) {
+            setFormattedDate(format(fromDate, format$1));
+        }
+    }, [date, format$1]);
+    return formattedDate;
+};
+
+export { DateTime, HumanDate, TOOLTIP_GLOBAL_ID, Toaster, getNextPageParam, getPreviousPageParam, isParamActive, setPartialParams };
 //# sourceMappingURL=index.js.map

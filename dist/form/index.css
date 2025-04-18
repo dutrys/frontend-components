@@ -29,13 +29,13 @@
 }
 
 .Input-module_desc__3D3hV {
-    display: table;
-    table-layout: fixed;
-    width: 100%;
+  display: table;
+  table-layout: fixed;
+  width: 100%;
 }
 .Input-module_desc__3D3hV span {
-    display: table-cell;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
+  display: table-cell;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }

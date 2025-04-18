@@ -14,7 +14,7 @@ import { InputErrors } from "./UseForm";
 import { format } from "date-fns";
 import { SelectPaginatedFromApi } from "./SelectPaginatedFromApi";
 import { PaginateQuery, ResponseMeta } from "../utils/paginate";
-import { stringToDate } from "../utils/datetime";
+import { stringToDate } from "../utils/date";
 import cx from "classnames";
 import { TimePicker } from "./TimePicker";
 import styles from "./Input.module.css";

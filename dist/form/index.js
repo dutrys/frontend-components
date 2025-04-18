@@ -172,7 +172,7 @@ const addServerErrors = (errors, setError) => Object.entries(errors).forEach(([k
 
 var styles$1 = {"dayPicker":"DatePicker-module_dayPicker__VRSSY"};
 
-const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: openProp, showOnHover = true, showOnClick = false, showOnFocus = false, popoverWidth, backgroundColor = "bg-slate-800", borderColor = "border-slate-600", }) => {
+const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: openProp, showOnHover = true, showOnClick = false, showOnFocus = false, popoverWidth, backgroundColor = "bg-slate-800", borderColor = "border-slate-600", disabled, }) => {
     const [isOpen, setIsOpen] = useState(openProp || false);
     const arrowRef = useRef(null);
     const { refs, floatingStyles, context } = useFloating({
@@ -195,6 +195,9 @@ const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: ope
     const click = useClick(context, { enabled: showOnClick, keyboardHandlers: false });
     const dismiss = useDismiss(context, { escapeKey: false, bubbles: true });
     const { getReferenceProps, getFloatingProps } = useInteractions([dismiss, hover, click, focus]);
+    if (disabled) {
+        return title(null, {});
+    }
     return (jsxs(Fragment, { children: [title(refs.setReference, getReferenceProps()), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100 }, ...getFloatingProps(), className: cx("border rounded-sm shadow-lg shadow-base-100 border-1", popoverClassName, backgroundColor, borderColor), children: [jsx(FloatingArrow, { strokeWidth: 1, fill: `var(--color-${backgroundColor.replace("bg-", "")})`, stroke: `var(--color-${borderColor.replace("border-", "")})`, context: context, ref: arrowRef }), jsx("div", { className: popoverWidth, children: children(() => setIsOpen(false)) })] }) }))] }));
 };
 

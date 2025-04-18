@@ -1,0 +1,28 @@
+.table tr.selectedRow {
+  background: color-mix(in oklab, var(--color-base-200) 100%, var(--color-base-100) 80%);
+}
+
+.table tr.selectedRow td,
+.table tr.selectedRow th {
+  background: color-mix(in oklab, var(--color-base-200) 100%, var(--color-base-100) 80%);
+}
+.table tbody tr.selectedRow th {
+  border-top: 1px solid var(--color-base-200);
+  border-bottom: 1px solid var(--color-base-200);
+}
+
+.table tbody tr:hover,
+.table tbody tr:hover td,
+.table tbody tr:hover th {
+  background: var(--color-base-200);
+  border-top: 1px solid var(--color-base-200);
+  border-bottom: 1px solid var(--color-base-200);
+}
+.table tbody th {
+  font-weight: normal;
+}
+
+.thead {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
