@@ -1,6 +1,6 @@
-import { Link } from "./Link";
+import { Link, addLocale } from "./Link";
 import { EyeIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import React from "react";
 import { TOOLTIP_GLOBAL_ID } from "@/utils";
@@ -67,8 +67,13 @@ export const ActionButton = ({
   icon: React.ElementType;
   tooltip: React.ReactNode;
 }) => {
+  const params = useParams();
   const Icon = icon;
   const L = props.href ? Link : "button";
+
+  if (props.href) {
+    props.href = addLocale(props.href, params.locale as string);
+  }
 
   return (
     // @ts-expect-error TS2322

@@ -1,4 +1,5 @@
-import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "next-nprogress-bar";
 import { ChevronDownIcon, ChevronUpIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { ActionButtons } from "./ActionButtons";
 import { DateTime, isParamActive, setPartialParams } from "@/utils";
@@ -11,7 +12,7 @@ import { HumanDate, TOOLTIP_GLOBAL_ID } from "@/utils";
 import cx from "classnames";
 import { BulkActions, BulkDropDownActions } from "./BulkActions";
 import { ResponseMeta } from "@/utils";
-import { Link, makeLink } from "./Link";
+import { Link, addLocale } from "./Link";
 import { Hotkeys } from "@/HotKeys";
 import { IndeterminateCheckbox } from "@/form";
 
@@ -115,9 +116,9 @@ export const PaginatedTable = <TModel extends { id: number }>({
           onSubmit={(e) => {
             e.preventDefault();
             router.push(
-              makeLink(
+              addLocale(
                 (path + setPartialParams({ search, page: 1 }, searchParams)).replace(/^\/(en|lt)\//, "/"),
-                params.locale,
+                params.locale as string,
               ),
             );
           }}
