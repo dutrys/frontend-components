@@ -55,11 +55,13 @@ const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: ope
 
 const Link = (props) => {
     const params = useParams();
-    let href = props.href;
-    if (typeof href === "string" && !/^\/(lt|en)\//.test(href) && href.startsWith("/")) {
-        href = `/${params.locale || "lt"}${props.href}`;
+    return jsx(LinkNext, { ...props, href: props.href === "string" ? makeLink(props.href, params.locale) : props.href });
+};
+const makeLink = (link, locale) => {
+    if (typeof link === "string" && !/^\/(lt|en)\//.test(link) && link.startsWith("/")) {
+        return `/${locale}${link}`;
     }
-    return jsx(LinkNext, { ...props, href: href });
+    return link;
 };
 
 ({
@@ -337,6 +339,7 @@ function isFunctionColumn(column) {
 }
 const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, pathname, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, }) => {
     const router = useRouter();
+    const params = useParams();
     const searchParams = useSearchParams();
     const t = useTranslations();
     const [selected, setSelected] = React.useState([]);
@@ -358,7 +361,7 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, pa
         const [search, setSearch] = useState(searchParams.get("search") || "");
         return (jsx("div", { className: "w-32 sm:w-52 shrink-0 grow-0", children: jsxs("form", { onSubmit: (e) => {
                     e.preventDefault();
-                    router.push((path + setPartialParams({ search, page: 1 }, searchParams)).replace(/^\/(en|lt)\//, "/"));
+                    router.push(makeLink((path + setPartialParams({ search, page: 1 }, searchParams)).replace(/^\/(en|lt)\//, "/"), params.locale));
                 }, children: [" ", jsxs("div", { className: "join w-full pr-4", children: [jsx("input", { type: "text", value: search, onChange: (e) => setSearch(e.target.value), name: "search", className: "join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500", placeholder: t("pagination.searchPlaceholder") }), jsx("button", { className: "join-item btn btn-neutral btn-xs uppercase", type: "submit", children: jsx(MagnifyingGlassIcon, { className: "w-4 h-4" }) })] })] }) }));
     };
     const elements = bulkActions && bulkActions?.length > 0
