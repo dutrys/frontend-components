@@ -356,7 +356,7 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, pa
             ctrlKey: true,
             description: t("pagination.addNew"),
             callback: () => {
-                router.push(addNew.replace(/^\/(en|lt)\//, "/"));
+                router.push(addLocale(addNew.replace(/^\/(en|lt)\//, "/"), params.locale));
             },
         });
     }
@@ -418,9 +418,9 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, pa
                                 const params = setPartialParams({ ...link, page: "" }, searchParams);
                                 return (jsx(Link, { prefetch: false, className: `btn join-item uppercase btn-xs ${active ? "btn-neutral" : ""}`, href: params === "" ? "?" : params, children: text }, text));
                             }) }, i));
-                    } })), addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addNew, "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: t("pagination.addNew") })] })), isSearchable && jsx(SearchField, {})] }) }));
+                    } })), addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: t("pagination.addNew") })] })), isSearchable && jsx(SearchField, {})] }) }));
     if (pagination.meta.totalItems === 0) {
-        return (jsxs(Fragment, { children: [heading, jsxs("div", { className: "text-center mt-20", children: [jsxs("span", { className: "text-gray-400", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addNew, children: [jsx(PlusIcon, { width: 20 }), " ", t("pagination.tryCreatingOne")] }) }))] })] }));
+        return (jsxs(Fragment, { children: [heading, jsxs("div", { className: "text-center mt-20", children: [jsxs("span", { className: "text-gray-400", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", t("pagination.tryCreatingOne")] }) }))] })] }));
     }
     return (jsxs("div", { "data-testid": "paginate-table", className: "relative h-full", "data-test-sort": (pagination.meta.sortBy || []).flat().join("-"), children: [heading, jsx("div", { className: "overflow-x-auto max-h-[calc(100%-7rem)] w-[calc(100vw)] sm:w-[calc(100vw-6rem)]", children: jsxs("table", { className: `${styles.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [jsx("thead", { children: jsxs("tr", { children: [bulkActions && (jsx("th", { children: jsx(IndeterminateCheckbox, { className: "checkbox checkbox-xs", onChange: (e) => {
                                                 setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);

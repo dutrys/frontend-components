@@ -101,7 +101,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
       ctrlKey: true,
       description: t("pagination.addNew"),
       callback: () => {
-        router.push(addNew.replace(/^\/(en|lt)\//, "/"));
+        router.push(addLocale(addNew.replace(/^\/(en|lt)\//, "/"), params.locale as string));
       },
     });
   }
@@ -257,7 +257,11 @@ export const PaginatedTable = <TModel extends { id: number }>({
           />
         )}
         {addNew && (
-          <Link className="btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2" href={addNew} data-testid="add-new">
+          <Link
+            className="btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2"
+            href={addLocale(addNew, params.locale as string)}
+            data-testid="add-new"
+          >
             <PlusIcon className="w-4 h-4" /> <span className="hidden sm:inline">{t("pagination.addNew")}</span>
           </Link>
         )}
@@ -276,7 +280,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
           </span>
           {addNew && (searchParams.get("search") || "") === "" && (
             <p className="mt-4">
-              <Link className="btn uppercase btn-outline" href={addNew}>
+              <Link className="btn uppercase btn-outline" href={addLocale(addNew, params.locale as string)}>
                 <PlusIcon width={20} /> {t("pagination.tryCreatingOne")}
               </Link>
             </p>
