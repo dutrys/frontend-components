@@ -75,6 +75,7 @@ export const HeaderResponsive = <T extends object>({
       {showItems < elements.length && (
         <div style={{ width: MORE_WIDTH }} className="pr-2">
           <Popover
+            showOnClick
             borderColor="border-base-300"
             backgroundColor="bg-base-200"
             title={(ref, props) => (
