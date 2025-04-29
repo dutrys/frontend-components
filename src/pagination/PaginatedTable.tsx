@@ -201,7 +201,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
                       <li key={text}>
                         <Link
                           prefetch={false}
-                          className={active ? "bg-gray-300 font-bold" : ""}
+                          className={active ? "bg-base-300/50 font-bold hover:bg-base-300" : ""}
                           href={params === "" ? "?" : params}
                         >
                           {text}

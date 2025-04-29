@@ -393,7 +393,7 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, pa
                                         });
                                     }
                                     const params = setPartialParams({ ...link, page: "" }, searchParams);
-                                    return (jsx("li", { children: jsx(Link, { prefetch: false, className: active ? "bg-gray-300 font-bold" : "", href: params === "" ? "?" : params, children: text }) }, text));
+                                    return (jsx("li", { children: jsx(Link, { prefetch: false, className: active ? "bg-base-300/50 font-bold hover:bg-base-300" : "", href: params === "" ? "?" : params, children: text }) }, text));
                                 })] }, i));
                     }, renderVisible: (element, i) => {
                         if (i === 0 && bulkActions && bulkActions.length > 0) {
