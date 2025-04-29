@@ -415,7 +415,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
                     }
 
                     return (
-                      <th key={`actions-td-${i}`} className="whitespace-nowrap">
+                      <th key={`actions-td-${i}`} className="whitespace-nowrap text-right">
                         {column.extraButtons?.map((Button, i) => (
                           <React.Fragment key={`${model[column.idField]}-${i}`}>{Button(model)}</React.Fragment>
                         ))}

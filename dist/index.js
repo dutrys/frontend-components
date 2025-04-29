@@ -479,7 +479,7 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, pa
                                             else {
                                                 view = typeof column.view === "undefined" ? false : column.view;
                                             }
-                                            return (jsxs("th", { className: "whitespace-nowrap", children: [column.extraButtons?.map((Button, i) => (jsx(React.Fragment, { children: Button(model) }, `${model[column.idField]}-${i}`))), jsx(ActionButtons, { archive: archive, pathname: pathname, view: view, edit: edit, id: idFieldValue })] }, `actions-td-${i}`));
+                                            return (jsxs("th", { className: "whitespace-nowrap text-right", children: [column.extraButtons?.map((Button, i) => (jsx(React.Fragment, { children: Button(model) }, `${model[column.idField]}-${i}`))), jsx(ActionButtons, { archive: archive, pathname: pathname, view: view, edit: edit, id: idFieldValue })] }, `actions-td-${i}`));
                                         }
                                         const Component = column.pin ? "th" : "td";
                                         if (isFunctionColumn(column)) {
