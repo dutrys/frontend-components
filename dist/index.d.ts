@@ -25,13 +25,6 @@ declare const Popover: ({ title, children, popoverClassName, onShow, open: openP
     backgroundColor?: `bg-${string}`;
 }) => string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined;
 
-declare const ActionButtons: ({ id, archive, edit, view, pathname, }: {
-    pathname: string;
-    id: number | string;
-    view?: string | false;
-    edit?: string | false;
-    archive?: string | false;
-}) => react_jsx_runtime.JSX.Element;
 declare const EditButton: ({ href, size }: {
     href: string;
     size?: "xs";
@@ -115,7 +108,7 @@ type FunctionColumn<TModel> = {
 type ColumnType<TModel> = SimpleColumn<TModel> | FunctionColumn<TModel> | ActionColumn<TModel> | DateColumn<TModel>;
 declare const PaginatedTable: <TModel extends {
     id: number;
-}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, }: {
+}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, }: {
     caption?: React__default.ReactNode;
     bulkActions?: {
         children: React__default.ReactNode;
@@ -136,6 +129,7 @@ declare const PaginatedTable: <TModel extends {
         data: TModel[];
         meta: ResponseMeta;
     };
+    addNewText?: string;
 }) => react_jsx_runtime.JSX.Element;
 declare const TableLink: ({ href, children, className, isLink, ...rest }: {
     className?: string;
@@ -144,4 +138,4 @@ declare const TableLink: ({ href, children, className, isLink, ...rest }: {
     isLink?: boolean;
 }) => string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React__default.ReactNode> | Promise<string | number | bigint | boolean | React__default.ReactPortal | React__default.ReactElement<unknown, string | React__default.JSXElementConstructor<any>> | Iterable<React__default.ReactNode> | null | undefined> | null | undefined;
 
-export { ActionButton, ActionButtons, ArchiveButton, BulkActions, BulkDropDownActions, type ColumnType, EditButton, HeaderResponsive, LoadingComponent, PaginatedTable, Pagination, Popover, TableLink, ViewButton };
+export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, type ColumnType, EditButton, HeaderResponsive, LoadingComponent, PaginatedTable, Pagination, Popover, TableLink, ViewButton };

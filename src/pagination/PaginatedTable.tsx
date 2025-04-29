@@ -73,6 +73,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
   searchableShortcuts = [],
   addNew,
   bulkActions,
+  addNewText,
 }: {
   caption?: React.ReactNode;
   bulkActions?: {
@@ -88,6 +89,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
   searchableShortcuts?: { link: Record<string, string>; text: string }[][];
   columns: Array<ColumnType<TModel>>;
   pagination: { data: TModel[]; meta: ResponseMeta };
+  addNewText?: string;
 }) => {
   const router = useRouter();
   const params = useParams();
@@ -264,7 +266,8 @@ export const PaginatedTable = <TModel extends { id: number }>({
             href={addLocale(addNew, params.locale as string)}
             data-testid="add-new"
           >
-            <PlusIcon className="w-4 h-4" /> <span className="hidden sm:inline">{t("pagination.addNew")}</span>
+            <PlusIcon className="w-4 h-4" />{" "}
+            <span className="hidden sm:inline">{addNewText || t("pagination.addNew")}</span>
           </Link>
         )}
         {isSearchable && <SearchField />}
@@ -284,7 +287,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
           {addNew && (searchParams.get("search") || "") === "" && (
             <p className="mt-4">
               <Link className="btn uppercase btn-outline" href={addLocale(addNew, params.locale as string)}>
-                <PlusIcon width={20} /> {t("pagination.tryCreatingOne")}
+                <PlusIcon width={20} /> {addNewText || t("pagination.tryCreatingOne")}
               </Link>
             </p>
           )}

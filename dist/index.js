@@ -174,10 +174,6 @@ const DateTime = ({ date, format: format$1 = "yyyy-MM-dd HH:mm:ss" }) => {
     return formattedDate;
 };
 
-const ActionButtons = ({ id, archive, edit, view, pathname, }) => {
-    useSearchParams();
-    return (jsxs(Fragment, { children: [view && jsx(ViewButton, { href: view }), edit && jsx(EditButton, { href: edit }), archive && jsx(ArchiveButton, { href: archive })] }));
-};
 const EditButton = ({ href, size }) => {
     const t = useTranslations("actionButtons");
     return jsx(ActionButton, { href: href, icon: PencilIcon, tooltip: t("edit"), "data-testid": "button-edit", size: size });
@@ -342,7 +338,7 @@ function isActionColumn(column) {
 function isFunctionColumn(column) {
     return typeof column === "object" && typeof column.body === "function";
 }
-const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, }) => {
+const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, }) => {
     const router = useRouter();
     const params = useParams();
     const searchParams = useSearchParams();
@@ -418,9 +414,9 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
                                 const params = setPartialParams({ ...link, page: "" }, searchParams);
                                 return (jsx(Link, { prefetch: false, className: `btn join-item uppercase btn-xs ${active ? "btn-neutral" : ""}`, href: params === "" ? "?" : params, children: text }, text));
                             }) }, i));
-                    } })), addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: t("pagination.addNew") })] })), isSearchable && jsx(SearchField, {})] }) }));
+                    } })), addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: addNewText || t("pagination.addNew") })] })), isSearchable && jsx(SearchField, {})] }) }));
     if (pagination.meta.totalItems === 0) {
-        return (jsxs(Fragment, { children: [heading, caption, jsxs("div", { className: "text-center mt-20", children: [jsxs("span", { className: "text-gray-400", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", t("pagination.tryCreatingOne")] }) }))] })] }));
+        return (jsxs(Fragment, { children: [heading, caption, jsxs("div", { className: "text-center mt-20", children: [jsxs("span", { className: "text-gray-400", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", addNewText || t("pagination.tryCreatingOne")] }) }))] })] }));
     }
     return (jsxs("div", { "data-testid": "paginate-table", className: "relative h-full", "data-test-sort": (pagination.meta.sortBy || []).flat().join("-"), children: [heading, jsx("div", { className: "overflow-x-auto max-h-[calc(100%-7rem)] w-[calc(100vw)] sm:w-[calc(100vw-6rem)]", children: jsxs("table", { className: `${styles.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [caption && jsx("caption", { children: caption }), jsx("thead", { children: jsxs("tr", { children: [bulkActions && (jsx("th", { children: jsx(IndeterminateCheckbox, { className: "checkbox checkbox-xs", onChange: (e) => {
                                                 setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);
@@ -505,5 +501,5 @@ const TruncateText = ({ text, length }) => {
     return (jsx("div", { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": text, className: "text-left text-ellipsis overflow-hidden", style: { width: length }, children: text }));
 };
 
-export { ActionButton, ActionButtons, ArchiveButton, BulkActions, BulkDropDownActions, EditButton, HeaderResponsive, LoadingComponent, PaginatedTable, Pagination, Popover, TableLink, ViewButton };
+export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, EditButton, HeaderResponsive, LoadingComponent, PaginatedTable, Pagination, Popover, TableLink, ViewButton };
 //# sourceMappingURL=index.js.map

@@ -31,7 +31,7 @@ type FunctionColumn<TModel> = {
 export type ColumnType<TModel> = SimpleColumn<TModel> | FunctionColumn<TModel> | ActionColumn<TModel> | DateColumn<TModel>;
 export declare const PaginatedTable: <TModel extends {
     id: number;
-}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, }: {
+}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, }: {
     caption?: React.ReactNode;
     bulkActions?: {
         children: React.ReactNode;
@@ -52,6 +52,7 @@ export declare const PaginatedTable: <TModel extends {
         data: TModel[];
         meta: ResponseMeta;
     };
+    addNewText?: string;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const TableLink: ({ href, children, className, isLink, ...rest }: {
     className?: string;
