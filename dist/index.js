@@ -175,8 +175,8 @@ const DateTime = ({ date, format: format$1 = "yyyy-MM-dd HH:mm:ss" }) => {
 };
 
 const ActionButtons = ({ id, archive, edit, view, pathname, }) => {
-    const searchParams = useSearchParams();
-    return (jsxs(Fragment, { children: [view && jsx(ViewButton, { href: `${pathname}/view/${id}?${searchParams.toString()}` }), edit && jsx(EditButton, { href: `${pathname}/edit/${id}?${searchParams.toString()}` }), archive && jsx(ArchiveButton, { href: `${pathname}/archive/${id}?${searchParams.toString()}` })] }));
+    useSearchParams();
+    return (jsxs(Fragment, { children: [view && jsx(ViewButton, { href: view }), edit && jsx(EditButton, { href: edit }), archive && jsx(ArchiveButton, { href: archive })] }));
 };
 const EditButton = ({ href, size }) => {
     const t = useTranslations("actionButtons");
@@ -342,7 +342,7 @@ function isActionColumn(column) {
 function isFunctionColumn(column) {
     return typeof column === "object" && typeof column.body === "function";
 }
-const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, pathname, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, }) => {
+const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, }) => {
     const router = useRouter();
     const params = useParams();
     const searchParams = useSearchParams();
@@ -420,9 +420,9 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, pa
                             }) }, i));
                     } })), addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: t("pagination.addNew") })] })), isSearchable && jsx(SearchField, {})] }) }));
     if (pagination.meta.totalItems === 0) {
-        return (jsxs(Fragment, { children: [heading, jsxs("div", { className: "text-center mt-20", children: [jsxs("span", { className: "text-gray-400", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", t("pagination.tryCreatingOne")] }) }))] })] }));
+        return (jsxs(Fragment, { children: [heading, caption, jsxs("div", { className: "text-center mt-20", children: [jsxs("span", { className: "text-gray-400", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", t("pagination.tryCreatingOne")] }) }))] })] }));
     }
-    return (jsxs("div", { "data-testid": "paginate-table", className: "relative h-full", "data-test-sort": (pagination.meta.sortBy || []).flat().join("-"), children: [heading, jsx("div", { className: "overflow-x-auto max-h-[calc(100%-7rem)] w-[calc(100vw)] sm:w-[calc(100vw-6rem)]", children: jsxs("table", { className: `${styles.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [jsx("thead", { children: jsxs("tr", { children: [bulkActions && (jsx("th", { children: jsx(IndeterminateCheckbox, { className: "checkbox checkbox-xs", onChange: (e) => {
+    return (jsxs("div", { "data-testid": "paginate-table", className: "relative h-full", "data-test-sort": (pagination.meta.sortBy || []).flat().join("-"), children: [heading, jsx("div", { className: "overflow-x-auto max-h-[calc(100%-7rem)] w-[calc(100vw)] sm:w-[calc(100vw-6rem)]", children: jsxs("table", { className: `${styles.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [caption && jsx("caption", { children: caption }), jsx("thead", { children: jsxs("tr", { children: [bulkActions && (jsx("th", { children: jsx(IndeterminateCheckbox, { className: "checkbox checkbox-xs", onChange: (e) => {
                                                 setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);
                                             }, indeterminate: selected.length > 0 && selected.length < pagination.data.length, checked: pagination.data.every((model) => selected.includes(model.id)) }) })), columns.map((column, i) => {
                                         if (isActionColumn(column)) {
@@ -458,28 +458,22 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, pa
                                             if (typeof idFieldValue !== "string" && typeof idFieldValue !== "number") {
                                                 throw new Error("idField must be a string or a number");
                                             }
-                                            let archive;
-                                            if (typeof column.archive === "function") {
-                                                archive = column.archive(model);
-                                            }
-                                            else {
-                                                archive = typeof column.archive === "undefined" ? false : column.archive;
-                                            }
-                                            let edit;
-                                            if (typeof column.edit === "function") {
-                                                edit = column.edit(model);
-                                            }
-                                            else {
-                                                edit = typeof column.edit === "undefined" ? false : column.edit;
-                                            }
-                                            let view;
-                                            if (typeof column.view === "function") {
-                                                view = column.view(model);
-                                            }
-                                            else {
-                                                view = typeof column.view === "undefined" ? false : column.view;
-                                            }
-                                            return (jsxs("th", { className: "whitespace-nowrap text-right", children: [column.extraButtons?.map((Button, i) => (jsx(React.Fragment, { children: Button(model) }, `${model[column.idField]}-${i}`))), jsx(ActionButtons, { archive: archive, pathname: pathname, view: view, edit: edit, id: idFieldValue })] }, `actions-td-${i}`));
+                                            const view = typeof column.view === "function"
+                                                ? column.view(model)
+                                                : column.view
+                                                    ? `${pathname}/${idFieldValue}/${column.view}`
+                                                    : false;
+                                            const archive = typeof column.archive === "function"
+                                                ? column.archive(model)
+                                                : column.archive
+                                                    ? `${pathname}/${idFieldValue}/${column.archive}`
+                                                    : false;
+                                            const edit = typeof column.edit === "function"
+                                                ? column.edit(model)
+                                                : column.edit
+                                                    ? `${pathname}/${idFieldValue}/${column.edit}?${searchParams.toString()}`
+                                                    : false;
+                                            return (jsxs("th", { className: "whitespace-nowrap text-right", children: [column.extraButtons?.map((Button, i) => (jsx(React.Fragment, { children: Button(model) }, `${model[column.idField]}-${i}`))), view && jsx(ViewButton, { href: view }), edit && jsx(EditButton, { href: edit }), archive && jsx(ArchiveButton, { href: archive })] }, `actions-td-${i}`));
                                         }
                                         const Component = column.pin ? "th" : "td";
                                         if (isFunctionColumn(column)) {

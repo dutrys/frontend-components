@@ -28,9 +28,9 @@ declare const Popover: ({ title, children, popoverClassName, onShow, open: openP
 declare const ActionButtons: ({ id, archive, edit, view, pathname, }: {
     pathname: string;
     id: number | string;
-    view?: boolean;
-    edit?: boolean;
-    archive?: boolean;
+    view?: string | false;
+    edit?: string | false;
+    archive?: string | false;
 }) => react_jsx_runtime.JSX.Element;
 declare const EditButton: ({ href, size }: {
     href: string;
@@ -86,9 +86,9 @@ declare const Pagination: ({ page, visiblePages, onClick, }: {
 
 type ActionColumn<TModel> = {
     type: "actions";
-    archive?: boolean | ((model: TModel) => boolean);
-    edit?: boolean | ((model: TModel) => boolean);
-    view?: boolean | ((model: TModel) => boolean);
+    archive?: string | false | ((model: TModel) => string | false);
+    edit?: string | false | ((model: TModel) => string | false);
+    view?: string | false | ((model: TModel) => string | false);
     idField: keyof TModel;
     extraButtons?: [(model: TModel) => React__default.ReactNode];
 };
@@ -115,7 +115,8 @@ type FunctionColumn<TModel> = {
 type ColumnType<TModel> = SimpleColumn<TModel> | FunctionColumn<TModel> | ActionColumn<TModel> | DateColumn<TModel>;
 declare const PaginatedTable: <TModel extends {
     id: number;
-}>({ pagination, title, sortEnum, extraHeading, columns, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, }: {
+}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, }: {
+    caption?: React__default.ReactNode;
     bulkActions?: {
         children: React__default.ReactNode;
         onSelect: (models: number[]) => Promise<boolean | void>;
@@ -123,7 +124,7 @@ declare const PaginatedTable: <TModel extends {
     sortEnum: any;
     extraHeading?: React__default.ReactNode;
     isSearchable?: boolean;
-    title: string;
+    title: React__default.ReactNode;
     pathname: string;
     addNew?: string;
     searchableShortcuts?: {

@@ -1,7 +1,7 @@
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next-nprogress-bar";
 import { ChevronDownIcon, ChevronUpIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
-import { ActionButtons } from "./ActionButtons";
+import { ArchiveButton, EditButton, ViewButton } from "./ActionButtons";
 import { DateTime, isParamActive, setPartialParams } from "@/utils";
 import { Pagination } from "./Pagination";
 import { useTranslations } from "next-intl";
@@ -20,9 +20,9 @@ const limits = [10, 20, 50, 100];
 
 type ActionColumn<TModel> = {
   type: "actions";
-  archive?: boolean | ((model: TModel) => boolean);
-  edit?: boolean | ((model: TModel) => boolean);
-  view?: boolean | ((model: TModel) => boolean);
+  archive?: string | false | ((model: TModel) => string | false);
+  edit?: string | false | ((model: TModel) => string | false);
+  view?: string | false | ((model: TModel) => string | false);
   idField: keyof TModel;
   extraButtons?: [(model: TModel) => React.ReactNode];
 };
@@ -67,12 +67,14 @@ export const PaginatedTable = <TModel extends { id: number }>({
   sortEnum,
   extraHeading,
   columns,
+  caption,
   pathname,
   isSearchable = false,
   searchableShortcuts = [],
   addNew,
   bulkActions,
 }: {
+  caption?: React.ReactNode;
   bulkActions?: {
     children: React.ReactNode;
     onSelect: (models: number[]) => Promise<boolean | void>;
@@ -80,7 +82,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
   sortEnum: any;
   extraHeading?: React.ReactNode;
   isSearchable?: boolean;
-  title: string;
+  title: React.ReactNode;
   pathname: string;
   addNew?: string;
   searchableShortcuts?: { link: Record<string, string>; text: string }[][];
@@ -274,6 +276,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
     return (
       <>
         {heading}
+        {caption}
         <div className="text-center mt-20">
           <span className="text-gray-400">
             {t("pagination.noItems")} <span className="align-middle text-3xl ">😿</span>
@@ -299,6 +302,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
       {heading}
       <div className="overflow-x-auto max-h-[calc(100%-7rem)] w-[calc(100vw)] sm:w-[calc(100vw-6rem)]">
         <table className={`${styles.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`}>
+          {caption && <caption>{caption}</caption>}
           <thead>
             <tr>
               {bulkActions && (
@@ -393,39 +397,33 @@ export const PaginatedTable = <TModel extends { id: number }>({
                       throw new Error("idField must be a string or a number");
                     }
 
-                    let archive: boolean;
-                    if (typeof column.archive === "function") {
-                      archive = column.archive(model);
-                    } else {
-                      archive = typeof column.archive === "undefined" ? false : column.archive;
-                    }
-
-                    let edit: boolean;
-                    if (typeof column.edit === "function") {
-                      edit = column.edit(model);
-                    } else {
-                      edit = typeof column.edit === "undefined" ? false : column.edit;
-                    }
-
-                    let view: boolean;
-                    if (typeof column.view === "function") {
-                      view = column.view(model);
-                    } else {
-                      view = typeof column.view === "undefined" ? false : column.view;
-                    }
+                    const view: string | false =
+                      typeof column.view === "function"
+                        ? column.view(model)
+                        : column.view
+                          ? `${pathname}/${idFieldValue}/${column.view}`
+                          : false;
+                    const archive: string | false =
+                      typeof column.archive === "function"
+                        ? column.archive(model)
+                        : column.archive
+                          ? `${pathname}/${idFieldValue}/${column.archive}`
+                          : false;
+                    const edit: string | false =
+                      typeof column.edit === "function"
+                        ? column.edit(model)
+                        : column.edit
+                          ? `${pathname}/${idFieldValue}/${column.edit}?${searchParams.toString()}`
+                          : false;
 
                     return (
                       <th key={`actions-td-${i}`} className="whitespace-nowrap text-right">
                         {column.extraButtons?.map((Button, i) => (
                           <React.Fragment key={`${model[column.idField]}-${i}`}>{Button(model)}</React.Fragment>
                         ))}
-                        <ActionButtons
-                          archive={archive}
-                          pathname={pathname}
-                          view={view}
-                          edit={edit}
-                          id={idFieldValue}
-                        />
+                        {view && <ViewButton href={view} />}
+                        {edit && <EditButton href={edit} />}
+                        {archive && <ArchiveButton href={archive} />}
                       </th>
                     );
                   }

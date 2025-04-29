@@ -2,9 +2,9 @@ import React from "react";
 export declare const ActionButtons: ({ id, archive, edit, view, pathname, }: {
     pathname: string;
     id: number | string;
-    view?: boolean;
-    edit?: boolean;
-    archive?: boolean;
+    view?: string | false;
+    edit?: string | false;
+    archive?: string | false;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const EditButton: ({ href, size }: {
     href: string;

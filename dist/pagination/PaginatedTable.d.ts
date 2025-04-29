@@ -2,9 +2,9 @@ import React from "react";
 import { ResponseMeta } from "@/utils";
 type ActionColumn<TModel> = {
     type: "actions";
-    archive?: boolean | ((model: TModel) => boolean);
-    edit?: boolean | ((model: TModel) => boolean);
-    view?: boolean | ((model: TModel) => boolean);
+    archive?: string | false | ((model: TModel) => string | false);
+    edit?: string | false | ((model: TModel) => string | false);
+    view?: string | false | ((model: TModel) => string | false);
     idField: keyof TModel;
     extraButtons?: [(model: TModel) => React.ReactNode];
 };
@@ -31,7 +31,8 @@ type FunctionColumn<TModel> = {
 export type ColumnType<TModel> = SimpleColumn<TModel> | FunctionColumn<TModel> | ActionColumn<TModel> | DateColumn<TModel>;
 export declare const PaginatedTable: <TModel extends {
     id: number;
-}>({ pagination, title, sortEnum, extraHeading, columns, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, }: {
+}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, }: {
+    caption?: React.ReactNode;
     bulkActions?: {
         children: React.ReactNode;
         onSelect: (models: number[]) => Promise<boolean | void>;
@@ -39,7 +40,7 @@ export declare const PaginatedTable: <TModel extends {
     sortEnum: any;
     extraHeading?: React.ReactNode;
     isSearchable?: boolean;
-    title: string;
+    title: React.ReactNode;
     pathname: string;
     addNew?: string;
     searchableShortcuts?: {

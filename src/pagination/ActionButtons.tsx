@@ -6,29 +6,6 @@ import React from "react";
 import { TOOLTIP_GLOBAL_ID } from "@/utils";
 import cx from "classnames";
 
-export const ActionButtons = ({
-  id,
-  archive,
-  edit,
-  view,
-  pathname,
-}: {
-  pathname: string;
-  id: number | string;
-  view?: boolean;
-  edit?: boolean;
-  archive?: boolean;
-}) => {
-  const searchParams = useSearchParams();
-  return (
-    <>
-      {view && <ViewButton href={`${pathname}/view/${id}?${searchParams.toString()}`} />}
-      {edit && <EditButton href={`${pathname}/edit/${id}?${searchParams.toString()}`} />}
-      {archive && <ArchiveButton href={`${pathname}/archive/${id}?${searchParams.toString()}`} />}
-    </>
-  );
-};
-
 export const EditButton = ({ href, size }: { href: string; size?: "xs" }) => {
   const t = useTranslations("actionButtons");
   return <ActionButton href={href} icon={PencilIcon} tooltip={t("edit")} data-testid="button-edit" size={size} />;
