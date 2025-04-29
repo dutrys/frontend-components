@@ -265,12 +265,20 @@ const HeaderResponsive = ({ renderVisible, renderDropdown, heightClassName, elem
     const [showItems, setShowItems] = useState(elements.length);
     const [elWidth, setElWidth] = useState();
     const bar = useRef(null);
+    const cont = useRef(null);
     useEffect(() => {
         if (bar.current && !elWidth) {
             const navItems = Array.from(bar.current.getElementsByClassName("item"));
             setElWidth(navItems.map((nav) => nav.offsetWidth));
         }
     }, [bar, elWidth]);
+    useEffect(() => {
+        if (!cont.current || !elWidth) {
+            return;
+        }
+        cont.current.style.maxWidth = `${elWidth.reduce((curr, acc) => acc + curr, 0)}px`;
+        window.dispatchEvent(new Event("resize"));
+    }, [cont, elWidth]);
     useEffect(() => {
         const checkNavbarWidth = () => {
             if (!elWidth || !bar.current) {
@@ -293,7 +301,7 @@ const HeaderResponsive = ({ renderVisible, renderDropdown, heightClassName, elem
             window.removeEventListener("resize", checkNavbarWidth);
         };
     }, [showItems, bar, elWidth]);
-    return (jsxs(Fragment, { children: [jsx("div", { className: "overflow-hidden grow", style: { overflow: "hidden" }, children: jsx("div", { ref: bar, className: "flex overflow-hidden", children: jsx("div", { className: `${heightClassName || ""} w-full`, children: jsx("ul", { className: `flex flex-nowrap shrink justify-end flex-row ${heightClassName || ""} items-center`, children: elements.map((elementCollection, i) => (jsx("li", { className: `item pr-2 shrink-0 flex-nowrap flex flex-row ${i >= showItems ? "hidden" : ""}`, children: renderVisible(elementCollection, i) }, i))) }) }) }) }), showItems < elements.length && (jsx("div", { style: { width: MORE_WIDTH }, className: "pr-2", children: jsx(Popover, { showOnClick: true, borderColor: "border-base-300", backgroundColor: "bg-base-200", title: (ref, props) => (jsx("a", { tabIndex: 0, ref: ref, ...props, role: "button", className: "btn btn-xs w-full", children: jsx(EllipsisHorizontalIcon, { className: "h-3 w-3" }) })), children: () => (jsx("div", { className: "max-h-96 overflow-y-auto", children: jsx("ul", { tabIndex: 0, className: "menu px-1 py-0", children: [...elements].splice(showItems).map(renderDropdown) }) })) }) }))] }));
+    return (jsxs(Fragment, { children: [jsx("div", { className: "overflow-hidden grow", style: { overflow: "hidden" }, ref: cont, children: jsx("div", { ref: bar, className: "flex overflow-hidden", children: jsx("div", { className: `${heightClassName || ""} w-full`, children: jsx("ul", { className: `flex flex-nowrap shrink justify-end flex-row ${heightClassName || ""} items-center`, children: elements.map((elementCollection, i) => (jsx("li", { className: `item pr-2 shrink-0 flex-nowrap flex flex-row ${i >= showItems ? "hidden" : ""}`, children: renderVisible(elementCollection, i) }, i))) }) }) }) }), showItems < elements.length && (jsx("div", { style: { width: MORE_WIDTH }, className: "pr-2", children: jsx(Popover, { showOnClick: true, borderColor: "border-base-300", backgroundColor: "bg-base-200", title: (ref, props) => (jsx("a", { tabIndex: 0, ref: ref, ...props, role: "button", className: "btn btn-xs w-full", children: jsx(EllipsisHorizontalIcon, { className: "h-3 w-3" }) })), children: (closeFn) => (jsx("div", { className: "max-h-96 overflow-y-auto", children: jsx("ul", { tabIndex: 0, className: "menu px-1 py-0", children: [...elements].splice(showItems).map((e, i) => renderDropdown(e, i, closeFn)) }) })) }) }))] }));
 };
 
 const Pagination = ({ page, visiblePages, onClick, }) => {
@@ -469,19 +477,19 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
                                                 : column.edit
                                                     ? `${pathname}/${idFieldValue}/${column.edit}?${searchParams.toString()}`
                                                     : false;
-                                            return (jsxs("th", { className: "whitespace-nowrap text-right", children: [column.extraButtons?.map((Button, i) => (jsx(React.Fragment, { children: Button(model) }, `${model[column.idField]}-${i}`))), view && jsx(ViewButton, { href: view }), edit && jsx(EditButton, { href: edit }), archive && jsx(ArchiveButton, { href: archive })] }, `actions-td-${i}`));
+                                            return (jsxs("th", { className: column.className || "whitespace-nowrap text-right", children: [column.extraButtons?.map((Button, i) => (jsx(React.Fragment, { children: Button(model) }, `${model[column.idField]}-${i}`))), view && jsx(ViewButton, { href: view }), edit && jsx(EditButton, { href: edit }), archive && jsx(ArchiveButton, { href: archive })] }, `actions-td-${i}`));
                                         }
                                         const Component = column.pin ? "th" : "td";
                                         if (isFunctionColumn(column)) {
                                             return jsx(Component, { children: column.body(model) }, `actions-td-${i}`);
                                         }
                                         if (column.type === "date") {
-                                            return (jsx(Component, { children: column.format ? (jsx(DateTime, { date: model[column.name], format: column.format })) : (jsx(HumanDate, { date: model[column.name] })) }, `${model.id}-${column.name.toString()}`));
+                                            return (jsx(Component, { className: column.className, children: column.format ? (jsx(DateTime, { date: model[column.name], format: column.format })) : (jsx(HumanDate, { date: model[column.name] })) }, `${model.id}-${column.name.toString()}`));
                                         }
                                         if (column.type === "code") {
-                                            return (jsx(Component, { children: model[column.name] && (jsx("div", { className: "badge badge-sm", children: jsx("code", { children: model[column.name] }) })) }, column.name.toString()));
+                                            return (jsx(Component, { className: column.className, children: model[column.name] && (jsx("div", { className: "badge badge-sm", children: jsx("code", { children: model[column.name] }) })) }, column.name.toString()));
                                         }
-                                        return (jsx(Component, { children: column.truncate ? (jsx(TruncateText, { text: model[column.name], length: column.truncate })) : model[column.name] }, column.name.toString()));
+                                        return (jsx(Component, { className: column.className, children: column.truncate ? (jsx(TruncateText, { text: model[column.name], length: column.truncate })) : model[column.name] }, column.name.toString()));
                                     })] }, o))) })] }) }), jsx("div", { className: "absolute left-0 bottom-0 w-full h-16 z-1", children: jsx("div", { className: "bg-base-100", children: jsxs("div", { className: "flex justify-center items-center", children: [jsx("div", { className: `shrink-1 w-60 text-xs pl-4 ${pagination.meta.totalPages > 1 ? "hidden md:block" : ""}`, children: t("pagination.showing", {
                                     from: (pagination.meta.currentPage - 1) * pagination.meta.itemsPerPage + 1,
                                     to: Math.min(pagination.meta.currentPage * pagination.meta.itemsPerPage, pagination.meta.totalItems),
@@ -495,7 +503,7 @@ const TableLink = ({ href, children, className, isLink = true, ...rest }) => {
     if (!isLink) {
         return children;
     }
-    return (jsxs(Link, { href: href, ...rest, prefetch: false, className: `${styles.link} ${className || ""} text-primary-700 hover:text-primary-500`, children: [children, " "] }));
+    return (jsxs(Link, { href: addLocale(href, useParams().locale), ...rest, prefetch: false, className: `${styles.link} ${className || ""} text-primary-700 hover:text-primary-500`, children: [children, " "] }));
 };
 const TruncateText = ({ text, length }) => {
     return (jsx("div", { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": text, className: "text-left text-ellipsis overflow-hidden", style: { width: length }, children: text }));

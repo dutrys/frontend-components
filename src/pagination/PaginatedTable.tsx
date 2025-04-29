@@ -25,6 +25,7 @@ type ActionColumn<TModel> = {
   view?: string | false | ((model: TModel) => string | false);
   idField: keyof TModel;
   extraButtons?: [(model: TModel) => React.ReactNode];
+  className?: string;
 };
 type SimpleColumn<TModel> = {
   name: keyof TModel;
@@ -32,6 +33,7 @@ type SimpleColumn<TModel> = {
   truncate?: number;
   type?: "code";
   pin?: true;
+  className?: string;
 };
 
 type DateColumn<TModel> = {
@@ -40,12 +42,14 @@ type DateColumn<TModel> = {
   format?: string;
   title: string;
   pin?: true;
+  className?: string;
 };
 type FunctionColumn<TModel> = {
   name?: string;
   body: (data: TModel) => string | number | React.ReactNode;
   title: string;
   pin?: true;
+  className?: string;
 };
 export type ColumnType<TModel> =
   | SimpleColumn<TModel>
@@ -420,7 +424,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
                           : false;
 
                     return (
-                      <th key={`actions-td-${i}`} className="whitespace-nowrap text-right">
+                      <th key={`actions-td-${i}`} className={column.className || "whitespace-nowrap text-right"}>
                         {column.extraButtons?.map((Button, i) => (
                           <React.Fragment key={`${model[column.idField]}-${i}`}>{Button(model)}</React.Fragment>
                         ))}
@@ -437,7 +441,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
                   }
                   if (column.type === "date") {
                     return (
-                      <Component key={`${model.id}-${column.name.toString()}`}>
+                      <Component key={`${model.id}-${column.name.toString()}`} className={column.className}>
                         {column.format ? (
                           <DateTime date={model[column.name] as string} format={column.format} />
                         ) : (
@@ -448,7 +452,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
                   }
                   if (column.type === "code") {
                     return (
-                      <Component key={column.name.toString()}>
+                      <Component key={column.name.toString()} className={column.className}>
                         {model[column.name] && (
                           <div className="badge badge-sm">
                             <code>{model[column.name] as string}</code>
@@ -458,7 +462,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
                     );
                   }
                   return (
-                    <Component key={column.name.toString()}>
+                    <Component key={column.name.toString()} className={column.className}>
                       {column.truncate ? (
                         <TruncateText text={model[column.name] as string} length={column.truncate} />
                       ) : (
@@ -534,7 +538,7 @@ export const TableLink = ({
   }
   return (
     <Link
-      href={href}
+      href={addLocale(href, useParams().locale as string)}
       {...rest}
       prefetch={false}
       className={`${styles.link} ${className || ""} text-primary-700 hover:text-primary-500`}

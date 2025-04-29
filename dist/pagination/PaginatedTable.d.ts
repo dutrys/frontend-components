@@ -7,6 +7,7 @@ type ActionColumn<TModel> = {
     view?: string | false | ((model: TModel) => string | false);
     idField: keyof TModel;
     extraButtons?: [(model: TModel) => React.ReactNode];
+    className?: string;
 };
 type SimpleColumn<TModel> = {
     name: keyof TModel;
@@ -14,6 +15,7 @@ type SimpleColumn<TModel> = {
     truncate?: number;
     type?: "code";
     pin?: true;
+    className?: string;
 };
 type DateColumn<TModel> = {
     name: keyof TModel;
@@ -21,12 +23,14 @@ type DateColumn<TModel> = {
     format?: string;
     title: string;
     pin?: true;
+    className?: string;
 };
 type FunctionColumn<TModel> = {
     name?: string;
     body: (data: TModel) => string | number | React.ReactNode;
     title: string;
     pin?: true;
+    className?: string;
 };
 export type ColumnType<TModel> = SimpleColumn<TModel> | FunctionColumn<TModel> | ActionColumn<TModel> | DateColumn<TModel>;
 export declare const PaginatedTable: <TModel extends {

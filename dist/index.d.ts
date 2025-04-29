@@ -67,7 +67,7 @@ declare const BulkDropDownActions: ({ bulkActions, disabled, }: {
 declare const HeaderResponsive: <T extends object>({ renderVisible, renderDropdown, heightClassName, elements, }: {
     heightClassName: string;
     renderVisible: (r: T, i: number) => React__default.ReactNode;
-    renderDropdown: (r: T, i: number) => React__default.ReactNode;
+    renderDropdown: (r: T, i: number, closeFn: () => void) => React__default.ReactNode;
     elements: T[];
 }) => react_jsx_runtime.JSX.Element;
 
@@ -84,6 +84,7 @@ type ActionColumn<TModel> = {
     view?: string | false | ((model: TModel) => string | false);
     idField: keyof TModel;
     extraButtons?: [(model: TModel) => React__default.ReactNode];
+    className?: string;
 };
 type SimpleColumn<TModel> = {
     name: keyof TModel;
@@ -91,6 +92,7 @@ type SimpleColumn<TModel> = {
     truncate?: number;
     type?: "code";
     pin?: true;
+    className?: string;
 };
 type DateColumn<TModel> = {
     name: keyof TModel;
@@ -98,12 +100,14 @@ type DateColumn<TModel> = {
     format?: string;
     title: string;
     pin?: true;
+    className?: string;
 };
 type FunctionColumn<TModel> = {
     name?: string;
     body: (data: TModel) => string | number | React__default.ReactNode;
     title: string;
     pin?: true;
+    className?: string;
 };
 type ColumnType<TModel> = SimpleColumn<TModel> | FunctionColumn<TModel> | ActionColumn<TModel> | DateColumn<TModel>;
 declare const PaginatedTable: <TModel extends {

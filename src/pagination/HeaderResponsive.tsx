@@ -12,12 +12,13 @@ export const HeaderResponsive = <T extends object>({
 }: {
   heightClassName: string;
   renderVisible: (r: T, i: number) => React.ReactNode;
-  renderDropdown: (r: T, i: number) => React.ReactNode;
+  renderDropdown: (r: T, i: number, closeFn: () => void) => React.ReactNode;
   elements: T[];
 }) => {
   const [showItems, setShowItems] = useState<number>(elements.length);
   const [elWidth, setElWidth] = useState<number[]>();
   const bar = useRef<HTMLDivElement>(null);
+  const cont = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (bar.current && !elWidth) {
@@ -25,6 +26,14 @@ export const HeaderResponsive = <T extends object>({
       setElWidth(navItems.map((nav) => (nav as HTMLUListElement).offsetWidth));
     }
   }, [bar, elWidth]);
+
+  useEffect(() => {
+    if (!cont.current || !elWidth) {
+      return;
+    }
+    cont.current.style.maxWidth = `${elWidth.reduce((curr, acc) => acc + curr, 0)}px`;
+    window.dispatchEvent(new Event("resize"));
+  }, [cont, elWidth]);
 
   useEffect(() => {
     const checkNavbarWidth = () => {
@@ -56,7 +65,7 @@ export const HeaderResponsive = <T extends object>({
 
   return (
     <>
-      <div className="overflow-hidden grow" style={{ overflow: "hidden" }}>
+      <div className="overflow-hidden grow" style={{ overflow: "hidden" }} ref={cont}>
         <div ref={bar} className="flex overflow-hidden">
           <div className={`${heightClassName || ""} w-full`}>
             <ul className={`flex flex-nowrap shrink justify-end flex-row ${heightClassName || ""} items-center`}>
@@ -84,10 +93,10 @@ export const HeaderResponsive = <T extends object>({
               </a>
             )}
           >
-            {() => (
+            {(closeFn) => (
               <div className="max-h-96 overflow-y-auto">
                 <ul tabIndex={0} className="menu px-1 py-0">
-                  {[...elements].splice(showItems).map(renderDropdown)}
+                  {[...elements].splice(showItems).map((e, i) => renderDropdown(e, i, closeFn))}
                 </ul>
               </div>
             )}
