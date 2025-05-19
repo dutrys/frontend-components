@@ -376,7 +376,7 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
     const elements = bulkActions && bulkActions?.length > 0
         ? [[{ link: { bulk: "bulk" }, text: "" }], ...searchableShortcuts]
         : searchableShortcuts;
-    const heading = (jsx(Fragment, { children: jsxs("div", { className: "flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]", children: [jsx("h1", { className: `pl-4 pb-3 pt-3 font-bold mr-2 ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), extraHeading, jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (searchableShortcuts.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsive, { heightClassName: "h-12", elements: elements, renderDropdown: (shortcuts, i) => {
+    const heading = (jsx(Fragment, { children: jsxs("div", { className: "flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]", children: [jsx("h1", { className: `pl-4 pb-3 pt-3 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), extraHeading, jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (searchableShortcuts.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsive, { heightClassName: "h-12", elements: elements, renderDropdown: (shortcuts, i) => {
                         return (jsxs(React.Fragment, { children: [i !== 0 && jsx("li", { className: "disabled" }), shortcuts.map(({ link, text }) => {
                                     if (bulkActions && bulkActions.length > 0 && link.bulk === "bulk") {
                                         return (jsxs(Fragment, { children: [jsx("li", { className: "menu-disabled", children: jsx("span", { children: t("pagination.bulkActions") }) }), jsx(BulkDropDownActions, { disabled: selected.length === 0, bulkActions: bulkActions.map((b) => ({
@@ -462,20 +462,23 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
                                             if (typeof idFieldValue !== "string" && typeof idFieldValue !== "number") {
                                                 throw new Error("idField must be a string or a number");
                                             }
-                                            const view = typeof column.view === "function"
-                                                ? column.view(model)
-                                                : column.view
-                                                    ? `${pathname}/${idFieldValue}/${column.view}`
+                                            const archiveValue = typeof column.archive === "function" ? column.archive(model) : column.archive;
+                                            const archive = typeof archiveValue === "string"
+                                                ? `${pathname}/${idFieldValue}/${archiveValue}`
+                                                : archiveValue
+                                                    ? `${pathname}/archive/${idFieldValue}`
                                                     : false;
-                                            const archive = typeof column.archive === "function"
-                                                ? column.archive(model)
-                                                : column.archive
-                                                    ? `${pathname}/${idFieldValue}/${column.archive}`
+                                            const viewValue = typeof column.view === "function" ? column.view(model) : column.view;
+                                            const view = typeof viewValue === "string"
+                                                ? `${pathname}/${idFieldValue}/${viewValue}`
+                                                : viewValue
+                                                    ? `${pathname}/view/${idFieldValue}`
                                                     : false;
-                                            const edit = typeof column.edit === "function"
-                                                ? column.edit(model)
-                                                : column.edit
-                                                    ? `${pathname}/${idFieldValue}/${column.edit}?${searchParams.toString()}`
+                                            const editValue = typeof column.edit === "function" ? column.edit(model) : column.edit;
+                                            const edit = typeof editValue === "string"
+                                                ? `${pathname}/${idFieldValue}/${editValue}`
+                                                : editValue
+                                                    ? `${pathname}/edit/${idFieldValue}`
                                                     : false;
                                             return (jsxs("th", { className: column.className || "whitespace-nowrap text-right", children: [column.extraButtons?.map((Button, i) => (jsx(React.Fragment, { children: Button(model) }, `${model[column.idField]}-${i}`))), view && jsx(ViewButton, { href: view }), edit && jsx(EditButton, { href: edit }), archive && jsx(ArchiveButton, { href: archive })] }, `actions-td-${i}`));
                                         }

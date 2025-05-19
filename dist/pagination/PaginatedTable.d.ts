@@ -2,9 +2,9 @@ import React from "react";
 import { ResponseMeta } from "@/utils";
 type ActionColumn<TModel> = {
     type: "actions";
-    archive?: string | false | ((model: TModel) => string | false);
-    edit?: string | false | ((model: TModel) => string | false);
-    view?: string | false | ((model: TModel) => string | false);
+    archive?: string | boolean | false | ((model: TModel) => string | boolean);
+    edit?: string | boolean | false | ((model: TModel) => string | boolean);
+    view?: string | boolean | false | ((model: TModel) => string | boolean);
     idField: keyof TModel;
     extraButtons?: [(model: TModel) => React.ReactNode];
     className?: string;

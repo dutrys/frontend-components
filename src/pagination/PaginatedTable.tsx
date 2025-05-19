@@ -20,9 +20,9 @@ const limits = [10, 20, 50, 100];
 
 type ActionColumn<TModel> = {
   type: "actions";
-  archive?: string | false | ((model: TModel) => string | false);
-  edit?: string | false | ((model: TModel) => string | false);
-  view?: string | false | ((model: TModel) => string | false);
+  archive?: string | boolean | false | ((model: TModel) => string | boolean);
+  edit?: string | boolean | false | ((model: TModel) => string | boolean);
+  view?: string | boolean | false | ((model: TModel) => string | boolean);
   idField: keyof TModel;
   extraButtons?: [(model: TModel) => React.ReactNode];
   className?: string;
@@ -158,7 +158,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
   const heading = (
     <>
       <div className="flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]">
-        <h1 className={`pl-4 pb-3 pt-3 font-bold mr-2 ${searchableShortcuts.length > 0 ? "" : "grow"}`}>{title}</h1>
+        <h1 className={`pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`}>{title}</h1>
         {extraHeading}
         <Hotkeys id="paginatedTable" hotKeys={hotKeys} />
 
@@ -404,23 +404,28 @@ export const PaginatedTable = <TModel extends { id: number }>({
                       throw new Error("idField must be a string or a number");
                     }
 
-                    const view: string | false =
-                      typeof column.view === "function"
-                        ? column.view(model)
-                        : column.view
-                          ? `${pathname}/${idFieldValue}/${column.view}`
-                          : false;
+                    const archiveValue = typeof column.archive === "function" ? column.archive(model) : column.archive;
                     const archive: string | false =
-                      typeof column.archive === "function"
-                        ? column.archive(model)
-                        : column.archive
-                          ? `${pathname}/${idFieldValue}/${column.archive}`
+                      typeof archiveValue === "string"
+                        ? `${pathname}/${idFieldValue}/${archiveValue}`
+                        : archiveValue
+                          ? `${pathname}/archive/${idFieldValue}`
                           : false;
+
+                    const viewValue = typeof column.view === "function" ? column.view(model) : column.view;
+                    const view: string | false =
+                      typeof viewValue === "string"
+                        ? `${pathname}/${idFieldValue}/${viewValue}`
+                        : viewValue
+                          ? `${pathname}/view/${idFieldValue}`
+                          : false;
+
+                    const editValue = typeof column.edit === "function" ? column.edit(model) : column.edit;
                     const edit: string | false =
-                      typeof column.edit === "function"
-                        ? column.edit(model)
-                        : column.edit
-                          ? `${pathname}/${idFieldValue}/${column.edit}?${searchParams.toString()}`
+                      typeof editValue === "string"
+                        ? `${pathname}/${idFieldValue}/${editValue}`
+                        : editValue
+                          ? `${pathname}/edit/${idFieldValue}`
                           : false;
 
                     return (

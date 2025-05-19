@@ -79,9 +79,9 @@ declare const Pagination: ({ page, visiblePages, onClick, }: {
 
 type ActionColumn<TModel> = {
     type: "actions";
-    archive?: string | false | ((model: TModel) => string | false);
-    edit?: string | false | ((model: TModel) => string | false);
-    view?: string | false | ((model: TModel) => string | false);
+    archive?: string | boolean | false | ((model: TModel) => string | boolean);
+    edit?: string | boolean | false | ((model: TModel) => string | boolean);
+    view?: string | boolean | false | ((model: TModel) => string | boolean);
     idField: keyof TModel;
     extraButtons?: [(model: TModel) => React__default.ReactNode];
     className?: string;
