@@ -460,12 +460,18 @@ const TimePicker = ({ className, value, onChange, placeholder, required, disable
 
 var styles = {"desc":"Input-module_desc__3D3hV"};
 
-const TextInput = ({ required, disabled, error, className, id, type, register, label, size, options, desc, name, fieldSetClassName, ...rest }) => {
-    return (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx("input", { id: id, type: type || "text", ...register(name, {
-                            required: required,
-                            disabled: disabled,
-                            ...(options || {}),
-                        }), required: required, disabled: disabled, placeholder: required ? `${label}*` : label, className: cx("input input-bordered w-full", className, {
+const TextInput = ({ required, disabled, error, className, id, type, register, label, size, options, desc, name, fieldSetClassName, ref, ...rest }) => {
+    const r = register(name, {
+        required: required,
+        disabled: disabled,
+        ...(options || {}),
+    });
+    return (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx("input", { id: id, type: type || "text", ...r, ref: (i) => {
+                            r.ref(i);
+                            if (ref) {
+                                ref(i);
+                            }
+                        }, required: required, disabled: disabled, placeholder: required ? `${label}*` : label, className: cx("input input-bordered w-full", className, {
                             "input-xs": size === "xs",
                             "input-sm": size === "sm",
                             "input-error": error,
@@ -483,15 +489,26 @@ const SelectInput = ({ id, disabled, fieldSetClassName, label, register, require
                         }), ...rest, children: children }), jsxs("span", { children: [label, required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 };
 const TextareaInput = (props) => {
-    return (jsxs("div", { className: props.fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx("textarea", { id: props.id, disabled: props.disabled, ...props.register(props.name, {
-                            required: props.required,
-                            disabled: props.disabled,
-                            ...(props.options || {}),
-                        }), className: cx("textarea textarea-bordered w-full", props.className, {
+    const r = props.register(props.name, {
+        required: props.required,
+        disabled: props.disabled,
+        ...(props.options || {}),
+    });
+    const [length, setLength] = useState(0);
+    return (jsxs("div", { className: props.fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx("textarea", { id: props.id, disabled: props.disabled, ...r, className: cx("textarea textarea-bordered w-full", props.className, {
                             "textarea-xs": props.size === "xs",
                             "textarea-sm": props.size === "sm",
                             "textarea-error": props.error,
-                        }) }), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+                        }), ref: (el) => {
+                            r.ref(el);
+                            if (props.maxLength && el) {
+                                setLength(el.value.length ?? 0);
+                            }
+                        }, onChange: (e) => {
+                            if (props.maxLength) {
+                                setLength(e.target?.value?.length ?? 0);
+                            }
+                        } }), props.maxLength && (jsx("div", { className: "badge badge-xs badge-ghost absolute right-1 bottom-1", children: `${length}/${props.maxLength}` })), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
 const CheckboxInput = (props) => {
     return (jsxs(Fragment, { children: [jsx("div", { className: props.fieldSetClassName, children: jsxs("label", { children: [jsx("input", { id: props.id, type: "checkbox", disabled: props.disabled, ...props.register(props.name, {

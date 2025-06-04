@@ -20,7 +20,7 @@ import { TimePicker } from "./TimePicker";
 import styles from "./Input.module.css";
 import { NumericFormat } from "react-number-format";
 import { NumericFormatProps } from "react-number-format/types/types";
-import React, { ChangeEvent, useEffect, useRef } from "react";
+import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import { LoadingComponent } from "@/Loading";
@@ -50,19 +50,27 @@ export const TextInput = <
   desc,
   name,
   fieldSetClassName,
+  ref,
   ...rest
-}: IInputRegisterProps<TFieldValues, TName> & { type?: string }) => {
+}: IInputRegisterProps<TFieldValues, TName> & { type?: string; ref?: (input: HTMLInputElement | null) => void }) => {
+  const r = register(name, {
+    required: required,
+    disabled: disabled,
+    ...((options as RegisterOptions<TFieldValues, TName>) || {}),
+  });
   return (
     <div className={fieldSetClassName}>
       <label className="floating-label">
         <input
           id={id}
           type={type || "text"}
-          {...register(name, {
-            required: required,
-            disabled: disabled,
-            ...((options as RegisterOptions<TFieldValues, TName>) || {}),
-          })}
+          {...r}
+          ref={(i) => {
+            r.ref(i);
+            if (ref) {
+              ref(i);
+            }
+          }}
           required={required}
           disabled={disabled}
           placeholder={required ? `${label}*` : label}
@@ -148,25 +156,44 @@ export const TextareaInput = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >(
-  props: IInputRegisterProps<TFieldValues, TName>,
+  props: IInputRegisterProps<TFieldValues, TName> & {
+    maxLength?: number;
+  },
 ) => {
+  const r = props.register(props.name, {
+    required: props.required,
+    disabled: props.disabled,
+    ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
+  });
+  const [length, setLength] = useState(0);
+
   return (
     <div className={props.fieldSetClassName}>
       <label className="floating-label">
         <textarea
           id={props.id}
           disabled={props.disabled}
-          {...props.register(props.name, {
-            required: props.required,
-            disabled: props.disabled,
-            ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
-          })}
+          {...r}
           className={cx("textarea textarea-bordered w-full", props.className, {
             "textarea-xs": props.size === "xs",
             "textarea-sm": props.size === "sm",
             "textarea-error": props.error,
           })}
+          ref={(el) => {
+            r.ref(el);
+            if (props.maxLength && el) {
+              setLength(el.value.length ?? 0);
+            }
+          }}
+          onChange={(e) => {
+            if (props.maxLength) {
+              setLength(e.target?.value?.length ?? 0);
+            }
+          }}
         />
+        {props.maxLength && (
+          <div className="badge badge-xs badge-ghost absolute right-1 bottom-1">{`${length}/${props.maxLength}`}</div>
+        )}
         <span>
           {props.label}
           {props.required ? <Required /> : null}
