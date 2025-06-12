@@ -539,7 +539,7 @@ export const NumberInput = <
               "input-sm": props.size === "sm",
               "input-error": props.error,
             })}
-            onValueChange={(values) => field.onChange(values.floatValue)}
+            onValueChange={(values) => field.onChange(values.floatValue ?? null)}
           />
         )}
       />
