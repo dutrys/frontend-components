@@ -1,20 +1,20 @@
 import React from "react";
 export declare const EditButton: ({ href, size }: {
     href: string;
-    size?: "xs";
+    size?: "xs" | "sm" | "lg" | "xl";
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const ViewButton: ({ href, size }: {
     href: string;
-    size?: "xs";
+    size?: "xs" | "sm" | "lg" | "xl";
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const ArchiveButton: (props: {
-    size?: "xs";
+    size?: "xs" | "sm" | "lg" | "xl";
     onClick?: (e: MouseEvent) => void;
     href?: string;
     tooltipId?: string;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const ActionButton: ({ tooltipId, icon, tooltip, className, size, ...props }: {
-    size?: "xs";
+    size?: "xs" | "sm" | "lg" | "xl";
     href?: string;
     onClick?: (e: MouseEvent) => void;
     className?: string;

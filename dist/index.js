@@ -197,6 +197,9 @@ const ActionButton = ({ tooltipId = TOOLTIP_GLOBAL_ID, icon, tooltip, className,
     // @ts-expect-error TS2322
     jsx(L, { ...props, "data-tooltip-id": tooltipId, "data-tooltip-place": "top", "data-tooltip-content": tooltip, className: cx("btn uppercase btn-ghost", className, {
             "btn-xs": size === "xs",
+            "btn-sm": size === "sm",
+            "btn-lg": size === "lg",
+            "btn-xl": size === "xl",
             "btn-xs md:btn-sm": !size,
         }), children: jsx(Icon, { className: "inline", width: 16 }) }));
 };

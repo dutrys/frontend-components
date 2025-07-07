@@ -6,18 +6,18 @@ import React from "react";
 import { TOOLTIP_GLOBAL_ID } from "@/utils";
 import cx from "classnames";
 
-export const EditButton = ({ href, size }: { href: string; size?: "xs" }) => {
+export const EditButton = ({ href, size }: { href: string; size?: "xs" | "sm" | "lg" | "xl" }) => {
   const t = useTranslations("actionButtons");
   return <ActionButton href={href} icon={PencilIcon} tooltip={t("edit")} data-testid="button-edit" size={size} />;
 };
 
-export const ViewButton = ({ href, size }: { href: string; size?: "xs" }) => {
+export const ViewButton = ({ href, size }: { href: string; size?: "xs" | "sm" | "lg" | "xl" }) => {
   const t = useTranslations("actionButtons");
   return <ActionButton href={href} icon={EyeIcon} tooltip={t("view")} data-testid="button-view" size={size} />;
 };
 
 export const ArchiveButton = (props: {
-  size?: "xs";
+  size?: "xs" | "sm" | "lg" | "xl";
   onClick?: (e: MouseEvent) => void;
   href?: string;
   tooltipId?: string;
@@ -36,7 +36,7 @@ export const ActionButton = ({
   size,
   ...props
 }: {
-  size?: "xs";
+  size?: "xs" | "sm" | "lg" | "xl";
   href?: string;
   onClick?: (e: MouseEvent) => void;
   className?: string;
@@ -61,6 +61,9 @@ export const ActionButton = ({
       data-tooltip-content={tooltip}
       className={cx("btn uppercase btn-ghost", className, {
         "btn-xs": size === "xs",
+        "btn-sm": size === "sm",
+        "btn-lg": size === "lg",
+        "btn-xl": size === "xl",
         "btn-xs md:btn-sm": !size,
       })}
     >
