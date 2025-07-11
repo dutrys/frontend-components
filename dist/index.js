@@ -342,6 +342,58 @@ const IndeterminateCheckbox = ({ checked, className = "checkbox checkbox-xs", in
     return (jsx("input", { type: "checkbox", ref: checkboxRef, className: className, onChange: onChange, checked: checked || false }));
 };
 
+const HeaderResponsivePaginated = ({ elements, bulkActions, }) => {
+    const t = useTranslations();
+    const searchParams = useSearchParams();
+    return (jsx(HeaderResponsive, { heightClassName: "h-12", elements: elements, renderDropdown: (shortcuts, i) => {
+            return (jsxs(React.Fragment, { children: [i !== 0 && jsx("li", { className: "disabled" }), shortcuts.map(({ link, text }) => {
+                        if (bulkActions && bulkActions.actions.length > 0 && link.bulk === "bulk") {
+                            return (jsxs(Fragment, { children: [jsx("li", { className: "menu-disabled", children: jsx("span", { children: t("pagination.bulkActions") }) }), jsx(BulkDropDownActions, { disabled: bulkActions.selected.length === 0, bulkActions: bulkActions.actions.map((b) => ({
+                                            children: b.children,
+                                            onSelect: async () => {
+                                                const success = await b.onSelect(bulkActions.selected);
+                                                if (success) {
+                                                    bulkActions.setSelected([]);
+                                                }
+                                            },
+                                        })) }), jsx("li", { className: "menu-disabled" }), jsx("li", { className: "menu-disabled", children: jsx("span", { children: t("pagination.filters") }) })] }));
+                        }
+                        const active = isParamActive(link, searchParams);
+                        link = { ...link };
+                        if (active) {
+                            Object.keys(link).forEach((key) => {
+                                link[key] = "";
+                            });
+                        }
+                        const params = setPartialParams({ ...link, page: "" }, searchParams);
+                        return (jsx("li", { children: jsx(Link, { prefetch: false, className: active ? "bg-base-300/50 font-bold hover:bg-base-300" : "", href: params === "" ? "?" : params, children: text }) }, text));
+                    })] }, i));
+        }, renderVisible: (element, i) => {
+            if (i === 0 && bulkActions && bulkActions.actions.length > 0) {
+                return (jsx(BulkActions, { disabled: bulkActions.selected.length === 0, bulkActions: bulkActions.actions.map((b) => ({
+                        children: b.children,
+                        onSelect: async () => {
+                            const success = await b.onSelect(bulkActions.selected);
+                            if (success) {
+                                bulkActions.setSelected([]);
+                            }
+                        },
+                    })) }));
+            }
+            return (jsx("div", { className: element.length > 1 ? "join" : undefined, children: element.map(({ text, link }) => {
+                    const active = isParamActive(link, searchParams);
+                    link = { ...link };
+                    if (active) {
+                        Object.keys(link).forEach((key) => {
+                            link[key] = "";
+                        });
+                    }
+                    const params = setPartialParams({ ...link, page: "" }, searchParams);
+                    return (jsx(Link, { prefetch: false, className: `btn join-item uppercase btn-xs ${active ? "btn-neutral" : ""}`, href: params === "" ? "?" : params, children: text }, text));
+                }) }, i));
+        } }));
+};
+
 const limits = [10, 20, 50, 100];
 function isActionColumn(column) {
     return typeof column === "object" && column.type === "actions";
@@ -379,53 +431,7 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
     const elements = bulkActions && bulkActions?.length > 0
         ? [[{ link: { bulk: "bulk" }, text: "" }], ...searchableShortcuts]
         : searchableShortcuts;
-    const heading = (jsx(Fragment, { children: jsxs("div", { className: "flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]", children: [jsx("h1", { className: `pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), extraHeading, jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (searchableShortcuts.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsive, { heightClassName: "h-12", elements: elements, renderDropdown: (shortcuts, i) => {
-                        return (jsxs(React.Fragment, { children: [i !== 0 && jsx("li", { className: "disabled" }), shortcuts.map(({ link, text }) => {
-                                    if (bulkActions && bulkActions.length > 0 && link.bulk === "bulk") {
-                                        return (jsxs(Fragment, { children: [jsx("li", { className: "menu-disabled", children: jsx("span", { children: t("pagination.bulkActions") }) }), jsx(BulkDropDownActions, { disabled: selected.length === 0, bulkActions: bulkActions.map((b) => ({
-                                                        children: b.children,
-                                                        onSelect: async () => {
-                                                            const success = await b.onSelect(selected);
-                                                            if (success) {
-                                                                setSelected([]);
-                                                            }
-                                                        },
-                                                    })) }), jsx("li", { className: "menu-disabled" }), jsx("li", { className: "menu-disabled", children: jsx("span", { children: t("pagination.filters") }) })] }));
-                                    }
-                                    const active = isParamActive(link, searchParams);
-                                    link = { ...link };
-                                    if (active) {
-                                        Object.keys(link).forEach((key) => {
-                                            link[key] = "";
-                                        });
-                                    }
-                                    const params = setPartialParams({ ...link, page: "" }, searchParams);
-                                    return (jsx("li", { children: jsx(Link, { prefetch: false, className: active ? "bg-base-300/50 font-bold hover:bg-base-300" : "", href: params === "" ? "?" : params, children: text }) }, text));
-                                })] }, i));
-                    }, renderVisible: (element, i) => {
-                        if (i === 0 && bulkActions && bulkActions.length > 0) {
-                            return (jsx(BulkActions, { disabled: selected.length === 0, bulkActions: bulkActions.map((b) => ({
-                                    children: b.children,
-                                    onSelect: async () => {
-                                        const success = await b.onSelect(selected);
-                                        if (success) {
-                                            setSelected([]);
-                                        }
-                                    },
-                                })) }));
-                        }
-                        return (jsx("div", { className: element.length > 1 ? "join" : undefined, children: element.map(({ text, link }) => {
-                                const active = isParamActive(link, searchParams);
-                                link = { ...link };
-                                if (active) {
-                                    Object.keys(link).forEach((key) => {
-                                        link[key] = "";
-                                    });
-                                }
-                                const params = setPartialParams({ ...link, page: "" }, searchParams);
-                                return (jsx(Link, { prefetch: false, className: `btn join-item uppercase btn-xs ${active ? "btn-neutral" : ""}`, href: params === "" ? "?" : params, children: text }, text));
-                            }) }, i));
-                    } })), addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: addNewText || t("pagination.addNew") })] })), isSearchable && jsx(SearchField, {})] }) }));
+    const heading = (jsx(Fragment, { children: jsxs("div", { className: "flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]", children: [jsx("h1", { className: `pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), extraHeading, jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (searchableShortcuts.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsivePaginated, { bulkActions: bulkActions ? { actions: bulkActions, setSelected, selected } : undefined, elements: elements })), addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: addNewText || t("pagination.addNew") })] })), isSearchable && jsx(SearchField, {})] }) }));
     if (pagination.meta.totalItems === 0) {
         return (jsxs(Fragment, { children: [heading, caption, jsxs("div", { className: "text-center mt-20", children: [jsxs("span", { className: "text-gray-400", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", addNewText || t("pagination.tryCreatingOne")] }) }))] })] }));
     }
@@ -515,5 +521,5 @@ const TruncateText = ({ text, length }) => {
     return (jsx("div", { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": text, className: "text-left text-ellipsis overflow-hidden", style: { width: length }, children: text }));
 };
 
-export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, EditButton, HeaderResponsive, LoadingComponent, PaginatedTable, Pagination, Popover, TableLink, ViewButton };
+export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, EditButton, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, PaginatedTable, Pagination, Popover, TableLink, ViewButton };
 //# sourceMappingURL=index.js.map

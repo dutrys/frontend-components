@@ -5,3 +5,4 @@ export * from "./pagination/BulkActions";
 export * from "./pagination/HeaderResponsive";
 export * from "./pagination/Pagination";
 export * from "./pagination/PaginatedTable";
+export * from "./pagination/HeaderResponsivePaginated";

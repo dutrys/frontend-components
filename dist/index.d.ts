@@ -142,4 +142,19 @@ declare const TableLink: ({ href, children, className, isLink, ...rest }: {
     isLink?: boolean;
 }) => string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React__default.ReactNode> | Promise<string | number | bigint | boolean | React__default.ReactPortal | React__default.ReactElement<unknown, string | React__default.JSXElementConstructor<any>> | Iterable<React__default.ReactNode> | null | undefined> | null | undefined;
 
-export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, type ColumnType, EditButton, HeaderResponsive, LoadingComponent, PaginatedTable, Pagination, Popover, TableLink, ViewButton };
+declare const HeaderResponsivePaginated: ({ elements, bulkActions, }: {
+    elements: {
+        link: Record<string, string>;
+        text: string;
+    }[][];
+    bulkActions?: {
+        actions: {
+            children: React__default.ReactNode;
+            onSelect: (models: number[]) => Promise<boolean | void>;
+        }[];
+        selected: number[];
+        setSelected: (selected: number[]) => void;
+    };
+}) => react_jsx_runtime.JSX.Element;
+
+export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, type ColumnType, EditButton, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, PaginatedTable, Pagination, Popover, TableLink, ViewButton };

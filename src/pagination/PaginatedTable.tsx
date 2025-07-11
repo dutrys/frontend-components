@@ -7,14 +7,13 @@ import { Pagination } from "./Pagination";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import styles from "./PaginatedTable.module.css";
-import { HeaderResponsive } from "./HeaderResponsive";
 import { HumanDate, TOOLTIP_GLOBAL_ID } from "@/utils";
 import cx from "classnames";
-import { BulkActions, BulkDropDownActions } from "./BulkActions";
 import { ResponseMeta } from "@/utils";
 import { Link, addLocale } from "./Link";
 import { Hotkeys } from "@/HotKeys";
 import { IndeterminateCheckbox } from "@/form";
+import { HeaderResponsivePaginated } from "@/pagination/HeaderResponsivePaginated";
 
 const limits = [10, 20, 50, 100];
 
@@ -163,105 +162,9 @@ export const PaginatedTable = <TModel extends { id: number }>({
         <Hotkeys id="paginatedTable" hotKeys={hotKeys} />
 
         {(searchableShortcuts.length > 0 || (bulkActions && bulkActions?.length > 0)) && (
-          <HeaderResponsive
-            heightClassName="h-12"
+          <HeaderResponsivePaginated
+            bulkActions={bulkActions ? { actions: bulkActions, setSelected, selected } : undefined}
             elements={elements}
-            renderDropdown={(shortcuts, i) => {
-              return (
-                <React.Fragment key={i}>
-                  {i !== 0 && <li className="disabled"></li>}
-                  {shortcuts.map(({ link, text }) => {
-                    if (bulkActions && bulkActions.length > 0 && link.bulk === "bulk") {
-                      return (
-                        <>
-                          <li className="menu-disabled">
-                            <span>{t("pagination.bulkActions")}</span>
-                          </li>
-                          <BulkDropDownActions
-                            disabled={selected.length === 0}
-                            bulkActions={bulkActions.map((b) => ({
-                              children: b.children,
-                              onSelect: async () => {
-                                const success = await b.onSelect(selected);
-                                if (success) {
-                                  setSelected([]);
-                                }
-                              },
-                            }))}
-                          />
-                          <li className="menu-disabled"></li>
-                          <li className="menu-disabled">
-                            <span>{t("pagination.filters")}</span>
-                          </li>
-                        </>
-                      );
-                    }
-
-                    const active = isParamActive(link, searchParams);
-                    link = { ...link };
-                    if (active) {
-                      Object.keys(link).forEach((key) => {
-                        link[key] = "";
-                      });
-                    }
-                    const params = setPartialParams({ ...link, page: "" }, searchParams);
-                    return (
-                      <li key={text}>
-                        <Link
-                          prefetch={false}
-                          className={active ? "bg-base-300/50 font-bold hover:bg-base-300" : ""}
-                          href={params === "" ? "?" : params}
-                        >
-                          {text}
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </React.Fragment>
-              );
-            }}
-            renderVisible={(element, i) => {
-              if (i === 0 && bulkActions && bulkActions.length > 0) {
-                return (
-                  <BulkActions
-                    disabled={selected.length === 0}
-                    bulkActions={bulkActions.map((b) => ({
-                      children: b.children,
-                      onSelect: async () => {
-                        const success = await b.onSelect(selected);
-                        if (success) {
-                          setSelected([]);
-                        }
-                      },
-                    }))}
-                  />
-                );
-              }
-              return (
-                <div className={element.length > 1 ? "join" : undefined} key={i}>
-                  {element.map(({ text, link }) => {
-                    const active = isParamActive(link, searchParams);
-                    link = { ...link };
-                    if (active) {
-                      Object.keys(link).forEach((key) => {
-                        link[key] = "";
-                      });
-                    }
-                    const params = setPartialParams({ ...link, page: "" }, searchParams);
-                    return (
-                      <Link
-                        prefetch={false}
-                        key={text}
-                        className={`btn join-item uppercase btn-xs ${active ? "btn-neutral" : ""}`}
-                        href={params === "" ? "?" : params}
-                      >
-                        {text}
-                      </Link>
-                    );
-                  })}
-                </div>
-              );
-            }}
           />
         )}
         {addNew && (
