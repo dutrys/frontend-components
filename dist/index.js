@@ -14,6 +14,7 @@ import 'react-tooltip';
 import 'date-fns-tz';
 import '@sentry/nextjs';
 import 'react-hook-form';
+import { EllipsisVerticalIcon } from '@heroicons/react/16/solid';
 import { useRouter } from 'next-nprogress-bar';
 import 'react-day-picker';
 import 'react-day-picker/locale';
@@ -174,36 +175,6 @@ const DateTime = ({ date, format: format$1 = "yyyy-MM-dd HH:mm:ss" }) => {
     return formattedDate;
 };
 
-const EditButton = ({ href, size }) => {
-    const t = useTranslations("actionButtons");
-    return jsx(ActionButton, { href: href, icon: PencilIcon, tooltip: t("edit"), "data-testid": "button-edit", size: size });
-};
-const ViewButton = ({ href, size }) => {
-    const t = useTranslations("actionButtons");
-    return jsx(ActionButton, { href: href, icon: EyeIcon, tooltip: t("view"), "data-testid": "button-view", size: size });
-};
-const ArchiveButton = (props) => {
-    const t = useTranslations("actionButtons");
-    return (jsx(ActionButton, { ...props, icon: TrashIcon, "data-testid": "button-archive", tooltip: t("archive"), size: props.size }));
-};
-const ActionButton = ({ tooltipId = TOOLTIP_GLOBAL_ID, icon, tooltip, className, size, ...props }) => {
-    const params = useParams();
-    const Icon = icon;
-    const L = props.href ? Link : "button";
-    if (props.href) {
-        props.href = addLocale(props.href, params.locale);
-    }
-    return (
-    // @ts-expect-error TS2322
-    jsx(L, { ...props, "data-tooltip-id": tooltipId, "data-tooltip-place": "top", "data-tooltip-content": tooltip, className: cx("btn uppercase btn-ghost", className, {
-            "btn-xs": size === "xs",
-            "btn-sm": size === "sm",
-            "btn-lg": size === "lg",
-            "btn-xl": size === "xl",
-            "btn-xs md:btn-sm": !size,
-        }), children: jsx(Icon, { className: "inline", width: 16 }) }));
-};
-
 const HotkeysContext = createContext({
     addHotKey: () => { },
     removeHotKey: () => { },
@@ -238,6 +209,62 @@ const Hotkeys = ({ hotKeys, id }) => {
         };
     }, [mapping, hotKeys, id]);
     return null;
+};
+
+const EditButton = ({ href, size }) => {
+    const t = useTranslations("actionButtons");
+    return jsx(ActionButton, { href: href, icon: PencilIcon, tooltip: t("edit"), "data-testid": "button-edit", size: size });
+};
+const ViewButton = ({ href, size }) => {
+    const t = useTranslations("actionButtons");
+    return jsx(ActionButton, { href: href, icon: EyeIcon, tooltip: t("view"), "data-testid": "button-view", size: size });
+};
+const MoreActions = ({ actions }) => {
+    if (actions.filter((a) => !a.hidden).length === 0) {
+        return null;
+    }
+    return (jsx(Popover, { title: (ref) => (jsx("button", { className: "btn btn-sm xs:btn-xs btn-ghost", ref: ref, children: jsx(EllipsisVerticalIcon, { className: "size-4" }) })), children: (close) => (jsx("ul", { className: "menu menu-sm px-1 p-0", children: actions
+                .filter((a) => !a.hidden)
+                .map((a, i) => (jsx("li", { children: jsx(Action, { action: a, close: close }) }, i))) })) }));
+};
+const Action = ({ action: a, close }) => {
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
+    const Icon = isLoading ? LoadingComponent : a.icon;
+    if (!a.onClick) {
+        return (jsxs(Link, { className: "text-base-100 hover:bg-base-100/20", href: a.href, onClick: () => close(), children: [Icon && jsx(Icon, { className: "size-4" }), a.label] }));
+    }
+    return (jsxs("button", { className: "text-base-100 hover:bg-base-100/20", onClick: (e) => {
+            e.preventDefault();
+            setIsLoading(true);
+            a.onClick()
+                .then((result) => {
+                router.push(result);
+                close();
+            })
+                .finally(() => setIsLoading(false));
+        }, children: [Icon && jsx(Icon, { className: "size-4" }), a.label] }));
+};
+const ArchiveButton = (props) => {
+    const t = useTranslations("actionButtons");
+    return (jsx(ActionButton, { ...props, icon: TrashIcon, "data-testid": "button-archive", tooltip: t("archive"), size: props.size }));
+};
+const ActionButton = ({ tooltipId = TOOLTIP_GLOBAL_ID, icon, tooltip, className, size, ...props }) => {
+    const params = useParams();
+    const Icon = icon;
+    const L = props.href ? Link : "button";
+    if (props.href) {
+        props.href = addLocale(props.href, params.locale);
+    }
+    return (
+    // @ts-expect-error TS2322
+    jsx(L, { ...props, "data-tooltip-id": tooltipId, "data-tooltip-place": "top", "data-tooltip-content": tooltip, className: cx("btn uppercase btn-ghost", className, {
+            "btn-xs": size === "xs",
+            "btn-sm": size === "sm",
+            "btn-lg": size === "lg",
+            "btn-xl": size === "xl",
+            "btn-xs md:btn-sm": !size,
+        }), children: jsx(Icon, { className: "inline", width: 16 }) }));
 };
 
 var styles$1 = {"menu":"BulkActions-module_menu__m9kWg"};
@@ -521,5 +548,5 @@ const TruncateText = ({ text, length }) => {
     return (jsx("div", { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": text, className: "text-left text-ellipsis overflow-hidden", style: { width: length }, children: text }));
 };
 
-export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, EditButton, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, PaginatedTable, Pagination, Popover, TableLink, ViewButton };
+export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, EditButton, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, MoreActions, PaginatedTable, Pagination, Popover, TableLink, ViewButton };
 //# sourceMappingURL=index.js.map

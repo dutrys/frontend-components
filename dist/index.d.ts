@@ -33,6 +33,18 @@ declare const ViewButton: ({ href, size }: {
     href: string;
     size?: "xs" | "sm" | "lg" | "xl";
 }) => react_jsx_runtime.JSX.Element;
+type MoreActionType = {
+    label: string;
+    icon: React__default.ComponentType<{
+        className?: string;
+    }>;
+    onClick?: () => Promise<string>;
+    href?: string;
+    hidden?: boolean;
+};
+declare const MoreActions: ({ actions }: {
+    actions: MoreActionType[];
+}) => react_jsx_runtime.JSX.Element | null;
 declare const ArchiveButton: (props: {
     size?: "xs" | "sm" | "lg" | "xl";
     onClick?: (e: MouseEvent) => void;
@@ -157,4 +169,4 @@ declare const HeaderResponsivePaginated: ({ elements, bulkActions, }: {
     };
 }) => react_jsx_runtime.JSX.Element;
 
-export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, type ColumnType, EditButton, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, PaginatedTable, Pagination, Popover, TableLink, ViewButton };
+export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, type ColumnType, EditButton, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, MoreActions, PaginatedTable, Pagination, Popover, TableLink, ViewButton };

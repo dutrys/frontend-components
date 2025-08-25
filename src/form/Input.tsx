@@ -209,6 +209,40 @@ export const TextareaInput = <
   );
 };
 
+export const RadioBox = <T extends string>({
+  name,
+  options,
+  label = "",
+  value,
+  onChange,
+}: {
+  name: string;
+  value: T;
+  label?: string;
+  options: Record<T, string>;
+  onChange: (value: T) => void;
+}) => (
+  <div>
+    {label || ""}
+    <div className="flex flex-col pt-2 gap-2">
+      {Object.entries(options).map(([key, label]) => (
+        <label key={key}>
+          <input
+            key={key}
+            type="radio"
+            checked={value === key}
+            name={name}
+            value={key}
+            onChange={() => onChange(key as T)}
+            className="radio radio-primary"
+          />{" "}
+          {typeof label === "string" ? label : null}
+        </label>
+      ))}
+    </div>
+  </div>
+);
+
 export const CheckboxInput = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,

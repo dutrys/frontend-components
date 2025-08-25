@@ -2,9 +2,13 @@ import { Link, addLocale } from "./Link";
 import { EyeIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useParams, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import React from "react";
+import React, { useState } from "react";
 import { TOOLTIP_GLOBAL_ID } from "@/utils";
 import cx from "classnames";
+import { Popover } from "@/dialog";
+import { EllipsisVerticalIcon } from "@heroicons/react/16/solid";
+import { useRouter } from "next-nprogress-bar";
+import { LoadingComponent } from "@/Loading";
 
 export const EditButton = ({ href, size }: { href: string; size?: "xs" | "sm" | "lg" | "xl" }) => {
   const t = useTranslations("actionButtons");
@@ -14,6 +18,75 @@ export const EditButton = ({ href, size }: { href: string; size?: "xs" | "sm" | 
 export const ViewButton = ({ href, size }: { href: string; size?: "xs" | "sm" | "lg" | "xl" }) => {
   const t = useTranslations("actionButtons");
   return <ActionButton href={href} icon={EyeIcon} tooltip={t("view")} data-testid="button-view" size={size} />;
+};
+
+type MoreActionType = {
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  onClick?: () => Promise<string>;
+  href?: string;
+  hidden?: boolean;
+};
+
+export const MoreActions = ({ actions }: { actions: MoreActionType[] }) => {
+  if (actions.filter((a) => !a.hidden).length === 0) {
+    return null;
+  }
+
+  return (
+    <Popover
+      title={(ref) => (
+        <button className="btn btn-sm xs:btn-xs btn-ghost" ref={ref}>
+          <EllipsisVerticalIcon className="size-4" />
+        </button>
+      )}
+    >
+      {(close) => (
+        <ul className="menu menu-sm px-1 p-0">
+          {actions
+            .filter((a) => !a.hidden)
+            .map((a, i) => (
+              <li key={i}>
+                <Action action={a} close={close} />
+              </li>
+            ))}
+        </ul>
+      )}
+    </Popover>
+  );
+};
+
+const Action = ({ action: a, close }: { close: () => void; action: MoreActionType }) => {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const Icon = isLoading ? LoadingComponent : a.icon;
+  if (!a.onClick) {
+    return (
+      <Link className="text-base-100 hover:bg-base-100/20" href={a.href!} onClick={() => close()}>
+        {Icon && <Icon className="size-4" />}
+        {a.label}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      className="text-base-100 hover:bg-base-100/20"
+      onClick={(e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        a.onClick!()
+          .then((result) => {
+            router.push(result);
+            close();
+          })
+          .finally(() => setIsLoading(false));
+      }}
+    >
+      {Icon && <Icon className="size-4" />}
+      {a.label}
+    </button>
+  );
 };
 
 export const ArchiveButton = (props: {
