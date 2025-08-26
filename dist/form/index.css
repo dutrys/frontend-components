@@ -17,8 +17,11 @@
   fill: var(--color-base-100) !important;
 }
 .DatePicker-module_dayPicker__VRSSY .rdp-today .rdp-day_button {
-  background: none !important;
+  background: var(--color-gray-500);
   border: 1px solid color-mix(in oklch, var(--color-primary) 10%, #0000) !important;
+}
+.DatePicker-module_dayPicker__VRSSY .rdp-today .rdp-day_button:hover {
+    background: var(--color-base-100) !important;
 }
 .DatePicker-module_dayPicker__VRSSY .rdp-selected .rdp-day_button {
   background: var(--color-primary) !important;
