@@ -158,7 +158,6 @@ export const PaginatedTable = <TModel extends { id: number }>({
     <>
       <div className="flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]">
         <h1 className={`pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`}>{title}</h1>
-        {extraHeading}
         <Hotkeys id="paginatedTable" hotKeys={hotKeys} />
 
         {(searchableShortcuts.length > 0 || (bulkActions && bulkActions?.length > 0)) && (
@@ -167,6 +166,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
             elements={elements}
           />
         )}
+        {extraHeading}
         {addNew && (
           <Link
             className="btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2"
