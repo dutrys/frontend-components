@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "next/navigation";
 import { Tooltip } from "react-tooltip";
+import FocusLock from "react-focus-lock";
 
 export const TOOLTIP_PARALLEL_ID = "paralel-tooltip";
 
@@ -53,25 +54,27 @@ export const ParallelDialog = ({ title, children, onClose, className, ...rest }:
   };
 
   return (
-    <dialog
-      onKeyDown={(e) => e.key === "Escape" && closeModal()}
-      className={`modal overflow-y-auto ${isOpen ? "modal-open" : ""}`}
-      style={{ zIndex: 1100 }}
-      data-testid="modal-dialog"
-      {...rest}
-    >
-      <div className={`modal-box my-4 overflow-y-visible max-h-none ${className}`}>
-        {title && (
-          <h3 className="font-bold text-lg" data-testid="modal-dialog-title">
-            {title}
-          </h3>
-        )}
-        {children}
-      </div>
-      <form method="dialog" className="modal-backdrop">
-        <button onClick={closeModal}>close</button>
-      </form>
-      <Tooltip id={TOOLTIP_PARALLEL_ID} place="top" />
-    </dialog>
+    <FocusLock autoFocus>
+      <dialog
+        onKeyDown={(e) => e.key === "Escape" && closeModal()}
+        className={`modal overflow-y-auto ${isOpen ? "modal-open" : ""}`}
+        style={{ zIndex: 1100 }}
+        data-testid="modal-dialog"
+        {...rest}
+      >
+        <div className={`modal-box my-4 overflow-y-visible max-h-none ${className}`}>
+          {title && (
+            <h3 className="font-bold text-lg" data-testid="modal-dialog-title">
+              {title}
+            </h3>
+          )}
+          {children}
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button onClick={closeModal}>close</button>
+        </form>
+        <Tooltip id={TOOLTIP_PARALLEL_ID} place="top" />
+      </dialog>
+    </FocusLock>
   );
 };

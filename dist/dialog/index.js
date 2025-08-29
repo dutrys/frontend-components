@@ -5,10 +5,12 @@ import { useFloating, offset, flip, arrow, autoUpdate, useFocus, useHover, safeP
 import cx from 'classnames';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import { Tooltip } from 'react-tooltip';
+import FocusLock from 'react-focus-lock';
 import toast from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
 import { captureException } from '@sentry/nextjs';
 import 'react-hook-form';
+import { createPortal } from 'react-dom';
 
 const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: openProp, showOnHover = true, showOnClick = false, showOnFocus = false, popoverWidth, backgroundColor = "bg-slate-800", borderColor = "border-slate-600", disabled, }) => {
     const [isOpen, setIsOpen] = useState(openProp || false);
@@ -72,7 +74,7 @@ const ParallelDialog = ({ title, children, onClose, className, ...rest }) => {
             return;
         }
     };
-    return (jsxs("dialog", { onKeyDown: (e) => e.key === "Escape" && closeModal(), className: `modal overflow-y-auto ${isOpen ? "modal-open" : ""}`, style: { zIndex: 1100 }, "data-testid": "modal-dialog", ...rest, children: [jsxs("div", { className: `modal-box my-4 overflow-y-visible max-h-none ${className}`, children: [title && (jsx("h3", { className: "font-bold text-lg", "data-testid": "modal-dialog-title", children: title })), children] }), jsx("form", { method: "dialog", className: "modal-backdrop", children: jsx("button", { onClick: closeModal, children: "close" }) }), jsx(Tooltip, { id: TOOLTIP_PARALLEL_ID, place: "top" })] }));
+    return (jsx(FocusLock, { autoFocus: true, children: jsxs("dialog", { onKeyDown: (e) => e.key === "Escape" && closeModal(), className: `modal overflow-y-auto ${isOpen ? "modal-open" : ""}`, style: { zIndex: 1100 }, "data-testid": "modal-dialog", ...rest, children: [jsxs("div", { className: `modal-box my-4 overflow-y-visible max-h-none ${className}`, children: [title && (jsx("h3", { className: "font-bold text-lg", "data-testid": "modal-dialog-title", children: title })), children] }), jsx("form", { method: "dialog", className: "modal-backdrop", children: jsx("button", { onClick: closeModal, children: "close" }) }), jsx(Tooltip, { id: TOOLTIP_PARALLEL_ID, place: "top" })] }) }));
 };
 
 const HotkeysContext = createContext({
@@ -171,15 +173,16 @@ const Archive = ({ title, archive, onClose, formatErrors, translateId, onSuccess
 const ArchiveButton = ({ title, archive, children, formatErrors, onSuccess, }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    return (jsxs(Fragment, { children: [isOpen && (jsx(Archive, { onSuccess: onSuccess, title: title, archive: async () => {
-                    setIsLoading(true);
-                    try {
-                        return await archive();
-                    }
-                    finally {
-                        setIsLoading(false);
-                    }
-                }, onClose: () => setIsOpen(false), formatErrors: formatErrors })), children(() => setIsOpen(!isOpen), isLoading)] }));
+    return (jsxs(Fragment, { children: [isOpen &&
+                createPortal(jsx(Archive, { onSuccess: onSuccess, title: title, archive: async () => {
+                        setIsLoading(true);
+                        try {
+                            return await archive();
+                        }
+                        finally {
+                            setIsLoading(false);
+                        }
+                    }, onClose: () => setIsOpen(false), formatErrors: formatErrors }), document.body), children(() => setIsOpen(!isOpen), isLoading)] }));
 };
 
 export { Archive, ArchiveButton, ParallelDialog, Popover, TOOLTIP_PARALLEL_ID };

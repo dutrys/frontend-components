@@ -58,6 +58,7 @@ export default [
     ],
     external: [
       "react/jsx-runtime",
+      "react-focus-lock",
       "react",
       "next/navigation",
       "react-tooltip",
@@ -132,6 +133,7 @@ export default [
       "react-hook-form",
       "react-tooltip",
       "next/navigation",
+      "react-focus-lock",
       "date-fns-tz",
     ],
   },

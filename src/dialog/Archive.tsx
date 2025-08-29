@@ -6,6 +6,7 @@ import { Hotkeys } from "../HotKeys";
 import { captureException } from "@sentry/nextjs";
 import { GeneralErrorsInToast, isServerError } from "../form/UseForm";
 import { ParallelDialog } from "./ParallelDialog";
+import { createPortal } from "react-dom";
 
 type Include<T, U> = T extends U ? T : never;
 
@@ -119,22 +120,24 @@ export const ArchiveButton = <T = unknown,>({
   const [isLoading, setIsLoading] = useState(false);
   return (
     <>
-      {isOpen && (
-        <Archive<T>
-          onSuccess={onSuccess}
-          title={title}
-          archive={async () => {
-            setIsLoading(true);
-            try {
-              return await archive();
-            } finally {
-              setIsLoading(false);
-            }
-          }}
-          onClose={() => setIsOpen(false)}
-          formatErrors={formatErrors}
-        />
-      )}
+      {isOpen &&
+        createPortal(
+          <Archive<T>
+            onSuccess={onSuccess}
+            title={title}
+            archive={async () => {
+              setIsLoading(true);
+              try {
+                return await archive();
+              } finally {
+                setIsLoading(false);
+              }
+            }}
+            onClose={() => setIsOpen(false)}
+            formatErrors={formatErrors}
+          />,
+          document.body,
+        )}
       {children(() => setIsOpen(!isOpen), isLoading)}
     </>
   );

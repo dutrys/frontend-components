@@ -12,6 +12,8 @@ import cx from 'classnames';
 import { DayPicker } from 'react-day-picker';
 import { lt, enGB } from 'react-day-picker/locale';
 import 'react-tooltip';
+import 'react-focus-lock';
+import 'react-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { Combobox, ComboboxInput, ComboboxButton, Transition, ComboboxOptions, ComboboxOption } from '@headlessui/react';
 import { ChevronUpDownIcon, CheckIcon } from '@heroicons/react/20/solid';
