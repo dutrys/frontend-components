@@ -59,6 +59,7 @@ declare const ActionButton: ({ tooltipId, icon, tooltip, className, size, ...pro
     tooltipId?: string;
     icon: React__default.ElementType;
     tooltip: React__default.ReactNode;
+    prefetch?: boolean;
 }) => react_jsx_runtime.JSX.Element;
 
 declare const BulkActions: ({ bulkActions, disabled, }: {

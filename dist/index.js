@@ -257,6 +257,7 @@ const ActionButton = ({ tooltipId = TOOLTIP_GLOBAL_ID, icon, tooltip, className,
     const L = props.href ? Link : "button";
     if (props.href) {
         props.href = addLocale(props.href, params.locale);
+        props.prefetch = props.prefetch ?? false;
     }
     return (
     // @ts-expect-error TS2322

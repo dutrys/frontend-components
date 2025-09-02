@@ -33,6 +33,7 @@ export declare const ActionButton: ({ tooltipId, icon, tooltip, className, size,
     tooltipId?: string;
     icon: React.ElementType;
     tooltip: React.ReactNode;
+    prefetch?: boolean;
 }) => import("react/jsx-runtime").JSX.Element;
 export {};
 //# sourceMappingURL=ActionButtons.d.ts.map

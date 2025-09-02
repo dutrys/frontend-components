@@ -1,6 +1,6 @@
 import { Link, addLocale } from "./Link";
 import { EyeIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 import { TOOLTIP_GLOBAL_ID } from "@/utils";
@@ -116,6 +116,7 @@ export const ActionButton = ({
   tooltipId?: string;
   icon: React.ElementType;
   tooltip: React.ReactNode;
+  prefetch?: boolean;
 }) => {
   const params = useParams();
   const Icon = icon;
@@ -123,6 +124,7 @@ export const ActionButton = ({
 
   if (props.href) {
     props.href = addLocale(props.href, params.locale as string);
+    props.prefetch = props.prefetch ?? false;
   }
 
   return (
