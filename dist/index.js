@@ -241,7 +241,7 @@ const Action = ({ action: a, close }) => {
             setIsLoading(true);
             a.onClick()
                 .then((result) => {
-                router.push(result);
+                router.push(addLocale(result));
                 close();
             })
                 .finally(() => setIsLoading(false));

@@ -77,7 +77,7 @@ const Action = ({ action: a, close }: { close: () => void; action: MoreActionTyp
         setIsLoading(true);
         a.onClick!()
           .then((result) => {
-            router.push(result);
+            router.push(addLocale(result));
             close();
           })
           .finally(() => setIsLoading(false));
