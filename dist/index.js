@@ -234,7 +234,10 @@ const Action = ({ action: a, close }) => {
     const [isLoading, setIsLoading] = useState(false);
     const Icon = isLoading ? LoadingComponent : a.icon;
     if (!a.onClick) {
-        return (jsxs(Link, { className: "text-base-100 hover:bg-base-100/20", href: a.href, onClick: () => close(), children: [Icon && jsx(Icon, { className: "size-4" }), a.label] }));
+        if (!a.href) {
+            throw new Error("href or onClick is required");
+        }
+        return (jsxs(Link, { className: "text-base-100 hover:bg-base-100/20", href: addLocale(a.href), onClick: () => close(), children: [Icon && jsx(Icon, { className: "size-4" }), a.label] }));
     }
     return (jsxs("button", { className: "text-base-100 hover:bg-base-100/20", onClick: (e) => {
             e.preventDefault();

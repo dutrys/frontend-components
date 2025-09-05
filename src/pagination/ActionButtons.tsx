@@ -61,8 +61,11 @@ const Action = ({ action: a, close }: { close: () => void; action: MoreActionTyp
   const [isLoading, setIsLoading] = useState(false);
   const Icon = isLoading ? LoadingComponent : a.icon;
   if (!a.onClick) {
+    if (!a.href) {
+      throw new Error("href or onClick is required");
+    }
     return (
-      <Link className="text-base-100 hover:bg-base-100/20" href={a.href!} onClick={() => close()}>
+      <Link className="text-base-100 hover:bg-base-100/20" href={addLocale(a.href)} onClick={() => close()}>
         {Icon && <Icon className="size-4" />}
         {a.label}
       </Link>
