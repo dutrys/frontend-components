@@ -120,7 +120,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
           />
           <ComboboxButton
             data-testid="select-input-btn"
-            className="absolute inset-y-0 right-0 flex items-center pr-2"
+            className="absolute z-1 cursor-pointer inset-y-0 right-0 flex items-center pr-2"
             onClick={(e) => {
               (e.target as HTMLButtonElement)?.parentNode?.parentNode?.querySelector("input")?.select();
             }}
