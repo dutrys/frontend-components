@@ -7,6 +7,8 @@ import { Popover } from "@/dialog";
 import { useParams } from "next/navigation";
 import { DayPicker, Matcher } from "react-day-picker";
 import { enGB, lt } from "react-day-picker/locale";
+import { FocusTrap } from "@headlessui/react";
+import FocusLock from "react-focus-lock";
 
 const formatDate = (date: Date | null | undefined) => {
   if (!date) {
@@ -58,7 +60,7 @@ export const DatePicker = ({
   return (
     <div className={`w-full ${inputClassName}`}>
       <Popover
-        showOnClick
+        showOnClick={false}
         showOnFocus
         showOnHover={false}
         popoverWidth=""

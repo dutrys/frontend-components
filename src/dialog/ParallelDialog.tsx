@@ -54,7 +54,7 @@ export const ParallelDialog = ({ title, children, onClose, className, ...rest }:
   };
 
   return (
-    <FocusLock autoFocus>
+    <FocusLock>
       <dialog
         onKeyDown={(e) => e.key === "Escape" && closeModal()}
         className={`modal overflow-y-auto ${isOpen ? "modal-open" : ""}`}
@@ -62,7 +62,7 @@ export const ParallelDialog = ({ title, children, onClose, className, ...rest }:
         data-testid="modal-dialog"
         {...rest}
       >
-        <div className={`modal-box my-4 overflow-y-visible max-h-none ${className}`}>
+        <div className={`modal-box my-4 overflow-y-visible max-h-none ${className}`} tabIndex={0}>
           {title && (
             <h3 className="font-bold text-lg" data-testid="modal-dialog-title">
               {title}

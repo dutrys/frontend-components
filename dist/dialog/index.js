@@ -33,12 +33,12 @@ const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: ope
     const focus = useFocus(context, { enabled: showOnFocus });
     const hover = useHover(context, { enabled: showOnHover, handleClose: safePolygon() });
     const click = useClick(context, { enabled: showOnClick, keyboardHandlers: false });
-    const dismiss = useDismiss(context, { escapeKey: false, bubbles: true });
+    const dismiss = useDismiss(context, { escapeKey: false, bubbles: true, outsidePress: true });
     const { getReferenceProps, getFloatingProps } = useInteractions([dismiss, hover, click, focus]);
     if (disabled) {
         return title(null, {});
     }
-    return (jsxs(Fragment, { children: [title(refs.setReference, getReferenceProps()), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100 }, ...getFloatingProps(), className: cx("border rounded-sm shadow-lg shadow-base-100 border-1", popoverClassName, backgroundColor, borderColor), children: [jsx(FloatingArrow, { strokeWidth: 1, fill: `var(--color-${backgroundColor.replace("bg-", "")})`, stroke: `var(--color-${borderColor.replace("border-", "")})`, context: context, ref: arrowRef }), jsx("div", { className: popoverWidth, children: children(() => setIsOpen(false)) })] }) }))] }));
+    return (jsxs(Fragment, { children: [title(refs.setReference, getReferenceProps()), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100 }, ...getFloatingProps(), className: cx("border rounded-sm shadow-lg shadow-base-100 border-1", popoverClassName, backgroundColor, borderColor), children: [jsx(FloatingArrow, { strokeWidth: 1, fill: `var(--color-${backgroundColor.replace("bg-", "")})`, stroke: `var(--color-${borderColor.replace("border-", "")})`, context: context, ref: arrowRef }), jsx("div", { className: popoverWidth, children: children(() => context.onOpenChange(false)) })] }) }))] }));
 };
 
 const TOOLTIP_PARALLEL_ID = "paralel-tooltip";
@@ -74,7 +74,7 @@ const ParallelDialog = ({ title, children, onClose, className, ...rest }) => {
             return;
         }
     };
-    return (jsx(FocusLock, { autoFocus: true, children: jsxs("dialog", { onKeyDown: (e) => e.key === "Escape" && closeModal(), className: `modal overflow-y-auto ${isOpen ? "modal-open" : ""}`, style: { zIndex: 1100 }, "data-testid": "modal-dialog", ...rest, children: [jsxs("div", { className: `modal-box my-4 overflow-y-visible max-h-none ${className}`, children: [title && (jsx("h3", { className: "font-bold text-lg", "data-testid": "modal-dialog-title", children: title })), children] }), jsx("form", { method: "dialog", className: "modal-backdrop", children: jsx("button", { onClick: closeModal, children: "close" }) }), jsx(Tooltip, { id: TOOLTIP_PARALLEL_ID, place: "top" })] }) }));
+    return (jsx(FocusLock, { children: jsxs("dialog", { onKeyDown: (e) => e.key === "Escape" && closeModal(), className: `modal overflow-y-auto ${isOpen ? "modal-open" : ""}`, style: { zIndex: 1100 }, "data-testid": "modal-dialog", ...rest, children: [jsxs("div", { className: `modal-box my-4 overflow-y-visible max-h-none ${className}`, tabIndex: 0, children: [title && (jsx("h3", { className: "font-bold text-lg", "data-testid": "modal-dialog-title", children: title })), children] }), jsx("form", { method: "dialog", className: "modal-backdrop", children: jsx("button", { onClick: closeModal, children: "close" }) }), jsx(Tooltip, { id: TOOLTIP_PARALLEL_ID, place: "top" })] }) }));
 };
 
 const HotkeysContext = createContext({

@@ -195,12 +195,12 @@ const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: ope
     const focus = useFocus(context, { enabled: showOnFocus });
     const hover = useHover(context, { enabled: showOnHover, handleClose: safePolygon() });
     const click = useClick(context, { enabled: showOnClick, keyboardHandlers: false });
-    const dismiss = useDismiss(context, { escapeKey: false, bubbles: true });
+    const dismiss = useDismiss(context, { escapeKey: false, bubbles: true, outsidePress: true });
     const { getReferenceProps, getFloatingProps } = useInteractions([dismiss, hover, click, focus]);
     if (disabled) {
         return title(null, {});
     }
-    return (jsxs(Fragment, { children: [title(refs.setReference, getReferenceProps()), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100 }, ...getFloatingProps(), className: cx("border rounded-sm shadow-lg shadow-base-100 border-1", popoverClassName, backgroundColor, borderColor), children: [jsx(FloatingArrow, { strokeWidth: 1, fill: `var(--color-${backgroundColor.replace("bg-", "")})`, stroke: `var(--color-${borderColor.replace("border-", "")})`, context: context, ref: arrowRef }), jsx("div", { className: popoverWidth, children: children(() => setIsOpen(false)) })] }) }))] }));
+    return (jsxs(Fragment, { children: [title(refs.setReference, getReferenceProps()), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100 }, ...getFloatingProps(), className: cx("border rounded-sm shadow-lg shadow-base-100 border-1", popoverClassName, backgroundColor, borderColor), children: [jsx(FloatingArrow, { strokeWidth: 1, fill: `var(--color-${backgroundColor.replace("bg-", "")})`, stroke: `var(--color-${borderColor.replace("border-", "")})`, context: context, ref: arrowRef }), jsx("div", { className: popoverWidth, children: children(() => context.onOpenChange(false)) })] }) }))] }));
 };
 
 function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from, to, placeholder, inputClassName = "input input-bordered", toggleClassName = "", ...rest }) {
@@ -330,7 +330,7 @@ const DatePicker = ({ onChange, value, inputClassName = "input input-bordered", 
     else if (to) {
         matcher = { after: to };
     }
-    return (jsxs("div", { className: `w-full ${inputClassName}`, children: [jsx(Popover, { showOnClick: true, showOnFocus: true, showOnHover: false, popoverWidth: "", title: (ref, popoverProps) => (jsx("input", { ref: ref, ...props, ...popoverProps, value: dateString, className: "grow", required: required, disabled: disabled, placeholder: placeholder, onChange: (e) => {
+    return (jsxs("div", { className: `w-full ${inputClassName}`, children: [jsx(Popover, { showOnClick: false, showOnFocus: true, showOnHover: false, popoverWidth: "", title: (ref, popoverProps) => (jsx("input", { ref: ref, ...props, ...popoverProps, value: dateString, className: "grow", required: required, disabled: disabled, placeholder: placeholder, onChange: (e) => {
                         if (e.target.value.length === 0) {
                             setDateString("");
                             onChange(null);

@@ -14,6 +14,7 @@ import {
   useFocus,
   useHover,
   useInteractions,
+  useRole,
 } from "@floating-ui/react";
 import cx from "classnames";
 
@@ -66,7 +67,7 @@ export const Popover = ({
   const focus = useFocus(context, { enabled: showOnFocus });
   const hover = useHover(context, { enabled: showOnHover, handleClose: safePolygon() });
   const click = useClick(context, { enabled: showOnClick, keyboardHandlers: false });
-  const dismiss = useDismiss(context, { escapeKey: false, bubbles: true });
+  const dismiss = useDismiss(context, { escapeKey: false, bubbles: true, outsidePress: true });
 
   const { getReferenceProps, getFloatingProps } = useInteractions([dismiss, hover, click, focus]);
 
@@ -98,7 +99,7 @@ export const Popover = ({
               context={context}
               ref={arrowRef}
             />
-            <div className={popoverWidth}>{children(() => setIsOpen(false))}</div>
+            <div className={popoverWidth}>{children(() => context.onOpenChange(false))}</div>
           </div>
         </FloatingPortal>
       )}
