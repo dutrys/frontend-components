@@ -5,7 +5,7 @@ import { useFloating, offset, flip, arrow, autoUpdate, useFocus, useHover, safeP
 import cx from 'classnames';
 import LinkNext from 'next/link';
 import { useParams, useSearchParams, usePathname } from 'next/navigation';
-import { ExclamationTriangleIcon, CheckCircleIcon, ExclamationCircleIcon, PencilIcon, EyeIcon, TrashIcon, ChevronDownIcon, EllipsisHorizontalIcon, PlusIcon, ChevronUpIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { ExclamationTriangleIcon, CheckCircleIcon, ExclamationCircleIcon, PencilIcon, EyeIcon, TrashIcon, ChevronDownIcon, EllipsisHorizontalIcon, PlusIcon, ChevronUpIcon, FunnelIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useTranslations } from 'next-intl';
 import { format, parseJSON, isValid, differenceInSeconds, formatDistance, differenceInMinutes, differenceInDays } from 'date-fns';
 import { lt } from 'date-fns/locale';
@@ -18,6 +18,7 @@ import 'react-hook-form';
 import 'react-dom';
 import { EllipsisVerticalIcon } from '@heroicons/react/16/solid';
 import { useRouter } from 'next-nprogress-bar';
+import { FunnelIcon as FunnelIcon$1 } from '@heroicons/react/24/solid';
 import 'react-day-picker';
 import 'react-day-picker/locale';
 import '@tanstack/react-query';
@@ -434,7 +435,7 @@ function isActionColumn(column) {
 function isFunctionColumn(column) {
     return typeof column === "object" && typeof column.body === "function";
 }
-const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, }) => {
+const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, }) => {
     const router = useRouter();
     const params = useParams();
     const searchParams = useSearchParams();
@@ -461,9 +462,20 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
                     router.push(addLocale((path + setPartialParams({ search, page: 1 }, searchParams)).replace(/^\/(en|lt)\//, "/"), params.locale));
                 }, children: [" ", jsxs("div", { className: "join w-full pr-4", children: [jsx("input", { type: "text", value: search, onChange: (e) => setSearch(e.target.value), name: "search", className: "join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500", placeholder: t("pagination.searchPlaceholder") }), jsx("button", { className: "join-item btn btn-neutral btn-xs uppercase", type: "submit", children: jsx(MagnifyingGlassIcon, { className: "w-4 h-4" }) })] })] }) }));
     };
-    const elements = bulkActions && bulkActions?.length > 0
-        ? [[{ link: { bulk: "bulk" }, text: "" }], ...searchableShortcuts]
-        : searchableShortcuts;
+    const elements = [];
+    if (bulkActions && bulkActions?.length > 0) {
+        elements.push([{ link: { bulk: "bulk" }, text: "" }]);
+    }
+    for (const d of displayFilters || []) {
+        if (d.filters.some((filter) => searchParams.get(`filter.${filter}`) !== null)) {
+            const filterToDisplay = {};
+            d.filters.forEach((filter) => {
+                filterToDisplay[`filter.${filter}`] = searchParams.get(`filter.${filter}`) || "";
+            });
+            elements.push([{ text: d.name, link: filterToDisplay }]);
+        }
+    }
+    elements.push(...searchableShortcuts);
     const heading = (jsx(Fragment, { children: jsxs("div", { className: "flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]", children: [jsx("h1", { className: `pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (searchableShortcuts.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsivePaginated, { bulkActions: bulkActions ? { actions: bulkActions, setSelected, selected } : undefined, elements: elements })), extraHeading, addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: addNewText || t("pagination.addNew") })] })), isSearchable && jsx(SearchField, {})] }) }));
     if (pagination.meta.totalItems === 0) {
         return (jsxs(Fragment, { children: [heading, caption, jsxs("div", { className: "text-center mt-20", children: [jsxs("span", { className: "text-gray-400", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", addNewText || t("pagination.tryCreatingOne")] }) }))] })] }));
@@ -526,7 +538,7 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
                                         }
                                         const Component = column.pin ? "th" : "td";
                                         if (isFunctionColumn(column)) {
-                                            return jsx(Component, { children: column.body(model) }, `actions-td-${i}`);
+                                            return (jsx(Component, { className: column.className, children: column.body(model) }, `actions-td-${i}`));
                                         }
                                         if (column.type === "date") {
                                             return (jsx(Component, { className: column.className, children: column.format ? (jsx(DateTime, { date: model[column.name], format: column.format })) : (jsx(HumanDate, { date: model[column.name] })) }, `${model.id}-${column.name.toString()}`));
@@ -550,9 +562,25 @@ const TableLink = ({ href, children, className, isLink = true, ...rest }) => {
     }
     return (jsxs(Link, { href: addLocale(href, useParams().locale), ...rest, prefetch: false, className: `${styles.link} ${className || ""} text-primary-700 hover:text-primary-500`, children: [children, " "] }));
 };
+const FilterLink = ({ children, className, params, }) => {
+    const t = useTranslations();
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const [isFiltering, setIsFiltering] = useState(!Object.entries(params).every(([key, value]) => searchParams.get(key) === value.toString()));
+    useEffect(() => {
+        setIsFiltering(!Object.entries(params).every(([key, value]) => searchParams.get(key) === value.toString()));
+    }, [searchParams, setIsFiltering, params]);
+    const p = params;
+    if (!isFiltering) {
+        Object.keys(params).forEach((key) => {
+            p[key] = "";
+        });
+    }
+    return (jsxs("div", { className: "flex items-center", children: [children, jsx(TableLink, { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": isFiltering ? t("general.filter") : t("general.clearFilter"), className: `${className || ""} px-2 invisible`, href: `${pathname}${setPartialParams(p, searchParams)}`, children: isFiltering ? jsx(FunnelIcon, { className: "size-5" }) : jsx(FunnelIcon$1, { className: "size-5" }) })] }));
+};
 const TruncateText = ({ text, length }) => {
     return (jsx("div", { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": text, className: "text-left text-ellipsis overflow-hidden", style: { width: length }, children: text }));
 };
 
-export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, EditButton, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, MoreActions, PaginatedTable, Pagination, Popover, TableLink, ViewButton };
+export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, EditButton, FilterLink, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, MoreActions, PaginatedTable, Pagination, Popover, TableLink, ViewButton };
 //# sourceMappingURL=index.js.map

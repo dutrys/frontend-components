@@ -35,7 +35,7 @@ type FunctionColumn<TModel> = {
 export type ColumnType<TModel> = SimpleColumn<TModel> | FunctionColumn<TModel> | ActionColumn<TModel> | DateColumn<TModel>;
 export declare const PaginatedTable: <TModel extends {
     id: number;
-}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, }: {
+}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, }: {
     caption?: React.ReactNode;
     bulkActions?: {
         children: React.ReactNode;
@@ -47,6 +47,10 @@ export declare const PaginatedTable: <TModel extends {
     title: React.ReactNode;
     pathname: string;
     addNew?: string;
+    displayFilters?: {
+        name: string;
+        filters: string[];
+    }[];
     searchableShortcuts?: {
         link: Record<string, string>;
         text: string;
@@ -64,5 +68,10 @@ export declare const TableLink: ({ href, children, className, isLink, ...rest }:
     children: React.ReactNode;
     isLink?: boolean;
 }) => string | number | bigint | boolean | import("react/jsx-runtime").JSX.Element | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined;
+export declare const FilterLink: ({ children, className, params, }: {
+    className: string;
+    children: React.ReactNode;
+    params: Record<string, string>;
+}) => import("react/jsx-runtime").JSX.Element;
 export {};
 //# sourceMappingURL=PaginatedTable.d.ts.map

@@ -1,11 +1,12 @@
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next-nprogress-bar";
-import { ChevronDownIcon, ChevronUpIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronUpIcon, FunnelIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { FunnelIcon as FunnelIconSolid } from "@heroicons/react/24/solid";
 import { ArchiveButton, EditButton, ViewButton } from "./ActionButtons";
 import { DateTime, isParamActive, setPartialParams } from "@/utils";
 import { Pagination } from "./Pagination";
 import { useTranslations } from "next-intl";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./PaginatedTable.module.css";
 import { HumanDate, TOOLTIP_GLOBAL_ID } from "@/utils";
 import cx from "classnames";
@@ -77,6 +78,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
   addNew,
   bulkActions,
   addNewText,
+  displayFilters,
 }: {
   caption?: React.ReactNode;
   bulkActions?: {
@@ -89,6 +91,10 @@ export const PaginatedTable = <TModel extends { id: number }>({
   title: React.ReactNode;
   pathname: string;
   addNew?: string;
+  displayFilters?: {
+    name: string;
+    filters: string[];
+  }[];
   searchableShortcuts?: { link: Record<string, string>; text: string }[][];
   columns: Array<ColumnType<TModel>>;
   pagination: { data: TModel[]; meta: ResponseMeta };
@@ -149,10 +155,24 @@ export const PaginatedTable = <TModel extends { id: number }>({
     );
   };
 
-  const elements =
-    bulkActions && bulkActions?.length > 0
-      ? [[{ link: { bulk: "bulk" }, text: "" }], ...searchableShortcuts]
-      : searchableShortcuts;
+  const elements: { link: Record<string, string>; text: string }[][] = [];
+
+  if (bulkActions && bulkActions?.length > 0) {
+    elements.push([{ link: { bulk: "bulk" }, text: "" }]);
+  }
+
+  for (const d of displayFilters || []) {
+    if (d.filters.some((filter) => searchParams.get(`filter.${filter}`) !== null)) {
+      const filterToDisplay: Record<string, string> = {};
+      d.filters.forEach((filter) => {
+        filterToDisplay[`filter.${filter}`] = searchParams.get(`filter.${filter}`) || "";
+      });
+
+      elements.push([{ text: d.name, link: filterToDisplay }]);
+    }
+  }
+
+  elements.push(...searchableShortcuts);
 
   const heading = (
     <>
@@ -345,7 +365,11 @@ export const PaginatedTable = <TModel extends { id: number }>({
 
                   const Component: React.ElementType = column.pin ? "th" : "td";
                   if (isFunctionColumn(column)) {
-                    return <Component key={`actions-td-${i}`}>{column.body(model)}</Component>;
+                    return (
+                      <Component key={`actions-td-${i}`} className={column.className}>
+                        {column.body(model)}
+                      </Component>
+                    );
                   }
                   if (column.type === "date") {
                     return (
@@ -453,6 +477,49 @@ export const TableLink = ({
     >
       {children}{" "}
     </Link>
+  );
+};
+
+export const FilterLink = ({
+  children,
+  className,
+  params,
+}: {
+  className: string;
+  children: React.ReactNode;
+  params: Record<string, string>;
+}) => {
+  const t = useTranslations();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const [isFiltering, setIsFiltering] = useState(
+    !Object.entries(params).every(([key, value]) => searchParams.get(key) === value.toString()),
+  );
+
+  useEffect(() => {
+    setIsFiltering(!Object.entries(params).every(([key, value]) => searchParams.get(key) === value.toString()));
+  }, [searchParams, setIsFiltering, params]);
+
+  const p = params;
+  if (!isFiltering) {
+    Object.keys(params).forEach((key) => {
+      p[key] = "";
+    });
+  }
+
+  return (
+    <div className="flex items-center">
+      {children}
+      <TableLink
+        data-tooltip-id={TOOLTIP_GLOBAL_ID}
+        data-tooltip-content={isFiltering ? t("general.filter") : t("general.clearFilter")}
+        className={`${className || ""} px-2 invisible`}
+        href={`${pathname}${setPartialParams(p, searchParams)}`}
+      >
+        {isFiltering ? <FunnelIcon className="size-5" /> : <FunnelIconSolid className="size-5" />}
+      </TableLink>
+    </div>
   );
 };
 

@@ -125,7 +125,7 @@ type FunctionColumn<TModel> = {
 type ColumnType<TModel> = SimpleColumn<TModel> | FunctionColumn<TModel> | ActionColumn<TModel> | DateColumn<TModel>;
 declare const PaginatedTable: <TModel extends {
     id: number;
-}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, }: {
+}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, }: {
     caption?: React__default.ReactNode;
     bulkActions?: {
         children: React__default.ReactNode;
@@ -137,6 +137,10 @@ declare const PaginatedTable: <TModel extends {
     title: React__default.ReactNode;
     pathname: string;
     addNew?: string;
+    displayFilters?: {
+        name: string;
+        filters: string[];
+    }[];
     searchableShortcuts?: {
         link: Record<string, string>;
         text: string;
@@ -154,6 +158,11 @@ declare const TableLink: ({ href, children, className, isLink, ...rest }: {
     children: React__default.ReactNode;
     isLink?: boolean;
 }) => string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React__default.ReactNode> | Promise<string | number | bigint | boolean | React__default.ReactPortal | React__default.ReactElement<unknown, string | React__default.JSXElementConstructor<any>> | Iterable<React__default.ReactNode> | null | undefined> | null | undefined;
+declare const FilterLink: ({ children, className, params, }: {
+    className: string;
+    children: React__default.ReactNode;
+    params: Record<string, string>;
+}) => react_jsx_runtime.JSX.Element;
 
 declare const HeaderResponsivePaginated: ({ elements, bulkActions, }: {
     elements: {
@@ -170,4 +179,4 @@ declare const HeaderResponsivePaginated: ({ elements, bulkActions, }: {
     };
 }) => react_jsx_runtime.JSX.Element;
 
-export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, type ColumnType, EditButton, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, MoreActions, PaginatedTable, Pagination, Popover, TableLink, ViewButton };
+export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, type ColumnType, EditButton, FilterLink, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, MoreActions, PaginatedTable, Pagination, Popover, TableLink, ViewButton };
