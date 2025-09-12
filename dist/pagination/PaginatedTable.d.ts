@@ -1,8 +1,45 @@
 import React from "react";
 import { ResponseMeta } from "@/utils";
-import { ColumnType } from "@/pagination/columnTypes";
+export type ActionColumn<TModel> = {
+    type: "actions";
+    archive?: string | boolean | false | ((model: TModel) => string | boolean);
+    edit?: string | boolean | false | ((model: TModel) => string | boolean);
+    view?: string | boolean | false | ((model: TModel) => string | boolean);
+    idField: keyof TModel;
+    extraButtons?: [(model: TModel) => React.ReactNode];
+    className?: string;
+};
+export type SimpleColumn<TModel> = {
+    name: keyof TModel;
+    title: string;
+    truncate?: number;
+    type?: "code";
+    pin?: true;
+    className?: string;
+};
+export type DateColumn<TModel> = {
+    name: keyof TModel;
+    type: "date";
+    format?: string;
+    title: string;
+    pin?: true;
+    className?: string;
+};
+export type FunctionColumn<TModel> = {
+    name?: string;
+    body: (data: TModel) => string | number | React.ReactNode;
+    title: string;
+    pin?: true;
+    className?: string;
+};
+export type ColumnType<TModel> = SimpleColumn<TModel> | FunctionColumn<TModel> | ActionColumn<TModel> | DateColumn<TModel>;
+export declare function isActionColumn<TModel>(column: ColumnType<TModel>): column is ActionColumn<TModel>;
+export declare function isFunctionColumn<TModel>(column: ColumnType<TModel>): column is FunctionColumn<TModel>;
 export declare const PaginatedTable: <TModel extends {
-    id: number;
+    data: {
+        id: number;
+    }[];
+    meta: ResponseMeta;
 }>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, configName, }: {
     caption?: React.ReactNode;
     bulkActions?: {
@@ -23,11 +60,8 @@ export declare const PaginatedTable: <TModel extends {
         link: Record<string, string>;
         text: string;
     }[][];
-    columns: ColumnType<TModel>[];
-    pagination: {
-        data: TModel[];
-        meta: ResponseMeta;
-    };
+    columns: Array<ColumnType<TModel["data"][number]>>;
+    pagination: TModel;
     addNewText?: string;
     configName?: string;
 }) => import("react/jsx-runtime").JSX.Element;

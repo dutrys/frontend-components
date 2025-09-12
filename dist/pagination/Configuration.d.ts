@@ -1,4 +1,4 @@
-import { ColumnType } from "@/pagination/columnTypes";
+import { ColumnType } from "@/pagination/PaginatedTable";
 export declare const PaginationConfiguration: ({ title, columns, setConfig, }: {
     setConfig: (config: {
         index: number;

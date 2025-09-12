@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ArrowsUpDownIcon } from "@heroicons/react/16/solid";
 import { Popover } from "@/dialog";
-import { ColumnType, isActionColumn } from "@/pagination/columnTypes";
+import { ColumnType, isActionColumn } from "@/pagination/PaginatedTable";
 
 function AddNew({ onAdd, names }: { onAdd: (name: string) => void; names: string[] }) {
   const [name, setName] = useState("");

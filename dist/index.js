@@ -433,13 +433,6 @@ const HeaderResponsivePaginated = ({ elements, bulkActions, }) => {
         } }));
 };
 
-function isActionColumn(column) {
-    return typeof column === "object" && column.type === "actions";
-}
-function isFunctionColumn(column) {
-    return typeof column === "object" && typeof column.body === "function";
-}
-
 function AddNew({ onAdd, names }) {
     const [name, setName] = useState("");
     const t = useTranslations();
@@ -599,6 +592,12 @@ function getPaginationConfigs(configName, columns) {
 }
 
 const limits = [10, 20, 50, 100];
+function isActionColumn(column) {
+    return typeof column === "object" && column.type === "actions";
+}
+function isFunctionColumn(column) {
+    return typeof column === "object" && typeof column.body === "function";
+}
 const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, configName, }) => {
     const router = useRouter();
     const params = useParams();
@@ -755,5 +754,5 @@ const TruncateText = ({ text, length }) => {
     return (jsx("div", { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": text, className: "text-left text-ellipsis overflow-hidden", style: { width: length }, children: text }));
 };
 
-export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, EditButton, FilterLink, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, MoreActions, PaginatedTable, Pagination, Popover, TableLink, ViewButton };
+export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, EditButton, FilterLink, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, MoreActions, PaginatedTable, Pagination, Popover, TableLink, ViewButton, isActionColumn, isFunctionColumn };
 //# sourceMappingURL=index.js.map

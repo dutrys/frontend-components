@@ -2,7 +2,6 @@ import * as react_jsx_runtime from 'react/jsx-runtime';
 import * as React from 'react';
 import React__default from 'react';
 import { ResponseMeta } from '@/utils';
-import { ColumnType } from '@/pagination/columnTypes';
 
 declare const LoadingComponent: ({ style, className, loadingClassName, size, }: {
     className?: string;
@@ -92,8 +91,46 @@ declare const Pagination: ({ page, visiblePages, onClick, }: {
     visiblePages: number;
 }) => react_jsx_runtime.JSX.Element;
 
+type ActionColumn<TModel> = {
+    type: "actions";
+    archive?: string | boolean | false | ((model: TModel) => string | boolean);
+    edit?: string | boolean | false | ((model: TModel) => string | boolean);
+    view?: string | boolean | false | ((model: TModel) => string | boolean);
+    idField: keyof TModel;
+    extraButtons?: [(model: TModel) => React__default.ReactNode];
+    className?: string;
+};
+type SimpleColumn<TModel> = {
+    name: keyof TModel;
+    title: string;
+    truncate?: number;
+    type?: "code";
+    pin?: true;
+    className?: string;
+};
+type DateColumn<TModel> = {
+    name: keyof TModel;
+    type: "date";
+    format?: string;
+    title: string;
+    pin?: true;
+    className?: string;
+};
+type FunctionColumn<TModel> = {
+    name?: string;
+    body: (data: TModel) => string | number | React__default.ReactNode;
+    title: string;
+    pin?: true;
+    className?: string;
+};
+type ColumnType<TModel> = SimpleColumn<TModel> | FunctionColumn<TModel> | ActionColumn<TModel> | DateColumn<TModel>;
+declare function isActionColumn<TModel>(column: ColumnType<TModel>): column is ActionColumn<TModel>;
+declare function isFunctionColumn<TModel>(column: ColumnType<TModel>): column is FunctionColumn<TModel>;
 declare const PaginatedTable: <TModel extends {
-    id: number;
+    data: {
+        id: number;
+    }[];
+    meta: ResponseMeta;
 }>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, configName, }: {
     caption?: React__default.ReactNode;
     bulkActions?: {
@@ -114,11 +151,8 @@ declare const PaginatedTable: <TModel extends {
         link: Record<string, string>;
         text: string;
     }[][];
-    columns: ColumnType<TModel>[];
-    pagination: {
-        data: TModel[];
-        meta: ResponseMeta;
-    };
+    columns: Array<ColumnType<TModel["data"][number]>>;
+    pagination: TModel;
     addNewText?: string;
     configName?: string;
 }) => react_jsx_runtime.JSX.Element;
@@ -149,4 +183,4 @@ declare const HeaderResponsivePaginated: ({ elements, bulkActions, }: {
     };
 }) => react_jsx_runtime.JSX.Element;
 
-export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, EditButton, FilterLink, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, MoreActions, PaginatedTable, Pagination, Popover, TableLink, ViewButton };
+export { ActionButton, type ActionColumn, ArchiveButton, BulkActions, BulkDropDownActions, type ColumnType, type DateColumn, EditButton, FilterLink, type FunctionColumn, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, MoreActions, PaginatedTable, Pagination, Popover, type SimpleColumn, TableLink, ViewButton, isActionColumn, isFunctionColumn };
