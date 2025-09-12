@@ -3,7 +3,7 @@ import { useRouter } from "next-nprogress-bar";
 import { ChevronDownIcon, ChevronUpIcon, FunnelIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { FunnelIcon as FunnelIconSolid } from "@heroicons/react/24/solid";
 import { ArchiveButton, EditButton, ViewButton } from "./ActionButtons";
-import { DateTime, isParamActive, setPartialParams } from "@/utils";
+import { DateTime, setPartialParams } from "@/utils";
 import { Pagination } from "./Pagination";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
@@ -15,55 +15,10 @@ import { Link, addLocale } from "./Link";
 import { Hotkeys } from "@/HotKeys";
 import { IndeterminateCheckbox } from "@/form";
 import { HeaderResponsivePaginated } from "@/pagination/HeaderResponsivePaginated";
+import { getPaginationConfigs, PaginationConfiguration } from "@/pagination/Configuration";
+import { ColumnType, isActionColumn, isFunctionColumn } from "@/pagination/columnTypes";
 
 const limits = [10, 20, 50, 100];
-
-type ActionColumn<TModel> = {
-  type: "actions";
-  archive?: string | boolean | false | ((model: TModel) => string | boolean);
-  edit?: string | boolean | false | ((model: TModel) => string | boolean);
-  view?: string | boolean | false | ((model: TModel) => string | boolean);
-  idField: keyof TModel;
-  extraButtons?: [(model: TModel) => React.ReactNode];
-  className?: string;
-};
-type SimpleColumn<TModel> = {
-  name: keyof TModel;
-  title: string;
-  truncate?: number;
-  type?: "code";
-  pin?: true;
-  className?: string;
-};
-
-type DateColumn<TModel> = {
-  name: keyof TModel;
-  type: "date";
-  format?: string;
-  title: string;
-  pin?: true;
-  className?: string;
-};
-type FunctionColumn<TModel> = {
-  name?: string;
-  body: (data: TModel) => string | number | React.ReactNode;
-  title: string;
-  pin?: true;
-  className?: string;
-};
-export type ColumnType<TModel> =
-  | SimpleColumn<TModel>
-  | FunctionColumn<TModel>
-  | ActionColumn<TModel>
-  | DateColumn<TModel>;
-
-function isActionColumn<TModel>(column: ColumnType<TModel>): column is ActionColumn<TModel> {
-  return typeof column === "object" && (column as any).type === "actions";
-}
-
-function isFunctionColumn<TModel>(column: ColumnType<TModel>): column is FunctionColumn<TModel> {
-  return typeof column === "object" && typeof (column as any).body === "function";
-}
 
 export const PaginatedTable = <TModel extends { id: number }>({
   pagination,
@@ -79,6 +34,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
   bulkActions,
   addNewText,
   displayFilters,
+  configName,
 }: {
   caption?: React.ReactNode;
   bulkActions?: {
@@ -96,15 +52,20 @@ export const PaginatedTable = <TModel extends { id: number }>({
     filters: string[];
   }[];
   searchableShortcuts?: { link: Record<string, string>; text: string }[][];
-  columns: Array<ColumnType<TModel>>;
+  columns: ColumnType<TModel>[];
   pagination: { data: TModel[]; meta: ResponseMeta };
   addNewText?: string;
+  configName?: string;
 }) => {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
   const t = useTranslations();
   const [selected, setSelected] = React.useState<number[]>([]);
+
+  const [config, setConfig] = React.useState<{ index: number; checked: boolean }[]>(
+    getPaginationConfigs(configName, columns),
+  );
 
   const hotKeys = [];
   if (addNew) {
@@ -137,7 +98,7 @@ export const PaginatedTable = <TModel extends { id: number }>({
           }}
         >
           {" "}
-          <div className="join w-full pr-4">
+          <div className="join w-full pr-2">
             <input
               type="text"
               value={search}
@@ -198,6 +159,12 @@ export const PaginatedTable = <TModel extends { id: number }>({
           </Link>
         )}
         {isSearchable && <SearchField />}
+
+        {configName && (
+          <div className="pr-2">
+            <PaginationConfiguration title={configName} columns={columns} setConfig={setConfig} />
+          </div>
+        )}
       </div>
     </>
   );
@@ -247,7 +214,11 @@ export const PaginatedTable = <TModel extends { id: number }>({
                   />
                 </th>
               )}
-              {columns.map((column, i) => {
+              {config.map((item, i) => {
+                const column = columns[item.index];
+                if (!item.checked) {
+                  return null;
+                }
                 if (isActionColumn(column)) {
                   return (
                     <th key={`actions-${i}`} className={`${styles.thead} w-12 max-w-24 text-xs`}>
@@ -317,7 +288,11 @@ export const PaginatedTable = <TModel extends { id: number }>({
                     />
                   </th>
                 )}
-                {columns.map((column, i) => {
+                {config.map((item, i) => {
+                  const column = columns[item.index];
+                  if (!item.checked) {
+                    return null;
+                  }
                   if (isActionColumn(column)) {
                     if (!column.idField) {
                       throw new Error("Model must have an id");

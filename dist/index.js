@@ -1,11 +1,11 @@
 'use client';
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
-import React, { useState, useRef, useEffect, useCallback, createContext, useContext } from 'react';
+import React, { useState, useRef, useEffect, useCallback, createContext, useContext, useMemo } from 'react';
 import { useFloating, offset, flip, arrow, autoUpdate, useFocus, useHover, safePolygon, useClick, useDismiss, useInteractions, FloatingPortal, FloatingArrow } from '@floating-ui/react';
 import cx from 'classnames';
 import LinkNext from 'next/link';
 import { useParams, useSearchParams, usePathname } from 'next/navigation';
-import { ExclamationTriangleIcon, CheckCircleIcon, ExclamationCircleIcon, PencilIcon, EyeIcon, TrashIcon, ChevronDownIcon, EllipsisHorizontalIcon, PlusIcon, ChevronUpIcon, FunnelIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { ExclamationTriangleIcon, CheckCircleIcon, ExclamationCircleIcon, PencilIcon, EyeIcon, TrashIcon, ChevronDownIcon, EllipsisHorizontalIcon, CheckIcon, AdjustmentsHorizontalIcon, XMarkIcon, PlusIcon, ChevronUpIcon, FunnelIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useTranslations } from 'next-intl';
 import { format, parseJSON, isValid, differenceInSeconds, formatDistance, differenceInMinutes, differenceInDays } from 'date-fns';
 import { lt } from 'date-fns/locale';
@@ -16,7 +16,7 @@ import 'react-focus-lock';
 import '@sentry/nextjs';
 import 'react-hook-form';
 import 'react-dom';
-import { EllipsisVerticalIcon } from '@heroicons/react/16/solid';
+import { EllipsisVerticalIcon, ArrowsUpDownIcon } from '@heroicons/react/16/solid';
 import { useRouter } from 'next-nprogress-bar';
 import { FunnelIcon as FunnelIcon$1 } from '@heroicons/react/24/solid';
 import 'react-day-picker';
@@ -26,10 +26,11 @@ import '@headlessui/react';
 import '@heroicons/react/20/solid';
 import 'react-intersection-observer';
 import 'react-number-format';
+import { Reorder, useMotionValue, useDragControls, animate, motion } from 'framer-motion';
 
 const LoadingComponent = ({ style, className, loadingClassName, size, }) => (jsx("div", { className: `flex justify-center ${className}`, style: style, children: jsx("span", { className: `${loadingClassName || "text-primary"} loading loading-spinner ${size}` }) }));
 
-const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: openProp, showOnHover = true, showOnClick = false, showOnFocus = false, popoverWidth, backgroundColor = "bg-slate-800", borderColor = "border-slate-600", disabled, }) => {
+const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: openProp, hoverClassName, showOnHover = true, showOnClick = false, showOnFocus = false, popoverWidth, backgroundColor = "bg-slate-800", borderColor = "border-slate-600", disabled, }) => {
     const [isOpen, setIsOpen] = useState(openProp || false);
     const arrowRef = useRef(null);
     const { refs, floatingStyles, context } = useFloating({
@@ -55,7 +56,11 @@ const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: ope
     if (disabled) {
         return title(null, {});
     }
-    return (jsxs(Fragment, { children: [title(refs.setReference, getReferenceProps()), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100 }, ...getFloatingProps(), className: cx("border rounded-sm shadow-lg shadow-base-100 border-1", popoverClassName, backgroundColor, borderColor), children: [jsx(FloatingArrow, { strokeWidth: 1, fill: `var(--color-${backgroundColor.replace("bg-", "")})`, stroke: `var(--color-${borderColor.replace("border-", "")})`, context: context, ref: arrowRef }), jsx("div", { className: popoverWidth, children: children(() => context.onOpenChange(false)) })] }) }))] }));
+    const p = getReferenceProps();
+    if (isOpen && hoverClassName) {
+        p.className = typeof p.className === "string" ? `${p.className} ${hoverClassName}` : hoverClassName;
+    }
+    return (jsxs(Fragment, { children: [title(refs.setReference, p), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100 }, ...getFloatingProps(), className: cx("border rounded-sm shadow-lg shadow-base-100 border-1", popoverClassName, backgroundColor, borderColor), children: [jsx(FloatingArrow, { strokeWidth: 1, fill: `var(--color-${backgroundColor.replace("bg-", "")})`, stroke: `var(--color-${borderColor.replace("border-", "")})`, context: context, ref: arrowRef }), jsx("div", { className: popoverWidth, children: children(() => context.onOpenChange(false)) })] }) }))] }));
 };
 
 const Link = (props) => {
@@ -428,19 +433,179 @@ const HeaderResponsivePaginated = ({ elements, bulkActions, }) => {
         } }));
 };
 
-const limits = [10, 20, 50, 100];
 function isActionColumn(column) {
     return typeof column === "object" && column.type === "actions";
 }
 function isFunctionColumn(column) {
     return typeof column === "object" && typeof column.body === "function";
 }
-const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, }) => {
+
+function AddNew({ onAdd, names }) {
+    const [name, setName] = useState("");
+    const t = useTranslations();
+    return (jsxs("div", { className: "join w-full", children: [jsx("input", { value: name, onChange: (e) => setName(e.target.value), className: "input input-bordered join-item grow", type: "text" }), jsx("button", { disabled: name.trim() === "" || names.includes(name), className: "btn btn-success join-item", onClick: () => {
+                    if (name.trim() === "") {
+                        return;
+                    }
+                    onAdd(name);
+                    setName("");
+                }, children: t("general.addNew") })] }));
+}
+const PaginationConfiguration = ({ title, columns, setConfig, }) => {
+    const [show, setShow] = useState(false);
+    const t = useTranslations();
+    const configsFromLocalStorage = useMemo(() => {
+        const configs = getPaginationConfigsFromLocalStorage(title, columns);
+        for (const configName of Object.keys(configs)) {
+            for (let i = 0; i < configs[configName].length; i++) {
+                configs[configName][i].column = columns[configs[configName][i].index];
+            }
+        }
+        return configs;
+    }, [title]);
+    const [configs, setConfigs] = useState(configsFromLocalStorage);
+    const configNameFromLocalStorage = useMemo(() => {
+        const config = localStorage.getItem(title) || "default";
+        if (typeof configsFromLocalStorage[config] === "object") {
+            return config;
+        }
+        return "default";
+    }, [title, configsFromLocalStorage]);
+    const [activeConfigName, setActiveConfigName] = useState(configNameFromLocalStorage);
+    const [open, setOpen] = useState(null);
+    return (jsxs(Fragment, { children: [jsx(Popover, { hoverClassName: "bg-slate-600", title: (ref, p) => (jsx("button", { ref: ref, ...p, onClick: () => setShow(!show), className: `btn btn-neutral btn-xs ${p.className ? p.className : undefined}`, children: jsx(AdjustmentsHorizontalIcon, { className: "size-4" }) })), children: (close) => {
+                    return (jsx("ul", { className: "p-1 menu menu-sm text-white", children: Object.keys(configs).map((configName) => (jsx("li", { children: jsxs("a", { href: "#", className: "hover:bg-slate-600 pl-2", onClick: (e) => {
+                                    e.preventDefault();
+                                    localStorage.setItem(title, configName);
+                                    setConfig(configs[configName]);
+                                    setActiveConfigName(configName);
+                                    close();
+                                }, children: [activeConfigName === configName ? (jsx(CheckIcon, { className: "size-4" })) : (jsx("div", { className: "size-4" })), configName === "default" ? t("pagination.configuration.defaultTitle") : configName] }) }, configName))) }));
+                } }), jsxs("dialog", { className: `modal ${show ? "modal-open" : ""}`, onClose: () => setShow(false), children: [jsxs("div", { className: "modal-box max-h-[calc(100vh-150px)] overflow-y-auto mt-10", children: [jsx("h3", { className: "font-bold text-lg", children: t("pagination.configuration.title") }), jsxs("div", { className: "space-y-4 mt-4", children: [Object.entries(configs).map(([configName, value]) => {
+                                        if (configName === "default") {
+                                            return (jsxs("div", { tabIndex: 0, className: `collapse bg-base-200 border-base-300 border ${open === configName ? "collapse-open" : "collapse-close"}`, children: [jsx("div", { className: "collapse-title font-semibold", onClick: () => setOpen(configName === open ? null : configName), children: t("pagination.configuration.defaultTitle") }), jsx("div", { className: "collapse-content text-sm space-y-2", children: value.map((item, index) => (jsx("div", { className: "flex justify-between items-center p-2 bg-base-100 rounded-xl border border-border shadow-sm grow-0", children: jsxs("label", { children: [jsx("input", { disabled: true, type: "checkbox", checked: true, className: "checkbox checkbox-xs mr-2" }), isActionColumn(item.column)
+                                                                        ? t("pagination.configuration.actionColumn")
+                                                                        : item.column.title] }) }, index))) })] }, configName));
+                                        }
+                                        return (jsxs("div", { tabIndex: 0, className: `collapse bg-base-200 border-base-300 border ${open === configName ? "collapse-open" : "collapse-close"}`, children: [jsx("div", { className: "collapse-title font-semibold p-4!", onClick: () => setOpen(configName === open ? null : configName), children: jsxs("div", { className: "flex", children: [jsx("div", { className: "grow", children: configName }), jsx("button", { className: "btn btn-xs btn-circle btn-error btn-ghost", onClick: () => {
+                                                                    setConfigs((configs) => {
+                                                                        const newConfigs = { ...configs };
+                                                                        delete newConfigs[configName];
+                                                                        return newConfigs;
+                                                                    });
+                                                                    if (open === configName) {
+                                                                        setOpen(null);
+                                                                    }
+                                                                }, children: jsx(XMarkIcon, { className: "size-4" }) })] }) }), jsx("div", { className: "collapse-content text-sm", children: jsx(OrderColumns, { name: configName, items: value, setOrder: (c) => setConfigs((oldCfg) => ({ ...oldCfg, [configName]: c })) }) })] }, configName));
+                                    }), jsx(AddNew, { names: Object.keys(configs), onAdd: (name) => {
+                                            setConfigs((oldCfg) => ({
+                                                ...oldCfg,
+                                                [name]: columns.map((c, index) => ({ column: c, checked: true, index })),
+                                            }));
+                                            setOpen(name);
+                                        } })] }), jsx("hr", { className: "my-4" }), jsx("div", { className: "flex justify-center", children: jsx("button", { className: "btn btn-primary", onClick: () => {
+                                        localStorage.setItem(`${title}Columns`, JSON.stringify(configs));
+                                        setShow(false);
+                                    }, children: t("general.saveButton") }) })] }), jsx("form", { method: "dialog", className: "modal-backdrop", onSubmit: () => setShow(false), children: jsx("button", { children: "close" }) })] })] }));
+};
+const OrderColumns = ({ name, items, setOrder, }) => {
+    return (jsx(Reorder.Group, { axis: "y", values: items, onReorder: setOrder, className: "space-y-2 w-full max-w-2xl mx-auto", children: items.map((column, i) => (jsx(ColumnItem, { onChange: (e) => {
+                const itemCopy = [...items];
+                const col = itemCopy.find((c) => c === column);
+                if (col) {
+                    col.checked = e.target.checked;
+                    setOrder(itemCopy);
+                }
+            }, item: column }, `${name}-${isActionColumn(column.column) ? "action" : column.column.title}`))) }));
+};
+function ReorderHandle({ dragControls }) {
+    return (jsx(motion.div, { whileTap: { scale: 0.95 }, onPointerDown: (e) => {
+            e.preventDefault();
+            dragControls.start(e);
+        }, className: "cursor-grab text-base-content/40 active:cursor-grabbing p-2", children: jsx(ArrowsUpDownIcon, { className: "size-4" }) }));
+}
+const inactiveShadow = "0px 0px 0px rgba(0,0,0,0.8)";
+function useRaisedShadow(value) {
+    const boxShadow = useMotionValue(inactiveShadow);
+    useEffect(() => {
+        let isActive = false;
+        value.on("change", (latest) => {
+            const wasActive = isActive;
+            if (latest !== 0) {
+                isActive = true;
+                if (isActive !== wasActive) {
+                    animate(boxShadow, "5px 5px 15px rgba(0,0,0,0.15)");
+                }
+            }
+            else {
+                isActive = false;
+                if (isActive !== wasActive) {
+                    animate(boxShadow, inactiveShadow);
+                }
+            }
+        });
+    }, [value]);
+    return boxShadow;
+}
+function ColumnItem({ item, onChange, }) {
+    const y = useMotionValue(0);
+    const boxShadow = useRaisedShadow(y);
+    const dragControls = useDragControls();
+    const t = useTranslations();
+    return (jsxs(Reorder.Item, { value: item, onChange: onChange, style: { boxShadow, y }, dragListener: false, dragControls: dragControls, className: "flex justify-between items-center pl-2 bg-base-100 rounded-xl border border-border shadow-sm", children: [jsx("div", { className: "grow-0", children: jsxs("label", { children: [jsx("input", { disabled: isActionColumn(item.column), type: "checkbox", checked: item.checked, onChange: onChange, className: "checkbox checkbox-xs mr-2" }), isActionColumn(item.column) ? t("pagination.configuration.actionColumn") : item.column.title] }) }), jsx(ReorderHandle, { dragControls: dragControls })] }));
+}
+function getPaginationConfigsFromLocalStorage(configName, columns) {
+    const configString = localStorage.getItem(`${configName}Columns`);
+    if (configString === null) {
+        return { default: columns.map((c, i) => ({ index: i, checked: true })) };
+    }
+    const parsed = JSON.parse(configString || "null");
+    if (typeof parsed !== "object" || parsed === null) {
+        return { default: columns.map((c, i) => ({ index: i, checked: true })) };
+    }
+    for (const key of Object.keys(parsed)) {
+        if (!Array.isArray(parsed[key])) {
+            return { default: columns.map((c, i) => ({ index: i, checked: true })) };
+        }
+        if (parsed[key].length !== columns.length) {
+            return { default: columns.map((c, i) => ({ index: i, checked: true })) };
+        }
+        for (const item of parsed[key]) {
+            if (typeof item !== "object" ||
+                item === null ||
+                typeof item.index !== "number" ||
+                typeof item.checked !== "boolean") {
+                return { default: columns.map((c, i) => ({ index: i, checked: true })) };
+            }
+        }
+    }
+    return parsed;
+}
+function getPaginationConfigNameFromLocalStorage(configName) {
+    return localStorage.getItem(configName) || "default";
+}
+function getPaginationConfigs(configName, columns) {
+    if (!configName) {
+        console.log("HAS NO CONFIG NAME");
+        return columns.map((c, i) => ({ index: i, checked: true }));
+    }
+    const configs = getPaginationConfigsFromLocalStorage(configName, columns);
+    const config = getPaginationConfigNameFromLocalStorage(configName);
+    console.log(`HAVE "${config}" NAME, CONFIG`, configs);
+    if (!configs[config]) {
+        return configs.default;
+    }
+    return configs[config];
+}
+
+const limits = [10, 20, 50, 100];
+const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, configName, }) => {
     const router = useRouter();
     const params = useParams();
     const searchParams = useSearchParams();
     const t = useTranslations();
     const [selected, setSelected] = React.useState([]);
+    const [config, setConfig] = React.useState(getPaginationConfigs(configName, columns));
     const hotKeys = [];
     if (addNew) {
         hotKeys.push({
@@ -460,7 +625,7 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
         return (jsx("div", { className: "w-32 sm:w-52 shrink-0 grow-0", children: jsxs("form", { onSubmit: (e) => {
                     e.preventDefault();
                     router.push(addLocale((path + setPartialParams({ search, page: 1 }, searchParams)).replace(/^\/(en|lt)\//, "/"), params.locale));
-                }, children: [" ", jsxs("div", { className: "join w-full pr-4", children: [jsx("input", { type: "text", value: search, onChange: (e) => setSearch(e.target.value), name: "search", className: "join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500", placeholder: t("pagination.searchPlaceholder") }), jsx("button", { className: "join-item btn btn-neutral btn-xs uppercase", type: "submit", children: jsx(MagnifyingGlassIcon, { className: "w-4 h-4" }) })] })] }) }));
+                }, children: [" ", jsxs("div", { className: "join w-full pr-2", children: [jsx("input", { type: "text", value: search, onChange: (e) => setSearch(e.target.value), name: "search", className: "join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500", placeholder: t("pagination.searchPlaceholder") }), jsx("button", { className: "join-item btn btn-neutral btn-xs uppercase", type: "submit", children: jsx(MagnifyingGlassIcon, { className: "w-4 h-4" }) })] })] }) }));
     };
     const elements = [];
     if (bulkActions && bulkActions?.length > 0) {
@@ -476,13 +641,17 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
         }
     }
     elements.push(...searchableShortcuts);
-    const heading = (jsx(Fragment, { children: jsxs("div", { className: "flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]", children: [jsx("h1", { className: `pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (searchableShortcuts.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsivePaginated, { bulkActions: bulkActions ? { actions: bulkActions, setSelected, selected } : undefined, elements: elements })), extraHeading, addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: addNewText || t("pagination.addNew") })] })), isSearchable && jsx(SearchField, {})] }) }));
+    const heading = (jsx(Fragment, { children: jsxs("div", { className: "flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]", children: [jsx("h1", { className: `pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (searchableShortcuts.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsivePaginated, { bulkActions: bulkActions ? { actions: bulkActions, setSelected, selected } : undefined, elements: elements })), extraHeading, addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: addNewText || t("pagination.addNew") })] })), isSearchable && jsx(SearchField, {}), configName && (jsx("div", { className: "pr-2", children: jsx(PaginationConfiguration, { title: configName, columns: columns, setConfig: setConfig }) }))] }) }));
     if (pagination.meta.totalItems === 0) {
         return (jsxs(Fragment, { children: [heading, caption, jsxs("div", { className: "text-center mt-20", children: [jsxs("span", { className: "text-gray-400", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", addNewText || t("pagination.tryCreatingOne")] }) }))] })] }));
     }
     return (jsxs("div", { "data-testid": "paginate-table", className: "relative h-full", "data-test-sort": (pagination.meta.sortBy || []).flat().join("-"), children: [heading, jsx("div", { className: "overflow-x-auto max-h-[calc(100%-7rem)] w-[calc(100vw)] sm:w-[calc(100vw-6rem)]", children: jsxs("table", { className: `${styles.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [caption && jsx("caption", { children: caption }), jsx("thead", { children: jsxs("tr", { children: [bulkActions && (jsx("th", { children: jsx(IndeterminateCheckbox, { className: "checkbox checkbox-xs", onChange: (e) => {
                                                 setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);
-                                            }, indeterminate: selected.length > 0 && selected.length < pagination.data.length, checked: pagination.data.every((model) => selected.includes(model.id)) }) })), columns.map((column, i) => {
+                                            }, indeterminate: selected.length > 0 && selected.length < pagination.data.length, checked: pagination.data.every((model) => selected.includes(model.id)) }) })), config.map((item, i) => {
+                                        const column = columns[item.index];
+                                        if (!item.checked) {
+                                            return null;
+                                        }
                                         if (isActionColumn(column)) {
                                             return (jsx("th", { className: `${styles.thead} w-12 max-w-24 text-xs`, children: "\u00A0" }, `actions-${i}`));
                                         }
@@ -507,7 +676,11 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
                                                 else {
                                                     setSelected((prev) => prev.filter((id) => id !== model.id));
                                                 }
-                                            }, checked: selected.includes(model.id) }) })), columns.map((column, i) => {
+                                            }, checked: selected.includes(model.id) }) })), config.map((item, i) => {
+                                        const column = columns[item.index];
+                                        if (!item.checked) {
+                                            return null;
+                                        }
                                         if (isActionColumn(column)) {
                                             if (!column.idField) {
                                                 throw new Error("Model must have an id");

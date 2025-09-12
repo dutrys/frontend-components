@@ -1,11 +1,12 @@
 import * as React from "react";
-export declare const Popover: ({ title, children, popoverClassName, onShow, open: openProp, showOnHover, showOnClick, showOnFocus, popoverWidth, backgroundColor, borderColor, disabled, }: {
+export declare const Popover: ({ title, children, popoverClassName, onShow, open: openProp, hoverClassName, showOnHover, showOnClick, showOnFocus, popoverWidth, backgroundColor, borderColor, disabled, }: {
     disabled?: boolean;
     open?: boolean;
     showOnHover?: boolean;
     showOnClick?: boolean;
     showOnFocus?: boolean;
     popoverClassName?: string;
+    hoverClassName?: string;
     popoverWidth?: string;
     title: (ref: ((node: HTMLElement | null) => void) | null, props: Record<string, unknown>) => React.ReactNode;
     children: (close: () => void) => React.ReactNode;

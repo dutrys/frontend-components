@@ -24,6 +24,7 @@ export const Popover = ({
   popoverClassName = "py-1",
   onShow,
   open: openProp,
+  hoverClassName,
   showOnHover = true,
   showOnClick = false,
   showOnFocus = false,
@@ -38,6 +39,7 @@ export const Popover = ({
   showOnClick?: boolean;
   showOnFocus?: boolean;
   popoverClassName?: string;
+  hoverClassName?: string;
   popoverWidth?: string;
   title: (ref: ((node: HTMLElement | null) => void) | null, props: Record<string, unknown>) => React.ReactNode;
   children: (close: () => void) => React.ReactNode;
@@ -75,9 +77,13 @@ export const Popover = ({
     return title(null, {});
   }
 
+  const p = getReferenceProps();
+  if (isOpen && hoverClassName) {
+    p.className = typeof p.className === "string" ? `${p.className} ${hoverClassName}` : hoverClassName;
+  }
   return (
     <>
-      {title(refs.setReference, getReferenceProps())}
+      {title(refs.setReference, p)}
 
       {isOpen && (
         <FloatingPortal>

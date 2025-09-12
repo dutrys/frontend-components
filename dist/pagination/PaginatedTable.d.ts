@@ -1,41 +1,9 @@
 import React from "react";
 import { ResponseMeta } from "@/utils";
-type ActionColumn<TModel> = {
-    type: "actions";
-    archive?: string | boolean | false | ((model: TModel) => string | boolean);
-    edit?: string | boolean | false | ((model: TModel) => string | boolean);
-    view?: string | boolean | false | ((model: TModel) => string | boolean);
-    idField: keyof TModel;
-    extraButtons?: [(model: TModel) => React.ReactNode];
-    className?: string;
-};
-type SimpleColumn<TModel> = {
-    name: keyof TModel;
-    title: string;
-    truncate?: number;
-    type?: "code";
-    pin?: true;
-    className?: string;
-};
-type DateColumn<TModel> = {
-    name: keyof TModel;
-    type: "date";
-    format?: string;
-    title: string;
-    pin?: true;
-    className?: string;
-};
-type FunctionColumn<TModel> = {
-    name?: string;
-    body: (data: TModel) => string | number | React.ReactNode;
-    title: string;
-    pin?: true;
-    className?: string;
-};
-export type ColumnType<TModel> = SimpleColumn<TModel> | FunctionColumn<TModel> | ActionColumn<TModel> | DateColumn<TModel>;
+import { ColumnType } from "@/pagination/columnTypes";
 export declare const PaginatedTable: <TModel extends {
     id: number;
-}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, }: {
+}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, configName, }: {
     caption?: React.ReactNode;
     bulkActions?: {
         children: React.ReactNode;
@@ -55,12 +23,13 @@ export declare const PaginatedTable: <TModel extends {
         link: Record<string, string>;
         text: string;
     }[][];
-    columns: Array<ColumnType<TModel>>;
+    columns: ColumnType<TModel>[];
     pagination: {
         data: TModel[];
         meta: ResponseMeta;
     };
     addNewText?: string;
+    configName?: string;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const TableLink: ({ href, children, className, isLink, ...rest }: {
     className?: string;
@@ -73,5 +42,4 @@ export declare const FilterLink: ({ children, className, params, }: {
     children: React.ReactNode;
     params: Record<string, string>;
 }) => import("react/jsx-runtime").JSX.Element;
-export {};
 //# sourceMappingURL=PaginatedTable.d.ts.map
