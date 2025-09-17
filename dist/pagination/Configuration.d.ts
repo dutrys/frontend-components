@@ -1,9 +1,10 @@
 import { ColumnType } from "@/pagination/PaginatedTable";
 import { StorageInterface } from "@/pagination/StorageInterface";
-export declare const PaginationConfiguration: <T = unknown>({ name, columns, setConfigName, store, configs: configsFromRemote, refresh, }: {
+export declare const PaginationConfiguration: <T = unknown>({ name, configName, columns, setConfigName, store, configs: configsFromRemote, refresh, }: {
     setConfigName: (configName: string) => void;
     refresh: () => void;
     name: string;
+    configName?: string;
     columns: ColumnType<T>[];
     store: StorageInterface<T>;
     configs: Record<string, {

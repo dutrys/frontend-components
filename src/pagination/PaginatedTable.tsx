@@ -234,6 +234,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
             <PaginationConfiguration
               store={store}
               name={displayConfig.name}
+              configName={configName}
               columns={columns}
               configs={paginationConfigs}
               setConfigName={(name) => setConfigName(name)}

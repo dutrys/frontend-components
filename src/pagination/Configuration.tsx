@@ -43,6 +43,7 @@ function AddNew({ onAdd, names }: { onAdd: (name: string) => void; names: string
 
 export const PaginationConfiguration = <T = unknown,>({
   name,
+  configName,
   columns,
   setConfigName,
   store,
@@ -52,6 +53,7 @@ export const PaginationConfiguration = <T = unknown,>({
   setConfigName: (configName: string) => void;
   refresh: () => void;
   name: string;
+  configName?: string;
   columns: ColumnType<T>[];
   store: StorageInterface<T>;
   configs: Record<string, { index: number; enabled: boolean }[]> | undefined;
@@ -81,7 +83,7 @@ export const PaginationConfiguration = <T = unknown,>({
   const [configs, setConfigs] = useState<
     Record<string, { column: ColumnType<any>; enabled: boolean; index: number }[]> | undefined
   >(cc);
-  const [activeConfigName, setActiveConfigName] = useState("default");
+  const [activeConfigName, setActiveConfigName] = useState(configName || "default");
 
   const [open, setOpen] = useState<string | null>(null);
 
