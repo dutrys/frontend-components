@@ -6,6 +6,11 @@ import { useState } from "react";
 import { ArrowsUpDownIcon } from "@heroicons/react/16/solid";
 import { Popover } from "@/dialog";
 import { ColumnType, isActionColumn } from "@/pagination/PaginatedTable";
+import { StorageInterface } from "@/pagination/StorageInterface";
+import { LoadingComponent } from "@/Loading";
+import { captureException } from "@sentry/nextjs";
+import toast from "react-hot-toast";
+import { isServerError } from "@/form";
 
 function AddNew({ onAdd, names }: { onAdd: (name: string) => void; names: string[] }) {
   const [name, setName] = useState("");
@@ -36,43 +41,47 @@ function AddNew({ onAdd, names }: { onAdd: (name: string) => void; names: string
   );
 }
 
-export const PaginationConfiguration = ({
-  title,
+export const PaginationConfiguration = <T = unknown,>({
+  name,
   columns,
-  setConfig,
+  setConfigName,
+  store,
+  configs: configsFromRemote,
+  refresh,
 }: {
-  setConfig: (config: { index: number; checked: boolean }[]) => void;
-  title: string;
-  columns: ColumnType<any>[];
+  setConfigName: (configName: string) => void;
+  refresh: () => void;
+  name: string;
+  columns: ColumnType<T>[];
+  store: StorageInterface<T>;
+  configs: Record<string, { index: number; enabled: boolean }[]> | undefined;
 }) => {
   const [show, setShow] = useState(false);
   const t = useTranslations();
+  const [isLoading, setLoading] = useState(false);
 
-  const configsFromLocalStorage = useMemo(() => {
-    const configs = getPaginationConfigsFromLocalStorage(title, columns) as Record<
-      string,
-      { index: number; checked: boolean; column: ColumnType<any> }[]
-    >;
-
-    for (const configName of Object.keys(configs)) {
-      for (let i = 0; i < configs[configName].length; i++) {
-        configs[configName][i].column = columns[configs[configName][i].index];
-      }
+  const cc = useMemo(() => {
+    if (!configsFromRemote) {
+      return undefined;
+    }
+    const configs: Record<string, { index: number; enabled: boolean; column: ColumnType<any> }[]> = {};
+    for (const [key, value] of Object.entries(configsFromRemote)) {
+      value.forEach((c, i) => {
+        configs[key] = configs[key] || [];
+        configs[key][i] = {
+          index: c.index,
+          column: columns[c.index],
+          enabled: c.enabled,
+        };
+      });
     }
     return configs;
-  }, [title]);
-  const [configs, setConfigs] =
-    useState<Record<string, { column: ColumnType<any>; checked: boolean; index: number }[]>>(configsFromLocalStorage);
+  }, [columns, configsFromRemote]);
 
-  const configNameFromLocalStorage = useMemo(() => {
-    const config = localStorage.getItem(title) || "default";
-    if (typeof configsFromLocalStorage[config] === "object") {
-      return config;
-    }
-    return "default";
-  }, [title, configsFromLocalStorage]);
-
-  const [activeConfigName, setActiveConfigName] = useState(configNameFromLocalStorage);
+  const [configs, setConfigs] = useState<
+    Record<string, { column: ColumnType<any>; enabled: boolean; index: number }[]> | undefined
+  >(cc);
+  const [activeConfigName, setActiveConfigName] = useState("default");
 
   const [open, setOpen] = useState<string | null>(null);
 
@@ -91,8 +100,8 @@ export const PaginationConfiguration = ({
           </button>
         )}
       >
-        {(close) => {
-          return (
+        {(close) =>
+          configs ? (
             <ul className="p-1 menu menu-sm text-white">
               {Object.keys(configs).map((configName) => (
                 <li key={configName}>
@@ -101,10 +110,18 @@ export const PaginationConfiguration = ({
                     className="hover:bg-slate-600 pl-2"
                     onClick={(e) => {
                       e.preventDefault();
-                      localStorage.setItem(title, configName);
-                      setConfig(configs[configName]);
-                      setActiveConfigName(configName);
+                      setConfigName(configName);
                       close();
+                      store
+                        .setConfigName(name, configName)
+                        .then(() => {
+                          toast(configName === "default" ? t("pagination.configuration.defaultTitle") : configName);
+                          setActiveConfigName(configName);
+                        })
+                        .catch((e) => {
+                          captureException(e);
+                          toast.error(t("general.error"));
+                        });
                     }}
                   >
                     {activeConfigName === configName ? (
@@ -117,112 +134,146 @@ export const PaginationConfiguration = ({
                 </li>
               ))}
             </ul>
-          );
-        }}
+          ) : (
+            <LoadingComponent />
+          )
+        }
       </Popover>
       <dialog className={`modal ${show ? "modal-open" : ""}`} onClose={() => setShow(false)}>
         <div className="modal-box max-h-[calc(100vh-150px)] overflow-y-auto mt-10">
           <h3 className="font-bold text-lg">{t("pagination.configuration.title")}</h3>
 
-          <div className="space-y-4 mt-4">
-            {Object.entries(configs).map(([configName, value]) => {
-              if (configName === "default") {
-                return (
-                  <div
-                    tabIndex={0}
-                    className={`collapse bg-base-200 border-base-300 border ${open === configName ? "collapse-open" : "collapse-close"}`}
-                    key={configName}
-                  >
-                    <div
-                      className="collapse-title font-semibold"
-                      onClick={() => setOpen(configName === open ? null : configName)}
-                    >
-                      {t("pagination.configuration.defaultTitle")}
-                    </div>
-                    <div className="collapse-content text-sm space-y-2">
-                      {value.map((item, index) => (
-                        <div
-                          className="flex justify-between items-center p-2 bg-base-100 rounded-xl border border-border shadow-sm grow-0"
-                          key={index}
-                        >
-                          <label>
-                            <input disabled type="checkbox" checked className="checkbox checkbox-xs mr-2" />
-                            {isActionColumn(item.column)
-                              ? t("pagination.configuration.actionColumn")
-                              : item.column.title}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              }
-
-              return (
-                <div
-                  tabIndex={0}
-                  className={`collapse bg-base-200 border-base-300 border ${open === configName ? "collapse-open" : "collapse-close"}`}
-                  key={configName}
-                >
-                  <div
-                    className="collapse-title font-semibold p-4!"
-                    onClick={() => setOpen(configName === open ? null : configName)}
-                  >
-                    <div className="flex">
-                      <div className="grow">{configName}</div>
-
-                      <button
-                        className="btn btn-xs btn-circle btn-error btn-ghost"
-                        onClick={() => {
-                          setConfigs((configs) => {
-                            const newConfigs = { ...configs };
-                            delete newConfigs[configName];
-                            return newConfigs;
-                          });
-                          if (open === configName) {
-                            setOpen(null);
-                          }
-                        }}
+          {configs ? (
+            <>
+              <div className="space-y-4 mt-4">
+                {Object.entries(configs).map(([configName, value]) => {
+                  if (configName === "default") {
+                    return (
+                      <div
+                        tabIndex={0}
+                        className={`collapse bg-base-200 border-base-300 border ${open === configName ? "collapse-open" : "collapse-close"}`}
+                        key={configName}
                       >
-                        <XMarkIcon className="size-4" />
-                      </button>
+                        <div
+                          className="collapse-title font-semibold cursor-pointer"
+                          onClick={() => setOpen(configName === open ? null : configName)}
+                        >
+                          {t("pagination.configuration.defaultTitle")}
+                        </div>
+                        <div className="collapse-content text-sm space-y-2">
+                          {value.map((item, index) => (
+                            <div
+                              className="flex justify-between items-center p-2 bg-base-100 rounded-xl border border-border shadow-sm grow-0"
+                              key={index}
+                            >
+                              <label>
+                                <input disabled type="checkbox" checked className="checkbox checkbox-xs mr-2" />
+                                {isActionColumn(item.column)
+                                  ? t("pagination.configuration.actionColumn")
+                                  : item.column.title}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div
+                      tabIndex={0}
+                      className={`collapse bg-base-200 border-base-300 border ${open === configName ? "collapse-open" : "collapse-close"}`}
+                      key={configName}
+                    >
+                      <div
+                        className="collapse-title font-semibold cursor-pointer p-4!"
+                        onClick={() => setOpen(configName === open ? null : configName)}
+                      >
+                        <div className="flex">
+                          <div className="grow">{configName}</div>
+
+                          <button
+                            className="btn btn-xs btn-circle btn-error btn-ghost"
+                            onClick={() => {
+                              setConfigs((configs) => {
+                                const newConfigs = { ...configs };
+                                delete newConfigs[configName];
+                                return newConfigs;
+                              });
+                              if (open === configName) {
+                                setOpen(null);
+                              }
+                            }}
+                          >
+                            <XMarkIcon className="size-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="collapse-content text-sm">
+                        <OrderColumns
+                          name={configName}
+                          items={value}
+                          setOrder={(c) => setConfigs((oldCfg) => ({ ...oldCfg, [configName]: c }))}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="collapse-content text-sm">
-                    <OrderColumns
-                      name={configName}
-                      items={value}
-                      setOrder={(c) => setConfigs((oldCfg) => ({ ...oldCfg, [configName]: c }))}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+                  );
+                })}
 
-            <AddNew
-              names={Object.keys(configs)}
-              onAdd={(name) => {
-                setConfigs((oldCfg) => ({
-                  ...oldCfg,
-                  [name]: columns.map((c, index) => ({ column: c, checked: true, index })),
-                }));
-                setOpen(name);
-              }}
-            />
-          </div>
-          <hr className="my-4" />
+                <AddNew
+                  names={Object.keys(configs)}
+                  onAdd={(name) => {
+                    setConfigs((oldCfg) => ({
+                      ...oldCfg,
+                      [name]: columns.map((c, index) => ({ column: c, enabled: true, index })),
+                    }));
+                    setOpen(name);
+                  }}
+                />
+              </div>
+              <hr className="my-4" />
 
-          <div className="flex justify-center">
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                localStorage.setItem(`${title}Columns`, JSON.stringify(configs));
-                setShow(false);
-              }}
-            >
-              {t("general.saveButton")}
-            </button>
-          </div>
+              <div className="flex justify-center">
+                <button
+                  disabled={isLoading}
+                  className="btn btn-primary"
+                  onClick={() => {
+                    const configsWinNoColumns: Record<string, { index: number; enabled: boolean }[]> = {};
+                    for (const [key, value] of Object.entries(configs)) {
+                      if (key !== "default") {
+                        configsWinNoColumns[key] = value.map((d) => ({ enabled: d.enabled, index: d.index }));
+                      }
+                    }
+
+                    setLoading(true);
+                    store
+                      .setConfigs(name, configsWinNoColumns)
+                      .then(() => {
+                        setShow(false);
+                        refresh();
+                      })
+                      .catch((e) => {
+                        if (isServerError(e)) {
+                          for (const value of Object.values(e.errors)) {
+                            if (Array.isArray(value) && typeof value[0] === "string") {
+                              toast.error(value[0]);
+                              return;
+                            }
+                          }
+                        }
+                        toast.error(t("general.error"));
+                        captureException(e);
+                      })
+                      .finally(() => setLoading(false));
+                  }}
+                >
+                  {t("general.saveButton")}
+                </button>
+              </div>
+            </>
+          ) : (
+            <LoadingComponent />
+          )}
         </div>
         <form method="dialog" className="modal-backdrop" onSubmit={() => setShow(false)}>
           <button>close</button>
@@ -238,8 +289,8 @@ export const OrderColumns = ({
   setOrder,
 }: {
   name: string;
-  items: { column: ColumnType<any>; checked: boolean; index: number }[];
-  setOrder: (columns: { column: ColumnType<any>; checked: boolean; index: number }[]) => void;
+  items: { column: ColumnType<any>; enabled: boolean; index: number }[];
+  setOrder: (columns: { column: ColumnType<any>; enabled: boolean; index: number }[]) => void;
 }) => {
   return (
     <Reorder.Group axis="y" values={items} onReorder={setOrder} className="space-y-2 w-full max-w-2xl mx-auto">
@@ -249,7 +300,7 @@ export const OrderColumns = ({
             const itemCopy = [...items];
             const col = itemCopy.find((c) => c === column);
             if (col) {
-              col.checked = e.target.checked;
+              col.enabled = e.target.checked;
               setOrder(itemCopy);
             }
           }}
@@ -306,7 +357,7 @@ function ColumnItem({
   onChange,
 }: {
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
-  item: { column: ColumnType<any>; checked: boolean; index: number };
+  item: { column: ColumnType<any>; enabled: boolean; index: number };
 }) {
   const y = useMotionValue(0);
   const boxShadow = useRaisedShadow(y);
@@ -327,7 +378,7 @@ function ColumnItem({
           <input
             disabled={isActionColumn(item.column)}
             type="checkbox"
-            checked={item.checked}
+            checked={item.enabled}
             onChange={onChange}
             className="checkbox checkbox-xs mr-2"
           />
@@ -337,68 +388,4 @@ function ColumnItem({
       <ReorderHandle dragControls={dragControls} />
     </Reorder.Item>
   );
-}
-
-function getPaginationConfigsFromLocalStorage(
-  configName: string,
-  columns: Array<ColumnType<any>>,
-): Record<"default" | string, { index: number; checked: boolean }[]> {
-  const configString = localStorage.getItem(`${configName}Columns`);
-
-  if (configString === null) {
-    return { default: columns.map((c, i) => ({ index: i, checked: true })) };
-  }
-
-  const parsed = JSON.parse(configString || "null");
-  if (typeof parsed !== "object" || parsed === null) {
-    return { default: columns.map((c, i) => ({ index: i, checked: true })) };
-  }
-
-  for (const key of Object.keys(parsed)) {
-    if (!Array.isArray(parsed[key])) {
-      return { default: columns.map((c, i) => ({ index: i, checked: true })) };
-    }
-
-    if (parsed[key].length !== columns.length) {
-      return { default: columns.map((c, i) => ({ index: i, checked: true })) };
-    }
-
-    for (const item of parsed[key]) {
-      if (
-        typeof item !== "object" ||
-        item === null ||
-        typeof item.index !== "number" ||
-        typeof item.checked !== "boolean"
-      ) {
-        return { default: columns.map((c, i) => ({ index: i, checked: true })) };
-      }
-    }
-  }
-
-  return parsed;
-}
-
-function getPaginationConfigNameFromLocalStorage(configName: string) {
-  return localStorage.getItem(configName) || "default";
-}
-
-export function getPaginationConfigs<TModel = any>(
-  configName: string | undefined,
-  columns: ColumnType<TModel>[],
-): { index: number; checked: boolean }[] {
-  if (!configName) {
-    console.log("HAS NO CONFIG NAME");
-    return columns.map((c, i) => ({ index: i, checked: true }));
-  }
-
-  const configs = getPaginationConfigsFromLocalStorage(configName, columns);
-  const config = getPaginationConfigNameFromLocalStorage(configName);
-
-  console.log(`HAVE "${config}" NAME, CONFIG`, configs);
-
-  if (!configs[config]) {
-    return configs.default;
-  }
-
-  return configs[config];
 }

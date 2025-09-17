@@ -2,6 +2,8 @@ import * as react_jsx_runtime from 'react/jsx-runtime';
 import * as React from 'react';
 import React__default from 'react';
 import { ResponseMeta } from '@/utils';
+import { StorageInterface as StorageInterface$1 } from '@/pagination/StorageInterface';
+import { ColumnType as ColumnType$1 } from '@/pagination/PaginatedTable';
 
 declare const LoadingComponent: ({ style, className, loadingClassName, size, }: {
     className?: string;
@@ -131,7 +133,7 @@ declare const PaginatedTable: <TModel extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, configName, }: {
+}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, }: {
     caption?: React__default.ReactNode;
     bulkActions?: {
         children: React__default.ReactNode;
@@ -154,7 +156,17 @@ declare const PaginatedTable: <TModel extends {
     columns: Array<ColumnType<TModel["data"][number]>>;
     pagination: TModel;
     addNewText?: string;
-    configName?: string;
+    displayConfig?: {
+        name: string;
+        store?: StorageInterface$1<TModel["data"][number]>;
+        stored?: {
+            name: string;
+            value: Record<string, {
+                index: number;
+                enabled: boolean;
+            }[]>;
+        };
+    };
 }) => react_jsx_runtime.JSX.Element;
 declare const TableLink: ({ href, children, className, isLink, ...rest }: {
     className?: string;
@@ -183,4 +195,37 @@ declare const HeaderResponsivePaginated: ({ elements, bulkActions, }: {
     };
 }) => react_jsx_runtime.JSX.Element;
 
-export { ActionButton, type ActionColumn, ArchiveButton, BulkActions, BulkDropDownActions, type ColumnType, type DateColumn, EditButton, FilterLink, type FunctionColumn, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, MoreActions, PaginatedTable, Pagination, Popover, type SimpleColumn, TableLink, ViewButton, isActionColumn, isFunctionColumn };
+interface StorageInterface<T = unknown> {
+    getConfigs(title: string | undefined, columns: ColumnType$1<T>[]): Promise<Record<string, {
+        index: number;
+        enabled: boolean;
+    }[]>>;
+    setConfigs(title: string, configs: Record<string, {
+        index: number;
+        enabled: boolean;
+    }[]>): Promise<void>;
+    getConfigName(title: string): Promise<string>;
+    setConfigName(title: string, configName: string): Promise<void>;
+    getConfig(title: string, columns: ColumnType$1<T>[]): Promise<{
+        index: number;
+        enabled: boolean;
+    }[]>;
+}
+declare class LocalStorage<T> implements StorageInterface<T> {
+    getConfig(title: string | undefined, columns: ColumnType$1<T>[]): Promise<{
+        index: number;
+        enabled: boolean;
+    }[]>;
+    getConfigName(title: string): Promise<string>;
+    getConfigs(title: string, columns: ColumnType$1<T>[]): Promise<Record<string, {
+        index: number;
+        enabled: boolean;
+    }[]>>;
+    setConfigName(title: string, configName: string): Promise<void>;
+    setConfigs(title: string, configs: Record<string, {
+        index: number;
+        enabled: boolean;
+    }[]>): Promise<void>;
+}
+
+export { ActionButton, type ActionColumn, ArchiveButton, BulkActions, BulkDropDownActions, type ColumnType, type DateColumn, EditButton, FilterLink, type FunctionColumn, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, LocalStorage, MoreActions, PaginatedTable, Pagination, Popover, type SimpleColumn, type StorageInterface, TableLink, ViewButton, isActionColumn, isFunctionColumn };

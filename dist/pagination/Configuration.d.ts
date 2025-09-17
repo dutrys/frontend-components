@@ -1,27 +1,27 @@
 import { ColumnType } from "@/pagination/PaginatedTable";
-export declare const PaginationConfiguration: ({ title, columns, setConfig, }: {
-    setConfig: (config: {
+import { StorageInterface } from "@/pagination/StorageInterface";
+export declare const PaginationConfiguration: <T = unknown>({ name, columns, setConfigName, store, configs: configsFromRemote, refresh, }: {
+    setConfigName: (configName: string) => void;
+    refresh: () => void;
+    name: string;
+    columns: ColumnType<T>[];
+    store: StorageInterface<T>;
+    configs: Record<string, {
         index: number;
-        checked: boolean;
-    }[]) => void;
-    title: string;
-    columns: ColumnType<any>[];
+        enabled: boolean;
+    }[]> | undefined;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const OrderColumns: ({ name, items, setOrder, }: {
     name: string;
     items: {
         column: ColumnType<any>;
-        checked: boolean;
+        enabled: boolean;
         index: number;
     }[];
     setOrder: (columns: {
         column: ColumnType<any>;
-        checked: boolean;
+        enabled: boolean;
         index: number;
     }[]) => void;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare function getPaginationConfigs<TModel = any>(configName: string | undefined, columns: ColumnType<TModel>[]): {
-    index: number;
-    checked: boolean;
-}[];
 //# sourceMappingURL=Configuration.d.ts.map

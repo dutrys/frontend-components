@@ -3,10 +3,10 @@ import { useRouter } from "next-nprogress-bar";
 import { ChevronDownIcon, ChevronUpIcon, FunnelIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { FunnelIcon as FunnelIconSolid } from "@heroicons/react/24/solid";
 import { ArchiveButton, EditButton, ViewButton } from "./ActionButtons";
-import { DateTime, isParamActive, setPartialParams } from "@/utils";
+import { DateTime, setPartialParams } from "@/utils";
 import { Pagination } from "./Pagination";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styles from "./PaginatedTable.module.css";
 import { HumanDate, TOOLTIP_GLOBAL_ID } from "@/utils";
 import cx from "classnames";
@@ -15,7 +15,9 @@ import { Link, addLocale } from "./Link";
 import { Hotkeys } from "@/HotKeys";
 import { IndeterminateCheckbox } from "@/form";
 import { HeaderResponsivePaginated } from "@/pagination/HeaderResponsivePaginated";
-import { getPaginationConfigs, PaginationConfiguration } from "@/pagination/Configuration";
+import { PaginationConfiguration } from "@/pagination/Configuration";
+import { LocalStorage, StorageInterface } from "@/pagination/StorageInterface";
+import { useQuery } from "@tanstack/react-query";
 
 const limits = [10, 20, 50, 100];
 
@@ -80,7 +82,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   bulkActions,
   addNewText,
   displayFilters,
-  configName,
+  displayConfig,
 }: {
   caption?: React.ReactNode;
   bulkActions?: {
@@ -101,7 +103,14 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   columns: Array<ColumnType<TModel["data"][number]>>;
   pagination: TModel;
   addNewText?: string;
-  configName?: string;
+  displayConfig?: {
+    name: string;
+    store?: StorageInterface<TModel["data"][number]>;
+    stored?: {
+      name: string;
+      value: Record<string, { index: number; enabled: boolean }[]>;
+    };
+  };
 }) => {
   const router = useRouter();
   const params = useParams();
@@ -109,9 +118,23 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   const t = useTranslations();
   const [selected, setSelected] = React.useState<number[]>([]);
 
-  const [config, setConfig] = React.useState<{ index: number; checked: boolean }[]>(
-    getPaginationConfigs(configName, columns),
-  );
+  const store = useMemo(() => displayConfig?.store || new LocalStorage(), [displayConfig]);
+  const [configName, setConfigName] = useState(displayConfig?.stored?.name || "default");
+
+  const { data: paginationConfigs, refetch: refetchPaginationConfigs } = useQuery({
+    enabled: !!displayConfig,
+    queryKey: ["paginationConfiguration", store],
+    queryFn: () => store.getConfigs(displayConfig!.name, columns),
+    initialData: displayConfig?.stored?.value || {},
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
+  paginationConfigs.default = columns.map((_, i) => ({ index: i, enabled: true }));
+
+  if (!paginationConfigs[configName]) {
+    paginationConfigs[configName] = paginationConfigs.default;
+  }
 
   const hotKeys = [];
   if (addNew) {
@@ -206,9 +229,16 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
         )}
         {isSearchable && <SearchField />}
 
-        {configName && (
+        {displayConfig && (
           <div className="pr-2">
-            <PaginationConfiguration title={configName} columns={columns} setConfig={setConfig} />
+            <PaginationConfiguration
+              store={store}
+              name={displayConfig.name}
+              columns={columns}
+              configs={paginationConfigs}
+              setConfigName={(name) => setConfigName(name)}
+              refresh={() => void refetchPaginationConfigs()}
+            />
           </div>
         )}
       </div>
@@ -260,9 +290,9 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                   />
                 </th>
               )}
-              {config.map((item, i) => {
+              {paginationConfigs[configName].map((item, i) => {
                 const column = columns[item.index];
-                if (!item.checked) {
+                if (!item.enabled) {
                   return null;
                 }
                 if (isActionColumn(column)) {
@@ -334,9 +364,9 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                     />
                   </th>
                 )}
-                {config.map((item, i) => {
+                {paginationConfigs[configName].map((item, i) => {
                   const column = columns[item.index];
-                  if (!item.checked) {
+                  if (!item.enabled) {
                     return null;
                   }
                   if (isActionColumn(column)) {

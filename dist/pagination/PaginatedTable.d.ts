@@ -1,5 +1,6 @@
 import React from "react";
 import { ResponseMeta } from "@/utils";
+import { StorageInterface } from "@/pagination/StorageInterface";
 export type ActionColumn<TModel> = {
     type: "actions";
     archive?: string | boolean | false | ((model: TModel) => string | boolean);
@@ -40,7 +41,7 @@ export declare const PaginatedTable: <TModel extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, configName, }: {
+}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, }: {
     caption?: React.ReactNode;
     bulkActions?: {
         children: React.ReactNode;
@@ -63,7 +64,17 @@ export declare const PaginatedTable: <TModel extends {
     columns: Array<ColumnType<TModel["data"][number]>>;
     pagination: TModel;
     addNewText?: string;
-    configName?: string;
+    displayConfig?: {
+        name: string;
+        store?: StorageInterface<TModel["data"][number]>;
+        stored?: {
+            name: string;
+            value: Record<string, {
+                index: number;
+                enabled: boolean;
+            }[]>;
+        };
+    };
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const TableLink: ({ href, children, className, isLink, ...rest }: {
     className?: string;

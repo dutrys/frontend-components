@@ -13,7 +13,7 @@ import toast from 'react-hot-toast';
 import 'react-tooltip';
 import 'date-fns-tz';
 import 'react-focus-lock';
-import '@sentry/nextjs';
+import { captureException } from '@sentry/nextjs';
 import 'react-hook-form';
 import 'react-dom';
 import { EllipsisVerticalIcon, ArrowsUpDownIcon } from '@heroicons/react/16/solid';
@@ -21,7 +21,7 @@ import { useRouter } from 'next-nprogress-bar';
 import { FunnelIcon as FunnelIcon$1 } from '@heroicons/react/24/solid';
 import 'react-day-picker';
 import 'react-day-picker/locale';
-import '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import '@headlessui/react';
 import '@heroicons/react/20/solid';
 import 'react-intersection-observer';
@@ -218,6 +218,8 @@ const Hotkeys = ({ hotKeys, id }) => {
     }, [mapping, hotKeys, id]);
     return null;
 };
+
+const isServerError = (error) => typeof error === "object" && typeof error.errors === "object";
 
 const EditButton = ({ href, size }) => {
     const t = useTranslations("actionButtons");
@@ -444,69 +446,101 @@ function AddNew({ onAdd, names }) {
                     setName("");
                 }, children: t("general.addNew") })] }));
 }
-const PaginationConfiguration = ({ title, columns, setConfig, }) => {
+const PaginationConfiguration = ({ name, columns, setConfigName, store, configs: configsFromRemote, refresh, }) => {
     const [show, setShow] = useState(false);
     const t = useTranslations();
-    const configsFromLocalStorage = useMemo(() => {
-        const configs = getPaginationConfigsFromLocalStorage(title, columns);
-        for (const configName of Object.keys(configs)) {
-            for (let i = 0; i < configs[configName].length; i++) {
-                configs[configName][i].column = columns[configs[configName][i].index];
-            }
+    const [isLoading, setLoading] = useState(false);
+    const cc = useMemo(() => {
+        if (!configsFromRemote) {
+            return undefined;
+        }
+        const configs = {};
+        for (const [key, value] of Object.entries(configsFromRemote)) {
+            value.forEach((c, i) => {
+                configs[key] = configs[key] || [];
+                configs[key][i] = {
+                    index: c.index,
+                    column: columns[c.index],
+                    enabled: c.enabled,
+                };
+            });
         }
         return configs;
-    }, [title]);
-    const [configs, setConfigs] = useState(configsFromLocalStorage);
-    const configNameFromLocalStorage = useMemo(() => {
-        const config = localStorage.getItem(title) || "default";
-        if (typeof configsFromLocalStorage[config] === "object") {
-            return config;
-        }
-        return "default";
-    }, [title, configsFromLocalStorage]);
-    const [activeConfigName, setActiveConfigName] = useState(configNameFromLocalStorage);
+    }, [columns, configsFromRemote]);
+    const [configs, setConfigs] = useState(cc);
+    const [activeConfigName, setActiveConfigName] = useState("default");
     const [open, setOpen] = useState(null);
-    return (jsxs(Fragment, { children: [jsx(Popover, { hoverClassName: "bg-slate-600", title: (ref, p) => (jsx("button", { ref: ref, ...p, onClick: () => setShow(!show), className: `btn btn-neutral btn-xs ${p.className ? p.className : undefined}`, children: jsx(AdjustmentsHorizontalIcon, { className: "size-4" }) })), children: (close) => {
-                    return (jsx("ul", { className: "p-1 menu menu-sm text-white", children: Object.keys(configs).map((configName) => (jsx("li", { children: jsxs("a", { href: "#", className: "hover:bg-slate-600 pl-2", onClick: (e) => {
-                                    e.preventDefault();
-                                    localStorage.setItem(title, configName);
-                                    setConfig(configs[configName]);
+    return (jsxs(Fragment, { children: [jsx(Popover, { hoverClassName: "bg-slate-600", title: (ref, p) => (jsx("button", { ref: ref, ...p, onClick: () => setShow(!show), className: `btn btn-neutral btn-xs ${p.className ? p.className : undefined}`, children: jsx(AdjustmentsHorizontalIcon, { className: "size-4" }) })), children: (close) => configs ? (jsx("ul", { className: "p-1 menu menu-sm text-white", children: Object.keys(configs).map((configName) => (jsx("li", { children: jsxs("a", { href: "#", className: "hover:bg-slate-600 pl-2", onClick: (e) => {
+                                e.preventDefault();
+                                setConfigName(configName);
+                                close();
+                                store
+                                    .setConfigName(name, configName)
+                                    .then(() => {
+                                    toast(configName === "default" ? t("pagination.configuration.defaultTitle") : configName);
                                     setActiveConfigName(configName);
-                                    close();
-                                }, children: [activeConfigName === configName ? (jsx(CheckIcon, { className: "size-4" })) : (jsx("div", { className: "size-4" })), configName === "default" ? t("pagination.configuration.defaultTitle") : configName] }) }, configName))) }));
-                } }), jsxs("dialog", { className: `modal ${show ? "modal-open" : ""}`, onClose: () => setShow(false), children: [jsxs("div", { className: "modal-box max-h-[calc(100vh-150px)] overflow-y-auto mt-10", children: [jsx("h3", { className: "font-bold text-lg", children: t("pagination.configuration.title") }), jsxs("div", { className: "space-y-4 mt-4", children: [Object.entries(configs).map(([configName, value]) => {
-                                        if (configName === "default") {
-                                            return (jsxs("div", { tabIndex: 0, className: `collapse bg-base-200 border-base-300 border ${open === configName ? "collapse-open" : "collapse-close"}`, children: [jsx("div", { className: "collapse-title font-semibold", onClick: () => setOpen(configName === open ? null : configName), children: t("pagination.configuration.defaultTitle") }), jsx("div", { className: "collapse-content text-sm space-y-2", children: value.map((item, index) => (jsx("div", { className: "flex justify-between items-center p-2 bg-base-100 rounded-xl border border-border shadow-sm grow-0", children: jsxs("label", { children: [jsx("input", { disabled: true, type: "checkbox", checked: true, className: "checkbox checkbox-xs mr-2" }), isActionColumn(item.column)
-                                                                        ? t("pagination.configuration.actionColumn")
-                                                                        : item.column.title] }) }, index))) })] }, configName));
-                                        }
-                                        return (jsxs("div", { tabIndex: 0, className: `collapse bg-base-200 border-base-300 border ${open === configName ? "collapse-open" : "collapse-close"}`, children: [jsx("div", { className: "collapse-title font-semibold p-4!", onClick: () => setOpen(configName === open ? null : configName), children: jsxs("div", { className: "flex", children: [jsx("div", { className: "grow", children: configName }), jsx("button", { className: "btn btn-xs btn-circle btn-error btn-ghost", onClick: () => {
-                                                                    setConfigs((configs) => {
-                                                                        const newConfigs = { ...configs };
-                                                                        delete newConfigs[configName];
-                                                                        return newConfigs;
-                                                                    });
-                                                                    if (open === configName) {
-                                                                        setOpen(null);
-                                                                    }
-                                                                }, children: jsx(XMarkIcon, { className: "size-4" }) })] }) }), jsx("div", { className: "collapse-content text-sm", children: jsx(OrderColumns, { name: configName, items: value, setOrder: (c) => setConfigs((oldCfg) => ({ ...oldCfg, [configName]: c })) }) })] }, configName));
-                                    }), jsx(AddNew, { names: Object.keys(configs), onAdd: (name) => {
-                                            setConfigs((oldCfg) => ({
-                                                ...oldCfg,
-                                                [name]: columns.map((c, index) => ({ column: c, checked: true, index })),
-                                            }));
-                                            setOpen(name);
-                                        } })] }), jsx("hr", { className: "my-4" }), jsx("div", { className: "flex justify-center", children: jsx("button", { className: "btn btn-primary", onClick: () => {
-                                        localStorage.setItem(`${title}Columns`, JSON.stringify(configs));
-                                        setShow(false);
-                                    }, children: t("general.saveButton") }) })] }), jsx("form", { method: "dialog", className: "modal-backdrop", onSubmit: () => setShow(false), children: jsx("button", { children: "close" }) })] })] }));
+                                })
+                                    .catch((e) => {
+                                    captureException(e);
+                                    toast.error(t("general.error"));
+                                });
+                            }, children: [activeConfigName === configName ? (jsx(CheckIcon, { className: "size-4" })) : (jsx("div", { className: "size-4" })), configName === "default" ? t("pagination.configuration.defaultTitle") : configName] }) }, configName))) })) : (jsx(LoadingComponent, {})) }), jsxs("dialog", { className: `modal ${show ? "modal-open" : ""}`, onClose: () => setShow(false), children: [jsxs("div", { className: "modal-box max-h-[calc(100vh-150px)] overflow-y-auto mt-10", children: [jsx("h3", { className: "font-bold text-lg", children: t("pagination.configuration.title") }), configs ? (jsxs(Fragment, { children: [jsxs("div", { className: "space-y-4 mt-4", children: [Object.entries(configs).map(([configName, value]) => {
+                                                if (configName === "default") {
+                                                    return (jsxs("div", { tabIndex: 0, className: `collapse bg-base-200 border-base-300 border ${open === configName ? "collapse-open" : "collapse-close"}`, children: [jsx("div", { className: "collapse-title font-semibold cursor-pointer", onClick: () => setOpen(configName === open ? null : configName), children: t("pagination.configuration.defaultTitle") }), jsx("div", { className: "collapse-content text-sm space-y-2", children: value.map((item, index) => (jsx("div", { className: "flex justify-between items-center p-2 bg-base-100 rounded-xl border border-border shadow-sm grow-0", children: jsxs("label", { children: [jsx("input", { disabled: true, type: "checkbox", checked: true, className: "checkbox checkbox-xs mr-2" }), isActionColumn(item.column)
+                                                                                ? t("pagination.configuration.actionColumn")
+                                                                                : item.column.title] }) }, index))) })] }, configName));
+                                                }
+                                                return (jsxs("div", { tabIndex: 0, className: `collapse bg-base-200 border-base-300 border ${open === configName ? "collapse-open" : "collapse-close"}`, children: [jsx("div", { className: "collapse-title font-semibold cursor-pointer p-4!", onClick: () => setOpen(configName === open ? null : configName), children: jsxs("div", { className: "flex", children: [jsx("div", { className: "grow", children: configName }), jsx("button", { className: "btn btn-xs btn-circle btn-error btn-ghost", onClick: () => {
+                                                                            setConfigs((configs) => {
+                                                                                const newConfigs = { ...configs };
+                                                                                delete newConfigs[configName];
+                                                                                return newConfigs;
+                                                                            });
+                                                                            if (open === configName) {
+                                                                                setOpen(null);
+                                                                            }
+                                                                        }, children: jsx(XMarkIcon, { className: "size-4" }) })] }) }), jsx("div", { className: "collapse-content text-sm", children: jsx(OrderColumns, { name: configName, items: value, setOrder: (c) => setConfigs((oldCfg) => ({ ...oldCfg, [configName]: c })) }) })] }, configName));
+                                            }), jsx(AddNew, { names: Object.keys(configs), onAdd: (name) => {
+                                                    setConfigs((oldCfg) => ({
+                                                        ...oldCfg,
+                                                        [name]: columns.map((c, index) => ({ column: c, enabled: true, index })),
+                                                    }));
+                                                    setOpen(name);
+                                                } })] }), jsx("hr", { className: "my-4" }), jsx("div", { className: "flex justify-center", children: jsx("button", { disabled: isLoading, className: "btn btn-primary", onClick: () => {
+                                                const configsWinNoColumns = {};
+                                                for (const [key, value] of Object.entries(configs)) {
+                                                    if (key !== "default") {
+                                                        configsWinNoColumns[key] = value.map((d) => ({ enabled: d.enabled, index: d.index }));
+                                                    }
+                                                }
+                                                setLoading(true);
+                                                store
+                                                    .setConfigs(name, configsWinNoColumns)
+                                                    .then(() => {
+                                                    setShow(false);
+                                                    refresh();
+                                                })
+                                                    .catch((e) => {
+                                                    if (isServerError(e)) {
+                                                        for (const value of Object.values(e.errors)) {
+                                                            if (Array.isArray(value) && typeof value[0] === "string") {
+                                                                toast.error(value[0]);
+                                                                return;
+                                                            }
+                                                        }
+                                                    }
+                                                    toast.error(t("general.error"));
+                                                    captureException(e);
+                                                })
+                                                    .finally(() => setLoading(false));
+                                            }, children: t("general.saveButton") }) })] })) : (jsx(LoadingComponent, {}))] }), jsx("form", { method: "dialog", className: "modal-backdrop", onSubmit: () => setShow(false), children: jsx("button", { children: "close" }) })] })] }));
 };
 const OrderColumns = ({ name, items, setOrder, }) => {
     return (jsx(Reorder.Group, { axis: "y", values: items, onReorder: setOrder, className: "space-y-2 w-full max-w-2xl mx-auto", children: items.map((column, i) => (jsx(ColumnItem, { onChange: (e) => {
                 const itemCopy = [...items];
                 const col = itemCopy.find((c) => c === column);
                 if (col) {
-                    col.checked = e.target.checked;
+                    col.enabled = e.target.checked;
                     setOrder(itemCopy);
                 }
             }, item: column }, `${name}-${isActionColumn(column.column) ? "action" : column.column.title}`))) }));
@@ -545,50 +579,57 @@ function ColumnItem({ item, onChange, }) {
     const boxShadow = useRaisedShadow(y);
     const dragControls = useDragControls();
     const t = useTranslations();
-    return (jsxs(Reorder.Item, { value: item, onChange: onChange, style: { boxShadow, y }, dragListener: false, dragControls: dragControls, className: "flex justify-between items-center pl-2 bg-base-100 rounded-xl border border-border shadow-sm", children: [jsx("div", { className: "grow-0", children: jsxs("label", { children: [jsx("input", { disabled: isActionColumn(item.column), type: "checkbox", checked: item.checked, onChange: onChange, className: "checkbox checkbox-xs mr-2" }), isActionColumn(item.column) ? t("pagination.configuration.actionColumn") : item.column.title] }) }), jsx(ReorderHandle, { dragControls: dragControls })] }));
+    return (jsxs(Reorder.Item, { value: item, onChange: onChange, style: { boxShadow, y }, dragListener: false, dragControls: dragControls, className: "flex justify-between items-center pl-2 bg-base-100 rounded-xl border border-border shadow-sm", children: [jsx("div", { className: "grow-0", children: jsxs("label", { children: [jsx("input", { disabled: isActionColumn(item.column), type: "checkbox", checked: item.enabled, onChange: onChange, className: "checkbox checkbox-xs mr-2" }), isActionColumn(item.column) ? t("pagination.configuration.actionColumn") : item.column.title] }) }), jsx(ReorderHandle, { dragControls: dragControls })] }));
 }
-function getPaginationConfigsFromLocalStorage(configName, columns) {
-    const configString = localStorage.getItem(`${configName}Columns`);
-    if (configString === null) {
-        return { default: columns.map((c, i) => ({ index: i, checked: true })) };
-    }
-    const parsed = JSON.parse(configString || "null");
-    if (typeof parsed !== "object" || parsed === null) {
-        return { default: columns.map((c, i) => ({ index: i, checked: true })) };
-    }
-    for (const key of Object.keys(parsed)) {
-        if (!Array.isArray(parsed[key])) {
-            return { default: columns.map((c, i) => ({ index: i, checked: true })) };
+
+class LocalStorage {
+    async getConfig(title, columns) {
+        const configName = title ? await this.getConfigName(title) : undefined;
+        if (!configName) {
+            return columns.map((c, i) => ({ index: i, enabled: true }));
         }
-        if (parsed[key].length !== columns.length) {
-            return { default: columns.map((c, i) => ({ index: i, checked: true })) };
+        const configs = await this.getConfigs(configName, columns);
+        if (!configs[configName]) {
+            return configs.default;
         }
-        for (const item of parsed[key]) {
-            if (typeof item !== "object" ||
-                item === null ||
-                typeof item.index !== "number" ||
-                typeof item.checked !== "boolean") {
-                return { default: columns.map((c, i) => ({ index: i, checked: true })) };
+        return configs[configName];
+    }
+    async getConfigName(title) {
+        return localStorage.getItem(title) || "default";
+    }
+    async getConfigs(title, columns) {
+        const configString = localStorage.getItem(`${title}Columns`);
+        if (configString === null) {
+            return { default: columns.map((c, i) => ({ index: i, enabled: true })) };
+        }
+        const parsed = JSON.parse(configString || "null");
+        if (typeof parsed !== "object" || parsed === null) {
+            return { default: columns.map((c, i) => ({ index: i, enabled: true })) };
+        }
+        for (const key of Object.keys(parsed)) {
+            if (!Array.isArray(parsed[key])) {
+                return { default: columns.map((c, i) => ({ index: i, enabled: true })) };
+            }
+            if (parsed[key].length !== columns.length) {
+                return { default: columns.map((c, i) => ({ index: i, enabled: true })) };
+            }
+            for (const item of parsed[key]) {
+                if (typeof item !== "object" ||
+                    item === null ||
+                    typeof item.index !== "number" ||
+                    typeof item.enabled !== "boolean") {
+                    return { default: columns.map((c, i) => ({ index: i, enabled: true })) };
+                }
             }
         }
+        return parsed;
     }
-    return parsed;
-}
-function getPaginationConfigNameFromLocalStorage(configName) {
-    return localStorage.getItem(configName) || "default";
-}
-function getPaginationConfigs(configName, columns) {
-    if (!configName) {
-        console.log("HAS NO CONFIG NAME");
-        return columns.map((c, i) => ({ index: i, checked: true }));
+    async setConfigName(title, configName) {
+        localStorage.setItem(title, configName);
     }
-    const configs = getPaginationConfigsFromLocalStorage(configName, columns);
-    const config = getPaginationConfigNameFromLocalStorage(configName);
-    console.log(`HAVE "${config}" NAME, CONFIG`, configs);
-    if (!configs[config]) {
-        return configs.default;
+    async setConfigs(title, configs) {
+        localStorage.setItem(`${title}Column`, JSON.stringify(configs));
     }
-    return configs[config];
 }
 
 const limits = [10, 20, 50, 100];
@@ -598,13 +639,26 @@ function isActionColumn(column) {
 function isFunctionColumn(column) {
     return typeof column === "object" && typeof column.body === "function";
 }
-const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, configName, }) => {
+const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, displayConfig, }) => {
     const router = useRouter();
     const params = useParams();
     const searchParams = useSearchParams();
     const t = useTranslations();
     const [selected, setSelected] = React.useState([]);
-    const [config, setConfig] = React.useState(getPaginationConfigs(configName, columns));
+    const store = useMemo(() => displayConfig?.store || new LocalStorage(), [displayConfig]);
+    const [configName, setConfigName] = useState(displayConfig?.stored?.name || "default");
+    const { data: paginationConfigs, refetch: refetchPaginationConfigs } = useQuery({
+        enabled: !!displayConfig,
+        queryKey: ["paginationConfiguration", store],
+        queryFn: () => store.getConfigs(displayConfig.name, columns),
+        initialData: displayConfig?.stored?.value || {},
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+    });
+    paginationConfigs.default = columns.map((_, i) => ({ index: i, enabled: true }));
+    if (!paginationConfigs[configName]) {
+        paginationConfigs[configName] = paginationConfigs.default;
+    }
     const hotKeys = [];
     if (addNew) {
         hotKeys.push({
@@ -640,15 +694,15 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
         }
     }
     elements.push(...searchableShortcuts);
-    const heading = (jsx(Fragment, { children: jsxs("div", { className: "flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]", children: [jsx("h1", { className: `pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (searchableShortcuts.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsivePaginated, { bulkActions: bulkActions ? { actions: bulkActions, setSelected, selected } : undefined, elements: elements })), extraHeading, addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: addNewText || t("pagination.addNew") })] })), isSearchable && jsx(SearchField, {}), configName && (jsx("div", { className: "pr-2", children: jsx(PaginationConfiguration, { title: configName, columns: columns, setConfig: setConfig }) }))] }) }));
+    const heading = (jsx(Fragment, { children: jsxs("div", { className: "flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]", children: [jsx("h1", { className: `pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (searchableShortcuts.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsivePaginated, { bulkActions: bulkActions ? { actions: bulkActions, setSelected, selected } : undefined, elements: elements })), extraHeading, addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: addNewText || t("pagination.addNew") })] })), isSearchable && jsx(SearchField, {}), displayConfig && (jsx("div", { className: "pr-2", children: jsx(PaginationConfiguration, { store: store, name: displayConfig.name, columns: columns, configs: paginationConfigs, setConfigName: (name) => setConfigName(name), refresh: () => void refetchPaginationConfigs() }) }))] }) }));
     if (pagination.meta.totalItems === 0) {
         return (jsxs(Fragment, { children: [heading, caption, jsxs("div", { className: "text-center mt-20", children: [jsxs("span", { className: "text-gray-400", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", addNewText || t("pagination.tryCreatingOne")] }) }))] })] }));
     }
     return (jsxs("div", { "data-testid": "paginate-table", className: "relative h-full", "data-test-sort": (pagination.meta.sortBy || []).flat().join("-"), children: [heading, jsx("div", { className: "overflow-x-auto max-h-[calc(100%-7rem)] w-[calc(100vw)] sm:w-[calc(100vw-6rem)]", children: jsxs("table", { className: `${styles.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [caption && jsx("caption", { children: caption }), jsx("thead", { children: jsxs("tr", { children: [bulkActions && (jsx("th", { children: jsx(IndeterminateCheckbox, { className: "checkbox checkbox-xs", onChange: (e) => {
                                                 setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);
-                                            }, indeterminate: selected.length > 0 && selected.length < pagination.data.length, checked: pagination.data.every((model) => selected.includes(model.id)) }) })), config.map((item, i) => {
+                                            }, indeterminate: selected.length > 0 && selected.length < pagination.data.length, checked: pagination.data.every((model) => selected.includes(model.id)) }) })), paginationConfigs[configName].map((item, i) => {
                                         const column = columns[item.index];
-                                        if (!item.checked) {
+                                        if (!item.enabled) {
                                             return null;
                                         }
                                         if (isActionColumn(column)) {
@@ -675,9 +729,9 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
                                                 else {
                                                     setSelected((prev) => prev.filter((id) => id !== model.id));
                                                 }
-                                            }, checked: selected.includes(model.id) }) })), config.map((item, i) => {
+                                            }, checked: selected.includes(model.id) }) })), paginationConfigs[configName].map((item, i) => {
                                         const column = columns[item.index];
-                                        if (!item.checked) {
+                                        if (!item.enabled) {
                                             return null;
                                         }
                                         if (isActionColumn(column)) {
@@ -754,5 +808,5 @@ const TruncateText = ({ text, length }) => {
     return (jsx("div", { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": text, className: "text-left text-ellipsis overflow-hidden", style: { width: length }, children: text }));
 };
 
-export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, EditButton, FilterLink, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, MoreActions, PaginatedTable, Pagination, Popover, TableLink, ViewButton, isActionColumn, isFunctionColumn };
+export { ActionButton, ArchiveButton, BulkActions, BulkDropDownActions, EditButton, FilterLink, HeaderResponsive, HeaderResponsivePaginated, LoadingComponent, LocalStorage, MoreActions, PaginatedTable, Pagination, Popover, TableLink, ViewButton, isActionColumn, isFunctionColumn };
 //# sourceMappingURL=index.js.map
