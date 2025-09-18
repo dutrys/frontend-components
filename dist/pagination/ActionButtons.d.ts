@@ -7,14 +7,16 @@ export declare const ViewButton: ({ href, size }: {
     href: string;
     size?: "xs" | "sm" | "lg" | "xl";
 }) => import("react/jsx-runtime").JSX.Element;
-type MoreActionType = {
+export type MoreActionType = {
     label: string;
     icon: React.ComponentType<{
         className?: string;
     }>;
-    onClick?: () => Promise<string>;
+    onClick?: () => Promise<string | void>;
     href?: string;
     hidden?: boolean;
+    enableWhenSpaceIsAvailable?: boolean;
+    disabled?: boolean;
 };
 export declare const MoreActions: ({ actions }: {
     actions: MoreActionType[];
@@ -35,5 +37,4 @@ export declare const ActionButton: ({ tooltipId, icon, tooltip, className, size,
     tooltip: React.ReactNode;
     prefetch?: boolean;
 }) => import("react/jsx-runtime").JSX.Element;
-export {};
 //# sourceMappingURL=ActionButtons.d.ts.map

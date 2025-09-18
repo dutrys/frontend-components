@@ -1,8 +1,8 @@
 import React from "react";
 import { useTranslations } from "next-intl";
-import { Popover } from "@/dialog";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import styles from "./BulkActions.module.css";
+import { Popover } from "@/dialog/Popover";
 
 export const BulkActions = ({
   bulkActions,

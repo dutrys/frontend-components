@@ -1,8 +1,7 @@
 import React from "react";
 import { useSearchParams } from "next/navigation";
 import { Link } from "./Link";
-import { setPartialParams } from "@/utils";
-import { ResponseMeta } from "@/utils";
+import { ResponseMeta, setPartialParams } from "@/utils/paginate";
 
 export const Pagination = ({
   page,

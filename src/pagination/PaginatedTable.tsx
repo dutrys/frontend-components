@@ -2,32 +2,29 @@ import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next-nprogress-bar";
 import { ChevronDownIcon, ChevronUpIcon, FunnelIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { FunnelIcon as FunnelIconSolid } from "@heroicons/react/24/solid";
-import { ArchiveButton, EditButton, ViewButton } from "./ActionButtons";
-import { DateTime, setPartialParams } from "@/utils";
+import { MoreActions, MoreActionType } from "./ActionButtons";
 import { Pagination } from "./Pagination";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useState } from "react";
 import styles from "./PaginatedTable.module.css";
-import { HumanDate, TOOLTIP_GLOBAL_ID } from "@/utils";
 import cx from "classnames";
-import { ResponseMeta } from "@/utils";
 import { Link, addLocale } from "./Link";
 import { Hotkeys } from "@/HotKeys";
-import { IndeterminateCheckbox } from "@/form";
 import { HeaderResponsivePaginated } from "@/pagination/HeaderResponsivePaginated";
 import { PaginationConfiguration } from "@/pagination/Configuration";
 import { LocalStorage, StorageInterface } from "@/pagination/StorageInterface";
 import { useQuery } from "@tanstack/react-query";
+import { ResponseMeta, setPartialParams } from "@/utils/paginate";
+import { IndeterminateCheckbox } from "@/form/Input";
+import { DateTime } from "@/utils/DateTime";
+import { HumanDate } from "@/utils/HumanDate";
+import { TOOLTIP_GLOBAL_ID } from "@/utils/Toaster";
 
 const limits = [10, 20, 50, 100];
 
 export type ActionColumn<TModel> = {
   type: "actions";
-  archive?: string | boolean | false | ((model: TModel) => string | boolean);
-  edit?: string | boolean | false | ((model: TModel) => string | boolean);
-  view?: string | boolean | false | ((model: TModel) => string | boolean);
-  idField: keyof TModel;
-  extraButtons?: [(model: TModel) => React.ReactNode];
+  actions: (model: TModel) => MoreActionType[];
   className?: string;
 };
 export type SimpleColumn<TModel> = {
@@ -75,7 +72,6 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   extraHeading,
   columns,
   caption,
-  pathname,
   isSearchable = false,
   searchableShortcuts = [],
   addNew,
@@ -93,7 +89,6 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   extraHeading?: React.ReactNode;
   isSearchable?: boolean;
   title: React.ReactNode;
-  pathname: string;
   addNew?: string;
   displayFilters?: {
     name: string;
@@ -371,46 +366,9 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                     return null;
                   }
                   if (isActionColumn(column)) {
-                    if (!column.idField) {
-                      throw new Error("Model must have an id");
-                    }
-                    const idFieldValue = model[column.idField];
-                    if (typeof idFieldValue !== "string" && typeof idFieldValue !== "number") {
-                      throw new Error("idField must be a string or a number");
-                    }
-
-                    const archiveValue = typeof column.archive === "function" ? column.archive(model) : column.archive;
-                    const archive: string | false =
-                      typeof archiveValue === "string"
-                        ? `${pathname}/${idFieldValue}/${archiveValue}`
-                        : archiveValue
-                          ? `${pathname}/archive/${idFieldValue}`
-                          : false;
-
-                    const viewValue = typeof column.view === "function" ? column.view(model) : column.view;
-                    const view: string | false =
-                      typeof viewValue === "string"
-                        ? `${pathname}/${idFieldValue}/${viewValue}`
-                        : viewValue
-                          ? `${pathname}/view/${idFieldValue}`
-                          : false;
-
-                    const editValue = typeof column.edit === "function" ? column.edit(model) : column.edit;
-                    const edit: string | false =
-                      typeof editValue === "string"
-                        ? `${pathname}/${idFieldValue}/${editValue}`
-                        : editValue
-                          ? `${pathname}/edit/${idFieldValue}`
-                          : false;
-
                     return (
                       <th key={`actions-td-${i}`} className={column.className || "whitespace-nowrap text-right"}>
-                        {column.extraButtons?.map((Button, i) => (
-                          <React.Fragment key={`${model[column.idField]}-${i}`}>{Button(model)}</React.Fragment>
-                        ))}
-                        {view && <ViewButton href={view} />}
-                        {edit && <EditButton href={edit} />}
-                        {archive && <ArchiveButton href={archive} />}
+                        <MoreActions actions={column.actions(model)} />
                       </th>
                     );
                   }

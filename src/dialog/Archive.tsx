@@ -103,7 +103,7 @@ export const Archive = <T,>({
   );
 };
 
-export const ArchiveButton = <T = unknown,>({
+export const ArchiveButtonWithDialog = <T = unknown,>({
   title,
   archive,
   children,

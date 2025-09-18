@@ -11,7 +11,7 @@ export declare const Archive: <T>({ title, archive, onClose, formatErrors, trans
     translateId?: string;
     onSuccess?: () => unknown;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const ArchiveButton: <T = unknown>({ title, archive, children, formatErrors, onSuccess, }: {
+export declare const ArchiveButtonWithDialog: <T = unknown>({ title, archive, children, formatErrors, onSuccess, }: {
     children: (onClick: () => void, isLoading: boolean) => React.ReactNode;
     title: string;
     archive: () => Promise<T>;

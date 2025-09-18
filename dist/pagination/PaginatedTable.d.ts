@@ -1,13 +1,10 @@
+import { MoreActionType } from "./ActionButtons";
 import React from "react";
-import { ResponseMeta } from "@/utils";
 import { StorageInterface } from "@/pagination/StorageInterface";
+import { ResponseMeta } from "@/utils/paginate";
 export type ActionColumn<TModel> = {
     type: "actions";
-    archive?: string | boolean | false | ((model: TModel) => string | boolean);
-    edit?: string | boolean | false | ((model: TModel) => string | boolean);
-    view?: string | boolean | false | ((model: TModel) => string | boolean);
-    idField: keyof TModel;
-    extraButtons?: [(model: TModel) => React.ReactNode];
+    actions: (model: TModel) => MoreActionType[];
     className?: string;
 };
 export type SimpleColumn<TModel> = {
@@ -41,7 +38,7 @@ export declare const PaginatedTable: <TModel extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ pagination, title, sortEnum, extraHeading, columns, caption, pathname, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, }: {
+}>({ pagination, title, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, }: {
     caption?: React.ReactNode;
     bulkActions?: {
         children: React.ReactNode;
@@ -51,7 +48,6 @@ export declare const PaginatedTable: <TModel extends {
     extraHeading?: React.ReactNode;
     isSearchable?: boolean;
     title: React.ReactNode;
-    pathname: string;
     addNew?: string;
     displayFilters?: {
         name: string;

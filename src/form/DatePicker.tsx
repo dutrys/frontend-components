@@ -3,12 +3,10 @@ import { useEffect, useState } from "react";
 import { format, isValid, parse } from "date-fns";
 import styles from "./DatePicker.module.css";
 import { ClockIcon, XMarkIcon, CalendarIcon } from "@heroicons/react/24/outline";
-import { Popover } from "@/dialog";
 import { useParams } from "next/navigation";
 import { DayPicker, Matcher } from "react-day-picker";
 import { enGB, lt } from "react-day-picker/locale";
-import { FocusTrap } from "@headlessui/react";
-import FocusLock from "react-focus-lock";
+import { Popover } from "@/dialog/Popover";
 
 const formatDate = (date: Date | null | undefined) => {
   if (!date) {
