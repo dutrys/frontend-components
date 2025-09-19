@@ -8,7 +8,7 @@ export declare const PaginationConfiguration: <T = unknown>({ name, configName, 
     columns: ColumnType<T>[];
     store: StorageInterface<T>;
     configs: Record<string, {
-        index: number;
+        name: string;
         enabled: boolean;
     }[]> | undefined;
 }) => import("react/jsx-runtime").JSX.Element;
@@ -17,12 +17,12 @@ export declare const OrderColumns: ({ name, items, setOrder, }: {
     items: {
         column: ColumnType<any>;
         enabled: boolean;
-        index: number;
+        name: string;
     }[];
     setOrder: (columns: {
         column: ColumnType<any>;
         enabled: boolean;
-        index: number;
+        name: string;
     }[]) => void;
 }) => import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=Configuration.d.ts.map

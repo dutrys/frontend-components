@@ -24,7 +24,7 @@ export type DateColumn<TModel> = {
     className?: string;
 };
 export type FunctionColumn<TModel> = {
-    name?: string;
+    name: string;
     body: (data: TModel) => string | number | React.ReactNode;
     title: string;
     pin?: true;
@@ -66,7 +66,7 @@ export declare const PaginatedTable: <TModel extends {
         stored?: {
             name: string;
             value: Record<string, {
-                index: number;
+                name: string;
                 enabled: boolean;
             }[]>;
         };

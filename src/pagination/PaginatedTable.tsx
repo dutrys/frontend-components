@@ -45,7 +45,7 @@ export type DateColumn<TModel> = {
   className?: string;
 };
 export type FunctionColumn<TModel> = {
-  name?: string;
+  name: string;
   body: (data: TModel) => string | number | React.ReactNode;
   title: string;
   pin?: true;
@@ -103,7 +103,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
     store?: StorageInterface<TModel["data"][number]>;
     stored?: {
       name: string;
-      value: Record<string, { index: number; enabled: boolean }[]>;
+      value: Record<string, { name: string; enabled: boolean }[]>;
     };
   };
 }) => {
@@ -125,7 +125,10 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
     refetchOnReconnect: false,
   });
 
-  paginationConfigs.default = columns.map((_, i) => ({ index: i, enabled: true }));
+  paginationConfigs.default = columns.map((c, i) => ({
+    name: isActionColumn(c) ? "action" : (c.name as string),
+    enabled: true,
+  }));
 
   if (!paginationConfigs[configName]) {
     paginationConfigs[configName] = paginationConfigs.default;
@@ -205,7 +208,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
         <h1 className={`pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`}>{title}</h1>
         <Hotkeys id="paginatedTable" hotKeys={hotKeys} />
 
-        {(searchableShortcuts.length > 0 || (bulkActions && bulkActions?.length > 0)) && (
+        {(elements.length > 0 || (bulkActions && bulkActions?.length > 0)) && (
           <HeaderResponsivePaginated
             bulkActions={bulkActions ? { actions: bulkActions, setSelected, selected } : undefined}
             elements={elements}
@@ -287,8 +290,10 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                 </th>
               )}
               {paginationConfigs[configName].map((item, i) => {
-                const column = columns[item.index];
-                if (!item.enabled) {
+                const column = columns.find((c) =>
+                  isActionColumn(c) ? "action" === item.name : (c.name as string) === item.name,
+                );
+                if (!column || !item.enabled) {
                   return null;
                 }
                 if (isActionColumn(column)) {
@@ -361,8 +366,10 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                   </th>
                 )}
                 {paginationConfigs[configName].map((item, i) => {
-                  const column = columns[item.index];
-                  if (!item.enabled) {
+                  const column = columns.find((c) =>
+                    isActionColumn(c) ? "action" === item.name : (c.name as string) === item.name,
+                  );
+                  if (!column || !item.enabled) {
                     return null;
                   }
                   if (isActionColumn(column)) {

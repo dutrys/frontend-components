@@ -1,22 +1,22 @@
-import { ColumnType } from "@/pagination/PaginatedTable";
+import { ColumnType, isActionColumn } from "@/pagination/PaginatedTable";
 
 export interface StorageInterface<T = unknown> {
   getConfigs(
     title: string | undefined,
     columns: ColumnType<T>[],
-  ): Promise<Record<string, { index: number; enabled: boolean }[]>>;
-  setConfigs(title: string, configs: Record<string, { index: number; enabled: boolean }[]>): Promise<void>;
+  ): Promise<Record<string, { name: string; enabled: boolean }[]>>;
+  setConfigs(title: string, configs: Record<string, { name: string; enabled: boolean }[]>): Promise<void>;
   getConfigName(title: string): Promise<string>;
   setConfigName(title: string, configName: string): Promise<void>;
-  getConfig(title: string, columns: ColumnType<T>[]): Promise<{ index: number; enabled: boolean }[]>;
+  getConfig(title: string, columns: ColumnType<T>[]): Promise<{ name: string; enabled: boolean }[]>;
 }
 
 export class LocalStorage<T> implements StorageInterface<T> {
-  async getConfig(title: string | undefined, columns: ColumnType<T>[]): Promise<{ index: number; enabled: boolean }[]> {
+  async getConfig(title: string | undefined, columns: ColumnType<T>[]): Promise<{ name: string; enabled: boolean }[]> {
     const configName = title ? await this.getConfigName(title) : undefined;
 
     if (!configName) {
-      return columns.map((c, i) => ({ index: i, enabled: true }));
+      return columns.map((c) => ({ name: isActionColumn(c) ? "action" : (c.name as string), enabled: true }));
     }
 
     const configs = await this.getConfigs(configName, columns);
@@ -35,25 +35,28 @@ export class LocalStorage<T> implements StorageInterface<T> {
   async getConfigs(
     title: string,
     columns: ColumnType<T>[],
-  ): Promise<Record<string, { index: number; enabled: boolean }[]>> {
+  ): Promise<Record<string, { name: string; enabled: boolean }[]>> {
     const configString = localStorage.getItem(`${title}Columns`);
 
+    const defaultConfig = {
+      default: columns.map((c) => ({ name: isActionColumn(c) ? "action" : (c.name as string), enabled: true })),
+    };
     if (configString === null) {
-      return { default: columns.map((c, i) => ({ index: i, enabled: true })) };
+      return defaultConfig;
     }
 
     const parsed = JSON.parse(configString || "null");
     if (typeof parsed !== "object" || parsed === null) {
-      return { default: columns.map((c, i) => ({ index: i, enabled: true })) };
+      return defaultConfig;
     }
 
     for (const key of Object.keys(parsed)) {
       if (!Array.isArray(parsed[key])) {
-        return { default: columns.map((c, i) => ({ index: i, enabled: true })) };
+        return defaultConfig;
       }
 
       if (parsed[key].length !== columns.length) {
-        return { default: columns.map((c, i) => ({ index: i, enabled: true })) };
+        return defaultConfig;
       }
 
       for (const item of parsed[key]) {
@@ -63,19 +66,22 @@ export class LocalStorage<T> implements StorageInterface<T> {
           typeof item.index !== "number" ||
           typeof item.enabled !== "boolean"
         ) {
-          return { default: columns.map((c, i) => ({ index: i, enabled: true })) };
+          return defaultConfig;
         }
       }
     }
 
-    return parsed;
+    return {
+      ...parsed,
+      default: defaultConfig.default,
+    };
   }
 
   async setConfigName(title: string, configName: string): Promise<void> {
     localStorage.setItem(title, configName);
   }
 
-  async setConfigs(title: string, configs: Record<string, { index: number; enabled: boolean }[]>): Promise<void> {
+  async setConfigs(title: string, configs: Record<string, { name: string; enabled: boolean }[]>): Promise<void> {
     localStorage.setItem(`${title}Column`, JSON.stringify(configs));
   }
 }

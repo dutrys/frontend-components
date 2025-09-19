@@ -121,7 +121,7 @@ type DateColumn<TModel> = {
     className?: string;
 };
 type FunctionColumn<TModel> = {
-    name?: string;
+    name: string;
     body: (data: TModel) => string | number | React__default.ReactNode;
     title: string;
     pin?: true;
@@ -163,7 +163,7 @@ declare const PaginatedTable: <TModel extends {
         stored?: {
             name: string;
             value: Record<string, {
-                index: number;
+                name: string;
                 enabled: boolean;
             }[]>;
         };
@@ -198,33 +198,33 @@ declare const HeaderResponsivePaginated: ({ elements, bulkActions, }: {
 
 interface StorageInterface<T = unknown> {
     getConfigs(title: string | undefined, columns: ColumnType$1<T>[]): Promise<Record<string, {
-        index: number;
+        name: string;
         enabled: boolean;
     }[]>>;
     setConfigs(title: string, configs: Record<string, {
-        index: number;
+        name: string;
         enabled: boolean;
     }[]>): Promise<void>;
     getConfigName(title: string): Promise<string>;
     setConfigName(title: string, configName: string): Promise<void>;
     getConfig(title: string, columns: ColumnType$1<T>[]): Promise<{
-        index: number;
+        name: string;
         enabled: boolean;
     }[]>;
 }
 declare class LocalStorage<T> implements StorageInterface<T> {
     getConfig(title: string | undefined, columns: ColumnType$1<T>[]): Promise<{
-        index: number;
+        name: string;
         enabled: boolean;
     }[]>;
     getConfigName(title: string): Promise<string>;
     getConfigs(title: string, columns: ColumnType$1<T>[]): Promise<Record<string, {
-        index: number;
+        name: string;
         enabled: boolean;
     }[]>>;
     setConfigName(title: string, configName: string): Promise<void>;
     setConfigs(title: string, configs: Record<string, {
-        index: number;
+        name: string;
         enabled: boolean;
     }[]>): Promise<void>;
 }
