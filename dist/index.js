@@ -187,7 +187,7 @@ const Action = ({ action: a, close, enable }) => {
     }
     return (jsxs("a", { className: enable ? `btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}` : undefined, onClick: (e) => {
             e.preventDefault();
-            if (!a.disabled) {
+            if (a.disabled) {
                 return;
             }
             setIsLoading(true);
