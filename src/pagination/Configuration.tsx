@@ -87,7 +87,7 @@ export const PaginationConfiguration = <T = unknown,>({
   const [activeConfigName, setActiveConfigName] = useState(configName || "default");
 
   const [open, setOpen] = useState<string | null>(null);
-  console.log(configs);
+
   return (
     <>
       <Popover

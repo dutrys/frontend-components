@@ -610,7 +610,6 @@ const PaginationConfiguration = ({ name, configName, columns, setConfigName, sto
     const [configs, setConfigs] = useState(cc);
     const [activeConfigName, setActiveConfigName] = useState(configName || "default");
     const [open, setOpen] = useState(null);
-    console.log(configs);
     return (jsxs(Fragment, { children: [jsx(Popover, { showOnClick: true, hoverClassName: "bg-slate-600", title: (ref, p) => (jsx("button", { ref: ref, ...p, className: `btn btn-neutral btn-xs ${p.className ? p.className : undefined}`, children: jsx(AdjustmentsHorizontalIcon, { className: "size-4" }) })), children: (close) => configs ? (jsxs("ul", { className: "p-1 menu menu-sm", "data-theme": "dim", children: [Object.keys(configs).map((configName) => (jsx("li", { children: jsxs("button", { onClick: (e) => {
                                     e.preventDefault();
                                     setConfigName(configName);
