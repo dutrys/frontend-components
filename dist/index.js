@@ -66,7 +66,7 @@ const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: ope
 
 const Link = (props) => {
     const params = useParams();
-    return (jsx(LinkNext, { ...props, href: props.href === "string" ? addLocale(props.href, params.locale) : props.href }));
+    return (jsx(LinkNext, { prefetch: false, ...props, href: props.href === "string" ? addLocale(props.href, params.locale) : props.href }));
 };
 const addLocale = (link, locale) => {
     if (typeof link === "string" && !/^\/(lt|en)\//.test(link) && link.startsWith("/")) {
@@ -181,9 +181,9 @@ const Action = ({ action: a, close, enable }) => {
             throw new Error("href or onClick is required");
         }
         if (enable) {
-            return (jsx(Link, { className: `btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}`, href: addLocale(a.href), onClick: () => !a.disabled && close(), "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": a.label, children: Icon ? jsx(Icon, { className: "size-4" }) : a.label }));
+            return (jsx(Link, { className: `btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}`, href: addLocale(a.href), onClick: () => !a.disabled && close(), "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": a.label, prefetch: false, children: Icon ? jsx(Icon, { className: "size-4" }) : a.label }));
         }
-        return (jsxs(Link, { className: "", href: addLocale(a.href), onClick: () => close(), children: [Icon && jsx(Icon, { className: "size-4" }), a.label] }));
+        return (jsxs(Link, { className: "", href: addLocale(a.href), onClick: () => close(), prefetch: false, children: [Icon && jsx(Icon, { className: "size-4" }), a.label] }));
     }
     return (jsxs("a", { className: enable ? `btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}` : undefined, onClick: (e) => {
             e.preventDefault();

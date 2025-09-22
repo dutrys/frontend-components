@@ -99,12 +99,12 @@ const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => v
     if (enable) {
       return (
         <Link
-          prefetch={false}
           className={`btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}`}
           href={addLocale(a.href)}
           onClick={() => !a.disabled && close()}
           data-tooltip-id={TOOLTIP_GLOBAL_ID}
           data-tooltip-content={a.label}
+          prefetch={false}
         >
           {Icon ? <Icon className="size-4" /> : a.label}
         </Link>
