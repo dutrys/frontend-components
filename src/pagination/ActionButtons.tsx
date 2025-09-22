@@ -99,6 +99,7 @@ const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => v
     if (enable) {
       return (
         <Link
+          prefetch={false}
           className={`btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}`}
           href={addLocale(a.href)}
           onClick={() => !a.disabled && close()}
@@ -111,7 +112,7 @@ const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => v
     }
 
     return (
-      <Link className="" href={addLocale(a.href)} onClick={() => close()}>
+      <Link className="" href={addLocale(a.href)} onClick={() => close()} prefetch={false}>
         {Icon && <Icon className="size-4" />}
         {a.label}
       </Link>
