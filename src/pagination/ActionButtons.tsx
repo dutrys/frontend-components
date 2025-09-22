@@ -37,7 +37,7 @@ export const MoreActions = ({ actions }: { actions: MoreActionType[] }) => {
     return null;
   }
 
-  const enable = screenSize > ScreenSize.xs;
+  const enable = screenSize === ScreenSize.none || screenSize > ScreenSize.xs;
   const { menuActions, buttonActions } = useMemo(() => {
     let menuActions: MoreActionType[] = actions.filter((a) =>
       enable ? !a.hidden && !a.enableWhenSpaceIsAvailable : !a.hidden,

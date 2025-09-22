@@ -157,7 +157,7 @@ const MoreActions = ({ actions }) => {
     if (actions.filter((a) => !a.hidden).length === 0) {
         return null;
     }
-    const enable = screenSize > ScreenSize.xs;
+    const enable = screenSize === ScreenSize.none || screenSize > ScreenSize.xs;
     const { menuActions, buttonActions } = useMemo(() => {
         let menuActions = actions.filter((a) => enable ? !a.hidden && !a.enableWhenSpaceIsAvailable : !a.hidden);
         const buttonActions = [];
