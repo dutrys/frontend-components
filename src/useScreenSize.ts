@@ -22,7 +22,7 @@ export const useScreenSize = () => {
         setScreenSize(ScreenSize.md);
       } else if (window.innerWidth >= 1024 && window.innerWidth < 1280) {
         setScreenSize(ScreenSize.lg);
-      } else if (window.innerWidth >= 1280 && window.innerWidth < 1536) {
+      } else if (window.innerWidth >= 1280) {
         setScreenSize(ScreenSize.xl);
       }
     };
