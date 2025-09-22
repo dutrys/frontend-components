@@ -316,8 +316,8 @@ declare const getPreviousPageParam: <T extends {
 declare const getNextPageParam: <T extends {
     meta: ResponseMeta;
 }>(page?: T) => number | undefined;
-declare const setPartialParams: (partialParams: Record<string, any>, searchParams: ReadonlyURLSearchParams | null) => string;
-declare const isParamActive: (link: Record<string, string>, searchParams: ReadonlyURLSearchParams) => boolean;
+declare const setPartialParams: (partialParams: Record<string, string | string[]>, searchParams: ReadonlyURLSearchParams | null) => string;
+declare const isParamActive: (link: Record<string, string | string[]>, searchParams: ReadonlyURLSearchParams) => boolean;
 
 interface IInputRegisterProps<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>> extends IInputProps<TName> {
     options?: Omit<RegisterOptions<TFieldValues, TName>, "required" | "disabled">;

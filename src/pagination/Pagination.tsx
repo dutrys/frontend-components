@@ -39,7 +39,7 @@ export const Pagination = ({
           prefetch={false}
           className={`btn uppercase join-item ${i === page.currentPage ? "btn-active" : ""}`}
           key={i}
-          href={setPartialParams({ page: i }, searchParams)}
+          href={setPartialParams({ page: `${i}` }, searchParams)}
         >
           {i}
         </Link>

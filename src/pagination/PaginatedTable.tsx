@@ -158,7 +158,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
             e.preventDefault();
             router.push(
               addLocale(
-                (path + setPartialParams({ search, page: 1 }, searchParams)).replace(/^\/(en|lt)\//, "/"),
+                (path + setPartialParams({ search, page: "1" }, searchParams)).replace(/^\/(en|lt)\//, "/"),
                 params.locale as string,
               ),
             );
@@ -321,7 +321,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                         data-testid={`sort-table-${column.name.toString()}-${sortOrder === "DESC" ? "asc" : "desc"}`}
                         {...(sortBy === column.name ? { className: "text-primary-500" } : {})}
                         href={setPartialParams(
-                          { page: 1, sortBy: `${column.name.toString()}:${sortOrder === "DESC" ? "ASC" : "DESC"}` },
+                          { page: "1", sortBy: `${column.name.toString()}:${sortOrder === "DESC" ? "ASC" : "DESC"}` },
                           searchParams,
                         )}
                       >
@@ -446,7 +446,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                     isActive={pagination.meta.itemsPerPage === l}
                     key={l}
                     text={l.toString()}
-                    href={setPartialParams({ page: 1, limit: l }, searchParams)}
+                    href={setPartialParams({ page: "1", limit: `${l}` }, searchParams)}
                   />
                 ))}
               </div>

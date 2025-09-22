@@ -296,22 +296,36 @@ const getNextPageParam = (page) => !page?.meta || page?.meta?.currentPage >= pag
 const setPartialParams = (partialParams, searchParams) => {
     const params = new URLSearchParams(Array.from(searchParams?.entries() || []));
     Object.keys(partialParams).forEach((key) => {
-        const value = partialParams[key].toString();
+        const value = partialParams[key];
         if (value === "" || !value) {
             params.delete(key);
+            params.delete(`${key}[]`);
+        }
+        else if (Array.isArray(value)) {
+            params.delete(key);
+            params.delete(`${key}[]`);
+            for (const item of value) {
+                params.append(`${key}[]`, item);
+            }
         }
         else {
+            params.delete(`${key}[]`);
             params.set(key, value);
         }
     });
     return `?${params}`;
 };
 const isParamActive = (link, searchParams) => {
-    for (const key in link) {
+    for (const key of Object.keys(link)) {
         if (link[key] === "" && !searchParams.has(key)) {
             continue;
         }
-        if (link[key] !== searchParams.get(key)) {
+        if (Array.isArray(link[key])) {
+            if (!link[key].every((item) => searchParams.getAll(`${key}[]`).includes(item))) {
+                return false;
+            }
+        }
+        else if (link[key] !== searchParams.get(key)) {
             return false;
         }
     }
@@ -330,7 +344,7 @@ const Pagination = ({ page, visiblePages, onClick, }) => {
         pageNumbers.push(onClick ? (jsx("button", { className: `btn uppercase join-item ${i === page.currentPage ? "btn-active" : ""}`, onClick: (e) => {
                 e.preventDefault();
                 onClick(i);
-            }, children: i }, i)) : (jsx(Link, { prefetch: false, className: `btn uppercase join-item ${i === page.currentPage ? "btn-active" : ""}`, href: setPartialParams({ page: i }, searchParams), children: i }, i)));
+            }, children: i }, i)) : (jsx(Link, { prefetch: false, className: `btn uppercase join-item ${i === page.currentPage ? "btn-active" : ""}`, href: setPartialParams({ page: `${i}` }, searchParams), children: i }, i)));
     }
     return jsx("div", { className: "join mx-auto py-2", children: pageNumbers });
 };
@@ -1299,7 +1313,7 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
         const [search, setSearch] = useState(searchParams.get("search") || "");
         return (jsx("div", { className: "w-32 sm:w-52 shrink-0 grow-0", children: jsxs("form", { onSubmit: (e) => {
                     e.preventDefault();
-                    router.push(addLocale((path + setPartialParams({ search, page: 1 }, searchParams)).replace(/^\/(en|lt)\//, "/"), params.locale));
+                    router.push(addLocale((path + setPartialParams({ search, page: "1" }, searchParams)).replace(/^\/(en|lt)\//, "/"), params.locale));
                 }, children: [" ", jsxs("div", { className: "join w-full pr-2", children: [jsx("input", { type: "text", value: search, onChange: (e) => setSearch(e.target.value), name: "search", className: "join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500", placeholder: t("pagination.searchPlaceholder") }), jsx("button", { className: "join-item btn btn-neutral btn-xs uppercase", type: "submit", children: jsx(MagnifyingGlassIcon, { className: "w-4 h-4" }) })] })] }) }));
     };
     const elements = [];
@@ -1339,7 +1353,7 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
                                                 className: "inline",
                                                 width: 10,
                                             };
-                                            return (jsx(Component, { className: `${styles$2.thead} text-xs`, children: jsxs(Link, { prefetch: false, "data-testid": `sort-table-${column.name.toString()}-${sortOrder === "DESC" ? "asc" : "desc"}`, ...(sortBy === column.name ? { className: "text-primary-500" } : {}), href: setPartialParams({ page: 1, sortBy: `${column.name.toString()}:${sortOrder === "DESC" ? "ASC" : "DESC"}` }, searchParams), children: [column.title, sortOrder === "DESC" ? jsx(ChevronDownIcon, { ...args }) : jsx(ChevronUpIcon, { ...args })] }) }, column.name.toString()));
+                                            return (jsx(Component, { className: `${styles$2.thead} text-xs`, children: jsxs(Link, { prefetch: false, "data-testid": `sort-table-${column.name.toString()}-${sortOrder === "DESC" ? "asc" : "desc"}`, ...(sortBy === column.name ? { className: "text-primary-500" } : {}), href: setPartialParams({ page: "1", sortBy: `${column.name.toString()}:${sortOrder === "DESC" ? "ASC" : "DESC"}` }, searchParams), children: [column.title, sortOrder === "DESC" ? jsx(ChevronDownIcon, { ...args }) : jsx(ChevronUpIcon, { ...args })] }) }, column.name.toString()));
                                         }
                                         return (jsx(Component, { className: `${styles$2.thead} text-xs`, children: column.title }, column.title.toString()));
                                     })] }) }), jsx("tbody", { children: pagination.data.map((model, o) => (jsxs("tr", { "data-testid": `table-row-${o}`, className: cx({
@@ -1374,7 +1388,7 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
                                     from: (pagination.meta.currentPage - 1) * pagination.meta.itemsPerPage + 1,
                                     to: Math.min(pagination.meta.currentPage * pagination.meta.itemsPerPage, pagination.meta.totalItems),
                                     total: pagination.meta.totalItems,
-                                }) }), jsx("div", { className: "grow text-center h-16", children: pagination.meta.totalPages > 1 && jsx(Pagination, { visiblePages: 5, page: pagination.meta }) }), pagination.meta.totalPages > 1 && (jsxs("div", { className: "shrink-1 w-60 hidden md:block text-xs text-right pr-4", children: [jsx("span", { className: "text-gray-400", children: t("pagination.itemsPerPage") }), " ", limits.map((l) => (jsx(LimitLink, { isActive: pagination.meta.itemsPerPage === l, text: l.toString(), href: setPartialParams({ page: 1, limit: l }, searchParams) }, l)))] }))] }) }) })] }));
+                                }) }), jsx("div", { className: "grow text-center h-16", children: pagination.meta.totalPages > 1 && jsx(Pagination, { visiblePages: 5, page: pagination.meta }) }), pagination.meta.totalPages > 1 && (jsxs("div", { className: "shrink-1 w-60 hidden md:block text-xs text-right pr-4", children: [jsx("span", { className: "text-gray-400", children: t("pagination.itemsPerPage") }), " ", limits.map((l) => (jsx(LimitLink, { isActive: pagination.meta.itemsPerPage === l, text: l.toString(), href: setPartialParams({ page: "1", limit: `${l}` }, searchParams) }, l)))] }))] }) }) })] }));
 };
 const LimitLink = ({ href, text, isActive }) => {
     return (jsx(Link, { prefetch: false, className: `text-gray-400 hover:text-primary-600 mr-1 ${isActive ? "font-bold text-primary-600" : ""}`, href: href, children: text }));
