@@ -1,6 +1,14 @@
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next-nprogress-bar";
-import { ChevronDownIcon, ChevronUpIcon, FunnelIcon, MagnifyingGlassIcon, PlusIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  FunnelIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+  QueueListIcon,
+  RectangleStackIcon,
+} from "@heroicons/react/24/outline";
 import { FunnelIcon as FunnelIconSolid } from "@heroicons/react/24/solid";
 import { MoreActions, MoreActionType } from "./ActionButtons";
 import { Pagination } from "./Pagination";
@@ -26,6 +34,7 @@ export type ActionColumn<TModel> = {
   type: "actions";
   actions: (model: TModel) => MoreActionType[];
   className?: string;
+  hiddenByDefault?: boolean;
 };
 export type SimpleColumn<TModel> = {
   name: keyof TModel;
@@ -33,7 +42,9 @@ export type SimpleColumn<TModel> = {
   truncate?: number;
   type?: "code";
   pin?: true;
+  translate?: string;
   className?: string;
+  hiddenByDefault?: boolean;
 };
 
 export type DateColumn<TModel> = {
@@ -43,6 +54,7 @@ export type DateColumn<TModel> = {
   title: string;
   pin?: true;
   className?: string;
+  hiddenByDefault?: boolean;
 };
 export type FunctionColumn<TModel> = {
   name: string;
@@ -50,6 +62,7 @@ export type FunctionColumn<TModel> = {
   title: string;
   pin?: true;
   className?: string;
+  hiddenByDefault?: boolean;
 };
 export type ColumnType<TModel> =
   | SimpleColumn<TModel>
@@ -79,8 +92,12 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   addNewText,
   displayFilters,
   displayConfig,
+  renderGridItem,
+  defaultDisplayAs = "list",
 }: {
   caption?: React.ReactNode;
+  defaultDisplayAs?: "list" | "grid";
+  renderGridItem?: (model: TModel["data"][number]) => React.ReactNode;
   bulkActions?: {
     children: React.ReactNode;
     onSelect: (models: number[]) => Promise<boolean | void>;
@@ -102,7 +119,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
     name: string;
     store?: StorageInterface<TModel["data"][number]>;
     stored?: {
-      name: string;
+      name?: string;
       value: Record<string, { name: string; enabled: boolean }[]>;
     };
   };
@@ -112,6 +129,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   const searchParams = useSearchParams();
   const t = useTranslations();
   const [selected, setSelected] = React.useState<number[]>([]);
+  const [displayAs, setDisplayAs] = useState<"list" | "grid">(defaultDisplayAs || "list");
 
   const store = useMemo(() => displayConfig?.store || new LocalStorage(), [displayConfig]);
   const [configName, setConfigName] = useState(displayConfig?.stored?.name || "default");
@@ -127,7 +145,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
 
   paginationConfigs.default = columns.map((c, i) => ({
     name: isActionColumn(c) ? "action" : (c.name as string),
-    enabled: true,
+    enabled: !c.hiddenByDefault,
   }));
 
   if (!paginationConfigs[configName]) {
@@ -225,11 +243,38 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
             <span className="hidden sm:inline">{addNewText || t("pagination.addNew")}</span>
           </Link>
         )}
+        {renderGridItem && (
+          <div className="join mr-2">
+            <button
+              className={cx("btn btn-xs join-item", { "btn-active": displayAs === "grid" })}
+              onClick={() => {
+                setDisplayAs("grid");
+                if (displayConfig) {
+                  void store.setDisplayAs(displayConfig.name, "grid");
+                }
+              }}
+            >
+              <RectangleStackIcon className="size-4" />
+            </button>
+            <button
+              className={cx("btn btn-xs join-item", { "btn-active": displayAs === "list" })}
+              onClick={() => {
+                setDisplayAs("list");
+                if (displayConfig) {
+                  void store.setDisplayAs(displayConfig.name, "list");
+                }
+              }}
+            >
+              <QueueListIcon className="size-4" />
+            </button>
+          </div>
+        )}
         {isSearchable && <SearchField />}
 
         {displayConfig && (
           <div className="pr-2">
             <PaginationConfiguration
+              disabled={displayAs !== "list"}
               store={store}
               name={displayConfig.name}
               configName={configName}
@@ -273,95 +318,24 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
     >
       {heading}
       <div className="overflow-x-auto max-h-[calc(100%-7rem)] w-[calc(100vw)] sm:w-[calc(100vw-6rem)]">
-        <table className={`${styles.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`}>
-          {caption && <caption>{caption}</caption>}
-          <thead>
-            <tr>
-              {bulkActions && (
-                <th>
-                  <IndeterminateCheckbox
-                    className="checkbox checkbox-xs"
-                    onChange={(e) => {
-                      setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);
-                    }}
-                    indeterminate={selected.length > 0 && selected.length < pagination.data.length}
-                    checked={pagination.data.every((model) => selected.includes(model.id))}
-                  />
-                </th>
-              )}
-              {paginationConfigs[configName].map((item, i) => {
-                const column = columns.find((c) =>
-                  isActionColumn(c) ? "action" === item.name : (c.name as string) === item.name,
-                );
-                if (!column || !item.enabled) {
-                  return null;
-                }
-                if (isActionColumn(column)) {
-                  return (
-                    <th key={`actions-${i}`} className={`${styles.thead} w-12 max-w-24 text-xs`}>
-                      &nbsp;
-                    </th>
-                  );
-                }
-
-                const [sortBy, sortOrder] = Array.isArray(pagination.meta.sortBy)
-                  ? pagination.meta.sortBy[0]
-                  : ["id", "DESC"];
-                const Component: React.ElementType = column.pin ? "th" : "td";
-                if (column.name && Object.values(sortEnum).includes(`${column.name.toString()}:DESC`)) {
-                  const args = {
-                    className: "inline",
-                    width: 10,
-                  };
-
-                  return (
-                    <Component key={column.name.toString()} className={`${styles.thead} text-xs`}>
-                      <Link
-                        prefetch={false}
-                        data-testid={`sort-table-${column.name.toString()}-${sortOrder === "DESC" ? "asc" : "desc"}`}
-                        {...(sortBy === column.name ? { className: "text-primary-500" } : {})}
-                        href={setPartialParams(
-                          { page: "1", sortBy: `${column.name.toString()}:${sortOrder === "DESC" ? "ASC" : "DESC"}` },
-                          searchParams,
-                        )}
-                      >
-                        {column.title}
-                        {sortOrder === "DESC" ? <ChevronDownIcon {...args} /> : <ChevronUpIcon {...args} />}
-                      </Link>
-                    </Component>
-                  );
-                }
-
-                return (
-                  <Component key={column.title.toString()} className={`${styles.thead} text-xs`}>
-                    {column.title}
-                  </Component>
-                );
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {pagination.data.map((model: TModel["data"][number], o: number) => (
-              <tr
-                key={o}
-                data-testid={`table-row-${o}`}
-                className={cx({
-                  [styles.selectedRow]: selected.includes(model.id),
-                })}
-              >
+        {displayAs === "grid" && renderGridItem ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m-4 2xl:grid-cols-4">
+            {pagination.data.map((d) => renderGridItem(d))}
+          </div>
+        ) : (
+          <table className={`${styles.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`}>
+            {caption && <caption>{caption}</caption>}
+            <thead>
+              <tr>
                 {bulkActions && (
                   <th>
-                    <input
-                      type="checkbox"
+                    <IndeterminateCheckbox
                       className="checkbox checkbox-xs"
                       onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelected((prev) => [...prev, model.id]);
-                        } else {
-                          setSelected((prev) => prev.filter((id) => id !== model.id));
-                        }
+                        setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);
                       }}
-                      checked={selected.includes(model.id)}
+                      indeterminate={selected.length > 0 && selected.length < pagination.data.length}
+                      checked={pagination.data.every((model) => selected.includes(model.id))}
                     />
                   </th>
                 )}
@@ -374,56 +348,137 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                   }
                   if (isActionColumn(column)) {
                     return (
-                      <th key={`actions-td-${i}`} className={column.className || "whitespace-nowrap text-right"}>
-                        <MoreActions actions={column.actions(model)} />
+                      <th key={`actions-${i}`} className={`${styles.thead} w-12 max-w-24 text-xs`}>
+                        &nbsp;
                       </th>
                     );
                   }
 
+                  const [sortBy, sortOrder] = Array.isArray(pagination.meta.sortBy)
+                    ? pagination.meta.sortBy[0]
+                    : ["id", "DESC"];
                   const Component: React.ElementType = column.pin ? "th" : "td";
-                  if (isFunctionColumn(column)) {
+                  if (column.name && Object.values(sortEnum).includes(`${column.name.toString()}:DESC`)) {
+                    const args = {
+                      className: "inline",
+                      width: 10,
+                    };
+
                     return (
-                      <Component key={`actions-td-${i}`} className={column.className}>
-                        {column.body(model)}
+                      <Component key={column.name.toString()} className={`${styles.thead} text-xs`}>
+                        <Link
+                          prefetch={false}
+                          data-testid={`sort-table-${column.name.toString()}-${sortOrder === "DESC" ? "asc" : "desc"}`}
+                          {...(sortBy === column.name ? { className: "text-primary-500" } : {})}
+                          href={setPartialParams(
+                            { page: "1", sortBy: `${column.name.toString()}:${sortOrder === "DESC" ? "ASC" : "DESC"}` },
+                            searchParams,
+                          )}
+                        >
+                          {column.title}
+                          {sortOrder === "DESC" ? <ChevronDownIcon {...args} /> : <ChevronUpIcon {...args} />}
+                        </Link>
                       </Component>
                     );
                   }
-                  if (column.type === "date") {
-                    return (
-                      <Component key={`${model.id}-${column.name.toString()}`} className={column.className}>
-                        {column.format ? (
-                          <DateTime date={model[column.name] as string} format={column.format} />
-                        ) : (
-                          <HumanDate date={model[column.name] as string} />
-                        )}
-                      </Component>
-                    );
-                  }
-                  if (column.type === "code") {
-                    return (
-                      <Component key={column.name.toString()} className={column.className}>
-                        {model[column.name] && (
-                          <div className="badge badge-sm">
-                            <code>{model[column.name] as string}</code>
-                          </div>
-                        )}
-                      </Component>
-                    );
-                  }
+
                   return (
-                    <Component key={column.name.toString()} className={column.className}>
-                      {column.truncate ? (
-                        <TruncateText text={model[column.name] as string} length={column.truncate} />
-                      ) : (
-                        (model[column.name] as string)
-                      )}
+                    <Component key={column.title.toString()} className={`${styles.thead} text-xs`}>
+                      {column.title}
                     </Component>
                   );
                 })}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {pagination.data.map((model: TModel["data"][number], o: number) => (
+                <tr
+                  key={o}
+                  data-testid={`table-row-${o}`}
+                  className={cx({
+                    [styles.selectedRow]: selected.includes(model.id),
+                  })}
+                >
+                  {bulkActions && (
+                    <th>
+                      <input
+                        type="checkbox"
+                        className="checkbox checkbox-xs"
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelected((prev) => [...prev, model.id]);
+                          } else {
+                            setSelected((prev) => prev.filter((id) => id !== model.id));
+                          }
+                        }}
+                        checked={selected.includes(model.id)}
+                      />
+                    </th>
+                  )}
+                  {paginationConfigs[configName].map((item, i) => {
+                    const column = columns.find((c) =>
+                      isActionColumn(c) ? "action" === item.name : (c.name as string) === item.name,
+                    );
+                    if (!column || !item.enabled) {
+                      return null;
+                    }
+                    if (isActionColumn(column)) {
+                      return (
+                        <th key={`actions-td-${i}`} className={column.className || "whitespace-nowrap text-right"}>
+                          <MoreActions actions={column.actions(model)} />
+                        </th>
+                      );
+                    }
+
+                    const Component: React.ElementType = column.pin ? "th" : "td";
+                    if (isFunctionColumn(column)) {
+                      return (
+                        <Component key={`actions-td-${i}`} className={column.className}>
+                          {column.body(model)}
+                        </Component>
+                      );
+                    }
+                    if (column.type === "date") {
+                      return (
+                        <Component key={`${model.id}-${column.name.toString()}`} className={column.className}>
+                          {column.format ? (
+                            <DateTime date={model[column.name] as string} format={column.format} />
+                          ) : (
+                            <HumanDate date={model[column.name] as string} />
+                          )}
+                        </Component>
+                      );
+                    }
+
+                    const translatedValue = column.translate
+                      ? t(`${column.translate}.${model[column.name]}`)
+                      : (model[column.name] as string);
+                    if (column.type === "code") {
+                      return (
+                        <Component key={column.name.toString()} className={column.className}>
+                          {model[column.name] && (
+                            <div className="badge badge-sm">
+                              <code>{translatedValue}</code>
+                            </div>
+                          )}
+                        </Component>
+                      );
+                    }
+                    return (
+                      <Component key={column.name.toString()} className={column.className}>
+                        {column.truncate ? (
+                          <TruncateText text={translatedValue} length={column.truncate} />
+                        ) : (
+                          translatedValue
+                        )}
+                      </Component>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
       <div className="absolute left-0 bottom-0 w-full h-16 z-1">
         <div className="bg-base-100">

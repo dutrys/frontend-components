@@ -6,6 +6,7 @@ export type ActionColumn<TModel> = {
     type: "actions";
     actions: (model: TModel) => MoreActionType[];
     className?: string;
+    hiddenByDefault?: boolean;
 };
 export type SimpleColumn<TModel> = {
     name: keyof TModel;
@@ -13,7 +14,9 @@ export type SimpleColumn<TModel> = {
     truncate?: number;
     type?: "code";
     pin?: true;
+    translate?: string;
     className?: string;
+    hiddenByDefault?: boolean;
 };
 export type DateColumn<TModel> = {
     name: keyof TModel;
@@ -22,6 +25,7 @@ export type DateColumn<TModel> = {
     title: string;
     pin?: true;
     className?: string;
+    hiddenByDefault?: boolean;
 };
 export type FunctionColumn<TModel> = {
     name: string;
@@ -29,6 +33,7 @@ export type FunctionColumn<TModel> = {
     title: string;
     pin?: true;
     className?: string;
+    hiddenByDefault?: boolean;
 };
 export type ColumnType<TModel> = SimpleColumn<TModel> | FunctionColumn<TModel> | ActionColumn<TModel> | DateColumn<TModel>;
 export declare function isActionColumn<TModel>(column: ColumnType<TModel>): column is ActionColumn<TModel>;
@@ -38,8 +43,10 @@ export declare const PaginatedTable: <TModel extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ pagination, title, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, }: {
+}>({ pagination, title, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, defaultDisplayAs, }: {
     caption?: React.ReactNode;
+    defaultDisplayAs?: "list" | "grid";
+    renderGridItem?: (model: TModel["data"][number]) => React.ReactNode;
     bulkActions?: {
         children: React.ReactNode;
         onSelect: (models: number[]) => Promise<boolean | void>;
@@ -64,7 +71,7 @@ export declare const PaginatedTable: <TModel extends {
         name: string;
         store?: StorageInterface<TModel["data"][number]>;
         stored?: {
-            name: string;
+            name?: string;
             value: Record<string, {
                 name: string;
                 enabled: boolean;

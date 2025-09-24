@@ -1,5 +1,5 @@
 import * as React from "react";
-export declare const TOOLTIP_PARALLEL_ID = "paralel-tooltip";
+export declare const TOOLTIP_PARALLEL_ID = "parallel-tooltip";
 type DialogWithBackProps = {
     onClose?: () => void;
     title?: string;

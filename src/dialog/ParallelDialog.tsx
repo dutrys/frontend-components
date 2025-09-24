@@ -1,11 +1,13 @@
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "next/navigation";
 import { Tooltip } from "react-tooltip";
-import FocusLock from "react-focus-lock";
+import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react";
+import { LoadingComponent } from "@/Loading";
+import cx from "classnames";
 
-export const TOOLTIP_PARALLEL_ID = "paralel-tooltip";
+export const TOOLTIP_PARALLEL_ID = "parallel-tooltip";
 
 type DialogWithBackProps = {
   onClose?: () => void;
@@ -52,29 +54,50 @@ export const ParallelDialog = ({ title, children, onClose, className, ...rest }:
       return;
     }
   };
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="relative z-[1200]">
+        <div className="fixed inset-0 bg-gray-500/50 backdrop-blur-xs bg-opacity-75 transition-opacity"></div>
+        <div className="fixed inset-0 w-screen overflow-y-auto p-4">
+          <div className="flex min-h-full items-center justify-center">
+            <div className="w-full sm:w-lg space-y-4 border bg-white p-6 relative rounded-lg">
+              {title && <div className="text-lg font-bold">{title}</div>}
+              <LoadingComponent />
+            </div>
+            <Tooltip id={TOOLTIP_PARALLEL_ID} place="top" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <FocusLock>
-      <dialog
+    <>
+      <Dialog
         onKeyDown={(e) => e.key === "Escape" && closeModal()}
-        className={`modal overflow-y-auto ${isOpen ? "modal-open" : ""}`}
-        style={{ zIndex: 1100 }}
+        className={`relative z-[1200]`}
         data-testid="modal-dialog"
+        onClose={closeModal}
+        open={isOpen}
         {...rest}
       >
-        <div className={`modal-box my-4 overflow-y-visible max-h-none ${className}`} tabIndex={0}>
-          {title && (
-            <h3 className="font-bold text-lg" data-testid="modal-dialog-title">
-              {title}
-            </h3>
-          )}
-          {children}
+        <DialogBackdrop className="fixed inset-0 bg-gray-500/50 backdrop-blur-xs bg-opacity-75 transition-opacity" />
+        <div className="fixed inset-0 w-screen overflow-y-auto p-4">
+          <div className="flex min-h-full items-center justify-center">
+            <DialogPanel className={cx("w-full sm:w-lg space-y-4 border bg-white p-6 relative rounded-lg", className)}>
+              {title && <DialogTitle className="text-lg font-bold">{title}</DialogTitle>}
+              {children}
+            </DialogPanel>
+            <Tooltip id={TOOLTIP_PARALLEL_ID} place="top" />
+          </div>
         </div>
-        <form method="dialog" className="modal-backdrop">
-          <button onClick={closeModal}>close</button>
-        </form>
-        <Tooltip id={TOOLTIP_PARALLEL_ID} place="top" />
-      </dialog>
-    </FocusLock>
+      </Dialog>
+    </>
   );
 };

@@ -1,6 +1,7 @@
 import { ColumnType } from "@/pagination/PaginatedTable";
 import { StorageInterface } from "@/pagination/StorageInterface";
-export declare const PaginationConfiguration: <T = unknown>({ name, configName, columns, setConfigName, store, configs: configsFromRemote, refresh, }: {
+export declare const PaginationConfiguration: <T = unknown>({ name, configName, columns, setConfigName, store, disabled, configs: configsFromRemote, refresh, }: {
+    disabled: boolean;
     setConfigName: (configName: string) => void;
     refresh: () => void;
     name: string;

@@ -49,9 +49,11 @@ export const PaginationConfiguration = <T = unknown,>({
   columns,
   setConfigName,
   store,
+  disabled,
   configs: configsFromRemote,
   refresh,
 }: {
+  disabled: boolean;
   setConfigName: (configName: string) => void;
   refresh: () => void;
   name: string;
@@ -68,6 +70,20 @@ export const PaginationConfiguration = <T = unknown,>({
     if (!configsFromRemote) {
       return undefined;
     }
+
+    for (const key of Object.keys(configsFromRemote)) {
+      if (configsFromRemote[key].length < columns.length) {
+        for (const column of columns) {
+          if (!configsFromRemote[key].find((c) => c.name === (isActionColumn(column) ? "action" : column.name))) {
+            configsFromRemote[key].push({
+              name: isActionColumn(column) ? "action" : (column.name as string),
+              enabled: !column.hiddenByDefault,
+            });
+          }
+        }
+      }
+    }
+
     const configs: Record<string, { name: string; enabled: boolean; column: ColumnType<any> }[]> = {};
     for (const [key, value] of Object.entries(configsFromRemote)) {
       value.forEach((c, i) => {
@@ -94,7 +110,12 @@ export const PaginationConfiguration = <T = unknown,>({
         showOnClick
         hoverClassName="bg-slate-600"
         title={(ref, p) => (
-          <button ref={ref} {...p} className={`btn btn-neutral btn-xs ${p.className ? p.className : undefined}`}>
+          <button
+            disabled={disabled}
+            ref={ref}
+            {...p}
+            className={`btn btn-neutral btn-xs ${p.className ? p.className : undefined}`}
+          >
             <AdjustmentsHorizontalIcon className="size-4" />
           </button>
         )}
@@ -178,7 +199,12 @@ export const PaginationConfiguration = <T = unknown,>({
                                   key={index}
                                 >
                                   <label>
-                                    <input disabled type="checkbox" checked className="checkbox checkbox-xs mr-2" />
+                                    <input
+                                      disabled
+                                      checked={item.enabled}
+                                      type="checkbox"
+                                      className="checkbox checkbox-xs mr-2"
+                                    />
                                     {isActionColumn(item.column)
                                       ? t("pagination.configuration.actionColumn")
                                       : item.column.title}
@@ -238,7 +264,7 @@ export const PaginationConfiguration = <T = unknown,>({
                           ...oldCfg,
                           [name]: columns.map((c) => ({
                             column: c,
-                            enabled: true,
+                            enabled: !c.hiddenByDefault,
                             name: isActionColumn(c) ? "action" : (c.name as string),
                           })),
                         }));

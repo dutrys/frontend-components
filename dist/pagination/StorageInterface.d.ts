@@ -10,12 +10,16 @@ export interface StorageInterface<T = unknown> {
     }[]>): Promise<void>;
     getConfigName(title: string): Promise<string>;
     setConfigName(title: string, configName: string): Promise<void>;
+    setDisplayAs(title: string, displayAs: "grid" | "list"): Promise<void>;
+    getDisplayAs(title: string): Promise<"grid" | "list">;
     getConfig(title: string, columns: ColumnType<T>[]): Promise<{
         name: string;
         enabled: boolean;
     }[]>;
 }
 export declare class LocalStorage<T> implements StorageInterface<T> {
+    setDisplayAs(title: string, displayAs: "grid" | "list"): Promise<void>;
+    getDisplayAs(title: string): Promise<"grid" | "list">;
     getConfig(title: string | undefined, columns: ColumnType<T>[]): Promise<{
         name: string;
         enabled: boolean;

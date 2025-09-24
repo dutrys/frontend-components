@@ -103,6 +103,7 @@ type ActionColumn<TModel> = {
     type: "actions";
     actions: (model: TModel) => MoreActionType[];
     className?: string;
+    hiddenByDefault?: boolean;
 };
 type SimpleColumn<TModel> = {
     name: keyof TModel;
@@ -110,7 +111,9 @@ type SimpleColumn<TModel> = {
     truncate?: number;
     type?: "code";
     pin?: true;
+    translate?: string;
     className?: string;
+    hiddenByDefault?: boolean;
 };
 type DateColumn<TModel> = {
     name: keyof TModel;
@@ -119,6 +122,7 @@ type DateColumn<TModel> = {
     title: string;
     pin?: true;
     className?: string;
+    hiddenByDefault?: boolean;
 };
 type FunctionColumn<TModel> = {
     name: string;
@@ -126,6 +130,7 @@ type FunctionColumn<TModel> = {
     title: string;
     pin?: true;
     className?: string;
+    hiddenByDefault?: boolean;
 };
 type ColumnType<TModel> = SimpleColumn<TModel> | FunctionColumn<TModel> | ActionColumn<TModel> | DateColumn<TModel>;
 declare function isActionColumn<TModel>(column: ColumnType<TModel>): column is ActionColumn<TModel>;
@@ -135,8 +140,10 @@ declare const PaginatedTable: <TModel extends {
         id: number;
     }[];
     meta: ResponseMeta$1;
-}>({ pagination, title, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, }: {
+}>({ pagination, title, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, defaultDisplayAs, }: {
     caption?: React__default.ReactNode;
+    defaultDisplayAs?: "list" | "grid";
+    renderGridItem?: (model: TModel["data"][number]) => React__default.ReactNode;
     bulkActions?: {
         children: React__default.ReactNode;
         onSelect: (models: number[]) => Promise<boolean | void>;
@@ -161,7 +168,7 @@ declare const PaginatedTable: <TModel extends {
         name: string;
         store?: StorageInterface$1<TModel["data"][number]>;
         stored?: {
-            name: string;
+            name?: string;
             value: Record<string, {
                 name: string;
                 enabled: boolean;
@@ -207,12 +214,16 @@ interface StorageInterface<T = unknown> {
     }[]>): Promise<void>;
     getConfigName(title: string): Promise<string>;
     setConfigName(title: string, configName: string): Promise<void>;
+    setDisplayAs(title: string, displayAs: "grid" | "list"): Promise<void>;
+    getDisplayAs(title: string): Promise<"grid" | "list">;
     getConfig(title: string, columns: ColumnType$1<T>[]): Promise<{
         name: string;
         enabled: boolean;
     }[]>;
 }
 declare class LocalStorage<T> implements StorageInterface<T> {
+    setDisplayAs(title: string, displayAs: "grid" | "list"): Promise<void>;
+    getDisplayAs(title: string): Promise<"grid" | "list">;
     getConfig(title: string | undefined, columns: ColumnType$1<T>[]): Promise<{
         name: string;
         enabled: boolean;
@@ -481,7 +492,7 @@ declare const SelectPaginatedFromApi: <TModel extends {
     valueFormat?: (model: TModel["data"][0]) => string;
 }) => react_jsx_runtime.JSX.Element;
 
-declare const TOOLTIP_PARALLEL_ID = "paralel-tooltip";
+declare const TOOLTIP_PARALLEL_ID = "parallel-tooltip";
 type DialogWithBackProps = {
     onClose?: () => void;
     title?: string;
