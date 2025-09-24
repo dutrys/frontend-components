@@ -108,13 +108,13 @@ export const PaginationConfiguration = <T = unknown,>({
     <>
       <Popover
         showOnClick
-        hoverClassName="bg-slate-600"
+        hoverClassName="btn-active"
         title={(ref, p) => (
           <button
             disabled={disabled}
             ref={ref}
             {...p}
-            className={`btn btn-neutral btn-xs ${p.className ? p.className : undefined}`}
+            className={`btn btn-xs ${p.className ? p.className : undefined}`}
           >
             <AdjustmentsHorizontalIcon className="size-4" />
           </button>
