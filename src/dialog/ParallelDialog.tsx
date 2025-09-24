@@ -81,7 +81,7 @@ export const ParallelDialog = ({ title, children, onClose, className, ...rest }:
     <>
       <Dialog
         onKeyDown={(e) => e.key === "Escape" && closeModal()}
-        className={`relative z-[1200]`}
+        className={`relative z-[1100]`}
         data-testid="modal-dialog"
         onClose={closeModal}
         open={isOpen}
