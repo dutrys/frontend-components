@@ -175,14 +175,19 @@ const Action = ({ action: a, close, enable }) => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const Icon = isLoading ? LoadingComponent : a.icon;
+    const searchParams = useSearchParams();
     if (!a.onClick) {
         if (!a.href) {
             throw new Error("href or onClick is required");
         }
-        if (enable) {
-            return (jsx(Link, { className: `btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}`, href: addLocale(a.href), onClick: () => !a.disabled && close(), "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": a.label, prefetch: false, children: Icon ? jsx(Icon, { className: "size-4" }) : a.label }));
+        let href = addLocale(a.href);
+        if (!href.includes("?")) {
+            href += `?${searchParams.toString()}`;
         }
-        return (jsxs(Link, { className: "", href: addLocale(a.href), onClick: () => close(), prefetch: false, children: [Icon && jsx(Icon, { className: "size-4" }), a.label] }));
+        if (enable) {
+            return (jsx(Link, { className: `btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}`, href: href, onClick: () => !a.disabled && close(), "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": a.label, prefetch: false, children: Icon ? jsx(Icon, { className: "size-4" }) : a.label }));
+        }
+        return (jsxs(Link, { className: "", href: href, onClick: () => close(), prefetch: false, children: [Icon && jsx(Icon, { className: "size-4" }), a.label] }));
     }
     return (jsxs("a", { className: enable ? `btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}` : undefined, onClick: (e) => {
             e.preventDefault();
@@ -193,7 +198,11 @@ const Action = ({ action: a, close, enable }) => {
             a.onClick()
                 .then((result) => {
                 if (typeof result === "string") {
-                    router.push(addLocale(result));
+                    let href = addLocale(result);
+                    if (!href.includes("?")) {
+                        href += `?${searchParams.toString()}`;
+                    }
+                    router.push(href);
                 }
                 close();
             })

@@ -1,6 +1,6 @@
 import { Link, addLocale } from "./Link";
 import { EyeIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import React, { useMemo, useState } from "react";
 import cx from "classnames";
@@ -90,17 +90,22 @@ const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => v
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const Icon = isLoading ? LoadingComponent : a.icon;
+  const searchParams = useSearchParams();
 
   if (!a.onClick) {
     if (!a.href) {
       throw new Error("href or onClick is required");
     }
 
+    let href = addLocale(a.href);
+    if (!href.includes("?")) {
+      href += `?${searchParams.toString()}`;
+    }
     if (enable) {
       return (
         <Link
           className={`btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}`}
-          href={addLocale(a.href)}
+          href={href}
           onClick={() => !a.disabled && close()}
           data-tooltip-id={TOOLTIP_GLOBAL_ID}
           data-tooltip-content={a.label}
@@ -112,7 +117,7 @@ const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => v
     }
 
     return (
-      <Link className="" href={addLocale(a.href)} onClick={() => close()} prefetch={false}>
+      <Link className="" href={href} onClick={() => close()} prefetch={false}>
         {Icon && <Icon className="size-4" />}
         {a.label}
       </Link>
@@ -131,7 +136,11 @@ const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => v
         a.onClick!()
           .then((result) => {
             if (typeof result === "string") {
-              router.push(addLocale(result));
+              let href = addLocale(result);
+              if (!href.includes("?")) {
+                href += `?${searchParams.toString()}`;
+              }
+              router.push(href);
             }
             close();
           })
