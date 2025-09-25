@@ -441,11 +441,12 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                     if (column.type === "date") {
                       return (
                         <Component key={`${model.id}-${column.name.toString()}`} className={column.className}>
-                          {column.format ? (
-                            <DateTime date={model[column.name] as string} format={column.format} />
-                          ) : (
-                            <HumanDate date={model[column.name] as string} />
-                          )}
+                          {model[column.name] &&
+                            (column.format ? (
+                              <DateTime date={model[column.name] as string} format={column.format} />
+                            ) : (
+                              <HumanDate date={model[column.name] as string} />
+                            ))}
                         </Component>
                       );
                     }

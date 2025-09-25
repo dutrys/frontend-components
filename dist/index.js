@@ -1421,7 +1421,8 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
                                             return (jsx(Component, { className: column.className, children: column.body(model) }, `actions-td-${i}`));
                                         }
                                         if (column.type === "date") {
-                                            return (jsx(Component, { className: column.className, children: column.format ? (jsx(DateTime, { date: model[column.name], format: column.format })) : (jsx(HumanDate, { date: model[column.name] })) }, `${model.id}-${column.name.toString()}`));
+                                            return (jsx(Component, { className: column.className, children: model[column.name] &&
+                                                    (column.format ? (jsx(DateTime, { date: model[column.name], format: column.format })) : (jsx(HumanDate, { date: model[column.name] }))) }, `${model.id}-${column.name.toString()}`));
                                         }
                                         const translatedValue = column.translate
                                             ? t(`${column.translate}.${model[column.name]}`)
