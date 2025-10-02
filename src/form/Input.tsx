@@ -24,6 +24,7 @@ import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslations } from "next-intl";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import { LoadingComponent } from "@/Loading";
+import { SelectFromApi } from "@/form/SelectFromApi";
 
 interface IInputRegisterProps<
   TFieldValues extends FieldValues = FieldValues,
@@ -403,6 +404,73 @@ export const SelectPaginatedFromApiInput = <
             disabled={disabled}
             placeholder={required ? `${label}*` : label}
             queryKey={queryKey}
+            queryFn={queryFn}
+            value={field.value}
+            valueFormat={valueFormat}
+            onChange={(model) => {
+              field.onChange(model?.id || null);
+              onChange?.(model || null);
+            }}
+          />
+        )}
+      />
+    </div>
+    <InputErrors className="text-xs text-error mt-1" errors={error} />
+  </div>
+);
+
+export const SelectFromApiInput = <
+  T extends { id: number },
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+>({
+  label,
+  queryFn,
+  queryKey,
+  desc,
+  control,
+  name,
+  valueFormat,
+  required,
+  disabled,
+  error,
+  className,
+  size,
+  onChange,
+  fieldSetClassName,
+  filter,
+  ...rest
+}: IInputProps<TName> & {
+  control: Control<TFieldValues>;
+  queryKey: ReadonlyArray<any>;
+  queryFn: () => Promise<T[]>;
+  valueFormat: (model: T) => string;
+  onChange?: (model: T) => unknown;
+  filter?: (model: T) => boolean;
+}) => (
+  <div className={fieldSetClassName}>
+    <div className="floating-label">
+      <span>
+        {label}
+        {required ? <Required /> : null}
+      </span>
+      <Controller
+        control={control}
+        name={name}
+        rules={{ required: required === true }}
+        render={({ field }) => (
+          <SelectFromApi<T>
+            inputClassName={cx("w-full mx-0 input input-bordered", className, {
+              "input-error": error,
+            })}
+            name={name}
+            {...rest}
+            size={size}
+            required={required}
+            disabled={disabled}
+            placeholder={required ? `${label}*` : label}
+            queryKey={queryKey}
+            filter={filter}
             queryFn={queryFn}
             value={field.value}
             valueFormat={valueFormat}

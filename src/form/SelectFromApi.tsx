@@ -1,4 +1,6 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import React, { Fragment, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import {
   Combobox,
   ComboboxButton,
@@ -7,17 +9,13 @@ import {
   ComboboxOptions,
   Transition,
 } from "@headlessui/react";
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
-import React, { Fragment, useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
-import { getNextPageParam, getPreviousPageParam, PaginateQuery, ResponseMeta } from "@/utils/paginate";
 import cx from "classnames";
+import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { LoadingComponent } from "@/Loading";
-import { useInView } from "react-intersection-observer";
 
 const SEARCH_FROM_QUERY_LENGTH = 3;
 
-export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data: { id: number }[] }>({
+export const SelectFromApi = <TModel extends { id: number }>({
   onChange,
   disabled,
   required,
@@ -33,42 +31,35 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
   empty,
   valueFormat = (model) => (model as any).name,
   inputClassName = "w-full mx-0 input input-bordered",
+  filter,
   ...rest
 }: {
   size?: "sm" | "xs";
   inputClassName?: string;
   name?: string;
   inputRef?: any;
-  queryFn: (query: PaginateQuery<any>) => Promise<TModel>;
+  queryFn: () => Promise<TModel[]>;
   queryKey: ReadonlyArray<any>;
   placeholder?: string;
   optionsClassName?: string;
   value: number | null;
   className?: string;
-  onChange: (model: TModel["data"][0]) => void;
+  onChange: (model: TModel) => void;
   disabled?: boolean;
   required?: boolean;
   empty?: string;
-  valueFormat?: (model: TModel["data"][0]) => string;
+  valueFormat?: (model: TModel) => string;
+  filter?: (model: TModel) => boolean;
 }) => {
   const [query, setQuery] = useState("");
-  const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<TModel>({
-    getPreviousPageParam,
-    getNextPageParam,
+  const { isLoading, data, refetch } = useQuery<TModel[]>({
     enabled: !disabled,
-    queryKey: [...queryKey, disabled, query.length < SEARCH_FROM_QUERY_LENGTH ? "" : query],
-    initialPageParam: 1,
-    queryFn: ({ queryKey, pageParam }) => {
+    queryKey: [...queryKey, disabled],
+    queryFn: () => {
       if (disabled) {
         return Promise.reject();
       }
-      const page = typeof pageParam === "number" ? pageParam : undefined;
-      const search = queryKey[queryKey.length - 1] || "";
-      if (typeof search !== "string" || search === "" || search.length < SEARCH_FROM_QUERY_LENGTH) {
-        return queryFn({ page });
-      }
-
-      return queryFn({ search, page });
+      return queryFn();
     },
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
@@ -79,37 +70,12 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
     void refetch();
   }, [refetch, query]);
 
-  const { ref, inView } = useInView({ threshold: 0.5 });
-
-  useEffect(() => {
-    if (inView) {
-      void fetchNextPage();
-    }
-  }, [fetchNextPage, inView]);
-
-  useEffect(() => {
-    if (!isLoading) {
-      const selected = (data?.pages || [])
-        .map((d) => d?.data || [])
-        .flat()
-        .find((b: TModel["data"][0]) => b.id === value);
-      if (selected) {
-        onChange(selected);
-      }
-    }
-  }, [isLoading]);
-
   return (
-    <Combobox<TModel["data"][0] | null>
+    <Combobox<TModel | null>
       immediate
       data-testid="select"
       disabled={disabled}
-      value={
-        (data?.pages || [])
-          .map((d) => d?.data || [])
-          .flat()
-          .find((b: TModel["data"][0]) => b.id === value) || null
-      }
+      value={data?.find((b: TModel) => b.id === value) || null}
       onChange={onChange}
       {...rest}
     >
@@ -127,9 +93,10 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
               "input-sm": size === "sm",
               "input-xs": size === "xs",
             })}
-            displayValue={(model: TModel["data"][0]) => (model ? valueFormat(model) : "")}
+            displayValue={(model: TModel) => (model ? valueFormat(model) : "")}
             onChange={(event) => setQuery(event.target.value)}
           />
+
           {isLoading && !disabled && (
             <LoadingComponent className="absolute z-1 inset-y-0 right-5 p-3" loadingClassName="size-4 text-primary" />
           )}
@@ -147,34 +114,30 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
           <ComboboxOptions
             className={`absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`}
           >
-            {!required &&
-              query.length < SEARCH_FROM_QUERY_LENGTH &&
-              data &&
-              data?.pages?.[0]?.meta?.totalItems !== 0 && (
-                <ComboboxOption
-                  data-testid="select-option-empty"
-                  key="empty"
-                  className={({ focus }) =>
-                    `relative select-none py-2 pl-4 pr-4 ${focus ? "bg-primary text-white" : "text-gray-900"}`
-                  }
-                  value={null}
-                >
-                  <span className={cx("block truncate", { "text-xs": "xs" === size || "sm" === size })}>
-                    {empty || t("selectFromApi.select")}
-                  </span>
-                </ComboboxOption>
-              )}
-            {data?.pages?.[0]?.meta?.totalItems === 0 ? (
+            {!required && query.length < SEARCH_FROM_QUERY_LENGTH && data && data?.length !== 0 && (
+              <ComboboxOption
+                data-testid="select-option-empty"
+                key="empty"
+                className={({ focus }) =>
+                  `relative select-none py-2 pl-4 pr-4 ${focus ? "bg-primary text-white" : "text-gray-900"}`
+                }
+                value={null}
+              >
+                <span className={cx("block truncate", { "text-xs": "xs" === size || "sm" === size })}>
+                  {empty || t("selectFromApi.select")}
+                </span>
+              </ComboboxOption>
+            )}
+            {data?.length === 0 ? (
               <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                 <span className={cx({ "text-xs": "xs" === size || "sm" === size })}>
                   {t("selectFromApi.nothingFound")}
                 </span>
               </div>
             ) : (
-              data?.pages
-                ?.map((d) => d?.data || [])
-                .flat()
-                .map((model: TModel["data"][0], i: number) => (
+              data
+                ?.filter((m) => (filter ? filter(m) : true))
+                ?.map((model: TModel, i: number) => (
                   <ComboboxOption
                     data-testid={`select-option-${i}`}
                     key={model.id}
@@ -212,17 +175,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
                 ))
             )}
 
-            {isFetchingNextPage || isLoading ? (
-              <LoadingComponent className="my-2" />
-            ) : (
-              hasNextPage && (
-                <div className="text-center">
-                  <button ref={ref} className="btn btn-ghost btn-xs my-1 btn-wide" onClick={() => fetchNextPage()}>
-                    {t("infiniteScroll.loadMore")}
-                  </button>
-                </div>
-              )
-            )}
+            {isLoading && <LoadingComponent className="my-2" />}
           </ComboboxOptions>
         </Transition>
       </div>

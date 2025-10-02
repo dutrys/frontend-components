@@ -43,6 +43,16 @@ export declare const SelectPaginatedFromApiInput: <T extends {
     valueFormat: (model: T["data"][0]) => string;
     onChange?: (model: T["data"][0]) => unknown;
 }) => import("react/jsx-runtime").JSX.Element;
+export declare const SelectFromApiInput: <T extends {
+    id: number;
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, filter, ...rest }: IInputProps<TName> & {
+    control: Control<TFieldValues>;
+    queryKey: ReadonlyArray<any>;
+    queryFn: () => Promise<T[]>;
+    valueFormat: (model: T) => string;
+    onChange?: (model: T) => unknown;
+    filter?: (model: T) => boolean;
+}) => import("react/jsx-runtime").JSX.Element;
 export declare const DateTimeInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, required, disabled, error, useDate, className, size, allowEmpty, from, to, fieldSetClassName, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;

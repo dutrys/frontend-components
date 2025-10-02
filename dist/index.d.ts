@@ -371,6 +371,16 @@ declare const SelectPaginatedFromApiInput: <T extends {
     valueFormat: (model: T["data"][0]) => string;
     onChange?: (model: T["data"][0]) => unknown;
 }) => react_jsx_runtime.JSX.Element;
+declare const SelectFromApiInput: <T extends {
+    id: number;
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, filter, ...rest }: IInputProps<TName> & {
+    control: Control<TFieldValues>;
+    queryKey: ReadonlyArray<any>;
+    queryFn: () => Promise<T[]>;
+    valueFormat: (model: T) => string;
+    onChange?: (model: T) => unknown;
+    filter?: (model: T) => boolean;
+}) => react_jsx_runtime.JSX.Element;
 declare const DateTimeInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, required, disabled, error, useDate, className, size, allowEmpty, from, to, fieldSetClassName, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
@@ -545,4 +555,4 @@ declare const DateTime: ({ date, format }: {
     format?: string;
 }) => string | null;
 
-export { ActionButton, type ActionColumn, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxInput, type ColumnType, ConfirmSave, type DateColumn, DateInput, DatePicker, DateTime, DateTimeInput, DateTimePicker, EditButton, FilterLink, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MoreActionType, MoreActions, NumberInput, type PaginateQuery, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBox, Required, type ResponseMeta, SaveButton, ScreenSize, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, type ServerError, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TableLink, TextInput, TextareaInput, TimeInput, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
+export { ActionButton, type ActionColumn, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxInput, type ColumnType, ConfirmSave, type DateColumn, DateInput, DatePicker, DateTime, DateTimeInput, DateTimePicker, EditButton, FilterLink, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MoreActionType, MoreActions, NumberInput, type PaginateQuery, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBox, Required, type ResponseMeta, SaveButton, ScreenSize, SelectFromApiInput, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, type ServerError, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TableLink, TextInput, TextareaInput, TimeInput, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };

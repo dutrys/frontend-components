@@ -983,14 +983,14 @@ const DatePicker = ({ onChange, value, inputClassName = "input input-bordered", 
                     } })) }), allowEmpty ? (jsx("button", { type: "button", disabled: allowEmpty && !value, className: toggleClassName, onClick: () => onChange(null), children: value ? jsx(XMarkIcon, { className: "size-4" }) : jsx(ClockIcon, { className: "size-4" }) })) : (jsx("div", { className: `cursor-pointer ${toggleClassName}`, children: jsx(CalendarIcon, { className: "size-4" }) }))] }));
 };
 
-const SEARCH_FROM_QUERY_LENGTH = 3;
+const SEARCH_FROM_QUERY_LENGTH$1 = 3;
 const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, name, value, size, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat = (model) => model.name, inputClassName = "w-full mx-0 input input-bordered", ...rest }) => {
     const [query, setQuery] = useState("");
     const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
         getPreviousPageParam,
         getNextPageParam,
         enabled: !disabled,
-        queryKey: [...queryKey, disabled, query.length < SEARCH_FROM_QUERY_LENGTH ? "" : query],
+        queryKey: [...queryKey, disabled, query.length < SEARCH_FROM_QUERY_LENGTH$1 ? "" : query],
         initialPageParam: 1,
         queryFn: ({ queryKey, pageParam }) => {
             if (disabled) {
@@ -998,7 +998,7 @@ const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, name, 
             }
             const page = typeof pageParam === "number" ? pageParam : undefined;
             const search = queryKey[queryKey.length - 1] || "";
-            if (typeof search !== "string" || search === "" || search.length < SEARCH_FROM_QUERY_LENGTH) {
+            if (typeof search !== "string" || search === "" || search.length < SEARCH_FROM_QUERY_LENGTH$1) {
                 return queryFn({ page });
             }
             return queryFn({ search, page });
@@ -1016,16 +1016,27 @@ const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, name, 
             void fetchNextPage();
         }
     }, [fetchNextPage, inView]);
+    useEffect(() => {
+        if (!isLoading) {
+            const selected = (data?.pages || [])
+                .map((d) => d?.data || [])
+                .flat()
+                .find((b) => b.id === value);
+            if (selected) {
+                onChange(selected);
+            }
+        }
+    }, [isLoading]);
     return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: (data?.pages || [])
             .map((d) => d?.data || [])
             .flat()
             .find((b) => b.id === value) || null, onChange: onChange, ...rest, children: jsxs("div", { className: `relative ${className}`, children: [jsxs("div", { className: "w-full relative p-0", children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, className: cx(inputClassName, {
                                 "input-sm": size === "sm",
                                 "input-xs": size === "xs",
-                            }), displayValue: (model) => (model ? valueFormat(model) : ""), onChange: (event) => setQuery(event.target.value) }), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "absolute z-1 cursor-pointer inset-y-0 right-0 flex items-center pr-2", onClick: (e) => {
+                            }), displayValue: (model) => (model ? valueFormat(model) : ""), onChange: (event) => setQuery(event.target.value) }), isLoading && !disabled && (jsx(LoadingComponent, { className: "absolute z-1 inset-y-0 right-5 p-3", loadingClassName: "size-4 text-primary" })), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "absolute z-1 cursor-pointer inset-y-0 right-0 flex items-center pr-2", onClick: (e) => {
                                 e.target?.parentNode?.parentNode?.querySelector("input")?.select();
                             }, children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsxs(ComboboxOptions, { className: `absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`, children: [!required &&
-                                query.length < SEARCH_FROM_QUERY_LENGTH &&
+                                query.length < SEARCH_FROM_QUERY_LENGTH$1 &&
                                 data &&
                                 data?.pages?.[0]?.meta?.totalItems !== 0 && (jsx(ComboboxOption, { "data-testid": "select-option-empty", className: ({ focus }) => `relative select-none py-2 pl-4 pr-4 ${focus ? "bg-primary text-white" : "text-gray-900"}`, value: null, children: jsx("span", { className: cx("block truncate", { "text-xs": "xs" === size || "sm" === size }), children: empty || t("selectFromApi.select") }) }, "empty")), data?.pages?.[0]?.meta?.totalItems === 0 ? (jsx("div", { className: "relative cursor-default select-none py-2 px-4 text-gray-700", children: jsx("span", { className: cx({ "text-xs": "xs" === size || "sm" === size }), children: t("selectFromApi.nothingFound") }) })) : (data?.pages
                                 ?.map((d) => d?.data || [])
@@ -1087,6 +1098,40 @@ const TimePicker = ({ className, value, onChange, placeholder, required, disable
 };
 
 var styles = {"desc":"Input-module_desc__3D3hV"};
+
+const SEARCH_FROM_QUERY_LENGTH = 3;
+const SelectFromApi = ({ onChange, disabled, required, inputRef, name, value, size, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat = (model) => model.name, inputClassName = "w-full mx-0 input input-bordered", filter, ...rest }) => {
+    const [query, setQuery] = useState("");
+    const { isLoading, data, refetch } = useQuery({
+        enabled: !disabled,
+        queryKey: [...queryKey, disabled],
+        queryFn: () => {
+            if (disabled) {
+                return Promise.reject();
+            }
+            return queryFn();
+        },
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+    });
+    const t = useTranslations();
+    useEffect(() => {
+        void refetch();
+    }, [refetch, query]);
+    return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: data?.find((b) => b.id === value) || null, onChange: onChange, ...rest, children: jsxs("div", { className: `relative ${className}`, children: [jsxs("div", { className: "w-full relative p-0", children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, className: cx(inputClassName, {
+                                "input-sm": size === "sm",
+                                "input-xs": size === "xs",
+                            }), displayValue: (model) => (model ? valueFormat(model) : ""), onChange: (event) => setQuery(event.target.value) }), isLoading && !disabled && (jsx(LoadingComponent, { className: "absolute z-1 inset-y-0 right-5 p-3", loadingClassName: "size-4 text-primary" })), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "absolute z-1 cursor-pointer inset-y-0 right-0 flex items-center pr-2", onClick: (e) => {
+                                e.target?.parentNode?.parentNode?.querySelector("input")?.select();
+                            }, children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsxs(ComboboxOptions, { className: `absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`, children: [!required && query.length < SEARCH_FROM_QUERY_LENGTH && data && data?.length !== 0 && (jsx(ComboboxOption, { "data-testid": "select-option-empty", className: ({ focus }) => `relative select-none py-2 pl-4 pr-4 ${focus ? "bg-primary text-white" : "text-gray-900"}`, value: null, children: jsx("span", { className: cx("block truncate", { "text-xs": "xs" === size || "sm" === size }), children: empty || t("selectFromApi.select") }) }, "empty")), data?.length === 0 ? (jsx("div", { className: "relative cursor-default select-none py-2 px-4 text-gray-700", children: jsx("span", { className: cx({ "text-xs": "xs" === size || "sm" === size }), children: t("selectFromApi.nothingFound") }) })) : (data
+                                ?.filter((m) => (filter ? filter(m) : true))
+                                ?.map((model, i) => (jsx(ComboboxOption, { "data-testid": `select-option-${i}`, className: ({ focus }) => `relative cursor-default select-none py-2 pl-4 pr-4 ${focus ? "bg-primary text-white" : "text-gray-900"}`, value: model, children: ({ selected, focus }) => (jsxs(Fragment, { children: [jsx("span", { className: cx("block truncate", {
+                                                "text-white": focus,
+                                                "pr-3 font-bold": selected,
+                                                "font-normal": !selected,
+                                                "text-xs": "xs" === size || "sm" === size,
+                                            }), children: valueFormat(model) }), selected ? (jsx("span", { className: `absolute inset-y-0 right-1 flex items-center pl-3 ${focus ? "text-white" : "text-teal-600"}`, children: jsx(CheckIcon$1, { className: "h-5 w-5", "aria-hidden": "true" }) })) : null] })) }, model.id)))), isLoading && jsx(LoadingComponent, { className: "my-2" })] }) })] }) }));
+};
 
 const TextInput = ({ required, disabled, error, className, id, type, register, label, size, options, desc, name, fieldSetClassName, ref, ...rest }) => {
     const r = register(name, {
@@ -1168,6 +1213,12 @@ const DateInput = ({ control, useDate, allowEmpty, label, error, disabled, desc,
 const SelectPaginatedFromApiInput = ({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, required ? jsx(Required, {}) : null] }), jsx(Controller, { control: control, name: name, rules: { required: required === true }, render: ({ field }) => (jsx(SelectPaginatedFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
                             "input-error": error,
                         }), name: name, ...rest, size: size, required: required, disabled: disabled, placeholder: required ? `${label}*` : label, queryKey: queryKey, queryFn: queryFn, value: field.value, valueFormat: valueFormat, onChange: (model) => {
+                            field.onChange(model?.id || null);
+                            onChange?.(model || null);
+                        } })) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+const SelectFromApiInput = ({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, filter, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, required ? jsx(Required, {}) : null] }), jsx(Controller, { control: control, name: name, rules: { required: required === true }, render: ({ field }) => (jsx(SelectFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
+                            "input-error": error,
+                        }), name: name, ...rest, size: size, required: required, disabled: disabled, placeholder: required ? `${label}*` : label, queryKey: queryKey, filter: filter, queryFn: queryFn, value: field.value, valueFormat: valueFormat, onChange: (model) => {
                             field.onChange(model?.id || null);
                             onChange?.(model || null);
                         } })) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
@@ -1577,5 +1628,5 @@ const ArchiveButtonWithDialog = ({ title, archive, children, formatErrors, onSuc
                     }, onClose: () => setIsOpen(false), formatErrors: formatErrors }), document.body), children(() => setIsOpen(!isOpen), isLoading)] }));
 };
 
-export { ActionButton, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxInput, ConfirmSave, DateInput, DatePicker, DateTime, DateTimeInput, DateTimePicker, EditButton, FilterLink, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NumberInput, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBox, Required, SaveButton, ScreenSize, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TableLink, TextInput, TextareaInput, TimeInput, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
+export { ActionButton, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxInput, ConfirmSave, DateInput, DatePicker, DateTime, DateTimeInput, DateTimePicker, EditButton, FilterLink, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NumberInput, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBox, Required, SaveButton, ScreenSize, SelectFromApiInput, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TableLink, TextInput, TextareaInput, TimeInput, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
 //# sourceMappingURL=index.js.map
