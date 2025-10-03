@@ -369,7 +369,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                         <Link
                           prefetch={false}
                           data-testid={`sort-table-${column.name.toString()}-${sortOrder === "DESC" ? "asc" : "desc"}`}
-                          {...(sortBy === column.name ? { className: "text-primary-500" } : {})}
+                          {...(sortBy === column.name ? { className: "text-primary" } : {})}
                           href={setPartialParams(
                             { page: "1", sortBy: `${column.name.toString()}:${sortOrder === "DESC" ? "ASC" : "DESC"}` },
                             searchParams,
@@ -546,7 +546,7 @@ export const TableLink = ({
       href={addLocale(href, useParams().locale as string)}
       {...rest}
       prefetch={false}
-      className={`${styles.link} ${className || ""} text-primary-700 hover:text-primary-500`}
+      className={cx(styles.link, className, "text-primary")}
     >
       {children}{" "}
     </Link>
