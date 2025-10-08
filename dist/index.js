@@ -68,7 +68,7 @@ const Link = (props) => {
     return (jsx(LinkNext, { prefetch: false, ...props, href: props.href === "string" ? addLocale(props.href, params.locale) : props.href }));
 };
 const addLocale = (link, locale) => {
-    if (typeof link === "string" && !/^\/(lt|en)\//.test(link) && link.startsWith("/")) {
+    if (typeof link === "string" && !/^\/api\//.test(link) && !/^\/(lt|en)\//.test(link) && link.startsWith("/")) {
         return `/${locale || "lt"}${link}`;
     }
     return link;

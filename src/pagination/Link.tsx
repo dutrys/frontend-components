@@ -14,7 +14,7 @@ export const Link = (props: Parameters<typeof LinkNext>[0]) => {
 };
 
 export const addLocale = (link: string, locale?: string) => {
-  if (typeof link === "string" && !/^\/(lt|en)\//.test(link) && link.startsWith("/")) {
+  if (typeof link === "string" && !/^\/api\//.test(link) && !/^\/(lt|en)\//.test(link) && link.startsWith("/")) {
     return `/${locale || "lt"}${link}`;
   }
   return link;
