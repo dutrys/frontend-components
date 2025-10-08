@@ -49,6 +49,7 @@ type MoreActionType = {
     href?: string;
     hidden?: boolean;
     enableWhenSpaceIsAvailable?: boolean;
+    disableNProgress?: boolean;
     disabled?: boolean;
 };
 declare const MoreActions: ({ actions }: {

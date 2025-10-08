@@ -28,6 +28,7 @@ export type MoreActionType = {
   href?: string;
   hidden?: boolean;
   enableWhenSpaceIsAvailable?: boolean;
+  disableNProgress?: boolean;
   disabled?: boolean;
 };
 
@@ -104,6 +105,7 @@ const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => v
     if (enable) {
       return (
         <Link
+          data-disable-nprogress={a.disableNProgress}
           className={`btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}`}
           href={href}
           onClick={() => !a.disabled && close()}
@@ -117,7 +119,13 @@ const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => v
     }
 
     return (
-      <Link className="" href={href} onClick={() => close()} prefetch={false}>
+      <Link
+        data-disable-nprogress={a.disableNProgress}
+        className=""
+        href={href}
+        onClick={() => close()}
+        prefetch={false}
+      >
         {Icon && <Icon className="size-4" />}
         {a.label}
       </Link>

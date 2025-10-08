@@ -16,6 +16,7 @@ export type MoreActionType = {
     href?: string;
     hidden?: boolean;
     enableWhenSpaceIsAvailable?: boolean;
+    disableNProgress?: boolean;
     disabled?: boolean;
 };
 export declare const MoreActions: ({ actions }: {

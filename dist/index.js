@@ -185,9 +185,9 @@ const Action = ({ action: a, close, enable }) => {
             href += `?${searchParams.toString()}`;
         }
         if (enable) {
-            return (jsx(Link, { className: `btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}`, href: href, onClick: () => !a.disabled && close(), "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": a.label, prefetch: false, children: Icon ? jsx(Icon, { className: "size-4" }) : a.label }));
+            return (jsx(Link, { "data-disable-nprogress": a.disableNProgress, className: `btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}`, href: href, onClick: () => !a.disabled && close(), "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": a.label, prefetch: false, children: Icon ? jsx(Icon, { className: "size-4" }) : a.label }));
         }
-        return (jsxs(Link, { className: "", href: href, onClick: () => close(), prefetch: false, children: [Icon && jsx(Icon, { className: "size-4" }), a.label] }));
+        return (jsxs(Link, { "data-disable-nprogress": a.disableNProgress, className: "", href: href, onClick: () => close(), prefetch: false, children: [Icon && jsx(Icon, { className: "size-4" }), a.label] }));
     }
     return (jsxs("a", { className: enable ? `btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}` : undefined, onClick: (e) => {
             e.preventDefault();
