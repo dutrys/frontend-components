@@ -67,9 +67,13 @@ export const ParallelDialog = ({ title, children, onClose, className, ...rest }:
         <div className="fixed inset-0 w-screen overflow-y-auto p-4">
           <div className="flex min-h-full items-center justify-center">
             <div
-              className={cx("w-full space-y-4 border bg-white p-6 relative rounded-lg", className, {
-                "sm:w-lg": !className?.includes("sm:w-"),
-              })}
+              className={cx(
+                "w-full space-y-4 border border-base-content/30 bg-base-100 p-6 relative rounded-lg",
+                className,
+                {
+                  "sm:w-lg": !className?.includes("sm:w-"),
+                },
+              )}
             >
               {title && <div className="text-lg font-bold">{title}</div>}
               <LoadingComponent />
@@ -95,9 +99,13 @@ export const ParallelDialog = ({ title, children, onClose, className, ...rest }:
         <div className="fixed inset-0 w-screen overflow-y-auto p-4">
           <div className="flex min-h-full items-center justify-center">
             <DialogPanel
-              className={cx("w-full space-y-4 border bg-white p-6 relative rounded-lg", className, {
-                "sm:w-lg": !className?.includes("sm:w-"),
-              })}
+              className={cx(
+                "w-full space-y-4 border border-base-content/30 bg-base-100 p-6 relative rounded-lg",
+                className,
+                {
+                  "sm:w-lg": !className?.includes("sm:w-"),
+                },
+              )}
             >
               {title && <DialogTitle className="text-lg font-bold">{title}</DialogTitle>}
               {children}
