@@ -32,7 +32,7 @@ export type MoreActionType = {
   disabled?: boolean;
 };
 
-export const MoreActions = ({ actions }: { actions: MoreActionType[] }) => {
+export const MoreActions = ({ className, actions }: { className?: string; actions: MoreActionType[] }) => {
   const screenSize = useScreenSize();
   if (actions.filter((a) => !a.hidden).length === 0) {
     return null;
@@ -65,7 +65,7 @@ export const MoreActions = ({ actions }: { actions: MoreActionType[] }) => {
         <Popover
           showOnClick
           title={(ref, props) => (
-            <button className="btn btn-xs md:btn-xs btn-ghost" ref={ref} {...props}>
+            <button className={cx("btn btn-xs md:btn-xs btn-ghost", className)} ref={ref} {...props}>
               <EllipsisVerticalIcon className="size-4" />
             </button>
           )}

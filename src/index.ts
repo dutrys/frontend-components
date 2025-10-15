@@ -14,6 +14,7 @@ export * from "./form/DatePicker";
 export * from "./form/DateTimePicker";
 export * from "./form/TimePicker";
 export * from "./form/SelectPaginatedFromApi";
+export * from "./form/SelectFromApi";
 export * from "./dialog/ParallelDialog";
 export * from "./dialog/Archive";
 export * from "./utils/HumanDate";

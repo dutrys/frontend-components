@@ -19,7 +19,8 @@ export type MoreActionType = {
     disableNProgress?: boolean;
     disabled?: boolean;
 };
-export declare const MoreActions: ({ actions }: {
+export declare const MoreActions: ({ className, actions }: {
+    className?: string;
     actions: MoreActionType[];
 }) => import("react/jsx-runtime").JSX.Element | null;
 export declare const ArchiveButton: (props: {

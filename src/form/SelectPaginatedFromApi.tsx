@@ -33,6 +33,8 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
   empty,
   valueFormat = (model) => (model as any).name,
   inputClassName = "w-full mx-0 input input-bordered",
+  heading,
+  footer,
   ...rest
 }: {
   size?: "sm" | "xs";
@@ -50,6 +52,8 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
   required?: boolean;
   empty?: string;
   valueFormat?: (model: TModel["data"][0]) => string;
+  heading?: React.ReactNode;
+  footer?: React.ReactNode;
 }) => {
   const [query, setQuery] = useState("");
   const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<TModel>({
@@ -147,6 +151,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
           <ComboboxOptions
             className={`absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`}
           >
+            {heading}
             {!required &&
               query.length < SEARCH_FROM_QUERY_LENGTH &&
               data &&
@@ -211,6 +216,8 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
                   </ComboboxOption>
                 ))
             )}
+
+            {footer}
 
             {isFetchingNextPage || isLoading ? (
               <LoadingComponent className="my-2" />

@@ -52,7 +52,8 @@ type MoreActionType = {
     disableNProgress?: boolean;
     disabled?: boolean;
 };
-declare const MoreActions: ({ actions }: {
+declare const MoreActions: ({ className, actions }: {
+    className?: string;
     actions: MoreActionType[];
 }) => react_jsx_runtime.JSX.Element | null;
 declare const ArchiveButton: (props: {
@@ -485,7 +486,7 @@ declare const SelectPaginatedFromApi: <TModel extends {
     data: {
         id: number;
     }[];
-}>({ onChange, disabled, required, inputRef, name, value, size, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat, inputClassName, ...rest }: {
+}>({ onChange, disabled, required, inputRef, name, value, size, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat, inputClassName, heading, footer, ...rest }: {
     size?: "sm" | "xs";
     inputClassName?: string;
     name?: string;
@@ -501,6 +502,29 @@ declare const SelectPaginatedFromApi: <TModel extends {
     required?: boolean;
     empty?: string;
     valueFormat?: (model: TModel["data"][0]) => string;
+    heading?: React__default.ReactNode;
+    footer?: React__default.ReactNode;
+}) => react_jsx_runtime.JSX.Element;
+
+declare const SelectFromApi: <TModel extends {
+    id: number;
+}>({ onChange, disabled, required, inputRef, name, value, size, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat, inputClassName, filter, ...rest }: {
+    size?: "sm" | "xs";
+    inputClassName?: string;
+    name?: string;
+    inputRef?: any;
+    queryFn: () => Promise<TModel[]>;
+    queryKey: ReadonlyArray<any>;
+    placeholder?: string;
+    optionsClassName?: string;
+    value: number | null;
+    className?: string;
+    onChange: (model: TModel) => void;
+    disabled?: boolean;
+    required?: boolean;
+    empty?: string;
+    valueFormat?: (model: TModel) => string;
+    filter?: (model: TModel) => boolean;
 }) => react_jsx_runtime.JSX.Element;
 
 declare const TOOLTIP_PARALLEL_ID = "parallel-tooltip";
@@ -556,4 +580,4 @@ declare const DateTime: ({ date, format }: {
     format?: string;
 }) => string | null;
 
-export { ActionButton, type ActionColumn, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxInput, type ColumnType, ConfirmSave, type DateColumn, DateInput, DatePicker, DateTime, DateTimeInput, DateTimePicker, EditButton, FilterLink, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MoreActionType, MoreActions, NumberInput, type PaginateQuery, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBox, Required, type ResponseMeta, SaveButton, ScreenSize, SelectFromApiInput, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, type ServerError, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TableLink, TextInput, TextareaInput, TimeInput, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
+export { ActionButton, type ActionColumn, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxInput, type ColumnType, ConfirmSave, type DateColumn, DateInput, DatePicker, DateTime, DateTimeInput, DateTimePicker, EditButton, FilterLink, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MoreActionType, MoreActions, NumberInput, type PaginateQuery, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBox, Required, type ResponseMeta, SaveButton, ScreenSize, SelectFromApi, SelectFromApiInput, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, type ServerError, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TableLink, TextInput, TextareaInput, TimeInput, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
