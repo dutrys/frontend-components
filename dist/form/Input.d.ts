@@ -1,4 +1,5 @@
 import { Control, FieldValues, FieldPath, FieldError, RegisterOptions, UseFormRegister, Merge } from "react-hook-form";
+import { SelectPaginatedFromApiProps } from "./SelectPaginatedFromApi";
 import { PaginateQuery, ResponseMeta } from "../utils/paginate";
 import { NumericFormatProps } from "react-number-format/types/types";
 import React, { ChangeEvent } from "react";
@@ -79,13 +80,7 @@ export declare const SelectPaginatedFromApiWithLabel: <T extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ label, queryFn, queryKey, desc, name, valueFormat, required, disabled, error, className, size, value, onChange, fieldSetClassName, ...rest }: IInputProps<any> & {
-    queryKey: ReadonlyArray<any>;
-    queryFn: (query: PaginateQuery<any>) => Promise<T>;
-    valueFormat: (model: T["data"][0]) => string;
-    onChange?: (model: T["data"][0]) => unknown;
-    value: number | null;
-}) => import("react/jsx-runtime").JSX.Element;
+}>({ label, queryFn, queryKey, desc, name, valueFormat, required, disabled, error, className, size, value, onChange, fieldSetClassName, inputRef, optionsClassName, empty, heading, footer, ...rest }: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "inputClassName" | "name" | "placeholder" | "className">) => import("react/jsx-runtime").JSX.Element;
 export interface IInputProps<TName extends FieldPath<FieldValues>> {
     id?: string;
     label: string;

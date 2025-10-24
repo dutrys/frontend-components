@@ -12,7 +12,7 @@ import { DateTimePicker } from "./DateTimePicker";
 import { DatePicker } from "./DatePicker";
 import { InputErrors } from "./UseForm";
 import { format } from "date-fns";
-import { SelectPaginatedFromApi } from "./SelectPaginatedFromApi";
+import { SelectPaginatedFromApi, SelectPaginatedFromApiProps } from "./SelectPaginatedFromApi";
 import { PaginateQuery, ResponseMeta } from "../utils/paginate";
 import { stringToDate } from "../utils/date";
 import cx from "classnames";
@@ -679,14 +679,14 @@ export const SelectPaginatedFromApiWithLabel = <T extends { data: { id: number }
   value,
   onChange,
   fieldSetClassName,
+  inputRef,
+  optionsClassName,
+  empty,
+  heading,
+  footer,
   ...rest
-}: IInputProps<any> & {
-  queryKey: ReadonlyArray<any>;
-  queryFn: (query: PaginateQuery<any>) => Promise<T>;
-  valueFormat: (model: T["data"][0]) => string;
-  onChange?: (model: T["data"][0]) => unknown;
-  value: number | null;
-}) => {
+}: IInputProps<any> &
+  Omit<SelectPaginatedFromApiProps<T>, "inputClassName" | "name" | "placeholder" | "className">) => {
   return (
     <div className={fieldSetClassName}>
       <div {...rest} className="floating-label">
@@ -700,6 +700,7 @@ export const SelectPaginatedFromApiWithLabel = <T extends { data: { id: number }
             "input-sm": size === "sm",
             "input-error": error,
           })}
+          inputRef={inputRef}
           size={size}
           required={required}
           disabled={disabled}

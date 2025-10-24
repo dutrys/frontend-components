@@ -311,6 +311,37 @@ declare const ConfirmSave: ({ onConfirm }: {
 }) => react_jsx_runtime.JSX.Element;
 declare const addServerErrors: <T extends FieldValues>(errors: { [P in keyof T]?: string[]; }, setError: UseFormSetError<T>) => void;
 
+type SelectPaginatedFromApiProps<TModel extends {
+    meta: ResponseMeta$1;
+    data: {
+        id: number;
+    }[];
+}> = {
+    size?: "sm" | "xs";
+    inputClassName?: string;
+    name?: string;
+    inputRef?: any;
+    queryFn: (query: PaginateQuery$1<any>) => Promise<TModel>;
+    queryKey: ReadonlyArray<any>;
+    placeholder?: string;
+    optionsClassName?: string;
+    value: TModel["data"][0] | number | null;
+    className?: string;
+    onChange: (model: TModel["data"][0]) => void;
+    disabled?: boolean;
+    required?: boolean;
+    empty?: string;
+    valueFormat?: (model: TModel["data"][0]) => string;
+    heading?: React__default.ReactNode;
+    footer?: React__default.ReactNode;
+};
+declare const SelectPaginatedFromApi: <TModel extends {
+    meta: ResponseMeta$1;
+    data: {
+        id: number;
+    }[];
+}>({ onChange, disabled, required, inputRef, name, value, size, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat, inputClassName, heading, footer, ...rest }: SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
+
 type PaginateQuery<T> = {
     page?: number;
     limit?: number;
@@ -411,13 +442,7 @@ declare const SelectPaginatedFromApiWithLabel: <T extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ label, queryFn, queryKey, desc, name, valueFormat, required, disabled, error, className, size, value, onChange, fieldSetClassName, ...rest }: IInputProps<any> & {
-    queryKey: ReadonlyArray<any>;
-    queryFn: (query: PaginateQuery<any>) => Promise<T>;
-    valueFormat: (model: T["data"][0]) => string;
-    onChange?: (model: T["data"][0]) => unknown;
-    value: number | null;
-}) => react_jsx_runtime.JSX.Element;
+}>({ label, queryFn, queryKey, desc, name, valueFormat, required, disabled, error, className, size, value, onChange, fieldSetClassName, inputRef, optionsClassName, empty, heading, footer, ...rest }: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "inputClassName" | "name" | "placeholder" | "className">) => react_jsx_runtime.JSX.Element;
 interface IInputProps<TName extends FieldPath<FieldValues>> {
     id?: string;
     label: string;
@@ -481,31 +506,6 @@ declare const TimePicker: ({ className, value, onChange, placeholder, required, 
     onChange: (e: any) => void;
     className?: string;
     value: string | undefined | null;
-}) => react_jsx_runtime.JSX.Element;
-
-declare const SelectPaginatedFromApi: <TModel extends {
-    meta: ResponseMeta$1;
-    data: {
-        id: number;
-    }[];
-}>({ onChange, disabled, required, inputRef, name, value, size, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat, inputClassName, heading, footer, ...rest }: {
-    size?: "sm" | "xs";
-    inputClassName?: string;
-    name?: string;
-    inputRef?: any;
-    queryFn: (query: PaginateQuery$1<any>) => Promise<TModel>;
-    queryKey: ReadonlyArray<any>;
-    placeholder?: string;
-    optionsClassName?: string;
-    value: number | null;
-    className?: string;
-    onChange: (model: TModel["data"][0]) => void;
-    disabled?: boolean;
-    required?: boolean;
-    empty?: string;
-    valueFormat?: (model: TModel["data"][0]) => string;
-    heading?: React__default.ReactNode;
-    footer?: React__default.ReactNode;
 }) => react_jsx_runtime.JSX.Element;
 
 declare const SelectFromApi: <TModel extends {
@@ -582,4 +582,22 @@ declare const DateTime: ({ date, format }: {
     format?: string;
 }) => string | null;
 
-export { ActionButton, type ActionColumn, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxInput, type ColumnType, ConfirmSave, type DateColumn, DateInput, DatePicker, DateTime, DateTimeInput, DateTimePicker, EditButton, FilterLink, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MoreActionType, MoreActions, NumberInput, type PaginateQuery, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBox, Required, type ResponseMeta, SaveButton, ScreenSize, SelectFromApi, SelectFromApiInput, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, type ServerError, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TableLink, TextInput, TextareaInput, TimeInput, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
+declare const TOOLTIP_SIDEBAR_ID = "sidebar";
+type MenuItem = {
+    href: string;
+    name: string;
+    icon: React__default.ComponentType<{
+        className?: string;
+    }>;
+};
+type MenuItemWithSubmenu = Omit<MenuItem, "href"> & {
+    href?: string;
+    onClick?: () => void;
+    items?: MenuItem[] | (() => React__default.ReactNode);
+};
+declare const SidebarMenu: ({ menu, active, }: {
+    active: (item: MenuItemWithSubmenu) => boolean;
+    menu: MenuItemWithSubmenu[];
+}) => react_jsx_runtime.JSX.Element;
+
+export { ActionButton, type ActionColumn, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxInput, type ColumnType, ConfirmSave, type DateColumn, DateInput, DatePicker, DateTime, DateTimeInput, DateTimePicker, EditButton, FilterLink, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MenuItem, type MenuItemWithSubmenu, type MoreActionType, MoreActions, NumberInput, type PaginateQuery, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBox, Required, type ResponseMeta, SaveButton, ScreenSize, SelectFromApi, SelectFromApiInput, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, type SelectPaginatedFromApiProps, SelectPaginatedFromApiWithLabel, type ServerError, SidebarMenu, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextInput, TextareaInput, TimeInput, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };

@@ -8,7 +8,7 @@ import {
   Transition,
 } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, use, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { getNextPageParam, getPreviousPageParam, PaginateQuery, ResponseMeta } from "@/utils/paginate";
 import cx from "classnames";
@@ -16,6 +16,26 @@ import { LoadingComponent } from "@/Loading";
 import { useInView } from "react-intersection-observer";
 
 const SEARCH_FROM_QUERY_LENGTH = 3;
+
+export type SelectPaginatedFromApiProps<TModel extends { meta: ResponseMeta; data: { id: number }[] }> = {
+  size?: "sm" | "xs";
+  inputClassName?: string;
+  name?: string;
+  inputRef?: any;
+  queryFn: (query: PaginateQuery<any>) => Promise<TModel>;
+  queryKey: ReadonlyArray<any>;
+  placeholder?: string;
+  optionsClassName?: string;
+  value: TModel["data"][0] | number | null;
+  className?: string;
+  onChange: (model: TModel["data"][0]) => void;
+  disabled?: boolean;
+  required?: boolean;
+  empty?: string;
+  valueFormat?: (model: TModel["data"][0]) => string;
+  heading?: React.ReactNode;
+  footer?: React.ReactNode;
+};
 
 export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data: { id: number }[] }>({
   onChange,
@@ -36,25 +56,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
   heading,
   footer,
   ...rest
-}: {
-  size?: "sm" | "xs";
-  inputClassName?: string;
-  name?: string;
-  inputRef?: any;
-  queryFn: (query: PaginateQuery<any>) => Promise<TModel>;
-  queryKey: ReadonlyArray<any>;
-  placeholder?: string;
-  optionsClassName?: string;
-  value: number | null;
-  className?: string;
-  onChange: (model: TModel["data"][0]) => void;
-  disabled?: boolean;
-  required?: boolean;
-  empty?: string;
-  valueFormat?: (model: TModel["data"][0]) => string;
-  heading?: React.ReactNode;
-  footer?: React.ReactNode;
-}) => {
+}: SelectPaginatedFromApiProps<TModel>) => {
   const [query, setQuery] = useState("");
   const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<TModel>({
     getPreviousPageParam,
@@ -109,10 +111,14 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
       data-testid="select"
       disabled={disabled}
       value={
-        (data?.pages || [])
-          .map((d) => d?.data || [])
-          .flat()
-          .find((b: TModel["data"][0]) => b.id === value) || null
+        typeof value === "number"
+          ? (data?.pages || [])
+              .map((d) => d?.data || [])
+              .flat()
+              .find((b: TModel["data"][0]) => b.id === value) || null
+          : value
+            ? value
+            : null
       }
       onChange={onChange}
       {...rest}
