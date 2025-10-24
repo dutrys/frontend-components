@@ -14,9 +14,9 @@ import {
   useFocus,
   useHover,
   useInteractions,
-  useRole,
 } from "@floating-ui/react";
 import cx from "classnames";
+import { Placement } from "@floating-ui/utils";
 
 export const Popover = ({
   title,
@@ -32,6 +32,7 @@ export const Popover = ({
   backgroundColor = "bg-slate-800",
   borderColor = "border-slate-600",
   disabled,
+  placement,
 }: {
   disabled?: boolean;
   open?: boolean;
@@ -41,16 +42,21 @@ export const Popover = ({
   popoverClassName?: string;
   hoverClassName?: string;
   popoverWidth?: string;
-  title: (ref: ((node: HTMLElement | null) => void) | null, props: Record<string, unknown>) => React.ReactNode;
+  title: (
+    ref: ((node: HTMLElement | null) => void) | null,
+    props: Record<string, unknown>,
+    isOpen: boolean,
+  ) => React.ReactNode;
   children: (close: () => void) => React.ReactNode;
   onShow?: (show: boolean) => void;
   borderColor?: `border-${string}`;
   backgroundColor?: `bg-${string}`;
+  placement?: Placement;
 }) => {
   const [isOpen, setIsOpen] = useState(openProp || false);
   const arrowRef = useRef(null);
   const { refs, floatingStyles, context } = useFloating<HTMLElement>({
-    placement: "bottom-start",
+    placement: placement ?? "bottom-start",
     open: isOpen,
     onOpenChange: (open) => {
       onShow?.(open);
@@ -74,7 +80,7 @@ export const Popover = ({
   const { getReferenceProps, getFloatingProps } = useInteractions([dismiss, hover, click, focus]);
 
   if (disabled) {
-    return title(null, {});
+    return title(null, {}, false);
   }
 
   const p = getReferenceProps();
@@ -83,7 +89,7 @@ export const Popover = ({
   }
   return (
     <>
-      {title(refs.setReference, p)}
+      {title(refs.setReference, p, isOpen)}
 
       {isOpen && (
         <FloatingPortal>

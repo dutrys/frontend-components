@@ -30,11 +30,11 @@ import { lt as lt$1 } from 'date-fns/locale';
 
 const LoadingComponent = ({ style, className, loadingClassName, size, }) => (jsx("div", { className: `flex justify-center ${className}`, style: style, children: jsx("span", { className: `${loadingClassName || "text-primary"} loading loading-spinner ${size}` }) }));
 
-const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: openProp, hoverClassName, showOnHover = true, showOnClick = false, showOnFocus = false, popoverWidth, backgroundColor = "bg-slate-800", borderColor = "border-slate-600", disabled, }) => {
+const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: openProp, hoverClassName, showOnHover = true, showOnClick = false, showOnFocus = false, popoverWidth, backgroundColor = "bg-slate-800", borderColor = "border-slate-600", disabled, placement, }) => {
     const [isOpen, setIsOpen] = useState(openProp || false);
     const arrowRef = useRef(null);
     const { refs, floatingStyles, context } = useFloating({
-        placement: "bottom-start",
+        placement: placement ?? "bottom-start",
         open: isOpen,
         onOpenChange: (open) => {
             onShow?.(open);
@@ -54,13 +54,13 @@ const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: ope
     const dismiss = useDismiss(context, { escapeKey: false, bubbles: true, outsidePress: true });
     const { getReferenceProps, getFloatingProps } = useInteractions([dismiss, hover, click, focus]);
     if (disabled) {
-        return title(null, {});
+        return title(null, {}, false);
     }
     const p = getReferenceProps();
     if (isOpen && hoverClassName) {
         p.className = typeof p.className === "string" ? `${p.className} ${hoverClassName}` : hoverClassName;
     }
-    return (jsxs(Fragment, { children: [title(refs.setReference, p), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100 }, ...getFloatingProps(), className: cx("border rounded-sm shadow-lg shadow-base-100 border-1", popoverClassName, backgroundColor, borderColor), children: [jsx(FloatingArrow, { strokeWidth: 1, fill: `var(--color-${backgroundColor.replace("bg-", "")})`, stroke: `var(--color-${borderColor.replace("border-", "")})`, context: context, ref: arrowRef }), jsx("div", { className: popoverWidth, children: children(() => context.onOpenChange(false)) })] }) }))] }));
+    return (jsxs(Fragment, { children: [title(refs.setReference, p, isOpen), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100 }, ...getFloatingProps(), className: cx("border rounded-sm shadow-lg shadow-base-100 border-1", popoverClassName, backgroundColor, borderColor), children: [jsx(FloatingArrow, { strokeWidth: 1, fill: `var(--color-${backgroundColor.replace("bg-", "")})`, stroke: `var(--color-${borderColor.replace("border-", "")})`, context: context, ref: arrowRef }), jsx("div", { className: popoverWidth, children: children(() => context.onOpenChange(false)) })] }) }))] }));
 };
 
 const Link = (props) => {

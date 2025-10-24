@@ -1,6 +1,7 @@
 import * as react_jsx_runtime from 'react/jsx-runtime';
 import * as React from 'react';
 import React__default, { ChangeEvent } from 'react';
+import { Placement } from '@floating-ui/utils';
 import { ResponseMeta as ResponseMeta$1, PaginateQuery as PaginateQuery$1 } from '@/utils/paginate';
 import { StorageInterface as StorageInterface$1 } from '@/pagination/StorageInterface';
 import { ColumnType as ColumnType$1 } from '@/pagination/PaginatedTable';
@@ -16,7 +17,7 @@ declare const LoadingComponent: ({ style, className, loadingClassName, size, }: 
     style?: React__default.CSSProperties;
 }) => react_jsx_runtime.JSX.Element;
 
-declare const Popover: ({ title, children, popoverClassName, onShow, open: openProp, hoverClassName, showOnHover, showOnClick, showOnFocus, popoverWidth, backgroundColor, borderColor, disabled, }: {
+declare const Popover: ({ title, children, popoverClassName, onShow, open: openProp, hoverClassName, showOnHover, showOnClick, showOnFocus, popoverWidth, backgroundColor, borderColor, disabled, placement, }: {
     disabled?: boolean;
     open?: boolean;
     showOnHover?: boolean;
@@ -25,11 +26,12 @@ declare const Popover: ({ title, children, popoverClassName, onShow, open: openP
     popoverClassName?: string;
     hoverClassName?: string;
     popoverWidth?: string;
-    title: (ref: ((node: HTMLElement | null) => void) | null, props: Record<string, unknown>) => React.ReactNode;
+    title: (ref: ((node: HTMLElement | null) => void) | null, props: Record<string, unknown>, isOpen: boolean) => React.ReactNode;
     children: (close: () => void) => React.ReactNode;
     onShow?: (show: boolean) => void;
     borderColor?: `border-${string}`;
     backgroundColor?: `bg-${string}`;
+    placement?: Placement;
 }) => string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined;
 
 declare const EditButton: ({ href, size }: {
