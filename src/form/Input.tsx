@@ -369,58 +369,57 @@ export const SelectPaginatedFromApiInput = <
   valueFormat,
   required,
   disabled,
-  searchFromChars,
   error,
   className,
   size,
   onChange,
   fieldSetClassName,
   ...rest
-}: IInputProps<TName> & {
-  searchFromChars?: number;
-  control: Control<TFieldValues>;
-  queryKey: ReadonlyArray<any>;
-  queryFn: (query: PaginateQuery<any>) => Promise<T>;
-  valueFormat: (model: T["data"][0]) => string;
-  onChange?: (model: T["data"][0]) => unknown;
-}) => (
-  <div className={fieldSetClassName}>
-    <div className="floating-label">
-      <span>
-        {label}
-        {required ? <Required /> : null}
-      </span>
-      <Controller
-        control={control}
-        name={name}
-        rules={{ required: required === true }}
-        render={({ field }) => (
-          <SelectPaginatedFromApi<T>
-            inputClassName={cx("w-full mx-0 input input-bordered", className, {
-              "input-error": error,
-            })}
-            name={name}
-            searchFromChars={searchFromChars}
-            {...rest}
-            size={size}
-            required={required}
-            disabled={disabled}
-            placeholder={required ? `${label}*` : label}
-            queryKey={queryKey}
-            queryFn={queryFn}
-            value={field.value}
-            valueFormat={valueFormat}
-            onChange={(model) => {
-              field.onChange(model?.id || null);
-              onChange?.(model || null);
-            }}
-          />
-        )}
-      />
+}: IInputProps<TName> & { control: Control<TFieldValues>; onChange?: (model: T["data"][number]) => void } & Omit<
+    SelectPaginatedFromApiProps<T>,
+    "inputClassName" | "name" | "placeholder" | "className" | "value" | "onChange"
+  >) => {
+  const [selectProps, restProps] = splitByData(rest);
+
+  return (
+    <div className={fieldSetClassName}>
+      <div {...restProps} className="floating-label">
+        <span>
+          {label}
+          {required ? <Required /> : null}
+        </span>
+        <Controller
+          control={control}
+          name={name}
+          rules={{ required: required === true }}
+          render={({ field }) => (
+            <SelectPaginatedFromApi<T>
+              inputClassName={cx("w-full mx-0 input input-bordered", className, {
+                "input-error": error,
+              })}
+              {...selectProps}
+              name={name}
+              {...rest}
+              size={size}
+              required={required}
+              disabled={disabled}
+              placeholder={required ? `${label}*` : label}
+              queryKey={queryKey}
+              queryFn={queryFn}
+              value={field.value}
+              valueFormat={valueFormat}
+              onChange={(model) => {
+                field.onChange(model?.id || null);
+                onChange?.(model || null);
+              }}
+            />
+          )}
+        />
+      </div>
+      <InputErrors className="text-xs text-error mt-1" errors={error} />
     </div>
-    <InputErrors className="text-xs text-error mt-1" errors={error} />
-  </div>
-);
+  );
+};
 
 export const SelectFromApiInput = <
   T extends { id: number },
@@ -691,9 +690,11 @@ export const SelectPaginatedFromApiWithLabel = <T extends { data: { id: number }
   ...rest
 }: IInputProps<any> &
   Omit<SelectPaginatedFromApiProps<T>, "inputClassName" | "name" | "placeholder" | "className">) => {
+  const [selectProps, restProps] = splitByData(rest);
+
   return (
     <div className={fieldSetClassName}>
-      <div {...rest} className="floating-label">
+      <div {...restProps} className="floating-label">
         <span>
           {label}
           {required ? <Required /> : null}
@@ -715,12 +716,21 @@ export const SelectPaginatedFromApiWithLabel = <T extends { data: { id: number }
           value={value}
           valueFormat={valueFormat}
           onChange={(model) => onChange?.(model || null)}
+          {...selectProps}
         />
       </div>
       {desc}
       <InputErrors className="text-xs text-error mt-1" errors={error} />
     </div>
   );
+};
+
+const splitByData = <T extends Record<string, unknown>>(attrs: T): [Partial<T>, Partial<T>] => {
+  const entries = Object.entries(attrs);
+  const dataEntries = entries.filter(([key]) => !key.startsWith("data-"));
+  const restEntries = entries.filter(([key]) => key.startsWith("data-"));
+
+  return [Object.fromEntries(dataEntries) as Partial<T>, Object.fromEntries(restEntries) as Partial<T>];
 };
 
 export interface IInputProps<TName extends FieldPath<FieldValues>> {

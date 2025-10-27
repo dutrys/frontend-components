@@ -1212,12 +1212,15 @@ const DateInput = ({ control, useDate, allowEmpty, label, error, disabled, desc,
                                 }, ...rest }));
                         } }), jsxs("span", { children: [label, required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 };
-const SelectPaginatedFromApiInput = ({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, searchFromChars, error, className, size, onChange, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, required ? jsx(Required, {}) : null] }), jsx(Controller, { control: control, name: name, rules: { required: required === true }, render: ({ field }) => (jsx(SelectPaginatedFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
-                            "input-error": error,
-                        }), name: name, searchFromChars: searchFromChars, ...rest, size: size, required: required, disabled: disabled, placeholder: required ? `${label}*` : label, queryKey: queryKey, queryFn: queryFn, value: field.value, valueFormat: valueFormat, onChange: (model) => {
-                            field.onChange(model?.id || null);
-                            onChange?.(model || null);
-                        } })) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+const SelectPaginatedFromApiInput = ({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, ...rest }) => {
+    const [selectProps, restProps] = splitByData(rest);
+    return (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { ...restProps, className: "floating-label", children: [jsxs("span", { children: [label, required ? jsx(Required, {}) : null] }), jsx(Controller, { control: control, name: name, rules: { required: required === true }, render: ({ field }) => (jsx(SelectPaginatedFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
+                                "input-error": error,
+                            }), ...selectProps, name: name, ...rest, size: size, required: required, disabled: disabled, placeholder: required ? `${label}*` : label, queryKey: queryKey, queryFn: queryFn, value: field.value, valueFormat: valueFormat, onChange: (model) => {
+                                field.onChange(model?.id || null);
+                                onChange?.(model || null);
+                            } })) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+};
 const SelectFromApiInput = ({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, filter, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, required ? jsx(Required, {}) : null] }), jsx(Controller, { control: control, name: name, rules: { required: required === true }, render: ({ field }) => (jsx(SelectFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
                             "input-error": error,
                         }), name: name, ...rest, size: size, required: required, disabled: disabled, placeholder: required ? `${label}*` : label, queryKey: queryKey, filter: filter, queryFn: queryFn, value: field.value, valueFormat: valueFormat, onChange: (model) => {
@@ -1254,11 +1257,18 @@ const NumberInput = ({ options, ...props }) => (jsxs("div", { className: props.f
                         }), onValueChange: (values) => field.onChange(values.floatValue ?? null) })) })] }), props.desc && (jsx("div", { className: "text-xs text-gray-500", children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 const Label = ({ text, required }) => (jsx("label", { className: "label", children: jsxs("span", { className: "text-sm", children: [text, required && jsx(Required, {})] }) }));
 const SelectPaginatedFromApiWithLabel = ({ label, queryFn, queryKey, desc, name, valueFormat, required, disabled, error, className, size, value, onChange, fieldSetClassName, inputRef, optionsClassName, searchFromChars, empty, heading, footer, ...rest }) => {
-    return (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { ...rest, className: "floating-label", children: [jsxs("span", { children: [label, required ? jsx(Required, {}) : null] }), jsx(SelectPaginatedFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
+    const [selectProps, restProps] = splitByData(rest);
+    return (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { ...restProps, className: "floating-label", children: [jsxs("span", { children: [label, required ? jsx(Required, {}) : null] }), jsx(SelectPaginatedFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
                             "input-xs": size === "xs",
                             "input-sm": size === "sm",
                             "input-error": error,
-                        }), inputRef: inputRef, size: size, required: required, searchFromChars: searchFromChars, disabled: disabled, placeholder: required ? `${label}*` : label, queryKey: queryKey, queryFn: queryFn, value: value, valueFormat: valueFormat, onChange: (model) => onChange?.(model || null) })] }), desc, jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+                        }), inputRef: inputRef, size: size, required: required, searchFromChars: searchFromChars, disabled: disabled, placeholder: required ? `${label}*` : label, queryKey: queryKey, queryFn: queryFn, value: value, valueFormat: valueFormat, onChange: (model) => onChange?.(model || null), ...selectProps })] }), desc, jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+};
+const splitByData = (attrs) => {
+    const entries = Object.entries(attrs);
+    const dataEntries = entries.filter(([key]) => !key.startsWith("data-"));
+    const restEntries = entries.filter(([key]) => key.startsWith("data-"));
+    return [Object.fromEntries(dataEntries), Object.fromEntries(restEntries)];
 };
 const Required = () => {
     return jsx("span", { className: "text-error align-bottom", children: "*" });

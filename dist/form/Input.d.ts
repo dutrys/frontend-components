@@ -1,6 +1,6 @@
 import { Control, FieldValues, FieldPath, FieldError, RegisterOptions, UseFormRegister, Merge } from "react-hook-form";
 import { SelectPaginatedFromApiProps } from "./SelectPaginatedFromApi";
-import { PaginateQuery, ResponseMeta } from "../utils/paginate";
+import { ResponseMeta } from "../utils/paginate";
 import { NumericFormatProps } from "react-number-format/types/types";
 import React, { ChangeEvent } from "react";
 interface IInputRegisterProps<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>> extends IInputProps<TName> {
@@ -37,14 +37,10 @@ export declare const SelectPaginatedFromApiInput: <T extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, searchFromChars, error, className, size, onChange, fieldSetClassName, ...rest }: IInputProps<TName> & {
-    searchFromChars?: number;
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
-    queryKey: ReadonlyArray<any>;
-    queryFn: (query: PaginateQuery<any>) => Promise<T>;
-    valueFormat: (model: T["data"][0]) => string;
-    onChange?: (model: T["data"][0]) => unknown;
-}) => import("react/jsx-runtime").JSX.Element;
+    onChange?: (model: T["data"][number]) => void;
+} & Omit<SelectPaginatedFromApiProps<T>, "inputClassName" | "name" | "placeholder" | "className" | "value" | "onChange">) => import("react/jsx-runtime").JSX.Element;
 export declare const SelectFromApiInput: <T extends {
     id: number;
 }, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, filter, ...rest }: IInputProps<TName> & {
