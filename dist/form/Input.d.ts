@@ -37,7 +37,8 @@ export declare const SelectPaginatedFromApiInput: <T extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, ...rest }: IInputProps<TName> & {
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, searchFromChars, error, className, size, onChange, fieldSetClassName, ...rest }: IInputProps<TName> & {
+    searchFromChars?: number;
     control: Control<TFieldValues>;
     queryKey: ReadonlyArray<any>;
     queryFn: (query: PaginateQuery<any>) => Promise<T>;
@@ -80,7 +81,7 @@ export declare const SelectPaginatedFromApiWithLabel: <T extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ label, queryFn, queryKey, desc, name, valueFormat, required, disabled, error, className, size, value, onChange, fieldSetClassName, inputRef, optionsClassName, empty, heading, footer, ...rest }: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "inputClassName" | "name" | "placeholder" | "className">) => import("react/jsx-runtime").JSX.Element;
+}>({ label, queryFn, queryKey, desc, name, valueFormat, required, disabled, error, className, size, value, onChange, fieldSetClassName, inputRef, optionsClassName, searchFromChars, empty, heading, footer, ...rest }: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "inputClassName" | "name" | "placeholder" | "className">) => import("react/jsx-runtime").JSX.Element;
 export interface IInputProps<TName extends FieldPath<FieldValues>> {
     id?: string;
     label: string;

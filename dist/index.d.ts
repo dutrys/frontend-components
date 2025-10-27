@@ -334,13 +334,14 @@ type SelectPaginatedFromApiProps<TModel extends {
     valueFormat?: (model: TModel["data"][0]) => string;
     heading?: React__default.ReactNode;
     footer?: React__default.ReactNode;
+    searchFromChars?: number;
 };
 declare const SelectPaginatedFromApi: <TModel extends {
     meta: ResponseMeta$1;
     data: {
         id: number;
     }[];
-}>({ onChange, disabled, required, inputRef, name, value, size, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat, inputClassName, heading, footer, ...rest }: SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
+}>({ onChange, disabled, required, inputRef, name, value, size, searchFromChars, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat, inputClassName, heading, footer, ...rest }: SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
 
 type PaginateQuery<T> = {
     page?: number;
@@ -399,7 +400,8 @@ declare const SelectPaginatedFromApiInput: <T extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, ...rest }: IInputProps<TName> & {
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, searchFromChars, error, className, size, onChange, fieldSetClassName, ...rest }: IInputProps<TName> & {
+    searchFromChars?: number;
     control: Control<TFieldValues>;
     queryKey: ReadonlyArray<any>;
     queryFn: (query: PaginateQuery<any>) => Promise<T>;
@@ -442,7 +444,7 @@ declare const SelectPaginatedFromApiWithLabel: <T extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ label, queryFn, queryKey, desc, name, valueFormat, required, disabled, error, className, size, value, onChange, fieldSetClassName, inputRef, optionsClassName, empty, heading, footer, ...rest }: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "inputClassName" | "name" | "placeholder" | "className">) => react_jsx_runtime.JSX.Element;
+}>({ label, queryFn, queryKey, desc, name, valueFormat, required, disabled, error, className, size, value, onChange, fieldSetClassName, inputRef, optionsClassName, searchFromChars, empty, heading, footer, ...rest }: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "inputClassName" | "name" | "placeholder" | "className">) => react_jsx_runtime.JSX.Element;
 interface IInputProps<TName extends FieldPath<FieldValues>> {
     id?: string;
     label: string;

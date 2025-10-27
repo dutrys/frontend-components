@@ -15,8 +15,6 @@ import cx from "classnames";
 import { LoadingComponent } from "@/Loading";
 import { useInView } from "react-intersection-observer";
 
-const SEARCH_FROM_QUERY_LENGTH = 3;
-
 export type SelectPaginatedFromApiProps<TModel extends { meta: ResponseMeta; data: { id: number }[] }> = {
   size?: "sm" | "xs";
   inputClassName?: string;
@@ -35,6 +33,7 @@ export type SelectPaginatedFromApiProps<TModel extends { meta: ResponseMeta; dat
   valueFormat?: (model: TModel["data"][0]) => string;
   heading?: React.ReactNode;
   footer?: React.ReactNode;
+  searchFromChars?: number;
 };
 
 export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data: { id: number }[] }>({
@@ -45,6 +44,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
   name,
   value,
   size,
+  searchFromChars = 3,
   className,
   queryKey,
   queryFn,
@@ -62,7 +62,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
     getPreviousPageParam,
     getNextPageParam,
     enabled: !disabled,
-    queryKey: [...queryKey, disabled, query.length < SEARCH_FROM_QUERY_LENGTH ? "" : query],
+    queryKey: [...queryKey, disabled, query.length < searchFromChars ? "" : query],
     initialPageParam: 1,
     queryFn: ({ queryKey, pageParam }) => {
       if (disabled) {
@@ -70,7 +70,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
       }
       const page = typeof pageParam === "number" ? pageParam : undefined;
       const search = queryKey[queryKey.length - 1] || "";
-      if (typeof search !== "string" || search === "" || search.length < SEARCH_FROM_QUERY_LENGTH) {
+      if (typeof search !== "string" || search === "" || search.length < searchFromChars) {
         return queryFn({ page });
       }
 
@@ -158,23 +158,20 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
             className={`absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`}
           >
             {heading}
-            {!required &&
-              query.length < SEARCH_FROM_QUERY_LENGTH &&
-              data &&
-              data?.pages?.[0]?.meta?.totalItems !== 0 && (
-                <ComboboxOption
-                  data-testid="select-option-empty"
-                  key="empty"
-                  className={({ focus }) =>
-                    `relative select-none py-2 pl-4 pr-4 ${focus ? "bg-primary text-white" : "text-gray-900"}`
-                  }
-                  value={null}
-                >
-                  <span className={cx("block truncate", { "text-xs": "xs" === size || "sm" === size })}>
-                    {empty || t("selectFromApi.select")}
-                  </span>
-                </ComboboxOption>
-              )}
+            {!required && query.length < searchFromChars && data && data?.pages?.[0]?.meta?.totalItems !== 0 && (
+              <ComboboxOption
+                data-testid="select-option-empty"
+                key="empty"
+                className={({ focus }) =>
+                  `relative select-none py-2 pl-4 pr-4 ${focus ? "bg-primary text-white" : "text-gray-900"}`
+                }
+                value={null}
+              >
+                <span className={cx("block truncate", { "text-xs": "xs" === size || "sm" === size })}>
+                  {empty || t("selectFromApi.select")}
+                </span>
+              </ComboboxOption>
+            )}
             {data?.pages?.[0]?.meta?.totalItems === 0 ? (
               <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                 <span className={cx({ "text-xs": "xs" === size || "sm" === size })}>

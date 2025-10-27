@@ -369,6 +369,7 @@ export const SelectPaginatedFromApiInput = <
   valueFormat,
   required,
   disabled,
+  searchFromChars,
   error,
   className,
   size,
@@ -376,6 +377,7 @@ export const SelectPaginatedFromApiInput = <
   fieldSetClassName,
   ...rest
 }: IInputProps<TName> & {
+  searchFromChars?: number;
   control: Control<TFieldValues>;
   queryKey: ReadonlyArray<any>;
   queryFn: (query: PaginateQuery<any>) => Promise<T>;
@@ -398,6 +400,7 @@ export const SelectPaginatedFromApiInput = <
               "input-error": error,
             })}
             name={name}
+            searchFromChars={searchFromChars}
             {...rest}
             size={size}
             required={required}
@@ -681,6 +684,7 @@ export const SelectPaginatedFromApiWithLabel = <T extends { data: { id: number }
   fieldSetClassName,
   inputRef,
   optionsClassName,
+  searchFromChars,
   empty,
   heading,
   footer,
@@ -703,6 +707,7 @@ export const SelectPaginatedFromApiWithLabel = <T extends { data: { id: number }
           inputRef={inputRef}
           size={size}
           required={required}
+          searchFromChars={searchFromChars}
           disabled={disabled}
           placeholder={required ? `${label}*` : label}
           queryKey={queryKey}
