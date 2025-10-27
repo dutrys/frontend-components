@@ -30,6 +30,7 @@ export type MoreActionType = {
   enableWhenSpaceIsAvailable?: boolean;
   disableNProgress?: boolean;
   disabled?: boolean;
+  testId?: string;
 };
 
 export const MoreActions = ({ className, actions }: { className?: string; actions: MoreActionType[] }) => {
@@ -105,6 +106,7 @@ const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => v
     if (enable) {
       return (
         <Link
+          data-testid={a.testId}
           data-disable-nprogress={a.disableNProgress}
           className={`btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}`}
           href={href}
@@ -120,6 +122,7 @@ const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => v
 
     return (
       <Link
+        data-testid={a.testId}
         data-disable-nprogress={a.disableNProgress}
         className=""
         href={href}
@@ -134,6 +137,7 @@ const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => v
 
   return (
     <a
+      data-testid={a.testId}
       className={enable ? `btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}` : undefined}
       onClick={(e) => {
         e.preventDefault();

@@ -18,6 +18,7 @@ export type MoreActionType = {
     enableWhenSpaceIsAvailable?: boolean;
     disableNProgress?: boolean;
     disabled?: boolean;
+    testId?: string;
 };
 export declare const MoreActions: ({ className, actions }: {
     className?: string;
