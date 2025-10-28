@@ -12,7 +12,6 @@ import toast from "react-hot-toast";
 import { Popover } from "@/dialog/Popover";
 import { isServerError } from "@/form/UseForm";
 import { createPortal } from "react-dom";
-import log from "eslint-plugin-react/lib/util/log";
 
 function AddNew({ onAdd, names }: { onAdd: (name: string) => void; names: string[] }) {
   const [name, setName] = useState("");

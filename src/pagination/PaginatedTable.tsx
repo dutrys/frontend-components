@@ -93,6 +93,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   displayFilters,
   displayConfig,
   renderGridItem,
+  rowClickHref,
   defaultDisplayAs = "list",
 }: {
   caption?: React.ReactNode;
@@ -107,6 +108,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   isSearchable?: boolean;
   title: React.ReactNode;
   addNew?: string;
+  rowClickHref?: (model: TModel["data"][number]) => string;
   displayFilters?: {
     name: string;
     filters: string[];
@@ -395,8 +397,27 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                 <tr
                   key={o}
                   data-testid={`table-row-${o}`}
+                  onClick={
+                    rowClickHref
+                      ? (event) => {
+                          const target = event.nativeEvent.target as HTMLElement;
+                          if (target.closest("a") || target.closest("button") || target.closest("input")) {
+                            return;
+                          }
+
+                          const url = addLocale(rowClickHref(model), params.locale as string);
+
+                          if (event.ctrlKey || event.metaKey || event.button === 1) {
+                            window.open(url, "_blank");
+                          } else {
+                            router.push(url);
+                          }
+                        }
+                      : undefined
+                  }
                   className={cx({
                     [styles.selectedRow]: selected.includes(model.id),
+                    "cursor-pointer relative": rowClickHref,
                   })}
                 >
                   {bulkActions && (
@@ -582,17 +603,18 @@ export const FilterLink = ({
   }
 
   return (
-    <div className="flex items-center">
-      {children}
-      <TableLink
-        data-tooltip-id={TOOLTIP_GLOBAL_ID}
-        data-tooltip-content={isFiltering ? t("general.filter") : t("general.clearFilter")}
-        className={`${className || ""} px-2 invisible`}
-        href={`${pathname}${setPartialParams(p, searchParams)}`}
-      >
-        {isFiltering ? <FunnelIcon className="size-5" /> : <FunnelIconSolid className="size-5" />}
-      </TableLink>
-    </div>
+    <TableLink
+      data-tooltip-id={TOOLTIP_GLOBAL_ID}
+      data-tooltip-content={isFiltering ? t("general.filter") : t("general.clearFilter")}
+      href={`${pathname}${setPartialParams(p, searchParams)}`}
+    >
+      <span className="text-base-content">{children}</span>
+      {isFiltering ? (
+        <FunnelIcon className={cx(className, "pl-1 inline size-5")} />
+      ) : (
+        <FunnelIconSolid className={cx(className, "pl-1 inline size-5")} />
+      )}
+    </TableLink>
   );
 };
 

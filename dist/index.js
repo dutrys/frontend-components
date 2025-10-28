@@ -1370,7 +1370,7 @@ function isActionColumn(column) {
 function isFunctionColumn(column) {
     return typeof column === "object" && typeof column.body === "function";
 }
-const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, caption, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, defaultDisplayAs = "list", }) => {
+const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, caption, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs = "list", }) => {
     const router = useRouter();
     const params = useParams();
     const searchParams = useSearchParams();
@@ -1465,8 +1465,23 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
                                             return (jsx(Component, { className: `${styles$2.thead} text-xs`, children: jsxs(Link, { prefetch: false, "data-testid": `sort-table-${column.name.toString()}-${sortOrder === "DESC" ? "asc" : "desc"}`, ...(sortBy === column.name ? { className: "text-primary" } : {}), href: setPartialParams({ page: "1", sortBy: `${column.name.toString()}:${sortOrder === "DESC" ? "ASC" : "DESC"}` }, searchParams), children: [column.title, sortOrder === "DESC" ? jsx(ChevronDownIcon, { ...args }) : jsx(ChevronUpIcon, { ...args })] }) }, column.name.toString()));
                                         }
                                         return (jsx(Component, { className: `${styles$2.thead} text-xs`, children: column.title }, column.title.toString()));
-                                    })] }) }), jsx("tbody", { children: pagination.data.map((model, o) => (jsxs("tr", { "data-testid": `table-row-${o}`, className: cx({
+                                    })] }) }), jsx("tbody", { children: pagination.data.map((model, o) => (jsxs("tr", { "data-testid": `table-row-${o}`, onClick: rowClickHref
+                                    ? (event) => {
+                                        const target = event.nativeEvent.target;
+                                        if (target.closest("a") || target.closest("button") || target.closest("input")) {
+                                            return;
+                                        }
+                                        const url = addLocale(rowClickHref(model), params.locale);
+                                        if (event.ctrlKey || event.metaKey || event.button === 1) {
+                                            window.open(url, "_blank");
+                                        }
+                                        else {
+                                            router.push(url);
+                                        }
+                                    }
+                                    : undefined, className: cx({
                                     [styles$2.selectedRow]: selected.includes(model.id),
+                                    "cursor-pointer relative": rowClickHref,
                                 }), children: [bulkActions && (jsx("th", { children: jsx("input", { type: "checkbox", className: "checkbox checkbox-xs", onChange: (e) => {
                                                 if (e.target.checked) {
                                                     setSelected((prev) => [...prev, model.id]);
@@ -1526,7 +1541,7 @@ const FilterLink = ({ children, className, params, }) => {
             p[key] = "";
         });
     }
-    return (jsxs("div", { className: "flex items-center", children: [children, jsx(TableLink, { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": isFiltering ? t("general.filter") : t("general.clearFilter"), className: `${className || ""} px-2 invisible`, href: `${pathname}${setPartialParams(p, searchParams)}`, children: isFiltering ? jsx(FunnelIcon, { className: "size-5" }) : jsx(FunnelIcon$1, { className: "size-5" }) })] }));
+    return (jsxs(TableLink, { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": isFiltering ? t("general.filter") : t("general.clearFilter"), href: `${pathname}${setPartialParams(p, searchParams)}`, children: [jsx("span", { className: "text-base-content", children: children }), isFiltering ? (jsx(FunnelIcon, { className: cx(className, "pl-1 inline size-5") })) : (jsx(FunnelIcon$1, { className: cx(className, "pl-1 inline size-5") }))] }));
 };
 const TruncateText = ({ text, length }) => {
     return (jsx("div", { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": text, className: "text-left text-ellipsis overflow-hidden", style: { width: length }, children: text }));

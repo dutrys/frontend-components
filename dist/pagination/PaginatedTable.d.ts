@@ -43,7 +43,7 @@ export declare const PaginatedTable: <TModel extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ pagination, title, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, defaultDisplayAs, }: {
+}>({ pagination, title, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, }: {
     caption?: React.ReactNode;
     defaultDisplayAs?: "list" | "grid";
     renderGridItem?: (model: TModel["data"][number]) => React.ReactNode;
@@ -56,6 +56,7 @@ export declare const PaginatedTable: <TModel extends {
     isSearchable?: boolean;
     title: React.ReactNode;
     addNew?: string;
+    rowClickHref?: (model: TModel["data"][number]) => string;
     displayFilters?: {
         name: string;
         filters: string[];
