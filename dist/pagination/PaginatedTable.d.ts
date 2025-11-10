@@ -43,7 +43,8 @@ export declare const PaginatedTable: <TModel extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ pagination, title, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, }: {
+}>({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, }: {
+    titleAbove?: React.ReactNode;
     caption?: React.ReactNode;
     defaultDisplayAs?: "list" | "grid";
     renderGridItem?: (model: TModel["data"][number]) => React.ReactNode;
@@ -51,10 +52,10 @@ export declare const PaginatedTable: <TModel extends {
         children: React.ReactNode;
         onSelect: (models: number[]) => Promise<boolean | void>;
     }[];
-    sortEnum: any;
+    sortEnum: Record<string, string>;
     extraHeading?: React.ReactNode;
     isSearchable?: boolean;
-    title: React.ReactNode;
+    title?: React.ReactNode;
     addNew?: string;
     rowClickHref?: (model: TModel["data"][number]) => string;
     displayFilters?: {
@@ -88,7 +89,7 @@ export declare const TableLink: ({ href, children, className, isLink, ...rest }:
 }) => string | number | bigint | boolean | import("react/jsx-runtime").JSX.Element | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined;
 export declare const FilterLink: ({ children, className, params, }: {
     className: string;
-    children: React.ReactNode;
+    children: string;
     params: Record<string, string>;
 }) => import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=PaginatedTable.d.ts.map

@@ -7,6 +7,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "push": "npm run build && git add dist/ && git add src/ && git commit -m ",
+    "build-tikis-patch": "npm run build && rm -rf ~/Sites/tikis-frontend/node_modules/frontend-components/dist && cp -r ./dist ~/Sites/tikis-frontend/node_modules/frontend-components/",
     "build-schedules-patch": "npm run build && rm -rf ~/Sites/schedules-frontend/node_modules/frontend-components/dist && cp -r ./dist ~/Sites/schedules-frontend/node_modules/frontend-components/",
     "build-tracker-patch": "npm run build && rm -rf ~/Sites/tracker-frontend/node_modules/frontend-components/dist && cp -r ./dist ~/Sites/tracker-frontend/node_modules/frontend-components/",
     "build-cashdesk-patch": "npm run build && rm -rf ~/Sites/cashdesk-frontend/node_modules/frontend-components/dist && cp -r ./dist ~/Sites/cashdesk-frontend/node_modules/frontend-components/",

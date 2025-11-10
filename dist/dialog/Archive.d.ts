@@ -1,6 +1,9 @@
 import React from "react";
 type Include<T, U> = T extends U ? T : never;
-export declare const Archive: <T>({ title, archive, onClose, formatErrors, translateId, onSuccess, children, }: {
+export declare const Archive: <T>({ title, yes, no, message, archive, onClose, formatErrors, translateId, onSuccess, children, closeHref, }: {
+    yes?: string;
+    no?: string;
+    message?: string;
     title: string;
     archive: () => Promise<T>;
     onClose?: () => void;
@@ -8,6 +11,7 @@ export declare const Archive: <T>({ title, archive, onClose, formatErrors, trans
     formatErrors?: (errors: Include<T, {
         errors: Record<string, string[]>;
     }>) => React.ReactNode;
+    closeHref?: string;
     translateId?: string;
     onSuccess?: () => unknown;
 }) => import("react/jsx-runtime").JSX.Element;

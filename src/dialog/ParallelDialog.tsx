@@ -6,6 +6,7 @@ import { Tooltip } from "react-tooltip";
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react";
 import { LoadingComponent } from "@/Loading";
 import cx from "classnames";
+import { addLocale } from "@/pagination/Link";
 
 export const TOOLTIP_PARALLEL_ID = "parallel-tooltip";
 
@@ -14,9 +15,10 @@ type DialogWithBackProps = {
   title?: string;
   className?: string;
   children: React.ReactNode;
+  closeHref?: string;
 };
 
-export const ParallelDialog = ({ title, children, onClose, className, ...rest }: DialogWithBackProps) => {
+export const ParallelDialog = ({ closeHref, title, children, onClose, className, ...rest }: DialogWithBackProps) => {
   const [isOpen, setIsOpen] = useState(true);
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -25,8 +27,16 @@ export const ParallelDialog = ({ title, children, onClose, className, ...rest }:
   const closeModal = () => {
     setIsOpen(false);
 
+    console.log("CLOSE EVENT", closeHref);
+
     if (onClose) {
       onClose();
+      return;
+    }
+
+    if (closeHref) {
+      console.log("CLOSE EVENT closeHref", closeHref);
+      router.push(addLocale(closeHref));
       return;
     }
 

@@ -17,7 +17,7 @@ declare const LoadingComponent: ({ style, className, loadingClassName, size, }: 
     style?: React__default.CSSProperties;
 }) => react_jsx_runtime.JSX.Element;
 
-declare const Popover: ({ title, children, popoverClassName, onShow, open: openProp, hoverClassName, showOnHover, showOnClick, showOnFocus, popoverWidth, backgroundColor, borderColor, disabled, placement, }: {
+declare const Popover: ({ title, children, popoverClassName, onShow, open: openProp, hoverClassName, showOnHover, showOnClick, showOnFocus, popoverWidth, backgroundColor, borderColor, disabled, placement, arrowSize, }: {
     disabled?: boolean;
     open?: boolean;
     showOnHover?: boolean;
@@ -26,6 +26,10 @@ declare const Popover: ({ title, children, popoverClassName, onShow, open: openP
     popoverClassName?: string;
     hoverClassName?: string;
     popoverWidth?: string;
+    arrowSize?: {
+        width: number;
+        height: number;
+    };
     title: (ref: ((node: HTMLElement | null) => void) | null, props: Record<string, unknown>, isOpen: boolean) => React.ReactNode;
     children: (close: () => void) => React.ReactNode;
     onShow?: (show: boolean) => void;
@@ -145,7 +149,8 @@ declare const PaginatedTable: <TModel extends {
         id: number;
     }[];
     meta: ResponseMeta$1;
-}>({ pagination, title, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, }: {
+}>({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, }: {
+    titleAbove?: React__default.ReactNode;
     caption?: React__default.ReactNode;
     defaultDisplayAs?: "list" | "grid";
     renderGridItem?: (model: TModel["data"][number]) => React__default.ReactNode;
@@ -153,10 +158,10 @@ declare const PaginatedTable: <TModel extends {
         children: React__default.ReactNode;
         onSelect: (models: number[]) => Promise<boolean | void>;
     }[];
-    sortEnum: any;
+    sortEnum: Record<string, string>;
     extraHeading?: React__default.ReactNode;
     isSearchable?: boolean;
-    title: React__default.ReactNode;
+    title?: React__default.ReactNode;
     addNew?: string;
     rowClickHref?: (model: TModel["data"][number]) => string;
     displayFilters?: {
@@ -190,7 +195,7 @@ declare const TableLink: ({ href, children, className, isLink, ...rest }: {
 }) => string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React__default.ReactNode> | Promise<string | number | bigint | boolean | React__default.ReactPortal | React__default.ReactElement<unknown, string | React__default.JSXElementConstructor<any>> | Iterable<React__default.ReactNode> | null | undefined> | null | undefined;
 declare const FilterLink: ({ children, className, params, }: {
     className: string;
-    children: React__default.ReactNode;
+    children: string;
     params: Record<string, string>;
 }) => react_jsx_runtime.JSX.Element;
 
@@ -535,11 +540,15 @@ type DialogWithBackProps = {
     title?: string;
     className?: string;
     children: React.ReactNode;
+    closeHref?: string;
 };
-declare const ParallelDialog: ({ title, children, onClose, className, ...rest }: DialogWithBackProps) => react_jsx_runtime.JSX.Element;
+declare const ParallelDialog: ({ closeHref, title, children, onClose, className, ...rest }: DialogWithBackProps) => react_jsx_runtime.JSX.Element;
 
 type Include<T, U> = T extends U ? T : never;
-declare const Archive: <T>({ title, archive, onClose, formatErrors, translateId, onSuccess, children, }: {
+declare const Archive: <T>({ title, yes, no, message, archive, onClose, formatErrors, translateId, onSuccess, children, closeHref, }: {
+    yes?: string;
+    no?: string;
+    message?: string;
     title: string;
     archive: () => Promise<T>;
     onClose?: () => void;
@@ -547,6 +556,7 @@ declare const Archive: <T>({ title, archive, onClose, formatErrors, translateId,
     formatErrors?: (errors: Include<T, {
         errors: Record<string, string[]>;
     }>) => React__default.ReactNode;
+    closeHref?: string;
     translateId?: string;
     onSuccess?: () => unknown;
 }) => react_jsx_runtime.JSX.Element;
@@ -595,9 +605,19 @@ type MenuItemWithSubmenu = Omit<MenuItem, "href"> & {
     onClick?: () => void;
     items?: MenuItem[] | (() => React__default.ReactNode);
 };
-declare const SidebarMenu: ({ menu, active, }: {
+declare const SidebarMenu: ({ menu, active, expanded, }: {
+    expanded?: boolean;
     active: (item: MenuItemWithSubmenu) => boolean;
     menu: MenuItemWithSubmenu[];
 }) => react_jsx_runtime.JSX.Element;
+declare const SidebarLayout: ({ sidebarExpanded, onExpandChanged, sideChildren, children, menuIcon, icon, className, }: {
+    onExpandChanged: (expanded: boolean) => void;
+    sidebarExpanded?: boolean;
+    sideChildren: (expanded: boolean) => React__default.ReactNode;
+    menuIcon: (expanded: boolean) => React__default.ReactNode;
+    children: React__default.ReactNode;
+    icon: React__default.ReactNode;
+    className?: string;
+}) => react_jsx_runtime.JSX.Element;
 
-export { ActionButton, type ActionColumn, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxInput, type ColumnType, ConfirmSave, type DateColumn, DateInput, DatePicker, DateTime, DateTimeInput, DateTimePicker, EditButton, FilterLink, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MenuItem, type MenuItemWithSubmenu, type MoreActionType, MoreActions, NumberInput, type PaginateQuery, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBox, Required, type ResponseMeta, SaveButton, ScreenSize, SelectFromApi, SelectFromApiInput, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, type SelectPaginatedFromApiProps, SelectPaginatedFromApiWithLabel, type ServerError, SidebarMenu, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextInput, TextareaInput, TimeInput, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
+export { ActionButton, type ActionColumn, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxInput, type ColumnType, ConfirmSave, type DateColumn, DateInput, DatePicker, DateTime, DateTimeInput, DateTimePicker, EditButton, FilterLink, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MenuItem, type MenuItemWithSubmenu, type MoreActionType, MoreActions, NumberInput, type PaginateQuery, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBox, Required, type ResponseMeta, SaveButton, ScreenSize, SelectFromApi, SelectFromApiInput, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, type SelectPaginatedFromApiProps, SelectPaginatedFromApiWithLabel, type ServerError, SidebarLayout, SidebarMenu, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextInput, TextareaInput, TimeInput, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };

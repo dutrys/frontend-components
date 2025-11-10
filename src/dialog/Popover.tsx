@@ -33,6 +33,7 @@ export const Popover = ({
   borderColor = "border-slate-600",
   disabled,
   placement,
+  arrowSize,
 }: {
   disabled?: boolean;
   open?: boolean;
@@ -42,6 +43,7 @@ export const Popover = ({
   popoverClassName?: string;
   hoverClassName?: string;
   popoverWidth?: string;
+  arrowSize?: { width: number; height: number };
   title: (
     ref: ((node: HTMLElement | null) => void) | null,
     props: Record<string, unknown>,
@@ -110,6 +112,8 @@ export const Popover = ({
               stroke={`var(--color-${borderColor.replace("border-", "")})`}
               context={context}
               ref={arrowRef}
+              width={arrowSize?.width}
+              height={arrowSize?.height}
             />
             <div className={popoverWidth}>{children(() => context.onOpenChange(false))}</div>
           </div>

@@ -12,18 +12,26 @@ type Include<T, U> = T extends U ? T : never;
 
 export const Archive = <T,>({
   title,
+  yes,
+  no,
+  message,
   archive,
   onClose,
   formatErrors,
   translateId,
   onSuccess,
   children,
+  closeHref,
 }: {
+  yes?: string;
+  no?: string;
+  message?: string;
   title: string;
   archive: () => Promise<T>;
   onClose?: () => void;
   children?: React.ReactNode;
   formatErrors?: (errors: Include<T, { errors: Record<string, string[]> }>) => React.ReactNode;
+  closeHref?: string;
   translateId?: string;
   onSuccess?: () => unknown;
 }) => {
@@ -73,10 +81,10 @@ export const Archive = <T,>({
   };
 
   return (
-    <ParallelDialog onClose={onClose} title={title}>
+    <ParallelDialog closeHref={closeHref} onClose={onClose} title={title}>
       <Hotkeys id="archive" hotKeys={[{ key: "Enter", description: t("archive.yes"), callback: doArchive }]} />
       {errors && formatErrors && <div className="alert alert-error my-4">{formatErrors(errors)}</div>}
-      {t("archive.message")}
+      {message ?? t("archive.message")}
       <br />
       <br />
       {children}
@@ -88,14 +96,14 @@ export const Archive = <T,>({
             disabled={isLoading}
             data-testid="button-archive"
           >
-            {t("archive.yes")}
+            {yes ?? t("archive.yes")}
           </button>{" "}
           <button
             className="btn uppercase"
             onClick={() => (onClose ? onClose() : router.back())}
             data-testid="button-cancel"
           >
-            {t("archive.no")}
+            {no ?? t("archive.no")}
           </button>
         </div>
       </div>

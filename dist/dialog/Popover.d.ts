@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Placement } from "@floating-ui/utils";
-export declare const Popover: ({ title, children, popoverClassName, onShow, open: openProp, hoverClassName, showOnHover, showOnClick, showOnFocus, popoverWidth, backgroundColor, borderColor, disabled, placement, }: {
+export declare const Popover: ({ title, children, popoverClassName, onShow, open: openProp, hoverClassName, showOnHover, showOnClick, showOnFocus, popoverWidth, backgroundColor, borderColor, disabled, placement, arrowSize, }: {
     disabled?: boolean;
     open?: boolean;
     showOnHover?: boolean;
@@ -9,6 +9,10 @@ export declare const Popover: ({ title, children, popoverClassName, onShow, open
     popoverClassName?: string;
     hoverClassName?: string;
     popoverWidth?: string;
+    arrowSize?: {
+        width: number;
+        height: number;
+    };
     title: (ref: ((node: HTMLElement | null) => void) | null, props: Record<string, unknown>, isOpen: boolean) => React.ReactNode;
     children: (close: () => void) => React.ReactNode;
     onShow?: (show: boolean) => void;

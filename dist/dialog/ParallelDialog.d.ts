@@ -5,7 +5,8 @@ type DialogWithBackProps = {
     title?: string;
     className?: string;
     children: React.ReactNode;
+    closeHref?: string;
 };
-export declare const ParallelDialog: ({ title, children, onClose, className, ...rest }: DialogWithBackProps) => import("react/jsx-runtime").JSX.Element;
+export declare const ParallelDialog: ({ closeHref, title, children, onClose, className, ...rest }: DialogWithBackProps) => import("react/jsx-runtime").JSX.Element;
 export {};
 //# sourceMappingURL=ParallelDialog.d.ts.map

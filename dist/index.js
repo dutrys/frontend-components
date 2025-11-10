@@ -6,7 +6,7 @@ import { useFloating, offset, flip, arrow, autoUpdate, useFocus, useHover, safeP
 import cx from 'classnames';
 import LinkNext from 'next/link';
 import { useParams, useSearchParams, useRouter as useRouter$1, usePathname } from 'next/navigation';
-import { ExclamationTriangleIcon, CheckCircleIcon, ExclamationCircleIcon, PencilIcon, EyeIcon, TrashIcon, ChevronDownIcon, EllipsisHorizontalIcon, CheckIcon, Cog6ToothIcon, AdjustmentsHorizontalIcon, XMarkIcon, ClockIcon, CalendarIcon, PlusIcon, RectangleStackIcon, QueueListIcon, ChevronUpIcon, FunnelIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { ExclamationTriangleIcon, CheckCircleIcon, ExclamationCircleIcon, PencilIcon, EyeIcon, TrashIcon, ChevronDownIcon, EllipsisHorizontalIcon, CheckIcon, Cog6ToothIcon, AdjustmentsHorizontalIcon, XMarkIcon, ClockIcon, CalendarIcon, PlusIcon, RectangleStackIcon, QueueListIcon, ChevronUpIcon, FunnelIcon, MagnifyingGlassIcon, ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from '@heroicons/react/24/outline';
 import { useTranslations } from 'next-intl';
 import { EllipsisVerticalIcon, ArrowsUpDownIcon } from '@heroicons/react/16/solid';
 import { useRouter } from 'next-nprogress-bar';
@@ -30,7 +30,7 @@ import { lt as lt$1 } from 'date-fns/locale';
 
 const LoadingComponent = ({ style, className, loadingClassName, size, }) => (jsx("div", { className: `flex justify-center ${className}`, style: style, children: jsx("span", { className: `${loadingClassName || "text-primary"} loading loading-spinner ${size}` }) }));
 
-const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: openProp, hoverClassName, showOnHover = true, showOnClick = false, showOnFocus = false, popoverWidth, backgroundColor = "bg-slate-800", borderColor = "border-slate-600", disabled, placement, }) => {
+const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: openProp, hoverClassName, showOnHover = true, showOnClick = false, showOnFocus = false, popoverWidth, backgroundColor = "bg-slate-800", borderColor = "border-slate-600", disabled, placement, arrowSize, }) => {
     const [isOpen, setIsOpen] = useState(openProp || false);
     const arrowRef = useRef(null);
     const { refs, floatingStyles, context } = useFloating({
@@ -60,7 +60,7 @@ const Popover = ({ title, children, popoverClassName = "py-1", onShow, open: ope
     if (isOpen && hoverClassName) {
         p.className = typeof p.className === "string" ? `${p.className} ${hoverClassName}` : hoverClassName;
     }
-    return (jsxs(Fragment, { children: [title(refs.setReference, p, isOpen), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100 }, ...getFloatingProps(), className: cx("border rounded-sm shadow-lg shadow-base-100 border-1", popoverClassName, backgroundColor, borderColor), children: [jsx(FloatingArrow, { strokeWidth: 1, fill: `var(--color-${backgroundColor.replace("bg-", "")})`, stroke: `var(--color-${borderColor.replace("border-", "")})`, context: context, ref: arrowRef }), jsx("div", { className: popoverWidth, children: children(() => context.onOpenChange(false)) })] }) }))] }));
+    return (jsxs(Fragment, { children: [title(refs.setReference, p, isOpen), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100 }, ...getFloatingProps(), className: cx("border rounded-sm shadow-lg shadow-base-100 border-1", popoverClassName, backgroundColor, borderColor), children: [jsx(FloatingArrow, { strokeWidth: 1, fill: `var(--color-${backgroundColor.replace("bg-", "")})`, stroke: `var(--color-${borderColor.replace("border-", "")})`, context: context, ref: arrowRef, width: arrowSize?.width, height: arrowSize?.height }), jsx("div", { className: popoverWidth, children: children(() => context.onOpenChange(false)) })] }) }))] }));
 };
 
 const Link = (props) => {
@@ -1370,7 +1370,7 @@ function isActionColumn(column) {
 function isFunctionColumn(column) {
     return typeof column === "object" && typeof column.body === "function";
 }
-const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, caption, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs = "list", }) => {
+const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs = "list", }) => {
     const router = useRouter();
     const params = useParams();
     const searchParams = useSearchParams();
@@ -1429,7 +1429,8 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
         }
     }
     elements.push(...searchableShortcuts);
-    const heading = (jsx(Fragment, { children: jsxs("div", { className: "flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]", children: [jsx("h1", { className: `pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (elements.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsivePaginated, { bulkActions: bulkActions ? { actions: bulkActions, setSelected, selected } : undefined, elements: elements })), extraHeading, addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: addNewText || t("pagination.addNew") })] })), renderGridItem && (jsxs("div", { className: "join mr-2", children: [jsx("button", { className: cx("btn btn-xs join-item", { "btn-active": displayAs === "grid" }), onClick: () => {
+    const titleAboveScreen = titleAbove ? (jsx("div", { className: "h-16 flex items-center pl-2 font-bold w-[calc(100vw-var(--sidebar-width)-var(--top-right-bar))] text-nowrap overflow-hidden text-ellipsis", children: titleAbove })) : undefined;
+    const heading = (jsx(Fragment, { children: jsxs("div", { className: "flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-screen sm:max-w-[calc(100vw-var(--sidebar-width))]", children: [jsx("h1", { className: `h-16 pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (elements.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsivePaginated, { bulkActions: bulkActions ? { actions: bulkActions, setSelected, selected } : undefined, elements: elements })), extraHeading, addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: addNewText || t("pagination.addNew") })] })), renderGridItem && (jsxs("div", { className: "join mr-2", children: [jsx("button", { className: cx("btn btn-xs join-item", { "btn-active": displayAs === "grid" }), onClick: () => {
                                 setDisplayAs("grid");
                                 if (displayConfig) {
                                     void store.setDisplayAs(displayConfig.name, "grid");
@@ -1441,82 +1442,85 @@ const PaginatedTable = ({ pagination, title, sortEnum, extraHeading, columns, ca
                                 }
                             }, children: jsx(QueueListIcon, { className: "size-4" }) })] })), isSearchable && jsx(SearchField, {}), displayConfig && (jsx("div", { className: "pr-2", children: jsx(PaginationConfiguration, { disabled: displayAs !== "list", store: store, name: displayConfig.name, configName: configName, columns: columns, configs: paginationConfigs, setConfigName: (name) => setConfigName(name), refresh: () => void refetchPaginationConfigs() }) }))] }) }));
     if (pagination.meta.totalItems === 0) {
-        return (jsxs(Fragment, { children: [heading, caption, jsxs("div", { className: "text-center mt-20", children: [jsxs("span", { className: "text-gray-400", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", addNewText || t("pagination.tryCreatingOne")] }) }))] })] }));
+        return (jsxs(Fragment, { children: [titleAboveScreen, heading, caption, jsxs("div", { className: "text-center mt-20", children: [jsxs("span", { className: "text-gray-400", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", addNewText || t("pagination.tryCreatingOne")] }) }))] })] }));
     }
-    return (jsxs("div", { "data-testid": "paginate-table", className: "relative h-full", "data-test-sort": (pagination.meta.sortBy || []).flat().join("-"), children: [heading, jsx("div", { className: "overflow-x-auto max-h-[calc(100%-7rem)] w-[calc(100vw)] sm:w-[calc(100vw-6rem)]", children: displayAs === "grid" && renderGridItem ? (jsx("div", { className: "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m-4 2xl:grid-cols-4", children: pagination.data.map((d) => renderGridItem(d)) })) : (jsxs("table", { className: `${styles$2.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [caption && jsx("caption", { children: caption }), jsx("thead", { children: jsxs("tr", { children: [bulkActions && (jsx("th", { children: jsx(IndeterminateCheckbox, { className: "checkbox checkbox-xs", onChange: (e) => {
-                                                setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);
-                                            }, indeterminate: selected.length > 0 && selected.length < pagination.data.length, checked: pagination.data.every((model) => selected.includes(model.id)) }) })), paginationConfigs[configName].map((item, i) => {
-                                        const column = columns.find((c) => isActionColumn(c) ? "action" === item.name : c.name === item.name);
-                                        if (!column || !item.enabled) {
-                                            return null;
-                                        }
-                                        if (isActionColumn(column)) {
-                                            return (jsx("th", { className: `${styles$2.thead} w-12 max-w-24 text-xs`, children: "\u00A0" }, `actions-${i}`));
-                                        }
-                                        const [sortBy, sortOrder] = Array.isArray(pagination.meta.sortBy)
-                                            ? pagination.meta.sortBy[0]
-                                            : ["id", "DESC"];
-                                        const Component = column.pin ? "th" : "td";
-                                        if (column.name && Object.values(sortEnum).includes(`${column.name.toString()}:DESC`)) {
-                                            const args = {
-                                                className: "inline",
-                                                width: 10,
-                                            };
-                                            return (jsx(Component, { className: `${styles$2.thead} text-xs`, children: jsxs(Link, { prefetch: false, "data-testid": `sort-table-${column.name.toString()}-${sortOrder === "DESC" ? "asc" : "desc"}`, ...(sortBy === column.name ? { className: "text-primary" } : {}), href: setPartialParams({ page: "1", sortBy: `${column.name.toString()}:${sortOrder === "DESC" ? "ASC" : "DESC"}` }, searchParams), children: [column.title, sortOrder === "DESC" ? jsx(ChevronDownIcon, { ...args }) : jsx(ChevronUpIcon, { ...args })] }) }, column.name.toString()));
-                                        }
-                                        return (jsx(Component, { className: `${styles$2.thead} text-xs`, children: column.title }, column.title.toString()));
-                                    })] }) }), jsx("tbody", { children: pagination.data.map((model, o) => (jsxs("tr", { "data-testid": `table-row-${o}`, onClick: rowClickHref
-                                    ? (event) => {
-                                        const target = event.nativeEvent.target;
-                                        if (target.closest("a") || target.closest("button") || target.closest("input")) {
-                                            return;
-                                        }
-                                        const url = addLocale(rowClickHref(model), params.locale);
-                                        if (event.ctrlKey || event.metaKey || event.button === 1) {
-                                            window.open(url, "_blank");
-                                        }
-                                        else {
-                                            router.push(url);
-                                        }
-                                    }
-                                    : undefined, className: cx({
-                                    [styles$2.selectedRow]: selected.includes(model.id),
-                                    "cursor-pointer relative": rowClickHref,
-                                }), children: [bulkActions && (jsx("th", { children: jsx("input", { type: "checkbox", className: "checkbox checkbox-xs", onChange: (e) => {
-                                                if (e.target.checked) {
-                                                    setSelected((prev) => [...prev, model.id]);
+    return (jsxs(Fragment, { children: [titleAboveScreen, jsxs("div", { "data-testid": "paginate-table", className: "relative h-[calc(100vh-4rem)]", "data-test-sort": (pagination.meta.sortBy || []).flat().join("-"), children: [heading, jsx("div", { className: "overflow-x-auto max-h-[calc(100%-7rem)] w-screen sm:w-[calc(100vw-var(--sidebar-width))]", children: displayAs === "grid" && renderGridItem ? (jsx("div", { className: "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m-4 2xl:grid-cols-4", children: pagination.data.map((d) => renderGridItem(d)) })) : (jsxs("table", { className: `${styles$2.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [caption && jsx("caption", { children: caption }), jsx("thead", { children: jsxs("tr", { children: [bulkActions && (jsx("th", { children: jsx(IndeterminateCheckbox, { className: "checkbox checkbox-xs", onChange: (e) => {
+                                                        setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);
+                                                    }, indeterminate: selected.length > 0 && selected.length < pagination.data.length, checked: pagination.data.every((model) => selected.includes(model.id)) }) })), paginationConfigs[configName].map((item, i) => {
+                                                const column = columns.find((c) => isActionColumn(c) ? "action" === item.name : c.name === item.name);
+                                                if (!column || !item.enabled) {
+                                                    return null;
+                                                }
+                                                if (isActionColumn(column)) {
+                                                    return (jsx("th", { className: `${styles$2.thead} w-12 max-w-24 text-xs`, children: "\u00A0" }, `actions-${i}`));
+                                                }
+                                                const [sortBy, sortOrder] = Array.isArray(pagination.meta.sortBy)
+                                                    ? pagination.meta.sortBy[0]
+                                                    : ["id", "DESC"];
+                                                const Component = column.pin ? "th" : "td";
+                                                if (column.name && Object.values(sortEnum).includes(`${column.name.toString()}:DESC`)) {
+                                                    const args = {
+                                                        className: "inline",
+                                                        width: 10,
+                                                    };
+                                                    return (jsx(Component, { className: `${styles$2.thead} text-xs`, children: jsxs(Link, { prefetch: false, "data-testid": `sort-table-${column.name.toString()}-${sortOrder === "DESC" ? "asc" : "desc"}`, ...(sortBy === column.name ? { className: "text-primary" } : {}), href: setPartialParams({
+                                                                page: "1",
+                                                                sortBy: `${column.name.toString()}:${sortOrder === "DESC" ? "ASC" : "DESC"}`,
+                                                            }, searchParams), children: [column.title, sortOrder === "DESC" ? jsx(ChevronDownIcon, { ...args }) : jsx(ChevronUpIcon, { ...args })] }) }, column.name.toString()));
+                                                }
+                                                return (jsx(Component, { className: `${styles$2.thead} text-xs`, children: column.title }, column.title.toString()));
+                                            })] }) }), jsx("tbody", { children: pagination.data.map((model, o) => (jsxs("tr", { "data-testid": `table-row-${o}`, onClick: rowClickHref
+                                            ? (event) => {
+                                                const target = event.nativeEvent.target;
+                                                if (target.closest("a") || target.closest("button") || target.closest("input")) {
+                                                    return;
+                                                }
+                                                const url = addLocale(rowClickHref(model), params.locale);
+                                                if (event.ctrlKey || event.metaKey || event.button === 1) {
+                                                    window.open(url, "_blank");
                                                 }
                                                 else {
-                                                    setSelected((prev) => prev.filter((id) => id !== model.id));
+                                                    router.push(url);
                                                 }
-                                            }, checked: selected.includes(model.id) }) })), paginationConfigs[configName].map((item, i) => {
-                                        const column = columns.find((c) => isActionColumn(c) ? "action" === item.name : c.name === item.name);
-                                        if (!column || !item.enabled) {
-                                            return null;
-                                        }
-                                        if (isActionColumn(column)) {
-                                            return (jsx("th", { className: column.className || "whitespace-nowrap text-right", children: jsx(MoreActions, { actions: column.actions(model) }) }, `actions-td-${i}`));
-                                        }
-                                        const Component = column.pin ? "th" : "td";
-                                        if (isFunctionColumn(column)) {
-                                            return (jsx(Component, { className: column.className, children: column.body(model) }, `actions-td-${i}`));
-                                        }
-                                        if (column.type === "date") {
-                                            return (jsx(Component, { className: column.className, children: model[column.name] &&
-                                                    (column.format ? (jsx(DateTime, { date: model[column.name], format: column.format })) : (jsx(HumanDate, { date: model[column.name] }))) }, `${model.id}-${column.name.toString()}`));
-                                        }
-                                        const translatedValue = column.translate
-                                            ? t(`${column.translate}.${model[column.name]}`)
-                                            : model[column.name];
-                                        if (column.type === "code") {
-                                            return (jsx(Component, { className: column.className, children: model[column.name] && (jsx("div", { className: "badge badge-sm", children: jsx("code", { children: translatedValue }) })) }, column.name.toString()));
-                                        }
-                                        return (jsx(Component, { className: column.className, children: column.truncate ? (jsx(TruncateText, { text: translatedValue, length: column.truncate })) : (translatedValue) }, column.name.toString()));
-                                    })] }, o))) })] })) }), jsx("div", { className: "absolute left-0 bottom-0 w-full h-16 z-1", children: jsx("div", { className: "bg-base-100", children: jsxs("div", { className: "flex justify-center items-center", children: [jsx("div", { className: `shrink-1 w-60 text-xs pl-4 ${pagination.meta.totalPages > 1 ? "hidden md:block" : ""}`, children: t("pagination.showing", {
-                                    from: (pagination.meta.currentPage - 1) * pagination.meta.itemsPerPage + 1,
-                                    to: Math.min(pagination.meta.currentPage * pagination.meta.itemsPerPage, pagination.meta.totalItems),
-                                    total: pagination.meta.totalItems,
-                                }) }), jsx("div", { className: "grow text-center h-16", children: pagination.meta.totalPages > 1 && jsx(Pagination, { visiblePages: 5, page: pagination.meta }) }), pagination.meta.totalPages > 1 && (jsxs("div", { className: "shrink-1 w-60 hidden md:block text-xs text-right pr-4", children: [jsx("span", { className: "text-gray-400", children: t("pagination.itemsPerPage") }), " ", limits.map((l) => (jsx(LimitLink, { isActive: pagination.meta.itemsPerPage === l, text: l.toString(), href: setPartialParams({ page: "1", limit: `${l}` }, searchParams) }, l)))] }))] }) }) })] }));
+                                            }
+                                            : undefined, className: cx({
+                                            [styles$2.selectedRow]: selected.includes(model.id),
+                                            "cursor-pointer relative": rowClickHref,
+                                        }), children: [bulkActions && (jsx("th", { children: jsx("input", { type: "checkbox", className: "checkbox checkbox-xs", onChange: (e) => {
+                                                        if (e.target.checked) {
+                                                            setSelected((prev) => [...prev, model.id]);
+                                                        }
+                                                        else {
+                                                            setSelected((prev) => prev.filter((id) => id !== model.id));
+                                                        }
+                                                    }, checked: selected.includes(model.id) }) })), paginationConfigs[configName].map((item, i) => {
+                                                const column = columns.find((c) => isActionColumn(c) ? "action" === item.name : c.name === item.name);
+                                                if (!column || !item.enabled) {
+                                                    return null;
+                                                }
+                                                if (isActionColumn(column)) {
+                                                    return (jsx("th", { className: column.className || "whitespace-nowrap text-right", children: jsx(MoreActions, { actions: column.actions(model) }) }, `actions-td-${i}`));
+                                                }
+                                                const Component = column.pin ? "th" : "td";
+                                                if (isFunctionColumn(column)) {
+                                                    return (jsx(Component, { className: column.className, children: column.body(model) }, `actions-td-${i}`));
+                                                }
+                                                if (column.type === "date") {
+                                                    return (jsx(Component, { className: column.className, children: model[column.name] &&
+                                                            (column.format ? (jsx(DateTime, { date: model[column.name], format: column.format })) : (jsx(HumanDate, { date: model[column.name] }))) }, `${model.id}-${column.name.toString()}`));
+                                                }
+                                                const translatedValue = column.translate
+                                                    ? t(`${column.translate}.${model[column.name]}`)
+                                                    : model[column.name];
+                                                if (column.type === "code") {
+                                                    return (jsx(Component, { className: column.className, children: model[column.name] && (jsx("div", { className: "badge badge-sm", children: jsx("code", { children: translatedValue }) })) }, column.name.toString()));
+                                                }
+                                                return (jsx(Component, { className: column.className, children: column.truncate ? (jsx(TruncateText, { text: translatedValue, length: column.truncate })) : (translatedValue) }, column.name.toString()));
+                                            })] }, o))) })] })) }), jsx("div", { className: "absolute left-0 bottom-0 w-full h-16 z-1", children: jsx("div", { className: "bg-base-100", children: jsxs("div", { className: "flex justify-center items-center", children: [jsx("div", { className: `shrink-1 w-60 text-xs pl-4 ${pagination.meta.totalPages > 1 ? "hidden md:block" : ""}`, children: t("pagination.showing", {
+                                            from: (pagination.meta.currentPage - 1) * pagination.meta.itemsPerPage + 1,
+                                            to: Math.min(pagination.meta.currentPage * pagination.meta.itemsPerPage, pagination.meta.totalItems),
+                                            total: pagination.meta.totalItems,
+                                        }) }), jsx("div", { className: "grow text-center h-16", children: pagination.meta.totalPages > 1 && jsx(Pagination, { visiblePages: 5, page: pagination.meta }) }), pagination.meta.totalPages > 1 && (jsxs("div", { className: "shrink-1 w-60 hidden md:block text-xs text-right pr-4", children: [jsx("span", { className: "text-gray-400", children: t("pagination.itemsPerPage") }), " ", limits.map((l) => (jsx(LimitLink, { isActive: pagination.meta.itemsPerPage === l, text: l.toString(), href: setPartialParams({ page: "1", limit: `${l}` }, searchParams) }, l)))] }))] }) }) })] })] }));
 };
 const LimitLink = ({ href, text, isActive }) => {
     return (jsx(Link, { prefetch: false, className: `text-gray-400 hover:text-primary-600 mr-1 ${isActive ? "font-bold text-primary-600" : ""}`, href: href, children: text }));
@@ -1541,22 +1545,31 @@ const FilterLink = ({ children, className, params, }) => {
             p[key] = "";
         });
     }
-    return (jsxs(TableLink, { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": isFiltering ? t("general.filter") : t("general.clearFilter"), href: `${pathname}${setPartialParams(p, searchParams)}`, children: [jsx("span", { className: "text-base-content", children: children }), isFiltering ? (jsx(FunnelIcon, { className: cx(className, "pl-1 inline size-5") })) : (jsx(FunnelIcon$1, { className: cx(className, "pl-1 inline size-5") }))] }));
+    const text = children.split(" ");
+    const firstWords = text.slice(0, text.length - 1).join(" ");
+    const lastWords = text[text.length - 1];
+    return (jsx(TableLink, { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": isFiltering ? t("general.filter") : t("general.clearFilter"), href: `${pathname}${setPartialParams(p, searchParams)}`, children: jsxs("div", { className: "text-wrap text-base-content", children: [firstWords, " ", jsxs("span", { className: "inline-flex items-center gap-1 whitespace-nowrap", children: [lastWords, " ", isFiltering ? (jsx(FunnelIcon, { className: cx(className, "inline size-5 text-primary") })) : (jsx(FunnelIcon$1, { className: cx(className, "inline size-5 text-primary") }))] })] }) }));
 };
 const TruncateText = ({ text, length }) => {
     return (jsx("div", { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": text, className: "text-left text-ellipsis overflow-hidden", style: { width: length }, children: text }));
 };
 
 const TOOLTIP_PARALLEL_ID = "parallel-tooltip";
-const ParallelDialog = ({ title, children, onClose, className, ...rest }) => {
+const ParallelDialog = ({ closeHref, title, children, onClose, className, ...rest }) => {
     const [isOpen, setIsOpen] = useState(true);
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const router = useRouter$1();
     const closeModal = () => {
         setIsOpen(false);
+        console.log("CLOSE EVENT", closeHref);
         if (onClose) {
             onClose();
+            return;
+        }
+        if (closeHref) {
+            console.log("CLOSE EVENT closeHref", closeHref);
+            router.push(addLocale(closeHref));
             return;
         }
         if (history.length > 2) {
@@ -1594,7 +1607,7 @@ const ParallelDialog = ({ title, children, onClose, className, ...rest }) => {
                                 }), children: [title && jsx(DialogTitle, { className: "text-lg font-bold", children: title }), children] }), jsx(Tooltip, { id: TOOLTIP_PARALLEL_ID, place: "top" })] }) })] }) }));
 };
 
-const Archive = ({ title, archive, onClose, formatErrors, translateId, onSuccess, children, }) => {
+const Archive = ({ title, yes, no, message, archive, onClose, formatErrors, translateId, onSuccess, children, closeHref, }) => {
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter$1();
     const t = useTranslations();
@@ -1638,7 +1651,7 @@ const Archive = ({ title, archive, onClose, formatErrors, translateId, onSuccess
             },
         });
     };
-    return (jsxs(ParallelDialog, { onClose: onClose, title: title, children: [jsx(Hotkeys, { id: "archive", hotKeys: [{ key: "Enter", description: t("archive.yes"), callback: doArchive }] }), errors && formatErrors && jsx("div", { className: "alert alert-error my-4", children: formatErrors(errors) }), t("archive.message"), jsx("br", {}), jsx("br", {}), children, jsx("div", { className: "w-full text-center", children: jsxs("div", { className: "mx-auto", children: [jsx("button", { onClick: doArchive, className: "btn btn-error uppercase", disabled: isLoading, "data-testid": "button-archive", children: t("archive.yes") }), " ", jsx("button", { className: "btn uppercase", onClick: () => (onClose ? onClose() : router.back()), "data-testid": "button-cancel", children: t("archive.no") })] }) })] }));
+    return (jsxs(ParallelDialog, { closeHref: closeHref, onClose: onClose, title: title, children: [jsx(Hotkeys, { id: "archive", hotKeys: [{ key: "Enter", description: t("archive.yes"), callback: doArchive }] }), errors && formatErrors && jsx("div", { className: "alert alert-error my-4", children: formatErrors(errors) }), message ?? t("archive.message"), jsx("br", {}), jsx("br", {}), children, jsx("div", { className: "w-full text-center", children: jsxs("div", { className: "mx-auto", children: [jsx("button", { onClick: doArchive, className: "btn btn-error uppercase", disabled: isLoading, "data-testid": "button-archive", children: yes ?? t("archive.yes") }), " ", jsx("button", { className: "btn uppercase", onClick: () => (onClose ? onClose() : router.back()), "data-testid": "button-cancel", children: no ?? t("archive.no") })] }) })] }));
 };
 const ArchiveButtonWithDialog = ({ title, archive, children, formatErrors, onSuccess, }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -1656,21 +1669,35 @@ const ArchiveButtonWithDialog = ({ title, archive, children, formatErrors, onSuc
 };
 
 const TOOLTIP_SIDEBAR_ID = "sidebar";
-const Item = ({ item, active, children, disableTooltip, forceHover, }) => (jsx("div", { className: "flex flex-col items-center text-gray-400 hover:text-white", children: jsxs(Link, { href: item.href || "/", prefetch: false, onClick: item.onClick
+const Item = ({ item, active, children, disableTooltip, forceHover, expanded, }) => (jsx("li", { children: jsxs(Link, { href: item.href || "/", prefetch: false, onClick: item.onClick
             ? (e) => {
                 e.preventDefault();
                 item.onClick();
             }
-            : undefined, "data-tooltip-id": TOOLTIP_SIDEBAR_ID, "data-tooltip-content": disableTooltip ? undefined : item.name, "aria-description": disableTooltip ? undefined : item.name, className: cx("flex items-center text-center w-full py-3 hover:bg-neutral-700 cursor-pointer", {
-            "text-primary bg-base-300": active,
-            "bg-neutral-700 text-white": forceHover,
-        }), children: [jsx("div", { className: "w-16 sm:w-24", children: jsx(item.icon, { className: "size-7 mx-auto" }) }), jsx("div", { className: "sm:hidden", children: item.name }), children] }) }, item.href));
-const SidebarMenu = ({ menu, active, }) => (jsx("div", { children: menu.map((i) => {
-        if (i.items) {
-            return (jsx(Popover, { placement: "right-start", title: (ref, props, isOpen) => (jsx("div", { ref: ref, children: jsx(Item, { disableTooltip: true, item: i, active: active(i) || (Array.isArray(i.items) && i.items.some((i) => active(i))), forceHover: isOpen }) })), children: (close) => (jsx("div", { "data-theme": "dim", className: "bg-transparent", children: Array.isArray(i.items) ? (jsxs(Fragment, { children: [jsx("div", { className: "text-sm text-center py-1", children: i.name }), jsx("ul", { className: "menu menu-sm px-1 pt-0 pb-0", children: i.items?.map((sub, i) => (jsx("li", { children: jsxs(Link, { href: sub.href, onClick: close, children: [jsx(sub.icon, { className: "size-4" }), sub.name] }) }, i))) })] })) : (i.items()) })) }, i.name));
+            : undefined, "data-tooltip-id": expanded ? undefined : TOOLTIP_SIDEBAR_ID, "data-tooltip-content": expanded ? undefined : disableTooltip ? undefined : item.name, "aria-description": disableTooltip ? undefined : item.name, className: cx("hover:bg-white/10 text-white/80 hover:text-white", {
+            "bg-white/20": active,
+            "justify-center items-center": !expanded,
+            "bg-white/10 text-white": forceHover,
+        }), children: [jsx(item.icon, { className: cx("mx-auto", { "size-5": expanded, "size-7": !expanded }) }), expanded && item.name, children] }) }));
+const SidebarMenu = ({ menu, active, expanded, }) => (jsx("ul", { className: cx("menu w-full"), children: menu.map((item, i) => {
+        if (item.items && !expanded) {
+            return (jsx(Popover, { backgroundColor: "bg-nav-popover/95", borderColor: "border-nav-popover", placement: "right-start", arrowSize: { width: 10, height: 5 }, title: (ref, props, isOpen) => (jsx("div", { ref: ref, children: jsx(Item, { disableTooltip: true, item: item, active: active(item) || (Array.isArray(item.items) && item.items.some((i) => active(i))), forceHover: isOpen }) })), children: (close) => (jsx("div", { "data-theme": "dim", className: "bg-transparent", children: Array.isArray(item.items) ? (jsxs(Fragment, { children: [jsx("div", { className: "text-xs text-center pt-1 pb-2 text-white", children: item.name }), jsx("ul", { className: "menu menu-sm px-1 pt-0 pb-0", children: item.items?.map((sub, i) => (jsx("li", { children: jsxs(Link, { href: sub.href, onClick: close, className: "text-white", children: [jsx(sub.icon, { className: "size-4" }), sub.name] }) }, i))) })] })) : (item.items()) })) }, `${item.name}-${i}`));
         }
-        return jsx(Item, { item: i, active: active(i) }, `${i.name}-${i.href}`);
+        return (jsx(React__default.Fragment, { children: expanded && item.items && Array.isArray(item.items) ? (jsx("li", { children: jsxs("details", { className: "[&[open]]:bg-gradient-to-b [&[open]]:from-white/20 [&[open]]:to-white/5 rounded-md", children: [jsxs("summary", { className: "hover:bg-white/10 text-white/80 hover:text-white", children: [jsx(item.icon, { className: "mx-auto size-5" }), item.name] }), jsx("ul", { children: item.items.map((sub, i) => (jsx(Item, { expanded: expanded, item: sub, active: active(sub) }, `${i}-${sub.name}`))) })] }) })) : (jsx(Item, { expanded: expanded, item: item, active: active(item) })) }, `${item.name}-${i}`));
     }) }));
+const SidebarLayout = ({ sidebarExpanded, onExpandChanged, sideChildren, children, menuIcon, icon, className, }) => {
+    const [showSidebar, setShowSidebar] = useState(false);
+    const screenSize = useScreenSize();
+    const [expanded, setMenuExpanded] = React__default.useState(sidebarExpanded ?? false);
+    const menuExpanded = expanded || (screenSize === ScreenSize.xs && showSidebar);
+    return (jsxs("div", { className: cx("flex flex-row h-full", className, {
+            "sidebar-expanded [--sidebar-width:15rem]": menuExpanded,
+            "[--sidebar-width:6rem]": !menuExpanded,
+        }), children: [showSidebar && (jsx("div", { className: "sm:hidden absolute left-0 top-0 bg-black/50 w-full h-full", style: { zIndex: 1000 }, onClick: () => setShowSidebar(!expanded) })), jsxs("div", { className: "sm:hidden absolute h-16 flex items-center", style: { zIndex: 1000 }, children: [jsx("span", { onChange: () => setShowSidebar(!showSidebar), children: icon }), jsxs("label", { className: "px-2 sm:hidden text-black ml-4 mr-2 swap swap-rotate", children: [jsx("input", { type: "checkbox", checked: showSidebar, onChange: () => setShowSidebar(!showSidebar) }), jsx("svg", { className: "swap-off fill-current", xmlns: "http://www.w3.org/2000/svg", width: "24", height: "24", viewBox: "0 0 512 512", children: jsx("path", { d: "M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z" }) }), jsx("svg", { className: "swap-on fill-current", xmlns: "http://www.w3.org/2000/svg", width: "24", height: "24", viewBox: "0 0 512 512", children: jsx("polygon", { points: "400 145.49 366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49" }) })] })] }), jsxs("div", { style: { zIndex: 1001 }, className: cx("print:hidden fixed sm:static left-0 top-0 h-full sm:inline-flex transition-[translate] duration-500 ease-in-out", { "-translate-x-60 sm:translate-x-0": !showSidebar }), children: [jsx("div", { className: cx("relative z-50 shrink-0 column-1 p-2 h-full justify-center transition-[width] duration-500 ease-in-out overflow-hidden", { "w-60": menuExpanded, "w-24": !menuExpanded }), children: jsxs("div", { className: "rounded-xl flex flex-col h-full overflow-auto pt-14 bg-navigation group", children: [jsx("div", { className: "absolute w-full h-18 left-0 top-2 z-1000", children: jsx("div", { className: " rounded-xl h-18 mx-2 pl-4 pt-5 bg-gradient-to-b from-[50%] from-navigation to-transparent", children: menuIcon(menuExpanded) }) }), jsx("button", { onClick: () => {
+                                        setMenuExpanded(!menuExpanded);
+                                        onExpandChanged(!menuExpanded);
+                                    }, className: cx("hidden sm:flex absolute top-8 right-0 z-1001 justify-center btn btn-xs btn-circle border-white/40 hover:border-white text-white/70 hover:text-white bg-navigation transition-[translate,opacity] duration-200 ease-in-out group-hover:opacity-100", { "-translate-x-8": expanded, "opacity-0 right-0": !expanded }), children: menuExpanded ? (jsx(ChevronDoubleLeftIcon, { className: "size-4" })) : (jsx(ChevronDoubleRightIcon, { className: "size-4" })) }), sideChildren(menuExpanded)] }) }), jsx(Tooltip, { id: TOOLTIP_SIDEBAR_ID, place: "right", style: { fontSize: 14, zIndex: 2000 } })] }), jsx("div", { className: "grow shirk", children: children })] }));
+};
 
-export { ActionButton, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxInput, ConfirmSave, DateInput, DatePicker, DateTime, DateTimeInput, DateTimePicker, EditButton, FilterLink, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NumberInput, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBox, Required, SaveButton, ScreenSize, SelectFromApi, SelectFromApiInput, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextInput, TextareaInput, TimeInput, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
+export { ActionButton, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxInput, ConfirmSave, DateInput, DatePicker, DateTime, DateTimeInput, DateTimePicker, EditButton, FilterLink, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NumberInput, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBox, Required, SaveButton, ScreenSize, SelectFromApi, SelectFromApiInput, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, SelectPaginatedFromApiWithLabel, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextInput, TextareaInput, TimeInput, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
 //# sourceMappingURL=index.js.map

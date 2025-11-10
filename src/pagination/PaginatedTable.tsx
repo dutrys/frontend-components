@@ -81,6 +81,7 @@ export function isFunctionColumn<TModel>(column: ColumnType<TModel>): column is 
 export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: ResponseMeta }>({
   pagination,
   title,
+  titleAbove,
   sortEnum,
   extraHeading,
   columns,
@@ -96,6 +97,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   rowClickHref,
   defaultDisplayAs = "list",
 }: {
+  titleAbove?: React.ReactNode;
   caption?: React.ReactNode;
   defaultDisplayAs?: "list" | "grid";
   renderGridItem?: (model: TModel["data"][number]) => React.ReactNode;
@@ -103,10 +105,10 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
     children: React.ReactNode;
     onSelect: (models: number[]) => Promise<boolean | void>;
   }[];
-  sortEnum: any;
+  sortEnum: Record<string, string>;
   extraHeading?: React.ReactNode;
   isSearchable?: boolean;
-  title: React.ReactNode;
+  title?: React.ReactNode;
   addNew?: string;
   rowClickHref?: (model: TModel["data"][number]) => string;
   displayFilters?: {
@@ -222,10 +224,18 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
 
   elements.push(...searchableShortcuts);
 
+  const titleAboveScreen = titleAbove ? (
+    <div className="h-16 flex items-center pl-2 font-bold w-[calc(100vw-var(--sidebar-width)-var(--top-right-bar))] text-nowrap overflow-hidden text-ellipsis">
+      {titleAbove}
+    </div>
+  ) : undefined;
+
   const heading = (
     <>
-      <div className="flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-[calc(100vw)] sm:max-w-[calc(100vw-6rem)]">
-        <h1 className={`pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`}>{title}</h1>
+      <div className="flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-screen sm:max-w-[calc(100vw-var(--sidebar-width))]">
+        <h1 className={`h-16 pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`}>
+          {title}
+        </h1>
         <Hotkeys id="paginatedTable" hotKeys={hotKeys} />
 
         {(elements.length > 0 || (bulkActions && bulkActions?.length > 0)) && (
@@ -294,6 +304,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   if (pagination.meta.totalItems === 0) {
     return (
       <>
+        {titleAboveScreen}
         {heading}
         {caption}
         <div className="text-center mt-20">
@@ -313,126 +324,33 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   }
 
   return (
-    <div
-      data-testid="paginate-table"
-      className="relative h-full"
-      data-test-sort={(pagination.meta.sortBy || []).flat().join("-")}
-    >
-      {heading}
-      <div className="overflow-x-auto max-h-[calc(100%-7rem)] w-[calc(100vw)] sm:w-[calc(100vw-6rem)]">
-        {displayAs === "grid" && renderGridItem ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m-4 2xl:grid-cols-4">
-            {pagination.data.map((d) => renderGridItem(d))}
-          </div>
-        ) : (
-          <table className={`${styles.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`}>
-            {caption && <caption>{caption}</caption>}
-            <thead>
-              <tr>
-                {bulkActions && (
-                  <th>
-                    <IndeterminateCheckbox
-                      className="checkbox checkbox-xs"
-                      onChange={(e) => {
-                        setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);
-                      }}
-                      indeterminate={selected.length > 0 && selected.length < pagination.data.length}
-                      checked={pagination.data.every((model) => selected.includes(model.id))}
-                    />
-                  </th>
-                )}
-                {paginationConfigs[configName].map((item, i) => {
-                  const column = columns.find((c) =>
-                    isActionColumn(c) ? "action" === item.name : (c.name as string) === item.name,
-                  );
-                  if (!column || !item.enabled) {
-                    return null;
-                  }
-                  if (isActionColumn(column)) {
-                    return (
-                      <th key={`actions-${i}`} className={`${styles.thead} w-12 max-w-24 text-xs`}>
-                        &nbsp;
-                      </th>
-                    );
-                  }
-
-                  const [sortBy, sortOrder] = Array.isArray(pagination.meta.sortBy)
-                    ? pagination.meta.sortBy[0]
-                    : ["id", "DESC"];
-                  const Component: React.ElementType = column.pin ? "th" : "td";
-                  if (column.name && Object.values(sortEnum).includes(`${column.name.toString()}:DESC`)) {
-                    const args = {
-                      className: "inline",
-                      width: 10,
-                    };
-
-                    return (
-                      <Component key={column.name.toString()} className={`${styles.thead} text-xs`}>
-                        <Link
-                          prefetch={false}
-                          data-testid={`sort-table-${column.name.toString()}-${sortOrder === "DESC" ? "asc" : "desc"}`}
-                          {...(sortBy === column.name ? { className: "text-primary" } : {})}
-                          href={setPartialParams(
-                            { page: "1", sortBy: `${column.name.toString()}:${sortOrder === "DESC" ? "ASC" : "DESC"}` },
-                            searchParams,
-                          )}
-                        >
-                          {column.title}
-                          {sortOrder === "DESC" ? <ChevronDownIcon {...args} /> : <ChevronUpIcon {...args} />}
-                        </Link>
-                      </Component>
-                    );
-                  }
-
-                  return (
-                    <Component key={column.title.toString()} className={`${styles.thead} text-xs`}>
-                      {column.title}
-                    </Component>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {pagination.data.map((model: TModel["data"][number], o: number) => (
-                <tr
-                  key={o}
-                  data-testid={`table-row-${o}`}
-                  onClick={
-                    rowClickHref
-                      ? (event) => {
-                          const target = event.nativeEvent.target as HTMLElement;
-                          if (target.closest("a") || target.closest("button") || target.closest("input")) {
-                            return;
-                          }
-
-                          const url = addLocale(rowClickHref(model), params.locale as string);
-
-                          if (event.ctrlKey || event.metaKey || event.button === 1) {
-                            window.open(url, "_blank");
-                          } else {
-                            router.push(url);
-                          }
-                        }
-                      : undefined
-                  }
-                  className={cx({
-                    [styles.selectedRow]: selected.includes(model.id),
-                    "cursor-pointer relative": rowClickHref,
-                  })}
-                >
+    <>
+      {titleAboveScreen}
+      <div
+        data-testid="paginate-table"
+        className="relative h-[calc(100vh-4rem)]"
+        data-test-sort={(pagination.meta.sortBy || []).flat().join("-")}
+      >
+        {heading}
+        <div className="overflow-x-auto max-h-[calc(100%-7rem)] w-screen sm:w-[calc(100vw-var(--sidebar-width))]">
+          {displayAs === "grid" && renderGridItem ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m-4 2xl:grid-cols-4">
+              {pagination.data.map((d) => renderGridItem(d))}
+            </div>
+          ) : (
+            <table className={`${styles.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`}>
+              {caption && <caption>{caption}</caption>}
+              <thead>
+                <tr>
                   {bulkActions && (
                     <th>
-                      <input
-                        type="checkbox"
+                      <IndeterminateCheckbox
                         className="checkbox checkbox-xs"
                         onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelected((prev) => [...prev, model.id]);
-                          } else {
-                            setSelected((prev) => prev.filter((id) => id !== model.id));
-                          }
+                          setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);
                         }}
-                        checked={selected.includes(model.id)}
+                        indeterminate={selected.length > 0 && selected.length < pagination.data.length}
+                        checked={pagination.data.every((model) => selected.includes(model.id))}
                       />
                     </th>
                   )}
@@ -445,93 +363,192 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                     }
                     if (isActionColumn(column)) {
                       return (
-                        <th key={`actions-td-${i}`} className={column.className || "whitespace-nowrap text-right"}>
-                          <MoreActions actions={column.actions(model)} />
+                        <th key={`actions-${i}`} className={`${styles.thead} w-12 max-w-24 text-xs`}>
+                          &nbsp;
                         </th>
                       );
                     }
 
+                    const [sortBy, sortOrder] = Array.isArray(pagination.meta.sortBy)
+                      ? pagination.meta.sortBy[0]
+                      : ["id", "DESC"];
                     const Component: React.ElementType = column.pin ? "th" : "td";
-                    if (isFunctionColumn(column)) {
+                    if (column.name && Object.values(sortEnum).includes(`${column.name.toString()}:DESC`)) {
+                      const args = {
+                        className: "inline",
+                        width: 10,
+                      };
+
                       return (
-                        <Component key={`actions-td-${i}`} className={column.className}>
-                          {column.body(model)}
-                        </Component>
-                      );
-                    }
-                    if (column.type === "date") {
-                      return (
-                        <Component key={`${model.id}-${column.name.toString()}`} className={column.className}>
-                          {model[column.name] &&
-                            (column.format ? (
-                              <DateTime date={model[column.name] as string} format={column.format} />
-                            ) : (
-                              <HumanDate date={model[column.name] as string} />
-                            ))}
+                        <Component key={column.name.toString()} className={`${styles.thead} text-xs`}>
+                          <Link
+                            prefetch={false}
+                            data-testid={`sort-table-${column.name.toString()}-${sortOrder === "DESC" ? "asc" : "desc"}`}
+                            {...(sortBy === column.name ? { className: "text-primary" } : {})}
+                            href={setPartialParams(
+                              {
+                                page: "1",
+                                sortBy: `${column.name.toString()}:${sortOrder === "DESC" ? "ASC" : "DESC"}`,
+                              },
+                              searchParams,
+                            )}
+                          >
+                            {column.title}
+                            {sortOrder === "DESC" ? <ChevronDownIcon {...args} /> : <ChevronUpIcon {...args} />}
+                          </Link>
                         </Component>
                       );
                     }
 
-                    const translatedValue = column.translate
-                      ? t(`${column.translate}.${model[column.name]}`)
-                      : (model[column.name] as string);
-                    if (column.type === "code") {
-                      return (
-                        <Component key={column.name.toString()} className={column.className}>
-                          {model[column.name] && (
-                            <div className="badge badge-sm">
-                              <code>{translatedValue}</code>
-                            </div>
-                          )}
-                        </Component>
-                      );
-                    }
                     return (
-                      <Component key={column.name.toString()} className={column.className}>
-                        {column.truncate ? (
-                          <TruncateText text={translatedValue} length={column.truncate} />
-                        ) : (
-                          translatedValue
-                        )}
+                      <Component key={column.title.toString()} className={`${styles.thead} text-xs`}>
+                        {column.title}
                       </Component>
                     );
                   })}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-      <div className="absolute left-0 bottom-0 w-full h-16 z-1">
-        <div className="bg-base-100">
-          <div className="flex justify-center items-center">
-            <div className={`shrink-1 w-60 text-xs pl-4 ${pagination.meta.totalPages > 1 ? "hidden md:block" : ""}`}>
-              {t("pagination.showing", {
-                from: (pagination.meta.currentPage - 1) * pagination.meta.itemsPerPage + 1,
-                to: Math.min(pagination.meta.currentPage * pagination.meta.itemsPerPage, pagination.meta.totalItems),
-                total: pagination.meta.totalItems,
-              })}
-            </div>
-            <div className="grow text-center h-16">
-              {pagination.meta.totalPages > 1 && <Pagination visiblePages={5} page={pagination.meta} />}
-            </div>
-            {pagination.meta.totalPages > 1 && (
-              <div className="shrink-1 w-60 hidden md:block text-xs text-right pr-4">
-                <span className="text-gray-400">{t("pagination.itemsPerPage")}</span>{" "}
-                {limits.map((l) => (
-                  <LimitLink
-                    isActive={pagination.meta.itemsPerPage === l}
-                    key={l}
-                    text={l.toString()}
-                    href={setPartialParams({ page: "1", limit: `${l}` }, searchParams)}
-                  />
+              </thead>
+              <tbody>
+                {pagination.data.map((model: TModel["data"][number], o: number) => (
+                  <tr
+                    key={o}
+                    data-testid={`table-row-${o}`}
+                    onClick={
+                      rowClickHref
+                        ? (event) => {
+                            const target = event.nativeEvent.target as HTMLElement;
+                            if (target.closest("a") || target.closest("button") || target.closest("input")) {
+                              return;
+                            }
+
+                            const url = addLocale(rowClickHref(model), params.locale as string);
+
+                            if (event.ctrlKey || event.metaKey || event.button === 1) {
+                              window.open(url, "_blank");
+                            } else {
+                              router.push(url);
+                            }
+                          }
+                        : undefined
+                    }
+                    className={cx({
+                      [styles.selectedRow]: selected.includes(model.id),
+                      "cursor-pointer relative": rowClickHref,
+                    })}
+                  >
+                    {bulkActions && (
+                      <th>
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-xs"
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelected((prev) => [...prev, model.id]);
+                            } else {
+                              setSelected((prev) => prev.filter((id) => id !== model.id));
+                            }
+                          }}
+                          checked={selected.includes(model.id)}
+                        />
+                      </th>
+                    )}
+                    {paginationConfigs[configName].map((item, i) => {
+                      const column = columns.find((c) =>
+                        isActionColumn(c) ? "action" === item.name : (c.name as string) === item.name,
+                      );
+                      if (!column || !item.enabled) {
+                        return null;
+                      }
+                      if (isActionColumn(column)) {
+                        return (
+                          <th key={`actions-td-${i}`} className={column.className || "whitespace-nowrap text-right"}>
+                            <MoreActions actions={column.actions(model)} />
+                          </th>
+                        );
+                      }
+
+                      const Component: React.ElementType = column.pin ? "th" : "td";
+                      if (isFunctionColumn(column)) {
+                        return (
+                          <Component key={`actions-td-${i}`} className={column.className}>
+                            {column.body(model)}
+                          </Component>
+                        );
+                      }
+                      if (column.type === "date") {
+                        return (
+                          <Component key={`${model.id}-${column.name.toString()}`} className={column.className}>
+                            {model[column.name] &&
+                              (column.format ? (
+                                <DateTime date={model[column.name] as string} format={column.format} />
+                              ) : (
+                                <HumanDate date={model[column.name] as string} />
+                              ))}
+                          </Component>
+                        );
+                      }
+
+                      const translatedValue = column.translate
+                        ? t(`${column.translate}.${model[column.name]}`)
+                        : (model[column.name] as string);
+                      if (column.type === "code") {
+                        return (
+                          <Component key={column.name.toString()} className={column.className}>
+                            {model[column.name] && (
+                              <div className="badge badge-sm">
+                                <code>{translatedValue}</code>
+                              </div>
+                            )}
+                          </Component>
+                        );
+                      }
+                      return (
+                        <Component key={column.name.toString()} className={column.className}>
+                          {column.truncate ? (
+                            <TruncateText text={translatedValue} length={column.truncate} />
+                          ) : (
+                            translatedValue
+                          )}
+                        </Component>
+                      );
+                    })}
+                  </tr>
                 ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+        <div className="absolute left-0 bottom-0 w-full h-16 z-1">
+          <div className="bg-base-100">
+            <div className="flex justify-center items-center">
+              <div className={`shrink-1 w-60 text-xs pl-4 ${pagination.meta.totalPages > 1 ? "hidden md:block" : ""}`}>
+                {t("pagination.showing", {
+                  from: (pagination.meta.currentPage - 1) * pagination.meta.itemsPerPage + 1,
+                  to: Math.min(pagination.meta.currentPage * pagination.meta.itemsPerPage, pagination.meta.totalItems),
+                  total: pagination.meta.totalItems,
+                })}
               </div>
-            )}
+              <div className="grow text-center h-16">
+                {pagination.meta.totalPages > 1 && <Pagination visiblePages={5} page={pagination.meta} />}
+              </div>
+              {pagination.meta.totalPages > 1 && (
+                <div className="shrink-1 w-60 hidden md:block text-xs text-right pr-4">
+                  <span className="text-gray-400">{t("pagination.itemsPerPage")}</span>{" "}
+                  {limits.map((l) => (
+                    <LimitLink
+                      isActive={pagination.meta.itemsPerPage === l}
+                      key={l}
+                      text={l.toString()}
+                      href={setPartialParams({ page: "1", limit: `${l}` }, searchParams)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
@@ -580,7 +597,7 @@ export const FilterLink = ({
   params,
 }: {
   className: string;
-  children: React.ReactNode;
+  children: string;
   params: Record<string, string>;
 }) => {
   const t = useTranslations();
@@ -602,18 +619,27 @@ export const FilterLink = ({
     });
   }
 
+  const text = children.split(" ");
+  const firstWords = text.slice(0, text.length - 1).join(" ");
+  const lastWords = text[text.length - 1];
+
   return (
     <TableLink
       data-tooltip-id={TOOLTIP_GLOBAL_ID}
       data-tooltip-content={isFiltering ? t("general.filter") : t("general.clearFilter")}
       href={`${pathname}${setPartialParams(p, searchParams)}`}
     >
-      <span className="text-base-content">{children}</span>
-      {isFiltering ? (
-        <FunnelIcon className={cx(className, "pl-1 inline size-5")} />
-      ) : (
-        <FunnelIconSolid className={cx(className, "pl-1 inline size-5")} />
-      )}
+      <div className="text-wrap text-base-content">
+        {firstWords}{" "}
+        <span className="inline-flex items-center gap-1 whitespace-nowrap">
+          {lastWords}{" "}
+          {isFiltering ? (
+            <FunnelIcon className={cx(className, "inline size-5 text-primary")} />
+          ) : (
+            <FunnelIconSolid className={cx(className, "inline size-5 text-primary")} />
+          )}
+        </span>
+      </div>
     </TableLink>
   );
 };
