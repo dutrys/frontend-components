@@ -124,7 +124,7 @@ export const DatePicker = ({
           className={toggleClassName}
           onClick={() => onChange(null)}
         >
-          {value ? <XMarkIcon className="size-4" /> : <ClockIcon className="size-4" />}
+          {value ? <XMarkIcon className="size-4" /> : <CalendarIcon className="size-4" />}
         </button>
       ) : (
         <div className={`cursor-pointer ${toggleClassName}`}>

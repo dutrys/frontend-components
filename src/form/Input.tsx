@@ -287,7 +287,6 @@ export const DateInput = <
 >({
   control,
   useDate,
-  allowEmpty,
   label,
   error,
   disabled,
@@ -303,7 +302,6 @@ export const DateInput = <
 }: IInputProps<TName> & {
   control: Control<TFieldValues>;
   useDate?: boolean;
-  allowEmpty?: boolean;
   from?: Date;
   to?: Date;
 }) => {
@@ -325,7 +323,7 @@ export const DateInput = <
                 to={to}
                 required={required}
                 disabled={disabled}
-                allowEmpty={allowEmpty}
+                allowEmpty={!required}
                 placeholder={required ? `${label}*` : label}
                 value={field.value}
                 onChange={(value) => {
@@ -502,7 +500,6 @@ export const DateTimeInput = <
   useDate,
   className,
   size,
-  allowEmpty,
   from,
   to,
   fieldSetClassName,
@@ -510,7 +507,6 @@ export const DateTimeInput = <
 }: IInputProps<TName> & {
   control: Control<TFieldValues>;
   useDate?: boolean;
-  allowEmpty?: boolean;
   from?: Date;
   to?: Date;
 }) => {
@@ -529,7 +525,7 @@ export const DateTimeInput = <
                   "input-error": error,
                 })}
                 required={required}
-                allowEmpty={allowEmpty}
+                allowEmpty={!required}
                 placeholder={required ? `${label}*` : label}
                 from={from}
                 disabled={disabled}
@@ -638,7 +634,7 @@ export const NumberInput = <
             disabled={props?.disabled}
             required={props?.required}
             value={field.value}
-            className={cx("w-full input input-bordered focus:outline-blue-400", {
+            className={cx("w-full input input-bordered focus:outline-blue-400", props.className, {
               "input-xs": props.size === "xs",
               "input-sm": props.size === "sm",
               "input-error": props.error,

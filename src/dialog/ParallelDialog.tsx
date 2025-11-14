@@ -27,16 +27,17 @@ export const ParallelDialog = ({ closeHref, title, children, onClose, className,
   const closeModal = () => {
     setIsOpen(false);
 
-    console.log("CLOSE EVENT", closeHref);
-
     if (onClose) {
       onClose();
       return;
     }
 
     if (closeHref) {
-      console.log("CLOSE EVENT closeHref", closeHref);
-      router.push(addLocale(closeHref));
+      if (closeHref.includes("?")) {
+        router.push(addLocale(closeHref));
+      } else {
+        router.push(addLocale(closeHref) + "?" + searchParams.toString());
+      }
       return;
     }
 

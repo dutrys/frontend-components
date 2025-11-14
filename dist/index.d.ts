@@ -395,10 +395,9 @@ declare const RadioBox: <T extends string>({ name, options, label, value, onChan
     onChange: (value: T) => void;
 }) => react_jsx_runtime.JSX.Element;
 declare const CheckboxInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName>) => react_jsx_runtime.JSX.Element;
-declare const DateInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, useDate, allowEmpty, label, error, disabled, desc, required, size, className, fieldSetClassName, name, from, to, ...rest }: IInputProps<TName> & {
+declare const DateInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, useDate, label, error, disabled, desc, required, size, className, fieldSetClassName, name, from, to, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
-    allowEmpty?: boolean;
     from?: Date;
     to?: Date;
 }) => react_jsx_runtime.JSX.Element;
@@ -421,10 +420,9 @@ declare const SelectFromApiInput: <T extends {
     onChange?: (model: T) => unknown;
     filter?: (model: T) => boolean;
 }) => react_jsx_runtime.JSX.Element;
-declare const DateTimeInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, required, disabled, error, useDate, className, size, allowEmpty, from, to, fieldSetClassName, ...rest }: IInputProps<TName> & {
+declare const DateTimeInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, required, disabled, error, useDate, className, size, from, to, fieldSetClassName, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
-    allowEmpty?: boolean;
     from?: Date;
     to?: Date;
 }) => react_jsx_runtime.JSX.Element;

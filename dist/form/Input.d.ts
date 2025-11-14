@@ -25,10 +25,9 @@ export declare const RadioBox: <T extends string>({ name, options, label, value,
     onChange: (value: T) => void;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const CheckboxInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName>) => import("react/jsx-runtime").JSX.Element;
-export declare const DateInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, useDate, allowEmpty, label, error, disabled, desc, required, size, className, fieldSetClassName, name, from, to, ...rest }: IInputProps<TName> & {
+export declare const DateInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, useDate, label, error, disabled, desc, required, size, className, fieldSetClassName, name, from, to, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
-    allowEmpty?: boolean;
     from?: Date;
     to?: Date;
 }) => import("react/jsx-runtime").JSX.Element;
@@ -51,10 +50,9 @@ export declare const SelectFromApiInput: <T extends {
     onChange?: (model: T) => unknown;
     filter?: (model: T) => boolean;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const DateTimeInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, required, disabled, error, useDate, className, size, allowEmpty, from, to, fieldSetClassName, ...rest }: IInputProps<TName> & {
+export declare const DateTimeInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, required, disabled, error, useDate, className, size, from, to, fieldSetClassName, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
-    allowEmpty?: boolean;
     from?: Date;
     to?: Date;
 }) => import("react/jsx-runtime").JSX.Element;

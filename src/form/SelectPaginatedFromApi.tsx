@@ -57,7 +57,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
   footer,
   ...rest
 }: SelectPaginatedFromApiProps<TModel>) => {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(value ? `${value}` : "");
   const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<TModel>({
     getPreviousPageParam,
     getNextPageParam,
@@ -141,7 +141,14 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
             onChange={(event) => setQuery(event.target.value)}
           />
           {isLoading && !disabled && (
-            <LoadingComponent className="absolute z-1 inset-y-0 right-5 p-3" loadingClassName="size-4 text-primary" />
+            <LoadingComponent
+              className={cx("absolute z-1 inset-y-0 right-5 px-3", {
+                "py-1": size === "xs",
+                "py-2": size === "sm",
+                "py-3": !size,
+              })}
+              loadingClassName="size-4 text-primary"
+            />
           )}
           <ComboboxButton
             data-testid="select-input-btn"
