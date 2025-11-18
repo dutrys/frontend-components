@@ -12,6 +12,7 @@ import {
 import cx from "classnames";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { LoadingComponent } from "@/Loading";
+import { SelectOption } from "@/form/Select";
 
 const SEARCH_FROM_QUERY_LENGTH = 3;
 
@@ -115,18 +116,9 @@ export const SelectFromApi = <TModel extends { id: number }>({
             className={`absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`}
           >
             {!required && query.length < SEARCH_FROM_QUERY_LENGTH && data && data?.length !== 0 && (
-              <ComboboxOption
-                data-testid="select-option-empty"
-                key="empty"
-                className={({ focus }) =>
-                  `relative select-none py-2 pl-4 pr-4 ${focus ? "bg-primary text-white" : "text-gray-900"}`
-                }
-                value={null}
-              >
-                <span className={cx("block truncate", { "text-xs": "xs" === size || "sm" === size })}>
-                  {empty || t("selectFromApi.select")}
-                </span>
-              </ComboboxOption>
+              <SelectOption data-testid="select-option-empty" key="empty" size={size} value={null}>
+                {empty || t("selectFromApi.select")}
+              </SelectOption>
             )}
             {data?.length === 0 ? (
               <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
@@ -138,40 +130,9 @@ export const SelectFromApi = <TModel extends { id: number }>({
               data
                 ?.filter((m) => (filter ? filter(m) : true))
                 ?.map((model: TModel, i: number) => (
-                  <ComboboxOption
-                    data-testid={`select-option-${i}`}
-                    key={model.id}
-                    className={({ focus }) =>
-                      `relative cursor-default select-none py-2 pl-4 pr-4 ${
-                        focus ? "bg-primary text-white" : "text-gray-900"
-                      }`
-                    }
-                    value={model}
-                  >
-                    {({ selected, focus }) => (
-                      <>
-                        <span
-                          className={cx("block truncate", {
-                            "text-white": focus,
-                            "pr-3 font-bold": selected,
-                            "font-normal": !selected,
-                            "text-xs": "xs" === size || "sm" === size,
-                          })}
-                        >
-                          {valueFormat(model)}
-                        </span>
-                        {selected ? (
-                          <span
-                            className={`absolute inset-y-0 right-1 flex items-center pl-3 ${
-                              focus ? "text-white" : "text-teal-600"
-                            }`}
-                          >
-                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                          </span>
-                        ) : null}
-                      </>
-                    )}
-                  </ComboboxOption>
+                  <SelectOption data-testid={`select-option-${i}`} key={model.id} value={model} size={size}>
+                    {valueFormat(model)}
+                  </SelectOption>
                 ))
             )}
 

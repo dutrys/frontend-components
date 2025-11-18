@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import { Popover } from "@/dialog/Popover";
 import { isServerError } from "@/form/UseForm";
 import { createPortal } from "react-dom";
+import cx from "classnames";
 
 function AddNew({ onAdd, names }: { onAdd: (name: string) => void; names: string[] }) {
   const [name, setName] = useState("");
@@ -107,14 +108,8 @@ export const PaginationConfiguration = <T = unknown,>({
     <>
       <Popover
         showOnClick
-        hoverClassName="btn-active"
-        title={(ref, p) => (
-          <button
-            disabled={disabled}
-            ref={ref}
-            {...p}
-            className={`btn btn-xs ${p.className ? p.className : undefined}`}
-          >
+        title={(ref, p, isOpen) => (
+          <button disabled={disabled} ref={ref} {...p} className={cx("btn", { "btn-active": isOpen })}>
             <AdjustmentsHorizontalIcon className="size-4" />
           </button>
         )}

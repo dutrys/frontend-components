@@ -4,7 +4,9 @@ import { Popover } from "@/dialog/Popover";
 
 const MORE_WIDTH = 40;
 
-export const HeaderResponsive = <T extends object>({
+type ObjOrNode = object | ((isVisible: boolean) => React.ReactNode);
+
+export const HeaderResponsive = <T extends ObjOrNode>({
   renderVisible,
   renderDropdown,
   heightClassName,
@@ -85,6 +87,7 @@ export const HeaderResponsive = <T extends object>({
         <div style={{ width: MORE_WIDTH }} className="pr-2">
           <Popover
             showOnClick
+            showOnHover={false}
             borderColor="border-base-300"
             backgroundColor="bg-base-200"
             title={(ref, props) => (
@@ -94,8 +97,8 @@ export const HeaderResponsive = <T extends object>({
             )}
           >
             {(closeFn) => (
-              <div className="max-h-96 overflow-y-auto">
-                <ul tabIndex={0} className="menu px-1 py-0">
+              <div className="max-h-96 overflow-y-auto py-2">
+                <ul tabIndex={0} className="menu menu-sm px-1 py-0">
                   {[...elements].splice(showItems).map((e, i) => renderDropdown(e, i, closeFn))}
                 </ul>
               </div>

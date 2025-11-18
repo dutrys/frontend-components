@@ -1,9 +1,9 @@
 import React from "react";
 export declare const HeaderResponsivePaginated: ({ elements, bulkActions, }: {
-    elements: {
+    elements: ({
         link: Record<string, string>;
         text: string;
-    }[][];
+    }[] | ((isVisible: boolean) => React.ReactNode))[];
     bulkActions?: {
         actions: {
             children: React.ReactNode;

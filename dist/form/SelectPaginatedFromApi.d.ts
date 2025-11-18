@@ -7,16 +7,14 @@ export type SelectPaginatedFromApiProps<TModel extends {
     }[];
 }> = {
     size?: "sm" | "xs";
-    inputClassName?: string;
     name?: string;
     inputRef?: any;
     queryFn: (query: PaginateQuery<any>) => Promise<TModel>;
     queryKey: ReadonlyArray<any>;
     placeholder?: string;
-    optionsClassName?: string;
     value: TModel["data"][0] | number | null;
     className?: string;
-    onChange: (model: TModel["data"][0]) => void;
+    onChange: (model: TModel["data"][0] | null) => void;
     disabled?: boolean;
     required?: boolean;
     empty?: string;
@@ -30,5 +28,5 @@ export declare const SelectPaginatedFromApi: <TModel extends {
     data: {
         id: number;
     }[];
-}>({ onChange, disabled, required, inputRef, name, value, size, searchFromChars, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat, inputClassName, heading, footer, ...rest }: SelectPaginatedFromApiProps<TModel>) => import("react/jsx-runtime").JSX.Element;
+}>({ onChange, disabled, required, inputRef, name, value, size, searchFromChars, className, queryKey, queryFn, placeholder, empty, valueFormat, heading, footer, ...rest }: SelectPaginatedFromApiProps<TModel>) => import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=SelectPaginatedFromApi.d.ts.map

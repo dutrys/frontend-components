@@ -126,7 +126,6 @@ export function DateTimePicker({
         showOnClick
         showOnFocus
         showOnHover={false}
-        popoverWidth=""
       >
         {(close) => (
           <>

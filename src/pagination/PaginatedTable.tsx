@@ -115,7 +115,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
     name: string;
     filters: string[];
   }[];
-  searchableShortcuts?: { link: Record<string, string>; text: string }[][];
+  searchableShortcuts?: ((isVisible: boolean) => React.ReactNode)[];
   columns: Array<ColumnType<TModel["data"][number]>>;
   pagination: TModel;
   addNewText?: string;
@@ -205,7 +205,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
     );
   };
 
-  const elements: { link: Record<string, string>; text: string }[][] = [];
+  const elements: ({ link: Record<string, string>; text: string }[] | ((isVisible: boolean) => React.ReactNode))[] = [];
 
   if (bulkActions && bulkActions?.length > 0) {
     elements.push([{ link: { bulk: "bulk" }, text: "" }]);

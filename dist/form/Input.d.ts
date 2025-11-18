@@ -1,4 +1,5 @@
 import { Control, FieldValues, FieldPath, FieldError, RegisterOptions, UseFormRegister, Merge } from "react-hook-form";
+import { DateInputProps } from "./DateInput";
 import { SelectPaginatedFromApiProps } from "./SelectPaginatedFromApi";
 import { ResponseMeta } from "../utils/paginate";
 import { NumericFormatProps } from "react-number-format/types/types";
@@ -7,40 +8,40 @@ interface IInputRegisterProps<TFieldValues extends FieldValues = FieldValues, TN
     options?: Omit<RegisterOptions<TFieldValues, TName>, "required" | "disabled">;
     register: UseFormRegister<TFieldValues>;
 }
-export declare const TextInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ required, disabled, error, className, id, type, register, label, size, options, desc, name, fieldSetClassName, ref, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
+export declare const TextFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ required, disabled, error, className, id, type, register, label, size, options, desc, name, fieldSetClassName, ref, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
     type?: string;
     ref?: (input: HTMLInputElement | null) => void;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const SelectInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ id, disabled, fieldSetClassName, label, register, required, name, error, desc, options, size, className, children, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
+export declare const SelectFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ id, disabled, fieldSetClassName, label, register, required, name, error, desc, options, size, className, children, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
     children: React.ReactNode;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const TextareaInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName> & {
+export declare const TextareaFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName> & {
     maxLength?: number;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const RadioBox: <T extends string>({ name, options, label, value, onChange, }: {
+export declare const RadioBoxFormField: <T extends string>({ name, options, label, value, onChange, }: {
     name: string;
     value: T;
     label?: string;
     options: Record<T, string>;
     onChange: (value: T) => void;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const CheckboxInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName>) => import("react/jsx-runtime").JSX.Element;
-export declare const DateInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, useDate, label, error, disabled, desc, required, size, className, fieldSetClassName, name, from, to, ...rest }: IInputProps<TName> & {
+export declare const CheckboxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName> & {
+    labelClassName?: string;
+}) => import("react/jsx-runtime").JSX.Element;
+export declare const DateFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, control, error, desc, useDate, ...props }: Omit<IInputProps<TName>, "size"> & Omit<DateInputProps, "onChange" | "value"> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
-    from?: Date;
-    to?: Date;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const SelectPaginatedFromApiInput: <T extends {
+export declare const SelectPaginatedFromApiFormField: <T extends {
     data: {
         id: number;
     }[];
     meta: ResponseMeta;
-}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, ...rest }: IInputProps<TName> & {
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, ...props }: IInputProps<TName> & {
     control: Control<TFieldValues>;
-    onChange?: (model: T["data"][number]) => void;
-} & Omit<SelectPaginatedFromApiProps<T>, "inputClassName" | "name" | "placeholder" | "className" | "value" | "onChange">) => import("react/jsx-runtime").JSX.Element;
-export declare const SelectFromApiInput: <T extends {
+    onChange?: (model: T["data"][number] | null) => void;
+} & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange">) => import("react/jsx-runtime").JSX.Element;
+export declare const SelectFromApiFormField: <T extends {
     id: number;
 }, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, filter, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
@@ -50,18 +51,18 @@ export declare const SelectFromApiInput: <T extends {
     onChange?: (model: T) => unknown;
     filter?: (model: T) => boolean;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const DateTimeInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, required, disabled, error, useDate, className, size, from, to, fieldSetClassName, ...rest }: IInputProps<TName> & {
+export declare const DateTimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, required, disabled, error, useDate, className, size, from, to, fieldSetClassName, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
     from?: Date;
     to?: Date;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const TimeInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputProps<TName> & {
+export declare const TimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
     allowEmpty?: boolean;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const NumberInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ options, ...props }: IInputProps<TName> & {
+export declare const NumberFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ options, ...props }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     options?: NumericFormatProps;
 }) => import("react/jsx-runtime").JSX.Element;
@@ -70,12 +71,12 @@ export declare const Label: ({ text, required }: {
     size?: "sm";
     text: React.ReactNode;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const SelectPaginatedFromApiWithLabel: <T extends {
+export declare const SelectPaginatedFromApiField: <T extends {
     data: {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ label, queryFn, queryKey, desc, name, valueFormat, required, disabled, error, className, size, value, onChange, fieldSetClassName, inputRef, optionsClassName, searchFromChars, empty, heading, footer, ...rest }: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "inputClassName" | "name" | "placeholder" | "className">) => import("react/jsx-runtime").JSX.Element;
+}>({ label, fieldSetClassName, className, desc, error, ...props }: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => import("react/jsx-runtime").JSX.Element;
 export interface IInputProps<TName extends FieldPath<FieldValues>> {
     id?: string;
     label: string;

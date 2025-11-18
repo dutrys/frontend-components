@@ -5,12 +5,13 @@ import { HeaderResponsive } from "@/pagination/HeaderResponsive";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { isParamActive, setPartialParams } from "@/utils/paginate";
+import cx from "classnames";
 
 export const HeaderResponsivePaginated = ({
   elements,
   bulkActions,
 }: {
-  elements: { link: Record<string, string>; text: string }[][];
+  elements: ({ link: Record<string, string>; text: string }[] | ((isVisible: boolean) => React.ReactNode))[];
   bulkActions?: {
     actions: {
       children: React.ReactNode;
@@ -30,57 +31,63 @@ export const HeaderResponsivePaginated = ({
         return (
           <React.Fragment key={i}>
             {i !== 0 && <li className="disabled"></li>}
-            {shortcuts.map(({ link, text }) => {
-              if (bulkActions && bulkActions.actions.length > 0 && link.bulk === "bulk") {
-                return (
-                  <>
-                    <li className="menu-disabled">
-                      <span>{t("pagination.bulkActions")}</span>
-                    </li>
-                    <BulkDropDownActions
-                      disabled={bulkActions.selected.length === 0}
-                      bulkActions={bulkActions.actions.map((b) => ({
-                        children: b.children,
-                        onSelect: async () => {
-                          const success = await b.onSelect(bulkActions.selected);
-                          if (success) {
-                            bulkActions.setSelected([]);
-                          }
-                        },
-                      }))}
-                    />
-                    <li className="menu-disabled"></li>
-                    <li className="menu-disabled">
-                      <span>{t("pagination.filters")}</span>
-                    </li>
-                  </>
-                );
-              }
 
-              const active = isParamActive(link, searchParams);
-              link = { ...link };
-              if (active) {
-                Object.keys(link).forEach((key) => {
-                  link[key] = "";
-                });
-              }
-              const params = setPartialParams({ ...link, page: "" }, searchParams);
-              return (
-                <li key={text}>
-                  <Link
-                    prefetch={false}
-                    className={active ? "bg-base-300/50 font-bold hover:bg-base-300" : ""}
-                    href={params === "" ? "?" : params}
-                  >
-                    {text}
-                  </Link>
-                </li>
-              );
-            })}
+            {!Array.isArray(shortcuts)
+              ? shortcuts(false)
+              : shortcuts.map(({ link, text }) => {
+                  if (bulkActions && bulkActions.actions.length > 0 && link.bulk === "bulk") {
+                    return (
+                      <>
+                        <li className="menu-disabled">
+                          <span>{t("pagination.bulkActions")}</span>
+                        </li>
+                        <BulkDropDownActions
+                          disabled={bulkActions.selected.length === 0}
+                          bulkActions={bulkActions.actions.map((b) => ({
+                            children: b.children,
+                            onSelect: async () => {
+                              const success = await b.onSelect(bulkActions.selected);
+                              if (success) {
+                                bulkActions.setSelected([]);
+                              }
+                            },
+                          }))}
+                        />
+                        <li className="menu-disabled"></li>
+                        <li className="menu-disabled">
+                          <span>{t("pagination.filters")}</span>
+                        </li>
+                      </>
+                    );
+                  }
+
+                  const active = isParamActive(link, searchParams);
+                  link = { ...link };
+                  if (active) {
+                    Object.keys(link).forEach((key) => {
+                      link[key] = "";
+                    });
+                  }
+                  const params = setPartialParams({ ...link, page: "" }, searchParams);
+                  return (
+                    <li key={text}>
+                      <Link
+                        prefetch={false}
+                        className={cx({ "bg-base-300/50 font-bold hover:bg-base-300": active })}
+                        href={params === "" ? "?" : params}
+                      >
+                        {text}
+                      </Link>
+                    </li>
+                  );
+                })}
           </React.Fragment>
         );
       }}
       renderVisible={(element, i) => {
+        if (!Array.isArray(element)) {
+          return element(true);
+        }
         if (i === 0 && bulkActions && bulkActions.actions.length > 0) {
           return (
             <BulkActions

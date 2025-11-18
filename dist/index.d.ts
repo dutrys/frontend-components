@@ -17,15 +17,13 @@ declare const LoadingComponent: ({ style, className, loadingClassName, size, }: 
     style?: React__default.CSSProperties;
 }) => react_jsx_runtime.JSX.Element;
 
-declare const Popover: ({ title, children, popoverClassName, onShow, open: openProp, hoverClassName, showOnHover, showOnClick, showOnFocus, popoverWidth, backgroundColor, borderColor, disabled, placement, arrowSize, }: {
+declare const Popover: ({ title, children, popoverClassName, onShow, open: openProp, showOnHover, showOnClick, showOnFocus, backgroundColor, borderColor, disabled, placement, arrowSize, }: {
     disabled?: boolean;
     open?: boolean;
     showOnHover?: boolean;
     showOnClick?: boolean;
     showOnFocus?: boolean;
     popoverClassName?: string;
-    hoverClassName?: string;
-    popoverWidth?: string;
     arrowSize?: {
         width: number;
         height: number;
@@ -95,7 +93,8 @@ declare const BulkDropDownActions: ({ bulkActions, disabled, }: {
     }[];
 }) => react_jsx_runtime.JSX.Element;
 
-declare const HeaderResponsive: <T extends object>({ renderVisible, renderDropdown, heightClassName, elements, }: {
+type ObjOrNode = object | ((isVisible: boolean) => React__default.ReactNode);
+declare const HeaderResponsive: <T extends ObjOrNode>({ renderVisible, renderDropdown, heightClassName, elements, }: {
     heightClassName: string;
     renderVisible: (r: T, i: number) => React__default.ReactNode;
     renderDropdown: (r: T, i: number, closeFn: () => void) => React__default.ReactNode;
@@ -168,10 +167,7 @@ declare const PaginatedTable: <TModel extends {
         name: string;
         filters: string[];
     }[];
-    searchableShortcuts?: {
-        link: Record<string, string>;
-        text: string;
-    }[][];
+    searchableShortcuts?: ((isVisible: boolean) => React__default.ReactNode)[];
     columns: Array<ColumnType<TModel["data"][number]>>;
     pagination: TModel;
     addNewText?: string;
@@ -200,10 +196,10 @@ declare const FilterLink: ({ children, className, params, }: {
 }) => react_jsx_runtime.JSX.Element;
 
 declare const HeaderResponsivePaginated: ({ elements, bulkActions, }: {
-    elements: {
+    elements: ({
         link: Record<string, string>;
         text: string;
-    }[][];
+    }[] | ((isVisible: boolean) => React__default.ReactNode))[];
     bulkActions?: {
         actions: {
             children: React__default.ReactNode;
@@ -318,6 +314,20 @@ declare const ConfirmSave: ({ onConfirm }: {
 }) => react_jsx_runtime.JSX.Element;
 declare const addServerErrors: <T extends FieldValues>(errors: { [P in keyof T]?: string[]; }, setError: UseFormSetError<T>) => void;
 
+type DateInputProps = Omit<React.ComponentPropsWithoutRef<"input">, "size" | "value" | "defaultValue" | "defaultChecked" | "onChange"> & {
+    size?: "sm" | "xs";
+    from?: Date;
+    to?: Date;
+    required?: boolean;
+    disabled?: boolean;
+    value: Date | null;
+    className?: string;
+    toggleClassName?: string;
+    placeholder?: string;
+    onChange: (date: Date | null) => unknown;
+};
+declare const DateInput: ({ onChange, value, className, toggleClassName, required, disabled, size, placeholder, from, to, ...rest }: DateInputProps) => react_jsx_runtime.JSX.Element;
+
 type SelectPaginatedFromApiProps<TModel extends {
     meta: ResponseMeta$1;
     data: {
@@ -325,16 +335,14 @@ type SelectPaginatedFromApiProps<TModel extends {
     }[];
 }> = {
     size?: "sm" | "xs";
-    inputClassName?: string;
     name?: string;
     inputRef?: any;
     queryFn: (query: PaginateQuery$1<any>) => Promise<TModel>;
     queryKey: ReadonlyArray<any>;
     placeholder?: string;
-    optionsClassName?: string;
     value: TModel["data"][0] | number | null;
     className?: string;
-    onChange: (model: TModel["data"][0]) => void;
+    onChange: (model: TModel["data"][0] | null) => void;
     disabled?: boolean;
     required?: boolean;
     empty?: string;
@@ -348,7 +356,7 @@ declare const SelectPaginatedFromApi: <TModel extends {
     data: {
         id: number;
     }[];
-}>({ onChange, disabled, required, inputRef, name, value, size, searchFromChars, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat, inputClassName, heading, footer, ...rest }: SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
+}>({ onChange, disabled, required, inputRef, name, value, size, searchFromChars, className, queryKey, queryFn, placeholder, empty, valueFormat, heading, footer, ...rest }: SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
 
 type PaginateQuery<T> = {
     page?: number;
@@ -377,40 +385,40 @@ interface IInputRegisterProps<TFieldValues extends FieldValues = FieldValues, TN
     options?: Omit<RegisterOptions<TFieldValues, TName>, "required" | "disabled">;
     register: UseFormRegister<TFieldValues>;
 }
-declare const TextInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ required, disabled, error, className, id, type, register, label, size, options, desc, name, fieldSetClassName, ref, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
+declare const TextFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ required, disabled, error, className, id, type, register, label, size, options, desc, name, fieldSetClassName, ref, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
     type?: string;
     ref?: (input: HTMLInputElement | null) => void;
 }) => react_jsx_runtime.JSX.Element;
-declare const SelectInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ id, disabled, fieldSetClassName, label, register, required, name, error, desc, options, size, className, children, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
+declare const SelectFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ id, disabled, fieldSetClassName, label, register, required, name, error, desc, options, size, className, children, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
     children: React__default.ReactNode;
 }) => react_jsx_runtime.JSX.Element;
-declare const TextareaInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName> & {
+declare const TextareaFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName> & {
     maxLength?: number;
 }) => react_jsx_runtime.JSX.Element;
-declare const RadioBox: <T extends string>({ name, options, label, value, onChange, }: {
+declare const RadioBoxFormField: <T extends string>({ name, options, label, value, onChange, }: {
     name: string;
     value: T;
     label?: string;
     options: Record<T, string>;
     onChange: (value: T) => void;
 }) => react_jsx_runtime.JSX.Element;
-declare const CheckboxInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName>) => react_jsx_runtime.JSX.Element;
-declare const DateInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, useDate, label, error, disabled, desc, required, size, className, fieldSetClassName, name, from, to, ...rest }: IInputProps<TName> & {
+declare const CheckboxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName> & {
+    labelClassName?: string;
+}) => react_jsx_runtime.JSX.Element;
+declare const DateFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, control, error, desc, useDate, ...props }: Omit<IInputProps<TName>, "size"> & Omit<DateInputProps, "onChange" | "value"> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
-    from?: Date;
-    to?: Date;
 }) => react_jsx_runtime.JSX.Element;
-declare const SelectPaginatedFromApiInput: <T extends {
+declare const SelectPaginatedFromApiFormField: <T extends {
     data: {
         id: number;
     }[];
     meta: ResponseMeta;
-}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, ...rest }: IInputProps<TName> & {
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, ...props }: IInputProps<TName> & {
     control: Control<TFieldValues>;
-    onChange?: (model: T["data"][number]) => void;
-} & Omit<SelectPaginatedFromApiProps<T>, "inputClassName" | "name" | "placeholder" | "className" | "value" | "onChange">) => react_jsx_runtime.JSX.Element;
-declare const SelectFromApiInput: <T extends {
+    onChange?: (model: T["data"][number] | null) => void;
+} & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange">) => react_jsx_runtime.JSX.Element;
+declare const SelectFromApiFormField: <T extends {
     id: number;
 }, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, filter, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
@@ -420,18 +428,18 @@ declare const SelectFromApiInput: <T extends {
     onChange?: (model: T) => unknown;
     filter?: (model: T) => boolean;
 }) => react_jsx_runtime.JSX.Element;
-declare const DateTimeInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, required, disabled, error, useDate, className, size, from, to, fieldSetClassName, ...rest }: IInputProps<TName> & {
+declare const DateTimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, required, disabled, error, useDate, className, size, from, to, fieldSetClassName, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
     from?: Date;
     to?: Date;
 }) => react_jsx_runtime.JSX.Element;
-declare const TimeInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputProps<TName> & {
+declare const TimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
     allowEmpty?: boolean;
 }) => react_jsx_runtime.JSX.Element;
-declare const NumberInput: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ options, ...props }: IInputProps<TName> & {
+declare const NumberFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ options, ...props }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     options?: NumericFormatProps;
 }) => react_jsx_runtime.JSX.Element;
@@ -440,12 +448,12 @@ declare const Label: ({ text, required }: {
     size?: "sm";
     text: React__default.ReactNode;
 }) => react_jsx_runtime.JSX.Element;
-declare const SelectPaginatedFromApiWithLabel: <T extends {
+declare const SelectPaginatedFromApiField: <T extends {
     data: {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ label, queryFn, queryKey, desc, name, valueFormat, required, disabled, error, className, size, value, onChange, fieldSetClassName, inputRef, optionsClassName, searchFromChars, empty, heading, footer, ...rest }: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "inputClassName" | "name" | "placeholder" | "className">) => react_jsx_runtime.JSX.Element;
+}>({ label, fieldSetClassName, className, desc, error, ...props }: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => react_jsx_runtime.JSX.Element;
 interface IInputProps<TName extends FieldPath<FieldValues>> {
     id?: string;
     label: string;
@@ -476,19 +484,6 @@ declare const IndeterminateCheckbox: ({ checked, className, indeterminate, onCha
     indeterminate?: boolean;
 }) => react_jsx_runtime.JSX.Element;
 
-declare const DatePicker: ({ onChange, value, inputClassName, toggleClassName, required, allowEmpty, disabled, placeholder, from, to, ...props }: {
-    from?: Date;
-    to?: Date;
-    required?: boolean;
-    disabled?: boolean;
-    value: Date | null;
-    inputClassName?: string;
-    toggleClassName?: string;
-    allowEmpty?: boolean;
-    placeholder?: string;
-    onChange: (date: Date | null) => unknown;
-}) => react_jsx_runtime.JSX.Element;
-
 declare function DateTimePicker({ value, onChange, allowEmpty, disabled, required, from, to, placeholder, inputClassName, toggleClassName, ...rest }: {
     required?: boolean;
     disabled?: boolean;
@@ -509,6 +504,38 @@ declare const TimePicker: ({ className, value, onChange, placeholder, required, 
     onChange: (e: any) => void;
     className?: string;
     value: string | undefined | null;
+}) => react_jsx_runtime.JSX.Element;
+
+type SelectProps = {
+    size?: "sm" | "xs";
+    name?: string;
+    inputRef?: any;
+    placeholder?: string;
+    value: {
+        label: string;
+        value: number | string;
+    } | null;
+    className?: string;
+    onChange: (model: {
+        label: string;
+        value: number | string;
+    } | null) => void;
+    disabled?: boolean;
+    required?: boolean;
+    empty?: string;
+    header?: React__default.ReactNode;
+    beforeOptions?: React__default.ReactNode;
+    afterOptions?: React__default.ReactNode;
+    options: {
+        label: string;
+        value: number | string;
+    }[];
+};
+declare const Select: ({ onChange, disabled, required, inputRef, options, name, value, size, className, placeholder, empty, beforeOptions, header, afterOptions, ...rest }: SelectProps) => react_jsx_runtime.JSX.Element;
+declare const SelectOption: ({ value, size, children, ...rest }: {
+    children: React__default.ReactNode;
+    value: unknown;
+    size?: "xs" | "sm";
 }) => react_jsx_runtime.JSX.Element;
 
 declare const SelectFromApi: <TModel extends {
@@ -618,4 +645,4 @@ declare const SidebarLayout: ({ sidebarExpanded, onExpandChanged, sideChildren, 
     className?: string;
 }) => react_jsx_runtime.JSX.Element;
 
-export { ActionButton, type ActionColumn, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxInput, type ColumnType, ConfirmSave, type DateColumn, DateInput, DatePicker, DateTime, DateTimeInput, DateTimePicker, EditButton, FilterLink, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MenuItem, type MenuItemWithSubmenu, type MoreActionType, MoreActions, NumberInput, type PaginateQuery, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBox, Required, type ResponseMeta, SaveButton, ScreenSize, SelectFromApi, SelectFromApiInput, SelectInput, SelectPaginatedFromApi, SelectPaginatedFromApiInput, type SelectPaginatedFromApiProps, SelectPaginatedFromApiWithLabel, type ServerError, SidebarLayout, SidebarMenu, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextInput, TextareaInput, TimeInput, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
+export { ActionButton, type ActionColumn, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxFormField, type ColumnType, ConfirmSave, type DateColumn, DateFormField, DateInput, type DateInputProps, DateTime, DateTimeFormField, DateTimePicker, EditButton, FilterLink, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MenuItem, type MenuItemWithSubmenu, type MoreActionType, MoreActions, NumberFormField, type PaginateQuery, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBoxFormField, Required, type ResponseMeta, SaveButton, ScreenSize, Select, SelectFormField, SelectFromApi, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, type SelectPaginatedFromApiProps, type SelectProps, type ServerError, SidebarLayout, SidebarMenu, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextFormField, TextareaFormField, TimeFormField, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };

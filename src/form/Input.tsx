@@ -9,11 +9,11 @@ import {
   Merge,
 } from "react-hook-form";
 import { DateTimePicker } from "./DateTimePicker";
-import { DatePicker } from "./DatePicker";
+import { DateInput, DateInputProps } from "./DateInput";
 import { InputErrors } from "./UseForm";
 import { format } from "date-fns";
 import { SelectPaginatedFromApi, SelectPaginatedFromApiProps } from "./SelectPaginatedFromApi";
-import { PaginateQuery, ResponseMeta } from "../utils/paginate";
+import { ResponseMeta } from "../utils/paginate";
 import { stringToDate } from "../utils/date";
 import cx from "classnames";
 import { TimePicker } from "./TimePicker";
@@ -34,7 +34,7 @@ interface IInputRegisterProps<
   register: UseFormRegister<TFieldValues>;
 }
 
-export const TextInput = <
+export const TextFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
@@ -97,7 +97,7 @@ export const TextInput = <
   );
 };
 
-export const SelectInput = <
+export const SelectFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
@@ -153,7 +153,7 @@ export const SelectInput = <
   );
 };
 
-export const TextareaInput = <
+export const TextareaFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >(
@@ -210,7 +210,7 @@ export const TextareaInput = <
   );
 };
 
-export const RadioBox = <T extends string>({
+export const RadioBoxFormField = <T extends string>({
   name,
   options,
   label = "",
@@ -244,11 +244,11 @@ export const RadioBox = <T extends string>({
   </div>
 );
 
-export const CheckboxInput = <
+export const CheckboxFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >(
-  props: IInputRegisterProps<TFieldValues, TName>,
+  props: IInputRegisterProps<TFieldValues, TName> & { labelClassName?: string },
 ) => {
   return (
     <>
@@ -263,12 +263,12 @@ export const CheckboxInput = <
               disabled: props.disabled,
               ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
             })}
-            className={cx("toggle", {
+            className={cx("toggle", props.className, {
               "toggle-sm": props.size === "sm",
               "toggle-xs": props.size === "xs",
             })}
           />
-          <span className="text-sm text-gray-500 label-text grow pl-2">{props.label}</span>
+          <span className={cx("text-sm text-gray-500 label-text grow pl-2", props.labelClassName)}>{props.label}</span>
         </label>
       </div>
       {props.desc && (
@@ -281,66 +281,48 @@ export const CheckboxInput = <
   );
 };
 
-export const DateInput = <
+export const DateFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
-  control,
-  useDate,
-  label,
-  error,
-  disabled,
-  desc,
-  required,
-  size,
-  className,
   fieldSetClassName,
-  name,
-  from,
-  to,
-  ...rest
-}: IInputProps<TName> & {
-  control: Control<TFieldValues>;
-  useDate?: boolean;
-  from?: Date;
-  to?: Date;
-}) => {
+  label,
+  control,
+  error,
+  desc,
+  useDate = true,
+  ...props
+}: Omit<IInputProps<TName>, "size"> &
+  Omit<DateInputProps, "onChange" | "value"> & {
+    control: Control<TFieldValues>;
+    // @deprecated
+    useDate?: boolean;
+  }) => {
   return (
     <div className={fieldSetClassName}>
       <label className="floating-label">
         <Controller
           control={control}
-          name={name}
-          render={({ field }) => {
-            return (
-              <DatePicker
-                inputClassName={cx("input input-bordered", className, {
-                  "input-xs": size === "xs",
-                  "input-sm": size === "sm",
-                  "input-error": error,
-                })}
-                from={from}
-                to={to}
-                required={required}
-                disabled={disabled}
-                allowEmpty={!required}
-                placeholder={required ? `${label}*` : label}
-                value={field.value}
-                onChange={(value) => {
-                  if (useDate) {
-                    field.onChange(value);
-                  } else {
-                    field.onChange(value ? format(value, "yyyy-MM-dd") : null);
-                  }
-                }}
-                {...rest}
-              />
-            );
-          }}
+          name={props.name}
+          render={({ field }) => (
+            <DateInput
+              {...props}
+              className={cx({ "input-error": error }, props.className)}
+              placeholder={props.required ? `${label}*` : label}
+              value={field.value}
+              onChange={(value) => {
+                if (useDate) {
+                  field.onChange(value);
+                } else {
+                  field.onChange(value ? format(value as Date, "yyyy-MM-dd") : null);
+                }
+              }}
+            />
+          )}
         />
         <span>
           {label}
-          {required ? <Required /> : null}
+          {props.required ? <Required /> : null}
         </span>
       </label>
       {desc && (
@@ -353,73 +335,49 @@ export const DateInput = <
   );
 };
 
-export const SelectPaginatedFromApiInput = <
+export const SelectPaginatedFromApiFormField = <
   T extends { data: { id: number }[]; meta: ResponseMeta },
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
-  label,
-  queryFn,
-  queryKey,
-  desc,
-  control,
-  name,
-  valueFormat,
-  required,
-  disabled,
-  error,
-  className,
-  size,
-  onChange,
   fieldSetClassName,
-  ...rest
-}: IInputProps<TName> & { control: Control<TFieldValues>; onChange?: (model: T["data"][number]) => void } & Omit<
-    SelectPaginatedFromApiProps<T>,
-    "inputClassName" | "name" | "placeholder" | "className" | "value" | "onChange"
-  >) => {
-  const [selectProps, restProps] = splitByData(rest);
-
+  label,
+  ...props
+}: IInputProps<TName> & {
+  control: Control<TFieldValues>;
+  onChange?: (model: T["data"][number] | null) => void;
+} & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange">) => {
   return (
     <div className={fieldSetClassName}>
-      <div {...restProps} className="floating-label">
+      <div className="floating-label">
         <span>
           {label}
-          {required ? <Required /> : null}
+          {props.required ? <Required /> : null}
         </span>
         <Controller
-          control={control}
-          name={name}
-          rules={{ required: required === true }}
+          control={props.control}
+          name={props.name}
+          rules={{ required: props.required === true }}
           render={({ field }) => (
             <SelectPaginatedFromApi<T>
-              inputClassName={cx("w-full mx-0 input input-bordered", className, {
-                "input-error": error,
-              })}
-              {...selectProps}
-              name={name}
-              {...rest}
-              size={size}
-              required={required}
-              disabled={disabled}
-              placeholder={required ? `${label}*` : label}
-              queryKey={queryKey}
-              queryFn={queryFn}
+              {...props}
+              className={cx("w-full mx-0", props.className, { "input-error": props.error })}
+              placeholder={props.required ? `${label}*` : label}
               value={field.value}
-              valueFormat={valueFormat}
               onChange={(model) => {
                 field.onChange(model?.id || null);
-                onChange?.(model || null);
+                props.onChange?.(model || null);
               }}
             />
           )}
         />
       </div>
-      <InputErrors className="text-xs text-error mt-1" errors={error} />
+      <InputErrors className="text-xs text-error mt-1" errors={props.error} />
     </div>
   );
 };
 
-export const SelectFromApiInput = <
+export const SelectFromApiFormField = <
   T extends { id: number },
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -486,7 +444,7 @@ export const SelectFromApiInput = <
   </div>
 );
 
-export const DateTimeInput = <
+export const DateTimeFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
@@ -558,7 +516,7 @@ export const DateTimeInput = <
   );
 };
 
-export const TimeInput = <
+export const TimeFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >(
@@ -606,7 +564,7 @@ export const TimeInput = <
   );
 };
 
-export const NumberInput = <
+export const NumberFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
@@ -662,57 +620,25 @@ export const Label = ({ text, required }: { required?: boolean; size?: "sm"; tex
   </label>
 );
 
-export const SelectPaginatedFromApiWithLabel = <T extends { data: { id: number }[]; meta: ResponseMeta }>({
+export const SelectPaginatedFromApiField = <T extends { data: { id: number }[]; meta: ResponseMeta }>({
   label,
-  queryFn,
-  queryKey,
-  desc,
-  name,
-  valueFormat,
-  required,
-  disabled,
-  error,
-  className,
-  size,
-  value,
-  onChange,
   fieldSetClassName,
-  inputRef,
-  optionsClassName,
-  searchFromChars,
-  empty,
-  heading,
-  footer,
-  ...rest
-}: IInputProps<any> &
-  Omit<SelectPaginatedFromApiProps<T>, "inputClassName" | "name" | "placeholder" | "className">) => {
-  const [selectProps, restProps] = splitByData(rest);
-
+  className,
+  desc,
+  error,
+  ...props
+}: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => {
   return (
     <div className={fieldSetClassName}>
-      <div {...restProps} className="floating-label">
+      <div className="floating-label">
         <span>
           {label}
-          {required ? <Required /> : null}
+          {props.required ? <Required /> : null}
         </span>
         <SelectPaginatedFromApi<T>
-          inputClassName={cx("w-full mx-0 input input-bordered", className, {
-            "input-xs": size === "xs",
-            "input-sm": size === "sm",
-            "input-error": error,
-          })}
-          inputRef={inputRef}
-          size={size}
-          required={required}
-          searchFromChars={searchFromChars}
-          disabled={disabled}
-          placeholder={required ? `${label}*` : label}
-          queryKey={queryKey}
-          queryFn={queryFn}
-          value={value}
-          valueFormat={valueFormat}
-          onChange={(model) => onChange?.(model || null)}
-          {...selectProps}
+          {...props}
+          className={cx("mx-0", className, { "input-error": error })}
+          placeholder={props.required ? `${label}*` : label}
         />
       </div>
       {desc}

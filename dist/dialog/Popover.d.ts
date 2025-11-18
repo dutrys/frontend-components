@@ -1,14 +1,12 @@
 import * as React from "react";
 import { Placement } from "@floating-ui/utils";
-export declare const Popover: ({ title, children, popoverClassName, onShow, open: openProp, hoverClassName, showOnHover, showOnClick, showOnFocus, popoverWidth, backgroundColor, borderColor, disabled, placement, arrowSize, }: {
+export declare const Popover: ({ title, children, popoverClassName, onShow, open: openProp, showOnHover, showOnClick, showOnFocus, backgroundColor, borderColor, disabled, placement, arrowSize, }: {
     disabled?: boolean;
     open?: boolean;
     showOnHover?: boolean;
     showOnClick?: boolean;
     showOnFocus?: boolean;
     popoverClassName?: string;
-    hoverClassName?: string;
-    popoverWidth?: string;
     arrowSize?: {
         width: number;
         height: number;

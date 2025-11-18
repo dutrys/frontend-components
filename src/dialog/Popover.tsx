@@ -8,6 +8,7 @@ import {
   FloatingPortal,
   offset,
   safePolygon,
+  shift,
   useClick,
   useDismiss,
   useFloating,
@@ -21,14 +22,12 @@ import { Placement } from "@floating-ui/utils";
 export const Popover = ({
   title,
   children,
-  popoverClassName = "py-1",
+  popoverClassName,
   onShow,
   open: openProp,
-  hoverClassName,
   showOnHover = true,
   showOnClick = false,
   showOnFocus = false,
-  popoverWidth,
   backgroundColor = "bg-slate-800",
   borderColor = "border-slate-600",
   disabled,
@@ -41,8 +40,6 @@ export const Popover = ({
   showOnClick?: boolean;
   showOnFocus?: boolean;
   popoverClassName?: string;
-  hoverClassName?: string;
-  popoverWidth?: string;
   arrowSize?: { width: number; height: number };
   title: (
     ref: ((node: HTMLElement | null) => void) | null,
@@ -57,6 +54,7 @@ export const Popover = ({
 }) => {
   const [isOpen, setIsOpen] = useState(openProp || false);
   const arrowRef = useRef(null);
+
   const { refs, floatingStyles, context } = useFloating<HTMLElement>({
     placement: placement ?? "bottom-start",
     open: isOpen,
@@ -65,7 +63,7 @@ export const Popover = ({
       setIsOpen(open);
     },
     whileElementsMounted: autoUpdate,
-    middleware: [offset(10), flip({ padding: 10 }), arrow({ element: arrowRef })],
+    middleware: [offset(10), flip({ padding: 10 }), shift({ padding: 10 }), arrow({ element: arrowRef, padding: 10 })],
   });
 
   useEffect(() => {
@@ -85,13 +83,9 @@ export const Popover = ({
     return title(null, {}, false);
   }
 
-  const p = getReferenceProps();
-  if (isOpen && hoverClassName) {
-    p.className = typeof p.className === "string" ? `${p.className} ${hoverClassName}` : hoverClassName;
-  }
   return (
     <>
-      {title(refs.setReference, p, isOpen)}
+      {title(refs.setReference, getReferenceProps(), isOpen)}
 
       {isOpen && (
         <FloatingPortal>
@@ -100,7 +94,7 @@ export const Popover = ({
             style={{ ...floatingStyles, zIndex: 1100 }}
             {...getFloatingProps()}
             className={cx(
-              "border rounded-sm shadow-lg shadow-base-100 border-1",
+              "popover border rounded-sm shadow-lg shadow-base-100 border-1",
               popoverClassName,
               backgroundColor,
               borderColor,
@@ -115,7 +109,7 @@ export const Popover = ({
               width={arrowSize?.width}
               height={arrowSize?.height}
             />
-            <div className={popoverWidth}>{children(() => context.onOpenChange(false))}</div>
+            {children(() => context.onOpenChange(false))}
           </div>
         </FloatingPortal>
       )}
