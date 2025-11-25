@@ -11,7 +11,11 @@ export declare const GeneralErrors: <T extends FieldValues>(props: {
     except?: (keyof T)[];
     translateId?: string;
     errors: FieldErrors<T>;
-    className?: string;
+    errorClassName?: string;
+    messageClassName?: string;
+    listClassName?: string;
+    as?: React.ElementType;
+    asClassName?: string;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const InputErrors: ({ errors, className, }: {
     className?: string;

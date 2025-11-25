@@ -69,7 +69,11 @@ export const GeneralErrors = <T extends FieldValues>(props: {
   except?: (keyof T)[];
   translateId?: string;
   errors: FieldErrors<T>;
-  className?: string;
+  errorClassName?: string;
+  messageClassName?: string;
+  listClassName?: string;
+  as?: React.ElementType;
+  asClassName?: string;
 }) => <GeneralErrorsInToast {...props} errors={mapToDot(props.errors)} />;
 
 export const InputErrors = ({
@@ -149,66 +153,72 @@ export const useFormSubmit = <T extends FieldValues, R = unknown>(
   const formProps = useForm<T>(options);
 
   const handleSubmit = () =>
-    formProps.handleSubmit((values) => {
-      const promise = new Promise((res, rej) => {
-        if (formOptions.confirm && !isConfirmed.current) {
-          setNeedsConfirm(true);
-          return rej("Form confirmation is required");
-        }
-        setNeedsConfirm(false);
-        isConfirmed.current = false;
-        doSubmitCallback(values)
-          .then((data) => {
-            if (isServerError(data)) {
-              if (typeof onError === "function") {
-                onError(data);
-              }
-              addServerErrors(data.errors, formProps.setError);
-              rej(data);
-              return;
-            }
-            if (typeof onSuccess === "function") {
-              onSuccess(data);
-            }
-            res(data);
-            if (returnBack !== false) {
-              router.back();
-            }
-          })
-          .catch((e) => {
-            captureException(e, { extra: { formValues: values } });
-            rej(e);
-          });
-      });
-
-      if (reportProgress !== false) {
-        void toast.promise(
-          promise,
-          {
-            loading: loadingText || t("general.saving"),
-            success: savedText || t("general.saved"),
-            error: (data) => {
+    formProps.handleSubmit(
+      (values) => {
+        const promise = new Promise((res, rej) => {
+          if (formOptions.confirm && !isConfirmed.current) {
+            setNeedsConfirm(true);
+            return rej("Form confirmation is required");
+          }
+          setNeedsConfirm(false);
+          isConfirmed.current = false;
+          doSubmitCallback(values)
+            .then((data) => {
               if (isServerError(data)) {
-                return (
-                  <>
-                    {t("general.validateError")}:{" "}
-                    <GeneralErrors
-                      className="text-gray-500"
-                      translateId={options.translateErrors}
-                      errors={formProps.formState.errors}
-                    />
-                  </>
-                );
+                if (typeof onError === "function") {
+                  onError(data);
+                }
+                addServerErrors(data.errors, formProps.setError);
+                rej(data);
+                return;
               }
-              return t("general.error");
-            },
-          },
-          { id: "form-submit" },
-        );
-      }
+              if (typeof onSuccess === "function") {
+                onSuccess(data);
+              }
+              res(data);
+              if (returnBack !== false) {
+                router.back();
+              }
+            })
+            .catch((e) => {
+              captureException(e, { extra: { formValues: values } });
+              rej(e);
+            });
+        });
 
-      return promise;
-    });
+        if (reportProgress !== false) {
+          void toast.promise(
+            promise,
+            {
+              loading: loadingText || t("general.saving"),
+              success: savedText || t("general.saved"),
+              error: (data) => {
+                if (isServerError(data)) {
+                  return (
+                    <>
+                      {t("general.validateError")}:{" "}
+                      <GeneralErrors
+                        errorClassName="text-gray-500"
+                        messageClassName="text-gray-500"
+                        translateId={options.translateErrors}
+                        errors={formProps.formState.errors}
+                      />
+                    </>
+                  );
+                }
+                return t("general.error");
+              },
+            },
+            { id: "form-submit" },
+          );
+        }
+
+        return promise;
+      },
+      (r) => {
+        console.log("INVALID FORM:", r);
+      },
+    );
 
   const isConfirmed = useRef(false);
   const [needsConfirm, setNeedsConfirm] = useState(false);

@@ -1,12 +1,15 @@
 import * as React from "react";
 export declare const TOOLTIP_PARALLEL_ID = "parallel-tooltip";
 type DialogWithBackProps = {
-    onClose?: () => void;
+    onClosed?: () => void;
     title?: string;
     className?: string;
     children: React.ReactNode;
-    closeHref?: string;
+    isOpen?: boolean;
+    setIsOpen?: (isOpen: boolean) => void;
+    dialogButtons?: React.ReactNode;
+    returnDefault?: string;
 };
-export declare const ParallelDialog: ({ closeHref, title, children, onClose, className, ...rest }: DialogWithBackProps) => import("react/jsx-runtime").JSX.Element;
+export declare const ParallelDialog: ({ dialogButtons, title, children, onClosed, className, returnDefault, ...rest }: DialogWithBackProps) => import("react/jsx-runtime").JSX.Element;
 export {};
 //# sourceMappingURL=ParallelDialog.d.ts.map

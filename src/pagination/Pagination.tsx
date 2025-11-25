@@ -2,12 +2,17 @@ import React from "react";
 import { useSearchParams } from "next/navigation";
 import { Link } from "./Link";
 import { ResponseMeta, setPartialParams } from "@/utils/paginate";
+import cx from "classnames";
 
 export const Pagination = ({
   page,
   visiblePages,
   onClick,
+  size,
+  className = "py-2",
 }: {
+  className?: string;
+  size?: "sm" | "xs";
   onClick?: (page: number) => void;
   page: ResponseMeta;
   visiblePages: number;
@@ -25,7 +30,11 @@ export const Pagination = ({
     pageNumbers.push(
       onClick ? (
         <button
-          className={`btn uppercase join-item ${i === page.currentPage ? "btn-active" : ""}`}
+          className={cx("btn uppercase join-item", {
+            "btn-active": i === page.currentPage,
+            "btn-xs": size === "xs",
+            "btn-sm": size === "sm",
+          })}
           key={i}
           onClick={(e) => {
             e.preventDefault();
@@ -37,7 +46,11 @@ export const Pagination = ({
       ) : (
         <Link
           prefetch={false}
-          className={`btn uppercase join-item ${i === page.currentPage ? "btn-active" : ""}`}
+          className={cx("btn uppercase join-item", {
+            "btn-active": i === page.currentPage,
+            "btn-xs": size === "xs",
+            "btn-sm": size === "sm",
+          })}
           key={i}
           href={setPartialParams({ page: `${i}` }, searchParams)}
         >
@@ -47,5 +60,5 @@ export const Pagination = ({
     );
   }
 
-  return <div className="join mx-auto py-2">{pageNumbers}</div>;
+  return <div className={cx("join mx-auto", className)}>{pageNumbers}</div>;
 };

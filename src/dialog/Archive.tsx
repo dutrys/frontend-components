@@ -10,6 +10,37 @@ import { createPortal } from "react-dom";
 
 type Include<T, U> = T extends U ? T : never;
 
+const Error = ({ key, error, translationId }: { key: string; error: string; translationId?: string }) => {
+  const t = useTranslations();
+  return (
+    <span>
+      {translationId && t.has(`${translationId}.${key}`) && `${t(`${translationId}.${key}`)}: `}
+      {error}
+    </span>
+  );
+};
+
+function FormatErrors({ errors, translationId }: { errors: Record<string, string[]>; translationId?: string }) {
+  const entries = Object.entries(errors);
+  if (entries.length === 1 && entries[0][1].length === 1) {
+    return <Error key={entries[0][0]} error={entries[0][1][0]} translationId={translationId} />;
+  }
+
+  return (
+    <ul>
+      {entries
+        .map(([key, value]) =>
+          value.map((error, i) => (
+            <li key={`${key}-${error}-${i}`}>
+              <Error key={key} error={error} translationId={translationId} />
+            </li>
+          )),
+        )
+        .flat()}
+    </ul>
+  );
+}
+
 export const Archive = <T,>({
   title,
   yes,
@@ -19,9 +50,9 @@ export const Archive = <T,>({
   onClose,
   formatErrors,
   translateId,
+  dialogButtons,
   onSuccess,
   children,
-  closeHref,
 }: {
   yes?: string;
   no?: string;
@@ -30,8 +61,8 @@ export const Archive = <T,>({
   archive: () => Promise<T>;
   onClose?: () => void;
   children?: React.ReactNode;
+  dialogButtons?: React.ReactNode;
   formatErrors?: (errors: Include<T, { errors: Record<string, string[]> }>) => React.ReactNode;
-  closeHref?: string;
   translateId?: string;
   onSuccess?: () => unknown;
 }) => {
@@ -46,9 +77,7 @@ export const Archive = <T,>({
       archive()
         .then((response) => {
           if (isServerError(response)) {
-            if (formatErrors) {
-              setErrors(response as any);
-            }
+            setErrors(response as any);
             reject(response);
             return;
           }
@@ -81,9 +110,13 @@ export const Archive = <T,>({
   };
 
   return (
-    <ParallelDialog closeHref={closeHref} onClose={onClose} title={title}>
+    <ParallelDialog dialogButtons={dialogButtons} onClosed={onClose} title={title}>
       <Hotkeys id="archive" hotKeys={[{ key: "Enter", description: t("archive.yes"), callback: doArchive }]} />
-      {errors && formatErrors && <div className="alert alert-error my-4">{formatErrors(errors)}</div>}
+      {errors && (
+        <div className="alert alert-error mb-4">
+          {formatErrors ? formatErrors(errors) : <FormatErrors translationId={translateId} errors={errors.errors} />}
+        </div>
+      )}
       {message ?? t("archive.message")}
       <br />
       <br />

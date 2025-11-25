@@ -109,7 +109,7 @@ export const PaginationConfiguration = <T = unknown,>({
       <Popover
         showOnClick
         title={(ref, p, isOpen) => (
-          <button disabled={disabled} ref={ref} {...p} className={cx("btn", { "btn-active": isOpen })}>
+          <button disabled={disabled} ref={ref} {...p} className={cx("btn btn-xs", { "btn-active": isOpen })}>
             <AdjustmentsHorizontalIcon className="size-4" />
           </button>
         )}

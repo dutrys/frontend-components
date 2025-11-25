@@ -27,6 +27,7 @@ export declare const RadioBoxFormField: <T extends string>({ name, options, labe
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const CheckboxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName> & {
     labelClassName?: string;
+    checkbox?: boolean;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const DateFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, control, error, desc, useDate, ...props }: Omit<IInputProps<TName>, "size"> & Omit<DateInputProps, "onChange" | "value"> & {
     control: Control<TFieldValues>;

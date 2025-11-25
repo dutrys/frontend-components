@@ -101,7 +101,9 @@ declare const HeaderResponsive: <T extends ObjOrNode>({ renderVisible, renderDro
     elements: T[];
 }) => react_jsx_runtime.JSX.Element;
 
-declare const Pagination: ({ page, visiblePages, onClick, }: {
+declare const Pagination: ({ page, visiblePages, onClick, size, className, }: {
+    className?: string;
+    size?: "sm" | "xs";
     onClick?: (page: number) => void;
     page: ResponseMeta$1;
     visiblePages: number;
@@ -191,7 +193,7 @@ declare const TableLink: ({ href, children, className, isLink, ...rest }: {
 }) => string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React__default.ReactNode> | Promise<string | number | bigint | boolean | React__default.ReactPortal | React__default.ReactElement<unknown, string | React__default.JSXElementConstructor<any>> | Iterable<React__default.ReactNode> | null | undefined> | null | undefined;
 declare const FilterLink: ({ children, className, params, }: {
     className: string;
-    children: string;
+    children?: string;
     params: Record<string, string>;
 }) => react_jsx_runtime.JSX.Element;
 
@@ -268,7 +270,11 @@ declare const GeneralErrors: <T extends FieldValues>(props: {
     except?: (keyof T)[];
     translateId?: string;
     errors: FieldErrors<T>;
-    className?: string;
+    errorClassName?: string;
+    messageClassName?: string;
+    listClassName?: string;
+    as?: React__default.ElementType;
+    asClassName?: string;
 }) => react_jsx_runtime.JSX.Element;
 declare const InputErrors: ({ errors, className, }: {
     className?: string;
@@ -350,13 +356,15 @@ type SelectPaginatedFromApiProps<TModel extends {
     heading?: React__default.ReactNode;
     footer?: React__default.ReactNode;
     searchFromChars?: number;
+    optionsClassName?: string;
+    portalEnabled?: boolean;
 };
 declare const SelectPaginatedFromApi: <TModel extends {
     meta: ResponseMeta$1;
     data: {
         id: number;
     }[];
-}>({ onChange, disabled, required, inputRef, name, value, size, searchFromChars, className, queryKey, queryFn, placeholder, empty, valueFormat, heading, footer, ...rest }: SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
+}>({ onChange, disabled, required, inputRef, name, value, size, searchFromChars, className, queryKey, queryFn, placeholder, empty, portalEnabled, optionsClassName, valueFormat, heading, footer, ...rest }: SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
 
 type PaginateQuery<T> = {
     page?: number;
@@ -404,6 +412,7 @@ declare const RadioBoxFormField: <T extends string>({ name, options, label, valu
 }) => react_jsx_runtime.JSX.Element;
 declare const CheckboxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName> & {
     labelClassName?: string;
+    checkbox?: boolean;
 }) => react_jsx_runtime.JSX.Element;
 declare const DateFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, control, error, desc, useDate, ...props }: Omit<IInputProps<TName>, "size"> & Omit<DateInputProps, "onChange" | "value"> & {
     control: Control<TFieldValues>;
@@ -561,16 +570,19 @@ declare const SelectFromApi: <TModel extends {
 
 declare const TOOLTIP_PARALLEL_ID = "parallel-tooltip";
 type DialogWithBackProps = {
-    onClose?: () => void;
+    onClosed?: () => void;
     title?: string;
     className?: string;
     children: React.ReactNode;
-    closeHref?: string;
+    isOpen?: boolean;
+    setIsOpen?: (isOpen: boolean) => void;
+    dialogButtons?: React.ReactNode;
+    returnDefault?: string;
 };
-declare const ParallelDialog: ({ closeHref, title, children, onClose, className, ...rest }: DialogWithBackProps) => react_jsx_runtime.JSX.Element;
+declare const ParallelDialog: ({ dialogButtons, title, children, onClosed, className, returnDefault, ...rest }: DialogWithBackProps) => react_jsx_runtime.JSX.Element;
 
 type Include<T, U> = T extends U ? T : never;
-declare const Archive: <T>({ title, yes, no, message, archive, onClose, formatErrors, translateId, onSuccess, children, closeHref, }: {
+declare const Archive: <T>({ title, yes, no, message, archive, onClose, formatErrors, translateId, dialogButtons, onSuccess, children, }: {
     yes?: string;
     no?: string;
     message?: string;
@@ -578,10 +590,10 @@ declare const Archive: <T>({ title, yes, no, message, archive, onClose, formatEr
     archive: () => Promise<T>;
     onClose?: () => void;
     children?: React__default.ReactNode;
+    dialogButtons?: React__default.ReactNode;
     formatErrors?: (errors: Include<T, {
         errors: Record<string, string[]>;
     }>) => React__default.ReactNode;
-    closeHref?: string;
     translateId?: string;
     onSuccess?: () => unknown;
 }) => react_jsx_runtime.JSX.Element;

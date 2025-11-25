@@ -22,11 +22,13 @@ export type SelectPaginatedFromApiProps<TModel extends {
     heading?: React.ReactNode;
     footer?: React.ReactNode;
     searchFromChars?: number;
+    optionsClassName?: string;
+    portalEnabled?: boolean;
 };
 export declare const SelectPaginatedFromApi: <TModel extends {
     meta: ResponseMeta;
     data: {
         id: number;
     }[];
-}>({ onChange, disabled, required, inputRef, name, value, size, searchFromChars, className, queryKey, queryFn, placeholder, empty, valueFormat, heading, footer, ...rest }: SelectPaginatedFromApiProps<TModel>) => import("react/jsx-runtime").JSX.Element;
+}>({ onChange, disabled, required, inputRef, name, value, size, searchFromChars, className, queryKey, queryFn, placeholder, empty, portalEnabled, optionsClassName, valueFormat, heading, footer, ...rest }: SelectPaginatedFromApiProps<TModel>) => import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=SelectPaginatedFromApi.d.ts.map

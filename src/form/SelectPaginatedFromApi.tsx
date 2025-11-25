@@ -36,6 +36,8 @@ export type SelectPaginatedFromApiProps<TModel extends { meta: ResponseMeta; dat
   heading?: React.ReactNode;
   footer?: React.ReactNode;
   searchFromChars?: number;
+  optionsClassName?: string;
+  portalEnabled?: boolean;
 };
 
 export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data: { id: number }[] }>({
@@ -52,6 +54,8 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
   queryFn,
   placeholder,
   empty,
+  portalEnabled,
+  optionsClassName,
   valueFormat = (model) => (model as any).name,
   heading,
   footer,
@@ -179,7 +183,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
               <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
             </ComboboxButton>
           </div>
-          <Portal>
+          <Portal enabled={portalEnabled}>
             <Transition
               as={Fragment}
               leave="transition ease-in duration-100"
@@ -187,7 +191,13 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
               leaveTo="opacity-0"
             >
               <div style={{ ...floatingStyles, zIndex: 2000 }} ref={refs.setFloating}>
-                <ComboboxOptions className="absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm">
+                <ComboboxOptions
+                  className={cx(
+                    "absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm",
+                    { "max-h-96": !optionsClassName?.includes("max-h-") },
+                    optionsClassName,
+                  )}
+                >
                   {heading}
                   {!required && query.length < searchFromChars && data && data?.pages?.[0]?.meta?.totalItems !== 0 && (
                     <SelectOption data-testid="select-option-empty" key="empty" value={null} size={size}>

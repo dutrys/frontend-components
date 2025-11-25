@@ -1,5 +1,7 @@
 import { ResponseMeta } from "@/utils/paginate";
-export declare const Pagination: ({ page, visiblePages, onClick, }: {
+export declare const Pagination: ({ page, visiblePages, onClick, size, className, }: {
+    className?: string;
+    size?: "sm" | "xs";
     onClick?: (page: number) => void;
     page: ResponseMeta;
     visiblePages: number;

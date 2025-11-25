@@ -67,16 +67,16 @@ export const DateInput = ({
   return (
     <div
       className={cx(
-        "input input-bordered pr-1",
+        "input input-bordered",
         {
-          "input-xs pl-3 gap-0.5": size === "xs",
-          "input-sm pl-3 gap-1": size === "sm",
+          "input-xs pl-3 pr-1 gap-0.5": size === "xs",
+          "input-sm pl-3 pr-2 gap-1": size === "sm",
           ["w-full"]: !className?.includes("w-"),
         },
         className,
       )}
     >
-      <FocusTrap features={isOpen ? FocusTrapFeatures.FocusLock : FocusTrapFeatures.None}>
+      <FocusTrap className="grow" features={isOpen ? FocusTrapFeatures.FocusLock : FocusTrapFeatures.None}>
         <Popover
           showOnClick={false}
           showOnFocus

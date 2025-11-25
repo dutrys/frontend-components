@@ -174,6 +174,7 @@ export const TextareaFormField = <
         <textarea
           id={props.id}
           disabled={props.disabled}
+          placeholder={props.required ? `${props.label}*` : props.label}
           {...r}
           className={cx("textarea textarea-bordered w-full", props.className, {
             "textarea-xs": props.size === "xs",
@@ -248,7 +249,7 @@ export const CheckboxFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >(
-  props: IInputRegisterProps<TFieldValues, TName> & { labelClassName?: string },
+  props: IInputRegisterProps<TFieldValues, TName> & { labelClassName?: string; checkbox?: boolean },
 ) => {
   return (
     <>
@@ -263,10 +264,17 @@ export const CheckboxFormField = <
               disabled: props.disabled,
               ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
             })}
-            className={cx("toggle", props.className, {
-              "toggle-sm": props.size === "sm",
-              "toggle-xs": props.size === "xs",
-            })}
+            className={
+              props.checkbox
+                ? cx("checkbox", props.className, {
+                    "checkbox-sm": props.size === "sm",
+                    "checkbox-xs": props.size === "xs",
+                  })
+                : cx("toggle", props.className, {
+                    "toggle-sm": props.size === "sm",
+                    "toggle-xs": props.size === "xs",
+                  })
+            }
           />
           <span className={cx("text-sm text-gray-500 label-text grow pl-2", props.labelClassName)}>{props.label}</span>
         </label>
@@ -290,7 +298,7 @@ export const DateFormField = <
   control,
   error,
   desc,
-  useDate = true,
+  useDate,
   ...props
 }: Omit<IInputProps<TName>, "size"> &
   Omit<DateInputProps, "onChange" | "value"> & {
