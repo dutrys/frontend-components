@@ -1,40 +1,18 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import {
-  Combobox,
-  ComboboxButton,
-  ComboboxInput,
-  ComboboxOption,
-  ComboboxOptions,
-  Transition,
-} from "@headlessui/react";
+import { Combobox, ComboboxButton, ComboboxInput, ComboboxOptions, Portal, Transition } from "@headlessui/react";
 import cx from "classnames";
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { LoadingComponent } from "@/Loading";
 import { SelectOption } from "@/form/Select";
+import { autoUpdate, useFloating } from "@floating-ui/react";
+import { size as floatingSize } from "@floating-ui/react-dom";
 
 const SEARCH_FROM_QUERY_LENGTH = 3;
 
-export const SelectFromApi = <TModel extends { id: number }>({
-  onChange,
-  disabled,
-  required,
-  inputRef,
-  name,
-  value,
-  size,
-  className,
-  queryKey,
-  queryFn,
-  placeholder,
-  optionsClassName,
-  empty,
-  valueFormat = (model) => (model as any).name,
-  inputClassName = "w-full mx-0 input input-bordered",
-  filter,
-  ...rest
-}: {
+export type SelectFromApiProps<TModel extends { id: number }> = {
+  portalEnabled?: boolean;
   size?: "sm" | "xs";
   inputClassName?: string;
   name?: string;
@@ -50,8 +28,29 @@ export const SelectFromApi = <TModel extends { id: number }>({
   required?: boolean;
   empty?: string;
   valueFormat?: (model: TModel) => string;
-  filter?: (model: TModel) => boolean;
-}) => {
+  filter?: (model: TModel, query: string) => boolean;
+};
+
+export const SelectFromApi = <TModel extends { id: number }>({
+  onChange,
+  disabled,
+  required,
+  inputRef,
+  name,
+  value,
+  size,
+  portalEnabled,
+  className,
+  queryKey,
+  queryFn,
+  placeholder,
+  optionsClassName,
+  empty,
+  valueFormat = (model) => (model as any).name,
+  inputClassName = "w-full mx-0 input input-bordered",
+  filter,
+  ...rest
+}: SelectFromApiProps<TModel>) => {
   const [query, setQuery] = useState("");
   const { isLoading, data, refetch } = useQuery<TModel[]>({
     enabled: !disabled,
@@ -71,6 +70,20 @@ export const SelectFromApi = <TModel extends { id: number }>({
     void refetch();
   }, [refetch, query]);
 
+  const { refs, floatingStyles } = useFloating({
+    placement: "bottom-start",
+    middleware: [
+      floatingSize({
+        apply({ rects, elements }) {
+          Object.assign(elements.floating.style, {
+            width: `${rects.reference.width}px`,
+          });
+        },
+      }),
+    ],
+    whileElementsMounted: autoUpdate,
+  });
+
   return (
     <Combobox<TModel | null>
       immediate
@@ -81,7 +94,7 @@ export const SelectFromApi = <TModel extends { id: number }>({
       {...rest}
     >
       <div className={`relative ${className}`}>
-        <div className="w-full relative p-0">
+        <div className="w-full relative p-0" ref={refs.setReference}>
           <ComboboxInput
             required={required}
             ref={inputRef}
@@ -111,34 +124,38 @@ export const SelectFromApi = <TModel extends { id: number }>({
             <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </ComboboxButton>
         </div>
-        <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-          <ComboboxOptions
-            className={`absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`}
-          >
-            {!required && query.length < SEARCH_FROM_QUERY_LENGTH && data && data?.length !== 0 && (
-              <SelectOption data-testid="select-option-empty" key="empty" size={size} value={null}>
-                {empty || t("selectFromApi.select")}
-              </SelectOption>
-            )}
-            {data?.length === 0 ? (
-              <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                <span className={cx({ "text-xs": "xs" === size || "sm" === size })}>
-                  {t("selectFromApi.nothingFound")}
-                </span>
-              </div>
-            ) : (
-              data
-                ?.filter((m) => (filter ? filter(m) : true))
-                ?.map((model: TModel, i: number) => (
-                  <SelectOption data-testid={`select-option-${i}`} key={model.id} value={model} size={size}>
-                    {valueFormat(model)}
+        <Portal enabled={portalEnabled}>
+          <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+            <div style={{ ...floatingStyles, zIndex: 2000 }} ref={refs.setFloating}>
+              <ComboboxOptions
+                className={`absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`}
+              >
+                {!required && query.length < SEARCH_FROM_QUERY_LENGTH && data && data?.length !== 0 && (
+                  <SelectOption data-testid="select-option-empty" key="empty" size={size} value={null}>
+                    {empty || t("selectFromApi.select")}
                   </SelectOption>
-                ))
-            )}
+                )}
+                {data?.length === 0 ? (
+                  <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                    <span className={cx({ "text-xs": "xs" === size || "sm" === size })}>
+                      {t("selectFromApi.nothingFound")}
+                    </span>
+                  </div>
+                ) : (
+                  data
+                    ?.filter((m) => (filter ? filter(m, query) : true))
+                    ?.map((model: TModel, i: number) => (
+                      <SelectOption data-testid={`select-option-${i}`} key={model.id} value={model} size={size}>
+                        {valueFormat(model)}
+                      </SelectOption>
+                    ))
+                )}
 
-            {isLoading && <LoadingComponent className="my-2" />}
-          </ComboboxOptions>
-        </Transition>
+                {isLoading && <LoadingComponent className="my-2" />}
+              </ComboboxOptions>
+            </div>
+          </Transition>
+        </Portal>
       </div>
     </Combobox>
   );

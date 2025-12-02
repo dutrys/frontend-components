@@ -1,12 +1,9 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import cx from "classnames";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "react-tooltip";
-import { useTranslations } from "next-intl";
-import { FocusTrap } from "@headlessui/react";
 import { addLocale } from "@/pagination/Link";
-import { ElementRef, useEffect, useRef } from "react";
+import cx from "classnames";
 
 export const TOOLTIP_PARALLEL_ID = "parallel-tooltip";
 
@@ -31,7 +28,6 @@ export const ParallelDialog = ({
   ...rest
 }: DialogWithBackProps) => {
   const router = useRouter();
-  const t = useTranslations();
 
   const closeModal = () => {
     onClosed?.();
@@ -47,11 +43,10 @@ export const ParallelDialog = ({
   };
 
   return (
-    <dialog data-testid="modal-dialog" open className="modal z-1100" {...rest}>
-      <FocusTrap
+    <dialog data-testid="modal-dialog" open className="modal modal-bottom modal-middle z-1100" {...rest}>
+      <div
+        className={cx("modal-box rounded-field p-4 my-4 relative", className)}
         onKeyDown={(e) => e.key === "Escape" && closeModal()}
-        autoFocus={false}
-        className={cx("modal-box rounded-field p-4 relative", className)}
       >
         <Tooltip id={TOOLTIP_PARALLEL_ID} place="top" />
         {title ? (
@@ -65,21 +60,15 @@ export const ParallelDialog = ({
             </button>
           </div>
         ) : (
-          <div className="absolute right-4 top-4 flex gap-2">
+          <div className="absolute right-4 top-4 flex gap-2 z-1101">
             {dialogButtons}
-            <a
-              href="#"
-              className="btn btn-circle btn-sm"
-              data-tooltip-id={TOOLTIP_PARALLEL_ID}
-              data-tooltip-content={t("general.close")}
-              onClick={closeModal}
-            >
+            <a href="#" className="btn btn-circle btn-sm" onClick={closeModal}>
               <XMarkIcon className="size-4" />
             </a>
           </div>
         )}
         {children}
-      </FocusTrap>
+      </div>
       <form
         method="dialog"
         onSubmit={(e) => {

@@ -17,9 +17,10 @@
   fill: var(--color-base-100) !important;
 }
 .dayPicker :global(.rdp-today .rdp-day_button) {
-  background: var(--color-gray-500);
-  border: 1px solid color-mix(in oklch, var(--color-primary) 10%, #0000) !important;
+  background: transparent;
+  border: 1px solid var(--color-primary) !important;
 }
+.dayPicker :global(.rdp-selected .rdp-day_button):hover,
 .dayPicker :global(.rdp-today .rdp-day_button):hover {
     background: var(--color-base-100) !important;
 }

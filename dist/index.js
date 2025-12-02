@@ -26,6 +26,7 @@ import { ChevronUpDownIcon as ChevronUpDownIcon$1, CheckIcon as CheckIcon$1 } fr
 import { useInView } from 'react-intersection-observer';
 import 'date-fns-tz';
 import { NumericFormat } from 'react-number-format';
+import { size as size$1 } from '@floating-ui/react-dom';
 import { lt as lt$1 } from 'date-fns/locale';
 
 const LoadingComponent = ({ style, className, loadingClassName, size, }) => (jsx("div", { className: `flex justify-center ${className}`, style: style, children: jsx("span", { className: `${loadingClassName || "text-primary"} loading loading-spinner ${size}` }) }));
@@ -969,11 +970,11 @@ const DateInput = ({ onChange, value, className, toggleClassName, required, disa
         matcher = { after: to };
     }
     const [isOpen, setIsOpen] = useState(false);
-    return (jsxs("div", { className: cx("input input-bordered", {
-            "input-xs pl-3 pr-1 gap-0.5": size === "xs",
-            "input-sm pl-3 pr-2 gap-1": size === "sm",
-            ["w-full"]: !className?.includes("w-"),
-        }, className), children: [jsx(FocusTrap, { className: "grow", features: isOpen ? FocusTrapFeatures.FocusLock : FocusTrapFeatures.None, children: jsx(Popover, { showOnClick: false, showOnFocus: true, showOnHover: false, onShow: (open) => setIsOpen(open), title: (ref, popoverProps) => (jsx("input", { ref: ref, ...rest, ...popoverProps, value: dateString, className: "grow", required: required, disabled: disabled, placeholder: placeholder, onChange: (e) => {
+    return (jsx(FocusTrap, { className: "grow", features: isOpen ? FocusTrapFeatures.FocusLock : FocusTrapFeatures.None, children: jsx(Popover, { showOnClick: true, showOnFocus: true, showOnHover: false, onShow: (open) => setIsOpen(open), title: (ref, popoverProps) => (jsxs("div", { ref: ref, ...rest, ...popoverProps, className: cx("input input-bordered", {
+                    "input-xs pl-3 pr-1 gap-0.5": size === "xs",
+                    "input-sm pl-3 pr-2 gap-1": size === "sm",
+                    ["w-full"]: !className?.includes("w-"),
+                }, className), children: [jsx("input", { value: dateString, className: "grow", required: required, disabled: disabled, placeholder: placeholder, onChange: (e) => {
                             if (e.target.value.length === 0) {
                                 setDateString("");
                                 onChange(null);
@@ -996,10 +997,14 @@ const DateInput = ({ onChange, value, className, toggleClassName, required, disa
                                 onChange(date);
                             }
                             rest.onBlur?.(e);
-                        } })), children: (close) => (jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$1.dayPicker}`, captionLayout: "dropdown", mode: "single", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, disabled: matcher, weekStartsOn: 1, selected: value || undefined, defaultMonth: value || undefined, onSelect: (day) => {
-                            onChange(day || null);
-                            close();
-                        } })) }) }), required || !value ? (jsx("div", { className: cx(toggleClassName, "cursor-pointer"), children: jsx(CalendarIcon, { className: "size-4" }) })) : (jsx("button", { type: "button", disabled: !required && !value, className: cx("cursor-pointer", toggleClassName), onClick: () => onChange(null), children: jsx(XMarkIcon, { className: "size-4" }) }))] }));
+                        } }), required || !value ? (jsx("div", { className: cx(toggleClassName, "cursor-pointer"), children: jsx(CalendarIcon, { className: "size-4" }) })) : (jsx("button", { type: "button", disabled: !required && !value, className: cx("cursor-pointer", toggleClassName), onClick: (e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            onChange(null);
+                        }, children: jsx(XMarkIcon, { className: "size-4" }) }))] })), children: (close) => (jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$1.dayPicker}`, captionLayout: "dropdown", mode: "single", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, disabled: matcher, weekStartsOn: 1, selected: value || undefined, defaultMonth: value || undefined, onSelect: (day) => {
+                    onChange(day || null);
+                    close();
+                } })) }) }));
 };
 
 const Select = ({ onChange, disabled, required, inputRef, options, name, value, size: size$1, className, placeholder, empty, beforeOptions, header, afterOptions, ...rest }) => {
@@ -1165,7 +1170,7 @@ const TimePicker = ({ className, value, onChange, placeholder, required, disable
 var styles = {"desc":"Input-module_desc__3D3hV"};
 
 const SEARCH_FROM_QUERY_LENGTH = 3;
-const SelectFromApi = ({ onChange, disabled, required, inputRef, name, value, size, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat = (model) => model.name, inputClassName = "w-full mx-0 input input-bordered", filter, ...rest }) => {
+const SelectFromApi = ({ onChange, disabled, required, inputRef, name, value, size, portalEnabled, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat = (model) => model.name, inputClassName = "w-full mx-0 input input-bordered", filter, ...rest }) => {
     const [query, setQuery] = useState("");
     const { isLoading, data, refetch } = useQuery({
         enabled: !disabled,
@@ -1183,14 +1188,27 @@ const SelectFromApi = ({ onChange, disabled, required, inputRef, name, value, si
     useEffect(() => {
         void refetch();
     }, [refetch, query]);
-    return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: data?.find((b) => b.id === value) || null, onChange: onChange, ...rest, children: jsxs("div", { className: `relative ${className}`, children: [jsxs("div", { className: "w-full relative p-0", children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, className: cx(inputClassName, {
+    const { refs, floatingStyles } = useFloating({
+        placement: "bottom-start",
+        middleware: [
+            size$1({
+                apply({ rects, elements }) {
+                    Object.assign(elements.floating.style, {
+                        width: `${rects.reference.width}px`,
+                    });
+                },
+            }),
+        ],
+        whileElementsMounted: autoUpdate,
+    });
+    return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: data?.find((b) => b.id === value) || null, onChange: onChange, ...rest, children: jsxs("div", { className: `relative ${className}`, children: [jsxs("div", { className: "w-full relative p-0", ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, className: cx(inputClassName, {
                                 "input-sm": size === "sm",
                                 "input-xs": size === "xs",
                             }), displayValue: (model) => (model ? valueFormat(model) : ""), onChange: (event) => setQuery(event.target.value) }), isLoading && !disabled && (jsx(LoadingComponent, { className: "absolute z-1 inset-y-0 right-5 p-3", loadingClassName: "size-4 text-primary" })), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "absolute z-1 cursor-pointer inset-y-0 right-0 flex items-center pr-2", onClick: (e) => {
                                 e.target?.parentNode?.parentNode?.querySelector("input")?.select();
-                            }, children: jsx(ChevronUpDownIcon$1, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsxs(ComboboxOptions, { className: `absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`, children: [!required && query.length < SEARCH_FROM_QUERY_LENGTH && data && data?.length !== 0 && (jsx(SelectOption, { "data-testid": "select-option-empty", size: size, value: null, children: empty || t("selectFromApi.select") }, "empty")), data?.length === 0 ? (jsx("div", { className: "relative cursor-default select-none py-2 px-4 text-gray-700", children: jsx("span", { className: cx({ "text-xs": "xs" === size || "sm" === size }), children: t("selectFromApi.nothingFound") }) })) : (data
-                                ?.filter((m) => (filter ? filter(m) : true))
-                                ?.map((model, i) => (jsx(SelectOption, { "data-testid": `select-option-${i}`, value: model, size: size, children: valueFormat(model) }, model.id)))), isLoading && jsx(LoadingComponent, { className: "my-2" })] }) })] }) }));
+                            }, children: jsx(ChevronUpDownIcon$1, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(Portal, { enabled: portalEnabled, children: jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsx("div", { style: { ...floatingStyles, zIndex: 2000 }, ref: refs.setFloating, children: jsxs(ComboboxOptions, { className: `absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`, children: [!required && query.length < SEARCH_FROM_QUERY_LENGTH && data && data?.length !== 0 && (jsx(SelectOption, { "data-testid": "select-option-empty", size: size, value: null, children: empty || t("selectFromApi.select") }, "empty")), data?.length === 0 ? (jsx("div", { className: "relative cursor-default select-none py-2 px-4 text-gray-700", children: jsx("span", { className: cx({ "text-xs": "xs" === size || "sm" === size }), children: t("selectFromApi.nothingFound") }) })) : (data
+                                        ?.filter((m) => (filter ? filter(m, query) : true))
+                                        ?.map((model, i) => (jsx(SelectOption, { "data-testid": `select-option-${i}`, value: model, size: size, children: valueFormat(model) }, model.id)))), isLoading && jsx(LoadingComponent, { className: "my-2" })] }) }) }) })] }) }));
 };
 
 const TextFormField = ({ required, disabled, error, className, id, type, register, label, size, options, desc, name, fieldSetClassName, ref, ...rest }) => {
@@ -1275,9 +1293,12 @@ const SelectPaginatedFromApiFormField = ({ fieldSetClassName, label, ...props })
                                 props.onChange?.(model || null);
                             } })) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
-const SelectFromApiFormField = ({ label, queryFn, queryKey, desc, control, name, valueFormat, required, disabled, error, className, size, onChange, fieldSetClassName, filter, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, required ? jsx(Required, {}) : null] }), jsx(Controller, { control: control, name: name, rules: { required: required === true }, render: ({ field }) => (jsx(SelectFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
+const SelectFromApiField = ({ label, desc, error, className, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] }), jsx(SelectFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
+                        "input-error": error,
+                    }), ...rest, placeholder: rest.required ? `${label}*` : label })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+const SelectFromApiFormField = ({ label, desc, control, name, error, className, onChange, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] }), jsx(Controller, { control: control, name: name, rules: { required: rest.required === true }, render: ({ field }) => (jsx(SelectFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
                             "input-error": error,
-                        }), name: name, ...rest, size: size, required: required, disabled: disabled, placeholder: required ? `${label}*` : label, queryKey: queryKey, filter: filter, queryFn: queryFn, value: field.value, valueFormat: valueFormat, onChange: (model) => {
+                        }), name: name, ...rest, placeholder: rest.required ? `${label}*` : label, value: field.value, onChange: (model) => {
                             field.onChange(model?.id || null);
                             onChange?.(model || null);
                         } })) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
@@ -1598,7 +1619,7 @@ const TruncateText = ({ text, length }) => {
 const TOOLTIP_PARALLEL_ID = "parallel-tooltip";
 const ParallelDialog = ({ dialogButtons, title, children, onClosed, className, returnDefault, ...rest }) => {
     const router = useRouter$1();
-    const t = useTranslations();
+    useTranslations();
     const closeModal = () => {
         onClosed?.();
         if (history.length > 2) {
@@ -1609,7 +1630,7 @@ const ParallelDialog = ({ dialogButtons, title, children, onClosed, className, r
             router.replace(addLocale(returnDefault));
         }
     };
-    return (jsxs("dialog", { "data-testid": "modal-dialog", open: true, className: "modal z-1100", ...rest, children: [jsxs(FocusTrap, { onKeyDown: (e) => e.key === "Escape" && closeModal(), autoFocus: false, className: cx("modal-box rounded-field p-4 relative", className), children: [jsx(Tooltip, { id: TOOLTIP_PARALLEL_ID, place: "top" }), title ? (jsxs("div", { className: "flex gap-2 mb-4", children: [jsx("h3", { className: "grow shrink truncate font-bold text-lg mt-0.5", tabIndex: -1, children: title }), dialogButtons, jsx("button", { type: "button", className: "btn btn-circle btn-sm", onClick: closeModal, children: jsx(XMarkIcon, { className: "size-4" }) })] })) : (jsxs("div", { className: "absolute right-4 top-4 flex gap-2", children: [dialogButtons, jsx("a", { href: "#", className: "btn btn-circle btn-sm", "data-tooltip-id": TOOLTIP_PARALLEL_ID, "data-tooltip-content": t("general.close"), onClick: closeModal, children: jsx(XMarkIcon, { className: "size-4" }) })] })), children] }), jsx("form", { method: "dialog", onSubmit: (e) => {
+    return (jsxs("dialog", { "data-testid": "modal-dialog", open: true, className: "modal modal-bottom modal-middle z-1100", ...rest, children: [jsxs("div", { className: cx("modal-box rounded-field p-4 my-4 relative", className), onKeyDown: (e) => e.key === "Escape" && closeModal(), children: [jsx(Tooltip, { id: TOOLTIP_PARALLEL_ID, place: "top" }), title ? (jsxs("div", { className: "flex gap-2 mb-4", children: [jsx("h3", { className: "grow shrink truncate font-bold text-lg mt-0.5", tabIndex: -1, children: title }), dialogButtons, jsx("button", { type: "button", className: "btn btn-circle btn-sm", onClick: closeModal, children: jsx(XMarkIcon, { className: "size-4" }) })] })) : (jsxs("div", { className: "absolute right-4 top-4 flex gap-2 z-1101", children: [dialogButtons, jsx("a", { href: "#", className: "btn btn-circle btn-sm", onClick: closeModal, children: jsx(XMarkIcon, { className: "size-4" }) })] })), children] }), jsx("form", { method: "dialog", onSubmit: (e) => {
                     e.preventDefault();
                     closeModal();
                 }, className: "modal-backdrop", children: jsx("button", { children: "close" }) })] }));
@@ -1718,5 +1739,5 @@ const SidebarLayout = ({ sidebarExpanded, onExpandChanged, sideChildren, childre
                                     }, className: cx("hidden sm:flex absolute top-8 right-0 z-1001 justify-center btn btn-xs btn-circle border-white/40 hover:border-white text-white/70 hover:text-white bg-navigation transition-[translate,opacity] duration-200 ease-in-out group-hover:opacity-100", { "-translate-x-8": expanded, "opacity-0 right-0": !expanded }), children: menuExpanded ? (jsx(ChevronDoubleLeftIcon, { className: "size-4" })) : (jsx(ChevronDoubleRightIcon, { className: "size-4" })) }), sideChildren(menuExpanded)] }) }), jsx(Tooltip, { id: TOOLTIP_SIDEBAR_ID, place: "right", style: { fontSize: 14, zIndex: 2000 } })] }), jsx("div", { className: "grow shirk", children: children })] }));
 };
 
-export { ActionButton, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxFormField, ConfirmSave, DateFormField, DateInput, DateTime, DateTimeFormField, DateTimePicker, EditButton, FilterLink, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NumberFormField, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBoxFormField, Required, SaveButton, ScreenSize, Select, SelectFormField, SelectFromApi, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextFormField, TextareaFormField, TimeFormField, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
+export { ActionButton, Archive, ArchiveButton, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxFormField, ConfirmSave, DateFormField, DateInput, DateTime, DateTimeFormField, DateTimePicker, EditButton, FilterLink, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NumberFormField, PaginatedTable, Pagination, ParallelDialog, Popover, RadioBoxFormField, Required, SaveButton, ScreenSize, Select, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextFormField, TextareaFormField, TimeFormField, TimePicker, Toaster, ViewButton, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
 //# sourceMappingURL=index.js.map

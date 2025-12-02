@@ -1,6 +1,7 @@
-export declare const SelectFromApi: <TModel extends {
+export type SelectFromApiProps<TModel extends {
     id: number;
-}>({ onChange, disabled, required, inputRef, name, value, size, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat, inputClassName, filter, ...rest }: {
+}> = {
+    portalEnabled?: boolean;
     size?: "sm" | "xs";
     inputClassName?: string;
     name?: string;
@@ -16,6 +17,9 @@ export declare const SelectFromApi: <TModel extends {
     required?: boolean;
     empty?: string;
     valueFormat?: (model: TModel) => string;
-    filter?: (model: TModel) => boolean;
-}) => import("react/jsx-runtime").JSX.Element;
+    filter?: (model: TModel, query: string) => boolean;
+};
+export declare const SelectFromApi: <TModel extends {
+    id: number;
+}>({ onChange, disabled, required, inputRef, name, value, size, portalEnabled, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat, inputClassName, filter, ...rest }: SelectFromApiProps<TModel>) => import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=SelectFromApi.d.ts.map

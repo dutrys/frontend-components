@@ -65,28 +65,28 @@ export const DateInput = ({
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div
-      className={cx(
-        "input input-bordered",
-        {
-          "input-xs pl-3 pr-1 gap-0.5": size === "xs",
-          "input-sm pl-3 pr-2 gap-1": size === "sm",
-          ["w-full"]: !className?.includes("w-"),
-        },
-        className,
-      )}
-    >
-      <FocusTrap className="grow" features={isOpen ? FocusTrapFeatures.FocusLock : FocusTrapFeatures.None}>
-        <Popover
-          showOnClick={false}
-          showOnFocus
-          showOnHover={false}
-          onShow={(open) => setIsOpen(open)}
-          title={(ref, popoverProps) => (
+    <FocusTrap className="grow" features={isOpen ? FocusTrapFeatures.FocusLock : FocusTrapFeatures.None}>
+      <Popover
+        showOnClick
+        showOnFocus
+        showOnHover={false}
+        onShow={(open) => setIsOpen(open)}
+        title={(ref, popoverProps) => (
+          <div
+            ref={ref}
+            {...rest}
+            {...popoverProps}
+            className={cx(
+              "input input-bordered",
+              {
+                "input-xs pl-3 pr-1 gap-0.5": size === "xs",
+                "input-sm pl-3 pr-2 gap-1": size === "sm",
+                ["w-full"]: !className?.includes("w-"),
+              },
+              className,
+            )}
+          >
             <input
-              ref={ref}
-              {...rest}
-              {...popoverProps}
               value={dateString}
               className="grow"
               required={required}
@@ -118,41 +118,46 @@ export const DateInput = ({
                 rest.onBlur?.(e);
               }}
             />
-          )}
-        >
-          {(close) => (
-            <DayPicker
-              className={`react-day-picker bg-transparent border-none text-white ${styles.dayPicker}`}
-              captionLayout="dropdown"
-              mode="single"
-              locale={params.locale === "lt" ? lt : enGB}
-              showOutsideDays
-              disabled={matcher}
-              weekStartsOn={1}
-              selected={value || undefined}
-              defaultMonth={value || undefined}
-              onSelect={(day) => {
-                onChange(day || null);
-                close();
-              }}
-            />
-          )}
-        </Popover>
-      </FocusTrap>
-      {required || !value ? (
-        <div className={cx(toggleClassName, "cursor-pointer")}>
-          <CalendarIcon className="size-4" />
-        </div>
-      ) : (
-        <button
-          type="button"
-          disabled={!required && !value}
-          className={cx("cursor-pointer", toggleClassName)}
-          onClick={() => onChange(null)}
-        >
-          <XMarkIcon className="size-4" />
-        </button>
-      )}
-    </div>
+
+            {required || !value ? (
+              <div className={cx(toggleClassName, "cursor-pointer")}>
+                <CalendarIcon className="size-4" />
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={!required && !value}
+                className={cx("cursor-pointer", toggleClassName)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  onChange(null);
+                }}
+              >
+                <XMarkIcon className="size-4" />
+              </button>
+            )}
+          </div>
+        )}
+      >
+        {(close) => (
+          <DayPicker
+            className={`react-day-picker bg-transparent border-none text-white ${styles.dayPicker}`}
+            captionLayout="dropdown"
+            mode="single"
+            locale={params.locale === "lt" ? lt : enGB}
+            showOutsideDays
+            disabled={matcher}
+            weekStartsOn={1}
+            selected={value || undefined}
+            defaultMonth={value || undefined}
+            onSelect={(day) => {
+              onChange(day || null);
+              close();
+            }}
+          />
+        )}
+      </Popover>
+    </FocusTrap>
   );
 };
