@@ -1337,7 +1337,7 @@ const SelectPaginatedFromApiField = ({ label, fieldSetClassName, className, desc
 const Required = () => {
     return jsx("span", { className: "text-error align-bottom", children: "*" });
 };
-const SaveButton = ({ isLoading, text, icon, disabled, className = "btn-block", onClick, size, type = "submit", ...props }) => {
+const SaveButton = ({ isLoading, icon, disabled, className = "btn-block", onClick, size, children, type = "submit", ...props }) => {
     const t = useTranslations();
     const Icon = icon || CheckIcon$1;
     return (jsxs("button", { type: type, className: `btn btn-primary ${size === "sm" ? "btn-sm" : ""} ${className}`, color: "primary", disabled: isLoading || disabled, "data-testid": type === "submit" ? "submit" : undefined, onClick: (e) => {
@@ -1345,7 +1345,7 @@ const SaveButton = ({ isLoading, text, icon, disabled, className = "btn-block", 
                 e.preventDefault();
                 onClick();
             }
-        }, ...props, children: [text || t("general.saveButton"), isLoading ? jsx(LoadingComponent, { className: "size-4" }) : jsx(Icon, { className: "size-4" })] }));
+        }, ...props, children: [children ?? t("general.saveButton"), isLoading ? jsx(LoadingComponent, { className: "size-4" }) : jsx(Icon, { className: "size-4" })] }));
 };
 const IndeterminateCheckbox = ({ checked, className = "checkbox checkbox-xs", indeterminate, onChange, }) => {
     const checkboxRef = useRef(null);
@@ -1619,7 +1619,6 @@ const TruncateText = ({ text, length }) => {
 const TOOLTIP_PARALLEL_ID = "parallel-tooltip";
 const ParallelDialog = ({ dialogButtons, title, children, onClosed, className, returnDefault, ...rest }) => {
     const router = useRouter$1();
-    useTranslations();
     const closeModal = () => {
         onClosed?.();
         if (history.length > 2) {

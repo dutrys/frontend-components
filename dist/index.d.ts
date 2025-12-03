@@ -500,13 +500,13 @@ interface IInputProps<TName extends FieldPath<FieldValues>> {
     size?: "xs" | "sm";
 }
 declare const Required: () => react_jsx_runtime.JSX.Element;
-declare const SaveButton: ({ isLoading, text, icon, disabled, className, onClick, size, type, ...props }: {
+declare const SaveButton: ({ isLoading, icon, disabled, className, onClick, size, children, type, ...props }: {
     type?: "submit" | "button";
     size?: "sm";
     onClick?: () => unknown;
     className?: string;
     icon?: React__default.ElementType;
-    text?: string;
+    children?: React__default.ReactNode;
     isLoading?: boolean;
     disabled?: boolean;
 }) => react_jsx_runtime.JSX.Element;

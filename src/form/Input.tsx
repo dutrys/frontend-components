@@ -695,12 +695,12 @@ export const Required = () => {
 
 export const SaveButton = ({
   isLoading,
-  text,
   icon,
   disabled,
   className = "btn-block",
   onClick,
   size,
+  children,
   type = "submit",
   ...props
 }: {
@@ -709,7 +709,7 @@ export const SaveButton = ({
   onClick?: () => unknown;
   className?: string;
   icon?: React.ElementType;
-  text?: string;
+  children?: React.ReactNode;
   isLoading?: boolean;
   disabled?: boolean;
 }) => {
@@ -731,7 +731,7 @@ export const SaveButton = ({
       }}
       {...props}
     >
-      {text || t("general.saveButton")}
+      {children ?? t("general.saveButton")}
       {isLoading ? <LoadingComponent className="size-4" /> : <Icon className="size-4" />}
     </button>
   );
