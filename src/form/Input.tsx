@@ -249,7 +249,7 @@ export const CheckboxFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >(
-  props: IInputRegisterProps<TFieldValues, TName> & { labelClassName?: string; checkbox?: boolean },
+  props: Omit<IInputRegisterProps<TFieldValues, TName>, "required"> & { labelClassName?: string; checkbox?: boolean },
 ) => {
   return (
     <>
@@ -260,7 +260,6 @@ export const CheckboxFormField = <
             type="checkbox"
             disabled={props.disabled}
             {...props.register(props.name, {
-              required: props.required,
               disabled: props.disabled,
               ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
             })}

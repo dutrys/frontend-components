@@ -524,7 +524,6 @@ const useFormSubmit = (doSubmitCallback, formOptions = {}) => {
     const { returnBack, reportProgress, onError, onSuccess, loadingText, savedText, ...options } = formOptions;
     const formProps = useForm(options);
     const handleSubmit = () => formProps.handleSubmit((values) => {
-        console.log("values", values);
         const promise = new Promise((res, rej) => {
             if (formOptions.confirm && !isConfirmed.current) {
                 setNeedsConfirm(true);
@@ -1277,7 +1276,6 @@ const TextareaFormField = (props) => {
 const RadioBoxFormField = ({ name, options, label = "", value, onChange, }) => (jsxs("div", { children: [label || "", jsx("div", { className: "flex flex-col pt-2 gap-2", children: Object.entries(options).map(([key, label]) => (jsxs("label", { children: [jsx("input", { type: "radio", checked: value === key, name: name, value: key, onChange: () => onChange(key), className: "radio radio-primary" }, key), " ", typeof label === "string" ? label : null] }, key))) })] }));
 const CheckboxFormField = (props) => {
     return (jsxs(Fragment, { children: [jsx("div", { className: props.fieldSetClassName, children: jsxs("label", { children: [jsx("input", { id: props.id, type: "checkbox", disabled: props.disabled, ...props.register(props.name, {
-                                required: props.required,
                                 disabled: props.disabled,
                                 ...(props.options || {}),
                             }), className: props.checkbox

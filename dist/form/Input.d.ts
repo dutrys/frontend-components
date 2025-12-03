@@ -26,7 +26,7 @@ export declare const RadioBoxFormField: <T extends string>({ name, options, labe
     options: Record<T, string>;
     onChange: (value: T) => void;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const CheckboxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName> & {
+export declare const CheckboxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: Omit<IInputRegisterProps<TFieldValues, TName>, "required"> & {
     labelClassName?: string;
     checkbox?: boolean;
 }) => import("react/jsx-runtime").JSX.Element;
