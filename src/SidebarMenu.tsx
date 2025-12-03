@@ -123,27 +123,29 @@ export const SidebarMenu = ({
         );
       }
 
-      return (
-        <React.Fragment key={`${item.name}-${i}`}>
-          {expanded && item.items && Array.isArray(item.items) ? (
-            <li>
-              <details className="[&[open]]:bg-gradient-to-b [&[open]]:from-white/20 [&[open]]:to-white/5 rounded-md">
-                <summary className="hover:bg-white/10 text-white/80 hover:text-white">
-                  <item.icon className="mx-auto size-5" />
-                  {item.name}
-                </summary>
-                <ul>
-                  {item.items.map((sub, i) => (
-                    <Item expanded={expanded} key={`${i}-${sub.name}`} item={sub} active={active(sub)} />
-                  ))}
-                </ul>
-              </details>
-            </li>
-          ) : (
-            <Item expanded={expanded} item={item} active={active(item)} />
-          )}
-        </React.Fragment>
-      );
+      if (expanded && Array.isArray(item.items)) {
+        const isActive = item.items.some((s) => active(s));
+        return (
+          <li key={`${item.name}-${i}`}>
+            <details
+              className={cx({ "rounded-box bg-gradient-to-b from-white/20 to-white/5": isActive })}
+              open={isActive}
+            >
+              <summary className="hover:bg-white/10 text-white/80 hover:text-white">
+                <item.icon className="mx-auto size-5" />
+                {item.name}
+              </summary>
+              <ul>
+                {item.items.map((sub, i) => (
+                  <Item expanded={expanded} key={`${i}-${sub.name}`} item={sub} active={active(sub)} />
+                ))}
+              </ul>
+            </details>
+          </li>
+        );
+      }
+
+      return <Item key={`${item.name}-${i}`} expanded={expanded} item={item} active={active(item)} />;
     })}
   </ul>
 );
@@ -172,9 +174,9 @@ export const SidebarLayout = ({
 
   return (
     <div
-      className={cx("flex flex-row h-full", className, {
-        "sidebar-expanded [--sidebar-width:15rem]": menuExpanded,
-        "[--sidebar-width:6rem]": !menuExpanded,
+      className={cx("flex flex-row h-full [--sidebar-width:0rem]", className, {
+        "sidebar-expanded sm:[--sidebar-width:15rem]": menuExpanded,
+        "sm:[--sidebar-width:6rem]": !menuExpanded,
       })}
     >
       {showSidebar && (
@@ -186,7 +188,7 @@ export const SidebarLayout = ({
       )}
       <div className="sm:hidden absolute h-16 flex items-center" style={{ zIndex: 1000 }}>
         <span onChange={() => setShowSidebar(!showSidebar)}>{icon}</span>
-        <label className="px-2 sm:hidden text-black ml-4 mr-2 swap swap-rotate">
+        <label className="px-2 sm:hidden text-black ml-2 mr-2 swap swap-rotate">
           <input type="checkbox" checked={showSidebar} onChange={() => setShowSidebar(!showSidebar)} />
 
           <svg
@@ -223,9 +225,9 @@ export const SidebarLayout = ({
             { "w-60": menuExpanded, "w-24": !menuExpanded },
           )}
         >
-          <div className="rounded-xl flex flex-col h-full overflow-auto pt-14 bg-navigation group">
+          <div className="rounded-box flex flex-col h-full overflow-auto pt-14 bg-navigation group">
             <div className="absolute w-full h-18 left-0 top-2 z-1000">
-              <div className=" rounded-xl h-18 mx-2 pl-4 pt-5 bg-gradient-to-b from-[50%] from-navigation to-transparent">
+              <div className=" rounded-box h-18 mx-2 pl-4 pt-5 bg-gradient-to-b from-[50%] from-navigation to-transparent">
                 {menuIcon(menuExpanded)}
               </div>
             </div>

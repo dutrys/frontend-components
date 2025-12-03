@@ -229,8 +229,8 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   return (
     <>
       {titleAbove && (
-        <div className="h-16 flex items-center pl-2 font-bold w-[calc(100vw-var(--sidebar-width)-var(--top-right-bar))] text-nowrap overflow-hidden text-ellipsis">
-          {titleAbove}
+        <div className="h-16 flex items-center font-bold ml-[var(--top-left-bar)] w-[calc(100vw-var(--sidebar-width)-var(--top-left-bar)-var(--top-right-bar))]">
+          <div className="truncate pl-2">{titleAbove}</div>
         </div>
       )}
 
