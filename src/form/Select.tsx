@@ -53,9 +53,10 @@ export const Select = ({
     placement: "bottom-start",
     middleware: [
       floatingSize({
-        apply({ rects, elements }) {
+        apply({ rects, elements, availableHeight }) {
           Object.assign(elements.floating.style, {
             width: `${rects.reference.width}px`,
+            maxHeight: `${Math.min(availableHeight - 10, 600)}px`,
           });
         },
       }),
@@ -115,8 +116,12 @@ export const Select = ({
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <div style={{ ...floatingStyles, zIndex: 2000 }} ref={refs.setFloating}>
-                <ComboboxOptions className="absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm">
+              <div
+                style={floatingStyles}
+                ref={refs.setFloating}
+                className="z-[2000] mt-2 w-full border-gray-300 border overflow-y-auto rounded-box bg-white py-1 shadow-lg"
+              >
+                <ComboboxOptions>
                   {beforeOptions}
                   {!required && (
                     <SelectOption size={size} data-testid="select-option-empty" key="empty" value={null}>
@@ -152,10 +157,12 @@ export const SelectOption = ({
   value,
   size,
   children,
+  className,
   ...rest
 }: {
   children: React.ReactNode;
   value: unknown;
+  className?: string;
   size?: "xs" | "sm";
 }) => (
   <ComboboxOption
@@ -173,16 +180,17 @@ export const SelectOption = ({
     {({ selected, focus }) => (
       <>
         <span
-          className={cx("block truncate", {
+          className={cx({
             "text-white": focus,
             "pr-3 font-bold": selected,
             "font-normal": !selected,
+            "text-sm": !size,
             "text-xs": "xs" === size || "sm" === size,
           })}
         >
           {children}
         </span>
-        {selected ? (
+        {selected && (
           <span
             className={cx("absolute inset-y-0 right-1 flex items-center pl-3", {
               "text-white": focus,
@@ -191,7 +199,7 @@ export const SelectOption = ({
           >
             <CheckIcon className="h-5 w-5" aria-hidden="true" />
           </span>
-        ) : null}
+        )}
       </>
     )}
   </ComboboxOption>

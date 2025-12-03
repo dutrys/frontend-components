@@ -33,6 +33,7 @@ export type SelectPaginatedFromApiProps<TModel extends { meta: ResponseMeta; dat
   required?: boolean;
   empty?: string;
   valueFormat?: (model: TModel["data"][0]) => string;
+  groupBy?: (model: TModel["data"][0]) => string;
   heading?: React.ReactNode;
   footer?: React.ReactNode;
   searchFromChars?: number;
@@ -50,6 +51,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
   size,
   searchFromChars = 3,
   className,
+  groupBy,
   queryKey,
   queryFn,
   placeholder,
@@ -113,9 +115,10 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
     placement: "bottom-start",
     middleware: [
       floatingSize({
-        apply({ rects, elements }) {
+        apply({ rects, elements, availableHeight }) {
           Object.assign(elements.floating.style, {
             width: `${rects.reference.width}px`,
+            maxHeight: `${Math.min(availableHeight - 10, 600)}px`,
           });
         },
       }),
@@ -123,6 +126,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
     whileElementsMounted: autoUpdate,
   });
 
+  let currentGroupBy: string | null | undefined = null;
   return (
     <Combobox<TModel["data"][0] | null>
       immediate
@@ -161,14 +165,11 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
               onChange={(event) => setQuery(event.target.value)}
             />
             {isLoading && !disabled ? (
-              <LoadingComponent
-                className={cx("absolute right-6", { invisible: open })}
-                loadingClassName="size-4 text-primary"
-              />
+              <LoadingComponent className={cx({ hidden: open })} loadingClassName="size-4 text-primary" />
             ) : (
               !required &&
               value && (
-                <button className="absolute right-6 z-1 cursor-pointer" type="button" onClick={() => onChange(null)}>
+                <button className="cursor-pointer" type="button" onClick={() => onChange(null)}>
                   <XMarkIcon className="size-4" />
                 </button>
               )
@@ -190,14 +191,12 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <div style={{ ...floatingStyles, zIndex: 2000 }} ref={refs.setFloating}>
-                <ComboboxOptions
-                  className={cx(
-                    "absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm",
-                    { "max-h-96": !optionsClassName?.includes("max-h-") },
-                    optionsClassName,
-                  )}
-                >
+              <div
+                style={floatingStyles}
+                ref={refs.setFloating}
+                className="z-[2000] mt-1 pb-1 w-full border-gray-300 border overflow-y-auto rounded-box bg-white shadow-lg"
+              >
+                <ComboboxOptions className={optionsClassName}>
                   {heading}
                   {!required && query.length < searchFromChars && data && data?.pages?.[0]?.meta?.totalItems !== 0 && (
                     <SelectOption data-testid="select-option-empty" key="empty" value={null} size={size}>
@@ -214,11 +213,31 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
                     data?.pages
                       ?.map((d) => d?.data || [])
                       .flat()
-                      .map((model: TModel["data"][0], i: number) => (
-                        <SelectOption data-testid={`select-option-${i}`} key={model.id} value={model} size={size}>
-                          {valueFormat(model)}
-                        </SelectOption>
-                      ))
+                      .map((model: TModel["data"][0], i: number) => {
+                        const group = groupBy?.(model);
+                        let groupNode: React.ReactNode;
+                        if (currentGroupBy !== group) {
+                          currentGroupBy = group;
+                          groupNode = (
+                            <div className="p-2 text-xs text-base-content/40 border-b border-b-base-200 cursor-default select-none truncate">
+                              {group}
+                            </div>
+                          );
+                        }
+                        return (
+                          <React.Fragment key={model.id}>
+                            {groupNode}
+                            <SelectOption
+                              data-testid={`select-option-${i}`}
+                              className={groupBy ? "pl-4" : undefined}
+                              value={model}
+                              size={size}
+                            >
+                              {valueFormat(model)}
+                            </SelectOption>
+                          </React.Fragment>
+                        );
+                      })
                   )}
 
                   {footer}

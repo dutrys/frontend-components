@@ -353,6 +353,7 @@ type SelectPaginatedFromApiProps<TModel extends {
     required?: boolean;
     empty?: string;
     valueFormat?: (model: TModel["data"][0]) => string;
+    groupBy?: (model: TModel["data"][0]) => string;
     heading?: React__default.ReactNode;
     footer?: React__default.ReactNode;
     searchFromChars?: number;
@@ -364,7 +365,7 @@ declare const SelectPaginatedFromApi: <TModel extends {
     data: {
         id: number;
     }[];
-}>({ onChange, disabled, required, inputRef, name, value, size, searchFromChars, className, queryKey, queryFn, placeholder, empty, portalEnabled, optionsClassName, valueFormat, heading, footer, ...rest }: SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
+}>({ onChange, disabled, required, inputRef, name, value, size, searchFromChars, className, groupBy, queryKey, queryFn, placeholder, empty, portalEnabled, optionsClassName, valueFormat, heading, footer, ...rest }: SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
 
 type PaginateQuery<T> = {
     page?: number;
@@ -565,9 +566,10 @@ type SelectProps = {
     }[];
 };
 declare const Select: ({ onChange, disabled, required, inputRef, options, name, value, size, className, placeholder, empty, beforeOptions, header, afterOptions, ...rest }: SelectProps) => react_jsx_runtime.JSX.Element;
-declare const SelectOption: ({ value, size, children, ...rest }: {
+declare const SelectOption: ({ value, size, children, className, ...rest }: {
     children: React__default.ReactNode;
     value: unknown;
+    className?: string;
     size?: "xs" | "sm";
 }) => react_jsx_runtime.JSX.Element;
 

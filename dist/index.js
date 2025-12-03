@@ -524,6 +524,7 @@ const useFormSubmit = (doSubmitCallback, formOptions = {}) => {
     const { returnBack, reportProgress, onError, onSuccess, loadingText, savedText, ...options } = formOptions;
     const formProps = useForm(options);
     const handleSubmit = () => formProps.handleSubmit((values) => {
+        console.log("values", values);
         const promise = new Promise((res, rej) => {
             if (formOptions.confirm && !isConfirmed.current) {
                 setNeedsConfirm(true);
@@ -1013,9 +1014,10 @@ const Select = ({ onChange, disabled, required, inputRef, options, name, value, 
         placement: "bottom-start",
         middleware: [
             size({
-                apply({ rects, elements }) {
+                apply({ rects, elements, availableHeight }) {
                     Object.assign(elements.floating.style, {
                         width: `${rects.reference.width}px`,
+                        maxHeight: `${Math.min(availableHeight - 10, 600)}px`,
                     });
                 },
             }),
@@ -1028,24 +1030,25 @@ const Select = ({ onChange, disabled, required, inputRef, options, name, value, 
                         "input-xs gap-0.5": size$1 === "xs",
                     }), ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, displayValue: (model) => model?.label }), header, !required && value && (jsx("button", { className: "z-1 cursor-pointer", type: "button", onClick: () => onChange(null), children: jsx(XMarkIcon, { className: "size-4" }) })), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "", onClick: (e) => {
                                 e.target?.parentNode?.parentNode?.querySelector("input")?.select();
-                            }, children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(Portal, { children: jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsx("div", { style: { ...floatingStyles, zIndex: 2000 }, ref: refs.setFloating, children: jsxs(ComboboxOptions, { className: "absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm", children: [beforeOptions, !required && (jsx(SelectOption, { size: size$1, "data-testid": "select-option-empty", value: null, children: empty || t("selectFromApi.select") }, "empty")), options.length === 0 ? (jsx("div", { className: "cursor-default select-none py-2 px-4 text-base-content/60", children: jsx("span", { className: cx({ "text-xs": "xs" === size$1 || "sm" === size$1 }), children: t("selectFromApi.nothingFound") }) })) : (options.map((model, i) => (jsx(SelectOption, { size: size$1, "data-testid": `select-option-${i}`, value: model, children: model.label }, model.value)))), afterOptions] }) }) }) })] })) }));
+                            }, children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(Portal, { children: jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsx("div", { style: floatingStyles, ref: refs.setFloating, className: "z-[2000] mt-2 w-full border-gray-300 border overflow-y-auto rounded-box bg-white py-1 shadow-lg", children: jsxs(ComboboxOptions, { children: [beforeOptions, !required && (jsx(SelectOption, { size: size$1, "data-testid": "select-option-empty", value: null, children: empty || t("selectFromApi.select") }, "empty")), options.length === 0 ? (jsx("div", { className: "cursor-default select-none py-2 px-4 text-base-content/60", children: jsx("span", { className: cx({ "text-xs": "xs" === size$1 || "sm" === size$1 }), children: t("selectFromApi.nothingFound") }) })) : (options.map((model, i) => (jsx(SelectOption, { size: size$1, "data-testid": `select-option-${i}`, value: model, children: model.label }, model.value)))), afterOptions] }) }) }) })] })) }));
 };
-const SelectOption = ({ value, size, children, ...rest }) => (jsx(ComboboxOption, { ...rest, className: ({ focus }) => cx(`relative cursor-default select-none`, {
+const SelectOption = ({ value, size, children, className, ...rest }) => (jsx(ComboboxOption, { ...rest, className: ({ focus }) => cx(`relative cursor-default select-none`, {
         "p-2": size === "xs" || size === "sm",
         "py-2 px-4": !size,
         "bg-primary text-white": focus,
         "text-gray-900": !focus,
-    }), value: value, children: ({ selected, focus }) => (jsxs(Fragment, { children: [jsx("span", { className: cx("block truncate", {
+    }), value: value, children: ({ selected, focus }) => (jsxs(Fragment, { children: [jsx("span", { className: cx({
                     "text-white": focus,
                     "pr-3 font-bold": selected,
                     "font-normal": !selected,
+                    "text-sm": !size,
                     "text-xs": "xs" === size || "sm" === size,
-                }), children: children }), selected ? (jsx("span", { className: cx("absolute inset-y-0 right-1 flex items-center pl-3", {
+                }), children: children }), selected && (jsx("span", { className: cx("absolute inset-y-0 right-1 flex items-center pl-3", {
                     "text-white": focus,
                     "text-teal-600": !focus,
-                }), children: jsx(CheckIcon, { className: "h-5 w-5", "aria-hidden": "true" }) })) : null] })) }));
+                }), children: jsx(CheckIcon, { className: "h-5 w-5", "aria-hidden": "true" }) }))] })) }));
 
-const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, name, value, size: size$1, searchFromChars = 3, className, queryKey, queryFn, placeholder, empty, portalEnabled, optionsClassName, valueFormat = (model) => model.name, heading, footer, ...rest }) => {
+const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, name, value, size: size$1, searchFromChars = 3, className, groupBy, queryKey, queryFn, placeholder, empty, portalEnabled, optionsClassName, valueFormat = (model) => model.name, heading, footer, ...rest }) => {
     const [query, setQuery] = useState(value ? `${value}` : "");
     const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
         getPreviousPageParam,
@@ -1092,15 +1095,17 @@ const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, name, 
         placement: "bottom-start",
         middleware: [
             size({
-                apply({ rects, elements }) {
+                apply({ rects, elements, availableHeight }) {
                     Object.assign(elements.floating.style, {
                         width: `${rects.reference.width}px`,
+                        maxHeight: `${Math.min(availableHeight - 10, 600)}px`,
                     });
                 },
             }),
         ],
         whileElementsMounted: autoUpdate,
     });
+    let currentGroupBy = null;
     return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: typeof value === "number"
             ? (data?.pages || [])
                 .map((d) => d?.data || [])
@@ -1110,13 +1115,21 @@ const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, name, 
                         "w-full": !className?.includes("w-"),
                         "input-sm gap-1": size$1 === "sm",
                         "input-xs gap-0.5": size$1 === "xs",
-                    }), ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, displayValue: (model) => (model ? valueFormat(model) : ""), onChange: (event) => setQuery(event.target.value) }), isLoading && !disabled ? (jsx(LoadingComponent, { className: cx("absolute right-6", { invisible: open }), loadingClassName: "size-4 text-primary" })) : (!required &&
-                            value && (jsx("button", { className: "absolute right-6 z-1 cursor-pointer", type: "button", onClick: () => onChange(null), children: jsx(XMarkIcon, { className: "size-4" }) }))), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "", onClick: (e) => {
+                    }), ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, displayValue: (model) => (model ? valueFormat(model) : ""), onChange: (event) => setQuery(event.target.value) }), isLoading && !disabled ? (jsx(LoadingComponent, { className: cx({ hidden: open }), loadingClassName: "size-4 text-primary" })) : (!required &&
+                            value && (jsx("button", { className: "cursor-pointer", type: "button", onClick: () => onChange(null), children: jsx(XMarkIcon, { className: "size-4" }) }))), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "", onClick: (e) => {
                                 e.target?.parentNode?.parentNode?.querySelector("input")?.select();
-                            }, children: jsx(ChevronUpDownIcon$1, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(Portal, { enabled: portalEnabled, children: jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsx("div", { style: { ...floatingStyles, zIndex: 2000 }, ref: refs.setFloating, children: jsxs(ComboboxOptions, { className: cx("absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm", { "max-h-96": !optionsClassName?.includes("max-h-") }, optionsClassName), children: [heading, !required && query.length < searchFromChars && data && data?.pages?.[0]?.meta?.totalItems !== 0 && (jsx(SelectOption, { "data-testid": "select-option-empty", value: null, size: size$1, children: empty || t("selectFromApi.select") }, "empty")), data?.pages?.[0]?.meta?.totalItems === 0 ? (jsx("div", { className: "cursor-default select-none py-2 px-4 text-base-content/60", children: jsx("span", { className: cx({ "text-xs": "xs" === size$1 || "sm" === size$1 }), children: t("selectFromApi.nothingFound") }) })) : (data?.pages
+                            }, children: jsx(ChevronUpDownIcon$1, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(Portal, { enabled: portalEnabled, children: jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsx("div", { style: floatingStyles, ref: refs.setFloating, className: "z-[2000] mt-1 pb-1 w-full border-gray-300 border overflow-y-auto rounded-box bg-white shadow-lg", children: jsxs(ComboboxOptions, { className: optionsClassName, children: [heading, !required && query.length < searchFromChars && data && data?.pages?.[0]?.meta?.totalItems !== 0 && (jsx(SelectOption, { "data-testid": "select-option-empty", value: null, size: size$1, children: empty || t("selectFromApi.select") }, "empty")), data?.pages?.[0]?.meta?.totalItems === 0 ? (jsx("div", { className: "cursor-default select-none py-2 px-4 text-base-content/60", children: jsx("span", { className: cx({ "text-xs": "xs" === size$1 || "sm" === size$1 }), children: t("selectFromApi.nothingFound") }) })) : (data?.pages
                                         ?.map((d) => d?.data || [])
                                         .flat()
-                                        .map((model, i) => (jsx(SelectOption, { "data-testid": `select-option-${i}`, value: model, size: size$1, children: valueFormat(model) }, model.id)))), footer, isFetchingNextPage || isLoading ? (jsx(LoadingComponent, { className: "my-2" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }) }) })] })) }));
+                                        .map((model, i) => {
+                                        const group = groupBy?.(model);
+                                        let groupNode;
+                                        if (currentGroupBy !== group) {
+                                            currentGroupBy = group;
+                                            groupNode = (jsx("div", { className: "p-2 text-xs text-base-content/40 border-b border-b-base-200 cursor-default select-none truncate", children: group }));
+                                        }
+                                        return (jsxs(React__default.Fragment, { children: [groupNode, jsx(SelectOption, { "data-testid": `select-option-${i}`, className: groupBy ? "pl-4" : undefined, value: model, size: size$1, children: valueFormat(model) })] }, model.id));
+                                    })), footer, isFetchingNextPage || isLoading ? (jsx(LoadingComponent, { className: "my-2" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }) }) })] })) }));
 };
 
 const timeToDate = (date, format = "HH:mm:ss") => {

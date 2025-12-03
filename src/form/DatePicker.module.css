@@ -22,7 +22,7 @@
 }
 .dayPicker :global(.rdp-selected .rdp-day_button):hover,
 .dayPicker :global(.rdp-today .rdp-day_button):hover {
-    background: var(--color-base-100) !important;
+  background: var(--color-base-100) !important;
 }
 .dayPicker :global(.rdp-selected .rdp-day_button) {
   background: var(--color-primary) !important;

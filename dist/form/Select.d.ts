@@ -25,9 +25,10 @@ export type SelectProps = {
     }[];
 };
 export declare const Select: ({ onChange, disabled, required, inputRef, options, name, value, size, className, placeholder, empty, beforeOptions, header, afterOptions, ...rest }: SelectProps) => import("react/jsx-runtime").JSX.Element;
-export declare const SelectOption: ({ value, size, children, ...rest }: {
+export declare const SelectOption: ({ value, size, children, className, ...rest }: {
     children: React.ReactNode;
     value: unknown;
+    className?: string;
     size?: "xs" | "sm";
 }) => import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=Select.d.ts.map

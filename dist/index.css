@@ -56,7 +56,7 @@
 }
 .DatePicker-module_dayPicker__VRSSY .rdp-selected .rdp-day_button:hover,
 .DatePicker-module_dayPicker__VRSSY .rdp-today .rdp-day_button:hover {
-    background: var(--color-base-100) !important;
+  background: var(--color-base-100) !important;
 }
 .DatePicker-module_dayPicker__VRSSY .rdp-selected .rdp-day_button {
   background: var(--color-primary) !important;
