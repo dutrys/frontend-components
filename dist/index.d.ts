@@ -7,6 +7,7 @@ import { StorageInterface as StorageInterface$1 } from '@/pagination/StorageInte
 import { ColumnType as ColumnType$1 } from '@/pagination/PaginatedTable';
 import * as react_hook_form from 'react-hook-form';
 import { FieldErrors, FieldValues, UseFormProps, UseFormSetError, FieldPath, FieldError, Merge, RegisterOptions, UseFormRegister, Control } from 'react-hook-form';
+import { SelectProps as SelectProps$1 } from '@/form/Select';
 import { ReadonlyURLSearchParams } from 'next/navigation';
 import { NumericFormatProps } from 'react-number-format/types/types';
 
@@ -350,40 +351,19 @@ declare const DateInput: ({ onChange, value, className, toggleClassName, require
 
 type SelectPaginatedFromApiProps<TModel extends {
     meta: ResponseMeta$1;
-    data: {
-        id: number;
-    }[];
+    data: Record<string, unknown>[];
 }> = {
-    size?: "sm" | "xs";
     name?: string;
-    inputRef?: any;
     queryFn: (query: PaginateQuery$1<any>) => Promise<TModel>;
     queryKey: ReadonlyArray<any>;
-    placeholder?: string;
-    value: TModel["data"][0] | number | null;
-    className?: string;
-    onChange: (model: TModel["data"][0] | null) => void;
-    disabled?: boolean;
-    required?: boolean;
-    empty?: string;
-    valueFormat?: (model: TModel["data"][0]) => string;
-    groupBy?: (model: TModel["data"][0]) => string;
-    heading?: React__default.ReactNode;
-    footer?: React__default.ReactNode;
+    value: TModel["data"][0] | string | number | null;
+    optionValue?: (model: TModel["data"][0]) => string | number;
     searchFromChars?: number;
-    optionsClassName?: string;
-    portalEnabled?: boolean;
-};
-declare function PortalSSR(props: {
-    enabled?: boolean;
-    children: React__default.ReactNode;
-}): string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React__default.ReactNode> | Promise<string | number | bigint | boolean | React__default.ReactPortal | React__default.ReactElement<unknown, string | React__default.JSXElementConstructor<any>> | Iterable<React__default.ReactNode> | null | undefined> | null | undefined;
+} & Omit<SelectProps$1<TModel["data"][0]>, "value">;
 declare const SelectPaginatedFromApi: <TModel extends {
     meta: ResponseMeta$1;
-    data: {
-        id: number;
-    }[];
-}>({ onChange, disabled, required, inputRef, name, value, size, searchFromChars, className, groupBy, queryKey, queryFn, placeholder, empty, portalEnabled, optionsClassName, valueFormat, heading, footer, ...rest }: SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
+    data: Record<string, unknown>[];
+}>({ onChange, name, value, searchFromChars, queryKey, queryFn, optionLabel, optionValue, ...rest }: SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
 
 type PaginateQuery<T> = {
     page?: number;
@@ -408,30 +388,16 @@ declare const getNextPageParam: <T extends {
 declare const setPartialParams: (partialParams: Record<string, string | string[]>, searchParams: ReadonlyURLSearchParams | null) => string;
 declare const isParamActive: (link: Record<string, string | string[]>, searchParams: ReadonlyURLSearchParams) => boolean;
 
-type SelectFromApiProps<TModel extends {
-    id: number;
-}> = {
-    portalEnabled?: boolean;
-    size?: "sm" | "xs";
-    inputClassName?: string;
-    name?: string;
-    inputRef?: any;
+type SelectFromApiProps<TModel extends Record<string, unknown>> = {
     queryFn: () => Promise<TModel[]>;
     queryKey: ReadonlyArray<any>;
-    placeholder?: string;
-    optionsClassName?: string;
-    value: number | null;
-    className?: string;
-    onChange: (model: TModel) => void;
-    disabled?: boolean;
-    required?: boolean;
-    empty?: string;
-    valueFormat?: (model: TModel) => string;
+    value: number | string | null;
+    onChange: (model: TModel | null) => void;
+    optionLabel?: (model: TModel) => string;
+    optionValue?: (model: TModel) => string | number;
     filter?: (model: TModel, query: string) => boolean;
-};
-declare const SelectFromApi: <TModel extends {
-    id: number;
-}>({ onChange, disabled, required, inputRef, name, value, size, portalEnabled, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat, inputClassName, filter, ...rest }: SelectFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
+} & Omit<SelectProps$1<TModel>, "onChange" | "optionLabel" | "value">;
+declare const SelectFromApi: <TModel extends Record<string, unknown>>({ name, value, queryKey, queryFn, optionLabel, optionValue, filter, ...rest }: SelectFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
 
 interface IInputRegisterProps<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>> extends IInputProps<TName> {
     options?: Omit<RegisterOptions<TFieldValues, TName>, "required" | "disabled">;
@@ -478,7 +444,7 @@ declare const SelectFromApiFormField: <T extends {
     id: number;
 }, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, error, className, onChange, fieldSetClassName, ...rest }: IInputProps<TName> & Omit<SelectFromApiProps<T>, "onChange" | "value"> & {
     control: Control<TFieldValues>;
-    onChange?: (model: T) => unknown;
+    onChange?: (model: T | null) => unknown;
 }) => react_jsx_runtime.JSX.Element;
 declare const DateTimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, disabled, error, className, fieldSetClassName, useDate, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
@@ -499,9 +465,7 @@ declare const Label: ({ text, required }: {
     text: React__default.ReactNode;
 }) => react_jsx_runtime.JSX.Element;
 declare const SelectPaginatedFromApiField: <T extends {
-    data: {
-        id: number;
-    }[];
+    data: Record<string, unknown>[];
     meta: ResponseMeta;
 }>({ label, fieldSetClassName, className, desc, error, ...props }: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => react_jsx_runtime.JSX.Element;
 interface IInputProps<TName extends FieldPath<FieldValues>> {
@@ -543,32 +507,35 @@ declare const TimePicker: ({ className, value, onChange, placeholder, required, 
     value: string | undefined | null;
 }) => react_jsx_runtime.JSX.Element;
 
-type SelectProps = {
+declare function PortalSSR(props: {
+    enabled?: boolean;
+    children: React__default.ReactNode;
+}): string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React__default.ReactNode> | Promise<string | number | bigint | boolean | React__default.ReactPortal | React__default.ReactElement<unknown, string | React__default.JSXElementConstructor<any>> | Iterable<React__default.ReactNode> | null | undefined> | null | undefined;
+type SelectProps<T> = {
     size?: "sm" | "xs";
     name?: string;
     inputRef?: any;
     placeholder?: string;
-    value: {
-        label: string;
-        value: number | string;
-    } | null;
+    value: T | null;
     className?: string;
-    onChange: (model: {
-        label: string;
-        value: number | string;
-    } | null) => void;
+    onChange: (model: T | null) => void;
     disabled?: boolean;
     required?: boolean;
     empty?: string;
+    portalEnabled?: boolean;
     header?: React__default.ReactNode;
     beforeOptions?: React__default.ReactNode;
     afterOptions?: React__default.ReactNode;
-    options: {
-        label: string;
-        value: number | string;
-    }[];
+    options: T[];
+    minWidth?: number;
+    maxHeight?: number;
+    optionLabel: (model: T) => string;
+    groupBy?: (model: T) => string;
+    onQueryChange?: (query: string) => void;
+    afterInput?: React__default.ReactNode;
+    hideNoItemsOption?: boolean;
 };
-declare const Select: ({ onChange, disabled, required, inputRef, options, name, value, size, className, placeholder, empty, beforeOptions, header, afterOptions, ...rest }: SelectProps) => react_jsx_runtime.JSX.Element;
+declare const Select: <T = unknown>({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel, value, size, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth, maxHeight, afterInput, hideNoItemsOption, ...rest }: SelectProps<T>) => react_jsx_runtime.JSX.Element;
 declare const SelectOption: ({ value, size, children, className, ...rest }: {
     children: React__default.ReactNode;
     value: unknown;

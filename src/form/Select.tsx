@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useFloating, size as floatingSize, autoUpdate } from "@floating-ui/react";
 import {
@@ -13,40 +13,67 @@ import {
 import { CheckIcon, ChevronUpDownIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import cx from "classnames";
 
-export type SelectProps = {
+export function PortalSSR(props: { enabled?: boolean; children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  if (props.enabled && mounted) {
+    return <Portal>{props.children}</Portal>;
+  }
+  return props.children;
+}
+
+export type SelectProps<T> = {
   size?: "sm" | "xs";
   name?: string;
   inputRef?: any;
   placeholder?: string;
-  value: { label: string; value: number | string } | null;
+  value: T | null;
   className?: string;
-  onChange: (model: { label: string; value: number | string } | null) => void;
+  onChange: (model: T | null) => void;
   disabled?: boolean;
   required?: boolean;
   empty?: string;
+  portalEnabled?: boolean;
   header?: React.ReactNode;
   beforeOptions?: React.ReactNode;
   afterOptions?: React.ReactNode;
-  options: { label: string; value: number | string }[];
+  options: T[];
+  minWidth?: number;
+  maxHeight?: number;
+  optionLabel: (model: T) => string;
+  groupBy?: (model: T) => string;
+  onQueryChange?: (query: string) => void;
+  afterInput?: React.ReactNode;
+  hideNoItemsOption?: boolean;
 };
 
-export const Select = ({
+export const Select = <T = unknown,>({
   onChange,
   disabled,
   required,
   inputRef,
   options,
   name,
+  portalEnabled,
+  optionLabel,
   value,
   size,
   className,
   placeholder,
+  groupBy,
   empty,
   beforeOptions,
   header,
   afterOptions,
+  onQueryChange,
+  minWidth = 100,
+  maxHeight = 500,
+  afterInput,
+  hideNoItemsOption,
   ...rest
-}: SelectProps) => {
+}: SelectProps<T>) => {
   const t = useTranslations();
 
   const { refs, floatingStyles } = useFloating({
@@ -55,8 +82,8 @@ export const Select = ({
       floatingSize({
         apply({ rects, elements, availableHeight }) {
           Object.assign(elements.floating.style, {
-            width: `${rects.reference.width}px`,
-            maxHeight: `${Math.min(availableHeight - 10, 600)}px`,
+            width: `${Math.max(minWidth ?? 0, rects.reference.width)}px`,
+            maxHeight: `${Math.min(availableHeight - 10, maxHeight)}px`,
           });
         },
       }),
@@ -64,15 +91,9 @@ export const Select = ({
     whileElementsMounted: autoUpdate,
   });
 
+  let currentGroupBy: string | null | undefined = null;
   return (
-    <Combobox<{ label: string; value: number | string } | null>
-      immediate
-      data-testid="select"
-      disabled={disabled}
-      value={value}
-      onChange={onChange}
-      {...rest}
-    >
+    <Combobox<T | null> immediate data-testid="select" disabled={disabled} value={value} onChange={onChange} {...rest}>
       {({ open }) => (
         <div>
           <div
@@ -83,7 +104,7 @@ export const Select = ({
             })}
             ref={refs.setReference}
           >
-            <ComboboxInput<{ label: string; value: string }>
+            <ComboboxInput<T | null>
               required={required}
               ref={inputRef}
               data-testid="select-input"
@@ -91,13 +112,16 @@ export const Select = ({
               onFocus={(e) => e?.target?.select()}
               autoComplete="off"
               name={name}
-              displayValue={(model) => model?.label}
+              displayValue={(model) => (model ? optionLabel(model) : "")}
+              onChange={onQueryChange && ((event) => onQueryChange(event.target.value))}
             />
             {header}
-            {!required && value && (
+            {!required && value ? (
               <button className="z-1 cursor-pointer" type="button" onClick={() => onChange(null)}>
                 <XMarkIcon className="size-4" />
               </button>
+            ) : (
+              !open && afterInput
             )}
             <ComboboxButton
               data-testid="select-input-btn"
@@ -109,7 +133,7 @@ export const Select = ({
               <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
             </ComboboxButton>
           </div>
-          <Portal>
+          <PortalSSR enabled={portalEnabled}>
             <Transition
               as={Fragment}
               leave="transition ease-in duration-100"
@@ -119,7 +143,7 @@ export const Select = ({
               <div
                 style={floatingStyles}
                 ref={refs.setFloating}
-                className="z-[2000] mt-2 w-full border-gray-300 border overflow-y-auto rounded-box bg-white py-1 shadow-lg"
+                className="z-[2000] bg-base-100 mt-1 pb-1 w-full border-base-content/10 border overflow-y-auto rounded-box shadow-lg"
               >
                 <ComboboxOptions>
                   {beforeOptions}
@@ -128,25 +152,45 @@ export const Select = ({
                       {empty || t("selectFromApi.select")}
                     </SelectOption>
                   )}
-                  {options.length === 0 ? (
+                  {options.length === 0 && !hideNoItemsOption ? (
                     <div className="cursor-default select-none py-2 px-4 text-base-content/60">
                       <span className={cx({ "text-xs": "xs" === size || "sm" === size })}>
                         {t("selectFromApi.nothingFound")}
                       </span>
                     </div>
                   ) : (
-                    options.map((model, i: number) => (
-                      <SelectOption size={size} data-testid={`select-option-${i}`} key={model.value} value={model}>
-                        {model.label}
-                      </SelectOption>
-                    ))
+                    options.map((model: T, i: number) => {
+                      const group = groupBy?.(model);
+                      let groupNode: React.ReactNode;
+                      if (currentGroupBy !== group) {
+                        currentGroupBy = group;
+                        groupNode = (
+                          <div className="p-2 text-xs text-base-content/40 border-b border-b-base-200 cursor-default select-none truncate">
+                            {group}
+                          </div>
+                        );
+                      }
+                      return (
+                        <React.Fragment key={`${optionLabel(model)}-${i}`}>
+                          {groupNode}
+                          <SelectOption
+                            data-testid={`select-option-${i}`}
+                            className={groupBy ? "pl-4" : undefined}
+                            value={model}
+                            size={size}
+                          >
+                            {optionLabel(model)}
+                          </SelectOption>
+                        </React.Fragment>
+                      );
+                    })
                   )}
 
                   {afterOptions}
                 </ComboboxOptions>
               </div>
             </Transition>
-          </Portal>
+          </PortalSSR>
         </div>
       )}
     </Combobox>
@@ -168,11 +212,11 @@ export const SelectOption = ({
   <ComboboxOption
     {...rest}
     className={({ focus }) =>
-      cx(`relative cursor-default select-none`, {
-        "p-2": size === "xs" || size === "sm",
-        "py-2 px-4": !size,
+      cx(`relative cursor-default select-none`, className, {
+        "px-2 py-1": size === "xs" || size === "sm",
+        "p-2": !size,
         "bg-primary text-white": focus,
-        "text-gray-900": !focus,
+        "text-base-content": !focus,
       })
     }
     value={value}

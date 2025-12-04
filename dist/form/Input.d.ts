@@ -51,7 +51,7 @@ export declare const SelectFromApiFormField: <T extends {
     id: number;
 }, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, error, className, onChange, fieldSetClassName, ...rest }: IInputProps<TName> & Omit<SelectFromApiProps<T>, "onChange" | "value"> & {
     control: Control<TFieldValues>;
-    onChange?: (model: T) => unknown;
+    onChange?: (model: T | null) => unknown;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const DateTimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, disabled, error, className, fieldSetClassName, useDate, ...rest }: IInputProps<TName> & {
     control: Control<TFieldValues>;
@@ -72,9 +72,7 @@ export declare const Label: ({ text, required }: {
     text: React.ReactNode;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const SelectPaginatedFromApiField: <T extends {
-    data: {
-        id: number;
-    }[];
+    data: Record<string, unknown>[];
     meta: ResponseMeta;
 }>({ label, fieldSetClassName, className, desc, error, ...props }: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => import("react/jsx-runtime").JSX.Element;
 export interface IInputProps<TName extends FieldPath<FieldValues>> {

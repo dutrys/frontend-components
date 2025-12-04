@@ -21,12 +21,11 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { format, isSameDay, isSameHour, parse, isValid, parseJSON, differenceInSeconds, formatDistance, differenceInMinutes, differenceInDays } from 'date-fns';
 import { DayPicker } from 'react-day-picker';
 import { lt, enGB } from 'react-day-picker/locale';
-import { FocusTrap, FocusTrapFeatures, Combobox, ComboboxInput, ComboboxButton, Portal, Transition, ComboboxOptions, ComboboxOption } from '@headlessui/react';
-import { ChevronUpDownIcon as ChevronUpDownIcon$1, CheckIcon as CheckIcon$1 } from '@heroicons/react/20/solid';
+import { FocusTrap, FocusTrapFeatures, Portal, Combobox, ComboboxInput, ComboboxButton, Transition, ComboboxOptions, ComboboxOption } from '@headlessui/react';
 import { useInView } from 'react-intersection-observer';
 import 'date-fns-tz';
 import { NumericFormat } from 'react-number-format';
-import { size as size$1 } from '@floating-ui/react-dom';
+import { CheckIcon as CheckIcon$1 } from '@heroicons/react/20/solid';
 import { lt as lt$1 } from 'date-fns/locale';
 
 const LoadingComponent = ({ style, className, loadingClassName, size, }) => (jsx("div", { className: `flex justify-center ${className}`, style: style, children: jsx("span", { className: `${loadingClassName || "text-primary"} loading loading-spinner ${size}` }) }));
@@ -1015,7 +1014,17 @@ const DateInput = ({ onChange, value, className, toggleClassName, required, disa
                 } })) }) }));
 };
 
-const Select = ({ onChange, disabled, required, inputRef, options, name, value, size: size$1, className, placeholder, empty, beforeOptions, header, afterOptions, ...rest }) => {
+function PortalSSR(props) {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+    if (props.enabled && mounted) {
+        return jsx(Portal, { children: props.children });
+    }
+    return props.children;
+}
+const Select = ({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel, value, size: size$1, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth = 100, maxHeight = 500, afterInput, hideNoItemsOption, ...rest }) => {
     const t = useTranslations();
     const { refs, floatingStyles } = useFloating({
         placement: "bottom-start",
@@ -1023,27 +1032,36 @@ const Select = ({ onChange, disabled, required, inputRef, options, name, value, 
             size({
                 apply({ rects, elements, availableHeight }) {
                     Object.assign(elements.floating.style, {
-                        width: `${rects.reference.width}px`,
-                        maxHeight: `${Math.min(availableHeight - 10, 600)}px`,
+                        width: `${Math.max(minWidth ?? 0, rects.reference.width)}px`,
+                        maxHeight: `${Math.min(availableHeight - 10, maxHeight)}px`,
                     });
                 },
             }),
         ],
         whileElementsMounted: autoUpdate,
     });
+    let currentGroupBy = null;
     return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: value, onChange: onChange, ...rest, children: ({ open }) => (jsxs("div", { children: [jsxs("div", { className: cx("relative input input-bordered pr-1", className, {
                         "w-full": !className?.includes("w-"),
                         "input-sm gap-1": size$1 === "sm",
                         "input-xs gap-0.5": size$1 === "xs",
-                    }), ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, displayValue: (model) => model?.label }), header, !required && value && (jsx("button", { className: "z-1 cursor-pointer", type: "button", onClick: () => onChange(null), children: jsx(XMarkIcon, { className: "size-4" }) })), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "", onClick: (e) => {
+                    }), ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, displayValue: (model) => (model ? optionLabel(model) : ""), onChange: onQueryChange && ((event) => onQueryChange(event.target.value)) }), header, !required && value ? (jsx("button", { className: "z-1 cursor-pointer", type: "button", onClick: () => onChange(null), children: jsx(XMarkIcon, { className: "size-4" }) })) : (!open && afterInput), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "", onClick: (e) => {
                                 e.target?.parentNode?.parentNode?.querySelector("input")?.select();
-                            }, children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(Portal, { children: jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsx("div", { style: floatingStyles, ref: refs.setFloating, className: "z-[2000] mt-2 w-full border-gray-300 border overflow-y-auto rounded-box bg-white py-1 shadow-lg", children: jsxs(ComboboxOptions, { children: [beforeOptions, !required && (jsx(SelectOption, { size: size$1, "data-testid": "select-option-empty", value: null, children: empty || t("selectFromApi.select") }, "empty")), options.length === 0 ? (jsx("div", { className: "cursor-default select-none py-2 px-4 text-base-content/60", children: jsx("span", { className: cx({ "text-xs": "xs" === size$1 || "sm" === size$1 }), children: t("selectFromApi.nothingFound") }) })) : (options.map((model, i) => (jsx(SelectOption, { size: size$1, "data-testid": `select-option-${i}`, value: model, children: model.label }, model.value)))), afterOptions] }) }) }) })] })) }));
+                            }, children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(PortalSSR, { enabled: portalEnabled, children: jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsx("div", { style: floatingStyles, ref: refs.setFloating, className: "z-[2000] bg-base-100 mt-1 pb-1 w-full border-base-content/10 border overflow-y-auto rounded-box shadow-lg", children: jsxs(ComboboxOptions, { children: [beforeOptions, !required && (jsx(SelectOption, { size: size$1, "data-testid": "select-option-empty", value: null, children: empty || t("selectFromApi.select") }, "empty")), options.length === 0 && !hideNoItemsOption ? (jsx("div", { className: "cursor-default select-none py-2 px-4 text-base-content/60", children: jsx("span", { className: cx({ "text-xs": "xs" === size$1 || "sm" === size$1 }), children: t("selectFromApi.nothingFound") }) })) : (options.map((model, i) => {
+                                        const group = groupBy?.(model);
+                                        let groupNode;
+                                        if (currentGroupBy !== group) {
+                                            currentGroupBy = group;
+                                            groupNode = (jsx("div", { className: "p-2 text-xs text-base-content/40 border-b border-b-base-200 cursor-default select-none truncate", children: group }));
+                                        }
+                                        return (jsxs(React__default.Fragment, { children: [groupNode, jsx(SelectOption, { "data-testid": `select-option-${i}`, className: groupBy ? "pl-4" : undefined, value: model, size: size$1, children: optionLabel(model) })] }, `${optionLabel(model)}-${i}`));
+                                    })), afterOptions] }) }) }) })] })) }));
 };
-const SelectOption = ({ value, size, children, className, ...rest }) => (jsx(ComboboxOption, { ...rest, className: ({ focus }) => cx(`relative cursor-default select-none`, {
-        "p-2": size === "xs" || size === "sm",
-        "py-2 px-4": !size,
+const SelectOption = ({ value, size, children, className, ...rest }) => (jsx(ComboboxOption, { ...rest, className: ({ focus }) => cx(`relative cursor-default select-none`, className, {
+        "px-2 py-1": size === "xs" || size === "sm",
+        "p-2": !size,
         "bg-primary text-white": focus,
-        "text-gray-900": !focus,
+        "text-base-content": !focus,
     }), value: value, children: ({ selected, focus }) => (jsxs(Fragment, { children: [jsx("span", { className: cx({
                     "text-white": focus,
                     "pr-3 font-bold": selected,
@@ -1055,26 +1073,16 @@ const SelectOption = ({ value, size, children, className, ...rest }) => (jsx(Com
                     "text-teal-600": !focus,
                 }), children: jsx(CheckIcon, { className: "h-5 w-5", "aria-hidden": "true" }) }))] })) }));
 
-function PortalSSR(props) {
-    const [mounted, setMounted] = useState(false);
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-    if (props.enabled && mounted) {
-        return jsx(Portal, { children: props.children });
-    }
-    return props.children;
-}
-const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, name, value, size: size$1, searchFromChars = 3, className, groupBy, queryKey, queryFn, placeholder, empty, portalEnabled, optionsClassName, valueFormat = (model) => model.name, heading, footer, ...rest }) => {
+const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, ...rest }) => {
     const [query, setQuery] = useState(value ? `${value}` : "");
     const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
         getPreviousPageParam,
         getNextPageParam,
-        enabled: !disabled,
-        queryKey: [...queryKey, disabled, query.length < searchFromChars ? "" : query],
+        enabled: !rest.disabled,
+        queryKey: [...queryKey, rest.disabled, query.length < searchFromChars ? "" : query],
         initialPageParam: 1,
         queryFn: ({ queryKey, pageParam }) => {
-            if (disabled) {
+            if (rest.disabled) {
                 return Promise.reject();
             }
             const page = typeof pageParam === "number" ? pageParam : undefined;
@@ -1102,51 +1110,18 @@ const SelectPaginatedFromApi = ({ onChange, disabled, required, inputRef, name, 
             const selected = (data?.pages || [])
                 .map((d) => d?.data || [])
                 .flat()
-                .find((b) => b.id === value);
+                .find((b) => optionValue(b) === value);
             if (selected) {
                 onChange(selected);
             }
         }
     }, [isLoading]);
-    const { refs, floatingStyles } = useFloating({
-        placement: "bottom-start",
-        middleware: [
-            size({
-                apply({ rects, elements, availableHeight }) {
-                    Object.assign(elements.floating.style, {
-                        width: `${rects.reference.width}px`,
-                        maxHeight: `${Math.min(availableHeight - 10, 600)}px`,
-                    });
-                },
-            }),
-        ],
-        whileElementsMounted: autoUpdate,
-    });
-    let currentGroupBy = null;
-    return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: typeof value === "number"
-            ? (data?.pages || [])
+    return (jsx(Select, { ...rest, disabled: rest.disabled, onChange: onChange, onQueryChange: setQuery, options: data?.pages.flatMap((d) => d?.data || []) ?? [], value: typeof value === "number" || typeof value === "string"
+            ? ((data?.pages || [])
                 .map((d) => d?.data || [])
                 .flat()
-                .find((b) => b.id === value) || null
-            : (value ?? null), onChange: onChange, ...rest, children: ({ open }) => (jsxs("div", { children: [jsxs("div", { className: cx("relative input input-bordered pr-1", className, {
-                        "w-full": !className?.includes("w-"),
-                        "input-sm gap-1": size$1 === "sm",
-                        "input-xs gap-0.5": size$1 === "xs",
-                    }), ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, displayValue: (model) => (model ? valueFormat(model) : ""), onChange: (event) => setQuery(event.target.value) }), isLoading && !disabled ? (jsx(LoadingComponent, { className: cx({ hidden: open }), loadingClassName: "size-4 text-primary" })) : (!required &&
-                            value && (jsx("button", { className: "cursor-pointer", type: "button", onClick: () => onChange(null), children: jsx(XMarkIcon, { className: "size-4" }) }))), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "", onClick: (e) => {
-                                e.target?.parentNode?.parentNode?.querySelector("input")?.select();
-                            }, children: jsx(ChevronUpDownIcon$1, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(PortalSSR, { enabled: portalEnabled, children: jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsx("div", { style: floatingStyles, ref: refs.setFloating, className: "z-[2000] mt-1 pb-1 w-full border-gray-300 border overflow-y-auto rounded-box bg-white shadow-lg", children: jsxs(ComboboxOptions, { className: optionsClassName, children: [heading, !required && query.length < searchFromChars && data && data?.pages?.[0]?.meta?.totalItems !== 0 && (jsx(SelectOption, { "data-testid": "select-option-empty", value: null, size: size$1, children: empty || t("selectFromApi.select") }, "empty")), data?.pages?.[0]?.meta?.totalItems === 0 ? (jsx("div", { className: "cursor-default select-none py-2 px-4 text-base-content/60", children: jsx("span", { className: cx({ "text-xs": "xs" === size$1 || "sm" === size$1 }), children: t("selectFromApi.nothingFound") }) })) : (data?.pages
-                                        ?.map((d) => d?.data || [])
-                                        .flat()
-                                        .map((model, i) => {
-                                        const group = groupBy?.(model);
-                                        let groupNode;
-                                        if (currentGroupBy !== group) {
-                                            currentGroupBy = group;
-                                            groupNode = (jsx("div", { className: "p-2 text-xs text-base-content/40 border-b border-b-base-200 cursor-default select-none truncate", children: group }));
-                                        }
-                                        return (jsxs(React__default.Fragment, { children: [groupNode, jsx(SelectOption, { "data-testid": `select-option-${i}`, className: groupBy ? "pl-4" : undefined, value: model, size: size$1, children: valueFormat(model) })] }, model.id));
-                                    })), footer, isFetchingNextPage || isLoading ? (jsx(LoadingComponent, { className: "my-2" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }) }) })] })) }));
+                .find((b) => optionValue(b) === value) ?? null)
+            : (value ?? null), optionLabel: optionLabel, afterInput: isLoading ? jsx(LoadingComponent, { loadingClassName: "size-4 text-primary" }) : undefined, hideNoItemsOption: isLoading, afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isFetchingNextPage || isLoading ? (jsx(LoadingComponent, { className: "my-2" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }));
 };
 
 const timeToDate = (date, format = "HH:mm:ss") => {
@@ -1195,14 +1170,13 @@ const TimePicker = ({ className, value, onChange, placeholder, required, disable
 
 var styles = {"desc":"Input-module_desc__3D3hV"};
 
-const SEARCH_FROM_QUERY_LENGTH = 3;
-const SelectFromApi = ({ onChange, disabled, required, inputRef, name, value, size, portalEnabled, className, queryKey, queryFn, placeholder, optionsClassName, empty, valueFormat = (model) => model.name, inputClassName = "w-full mx-0 input input-bordered", filter, ...rest }) => {
+const SelectFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, filter, ...rest }) => {
     const [query, setQuery] = useState("");
     const { isLoading, data, refetch } = useQuery({
-        enabled: !disabled,
-        queryKey: [...queryKey, disabled],
+        enabled: !rest.disabled,
+        queryKey: [...queryKey, rest.disabled],
         queryFn: () => {
-            if (disabled) {
+            if (rest.disabled) {
                 return Promise.reject();
             }
             return queryFn();
@@ -1210,32 +1184,12 @@ const SelectFromApi = ({ onChange, disabled, required, inputRef, name, value, si
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
     });
-    const t = useTranslations();
     useEffect(() => {
         void refetch();
     }, [refetch, query]);
-    const { refs, floatingStyles } = useFloating({
-        placement: "bottom-start",
-        middleware: [
-            size$1({
-                apply({ rects, elements, availableHeight }) {
-                    Object.assign(elements.floating.style, {
-                        width: `${rects.reference.width}px`,
-                        maxHeight: `${Math.min(availableHeight - 10, 600)}px`,
-                    });
-                },
-            }),
-        ],
-        whileElementsMounted: autoUpdate,
-    });
-    return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: data?.find((b) => b.id === value) || null, onChange: onChange, ...rest, children: jsxs("div", { className: `relative ${className}`, children: [jsxs("div", { className: "w-full relative p-0", ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, className: cx(inputClassName, {
-                                "input-sm": size === "sm",
-                                "input-xs": size === "xs",
-                            }), displayValue: (model) => (model ? valueFormat(model) : ""), onChange: (event) => setQuery(event.target.value) }), isLoading && !disabled && (jsx(LoadingComponent, { className: "absolute z-1 inset-y-0 right-5 p-3", loadingClassName: "size-4 text-primary" })), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "absolute z-1 cursor-pointer inset-y-0 right-0 flex items-center pr-2", onClick: (e) => {
-                                e.target?.parentNode?.parentNode?.querySelector("input")?.select();
-                            }, children: jsx(ChevronUpDownIcon$1, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(PortalSSR, { enabled: portalEnabled, children: jsx(Transition, { as: Fragment$1, leave: "transition ease-in duration-100", leaveFrom: "opacity-100", leaveTo: "opacity-0", children: jsx("div", { style: floatingStyles, ref: refs.setFloating, className: "z-[2000] mt-1 pb-1 w-full border-gray-300 border overflow-y-auto rounded-box bg-white shadow-lg", children: jsxs(ComboboxOptions, { className: optionsClassName, children: [!required && query.length < SEARCH_FROM_QUERY_LENGTH && data && data?.length !== 0 && (jsx(SelectOption, { "data-testid": "select-option-empty", size: size, value: null, children: empty || t("selectFromApi.select") }, "empty")), data?.length === 0 ? (jsx("div", { className: "relative cursor-default select-none py-2 px-4 text-gray-700", children: jsx("span", { className: cx({ "text-xs": "xs" === size || "sm" === size }), children: t("selectFromApi.nothingFound") }) })) : (data
-                                        ?.filter((m) => (filter ? filter(m, query) : true))
-                                        ?.map((model, i) => (jsx(SelectOption, { "data-testid": `select-option-${i}`, value: model, size: size, children: valueFormat(model) }, model.id)))), isLoading && jsx(LoadingComponent, { className: "my-2" })] }) }) }) })] }) }));
+    return (jsx(Select, { ...rest, disabled: rest.disabled, onChange: rest.onChange, optionLabel: optionLabel, options: data ?? [], onQueryChange: setQuery, afterInput: isLoading ? jsx(LoadingComponent, { loadingClassName: "size-4 text-primary" }) : undefined, hideNoItemsOption: isLoading, value: typeof value === "number" || typeof value === "string"
+            ? ((data || []).find((b) => optionValue(b) === value) ?? null)
+            : (value ?? null), afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isLoading && jsx(LoadingComponent, { className: "my-2" })] }) }));
 };
 
 const TextFormField = ({ required, disabled, error, className, id, type, register, label, size, options, desc, name, fieldSetClassName, ref, ...rest }) => {
@@ -1319,14 +1273,12 @@ const SelectPaginatedFromApiFormField = ({ fieldSetClassName, label, disabled, .
                                 props.onChange?.(model || null);
                             } })) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
-const SelectFromApiField = ({ label, desc, error, className, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] }), jsx(SelectFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
-                        "input-error": error,
-                    }), ...rest, placeholder: rest.required ? `${label}*` : label })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
-const SelectFromApiFormField = ({ label, desc, control, name, error, className, onChange, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] }), jsx(Controller, { control: control, name: name, rules: { required: rest.required === true }, render: ({ field }) => (jsx(SelectFromApi, { inputClassName: cx("w-full mx-0 input input-bordered", className, {
+const SelectFromApiField = ({ label, desc, error, className, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] }), jsx(SelectFromApi, { className: cx(className, { "input-error": error }), ...rest, placeholder: rest.required ? `${label}*` : label })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+const SelectFromApiFormField = ({ label, desc, control, name, error, className, onChange, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] }), jsx(Controller, { control: control, name: name, rules: { required: rest.required === true }, render: ({ field }) => (jsx(SelectFromApi, { className: cx("w-full mx-0 input input-bordered", className, {
                             "input-error": error,
                         }), name: name, ...rest, placeholder: rest.required ? `${label}*` : label, value: field.value, onChange: (model) => {
-                            field.onChange(model?.id || null);
-                            onChange?.(model || null);
+                            field.onChange(model?.id ?? null);
+                            onChange?.(model);
                         } })) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 const DateTimeFormField = ({ label, desc, control, name, disabled, error, className, fieldSetClassName, useDate, ...rest }) => {
     return (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(Controller, { control: control, name: name, disabled: disabled, render: ({ field }) => {
@@ -1353,9 +1305,7 @@ const NumberFormField = ({ options, ...props }) => (jsxs("div", { className: pro
                             "input-error": props.error,
                         }), onValueChange: (values) => field.onChange(values.floatValue ?? null) })) })] }), props.desc && (jsx("div", { className: "text-xs text-gray-500", children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 const Label = ({ text, required }) => (jsx("label", { className: "label", children: jsxs("span", { className: "text-sm", children: [text, required && jsx(Required, {})] }) }));
-const SelectPaginatedFromApiField = ({ label, fieldSetClassName, className, desc, error, ...props }) => {
-    return (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, props.required ? jsx(Required, {}) : null] }), jsx(SelectPaginatedFromApi, { ...props, className: cx("mx-0", className, { "input-error": error }), placeholder: props.required ? `${label}*` : label })] }), desc, jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
-};
+const SelectPaginatedFromApiField = ({ label, fieldSetClassName, className, desc, error, ...props }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, props.required ? jsx(Required, {}) : null] }), jsx(SelectPaginatedFromApi, { ...props, className: cx("mx-0", className, { "input-error": error }), placeholder: props.required ? `${label}*` : label })] }), desc, jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 const Required = () => {
     return jsx("span", { className: "text-error align-bottom", children: "*" });
 };

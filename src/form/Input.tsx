@@ -405,9 +405,7 @@ export const SelectFromApiField = <
         {rest.required ? <Required /> : null}
       </span>
       <SelectFromApi<T>
-        inputClassName={cx("w-full mx-0 input input-bordered", className, {
-          "input-error": error,
-        })}
+        className={cx(className, { "input-error": error })}
         {...rest}
         placeholder={rest.required ? `${label}*` : label}
       />
@@ -433,7 +431,7 @@ export const SelectFromApiFormField = <
 }: IInputProps<TName> &
   Omit<SelectFromApiProps<T>, "onChange" | "value"> & {
     control: Control<TFieldValues>;
-    onChange?: (model: T) => unknown;
+    onChange?: (model: T | null) => unknown;
   }) => (
   <div className={fieldSetClassName}>
     <div className="floating-label">
@@ -447,7 +445,7 @@ export const SelectFromApiFormField = <
         rules={{ required: rest.required === true }}
         render={({ field }) => (
           <SelectFromApi<T>
-            inputClassName={cx("w-full mx-0 input input-bordered", className, {
+            className={cx("w-full mx-0 input input-bordered", className, {
               "input-error": error,
             })}
             name={name}
@@ -455,8 +453,8 @@ export const SelectFromApiFormField = <
             placeholder={rest.required ? `${label}*` : label}
             value={field.value}
             onChange={(model) => {
-              field.onChange(model?.id || null);
-              onChange?.(model || null);
+              field.onChange(model?.id ?? null);
+              onChange?.(model);
             }}
           />
         )}
@@ -631,32 +629,30 @@ export const Label = ({ text, required }: { required?: boolean; size?: "sm"; tex
   </label>
 );
 
-export const SelectPaginatedFromApiField = <T extends { data: { id: number }[]; meta: ResponseMeta }>({
+export const SelectPaginatedFromApiField = <T extends { data: Record<string, unknown>[]; meta: ResponseMeta }>({
   label,
   fieldSetClassName,
   className,
   desc,
   error,
   ...props
-}: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => {
-  return (
-    <div className={fieldSetClassName}>
-      <div className="floating-label">
-        <span>
-          {label}
-          {props.required ? <Required /> : null}
-        </span>
-        <SelectPaginatedFromApi<T>
-          {...props}
-          className={cx("mx-0", className, { "input-error": error })}
-          placeholder={props.required ? `${label}*` : label}
-        />
-      </div>
-      {desc}
-      <InputErrors className="text-xs text-error mt-1" errors={error} />
+}: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => (
+  <div className={fieldSetClassName}>
+    <div className="floating-label">
+      <span>
+        {label}
+        {props.required ? <Required /> : null}
+      </span>
+      <SelectPaginatedFromApi<T>
+        {...props}
+        className={cx("mx-0", className, { "input-error": error })}
+        placeholder={props.required ? `${label}*` : label}
+      />
     </div>
-  );
-};
+    {desc}
+    <InputErrors className="text-xs text-error mt-1" errors={error} />
+  </div>
+);
 
 export interface IInputProps<TName extends FieldPath<FieldValues>> {
   id?: string;
