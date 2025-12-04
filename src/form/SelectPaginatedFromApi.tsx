@@ -3,19 +3,19 @@ import React, { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useInView } from "react-intersection-observer";
 import { getNextPageParam, getPreviousPageParam, PaginateQuery, ResponseMeta } from "@/utils/paginate";
-import { LoadingComponent } from "@/Loading";
-import { Select, SelectProps } from "@/form/Select";
+import { LoadingComponent } from "../Loading";
+import { Select, SelectProps } from "./Select";
 
-export type SelectPaginatedFromApiProps<TModel extends { meta: ResponseMeta; data: Record<string, unknown>[] }> = {
+export type SelectPaginatedFromApiProps<TModel extends { meta: ResponseMeta; data: unknown[] }> = {
   name?: string;
   queryFn: (query: PaginateQuery<any>) => Promise<TModel>;
   queryKey: ReadonlyArray<any>;
   value: TModel["data"][0] | string | number | null;
   optionValue?: (model: TModel["data"][0]) => string | number;
   searchFromChars?: number;
-} & Omit<SelectProps<TModel["data"][0]>, "value">;
+} & Omit<SelectProps<TModel["data"][0]>, "value" | "options">;
 
-export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data: Record<string, unknown>[] }>({
+export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data: unknown[] }>({
   onChange,
   name,
   value,

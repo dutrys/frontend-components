@@ -21,7 +21,7 @@ export type SelectProps<T> = {
     options: T[];
     minWidth?: number;
     maxHeight?: number;
-    optionLabel: (model: T) => string;
+    optionLabel?: (model: T) => string;
     groupBy?: (model: T) => string;
     onQueryChange?: (query: string) => void;
     afterInput?: React.ReactNode;

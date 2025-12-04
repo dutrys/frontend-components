@@ -1,7 +1,5 @@
 import { Link, addLocale } from "./Link";
-import { EyeIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { useParams, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import React, { useMemo, useState } from "react";
 import cx from "classnames";
 import { EllipsisVerticalIcon } from "@heroicons/react/16/solid";
@@ -10,16 +8,6 @@ import { LoadingComponent } from "@/Loading";
 import { ScreenSize, useScreenSize } from "@/useScreenSize";
 import { Popover } from "@/dialog/Popover";
 import { TOOLTIP_GLOBAL_ID } from "@/utils/Toaster";
-
-export const EditButton = ({ href, size }: { href: string; size?: "xs" | "sm" | "lg" | "xl" }) => {
-  const t = useTranslations("actionButtons");
-  return <ActionButton href={href} icon={PencilIcon} tooltip={t("edit")} data-testid="button-edit" size={size} />;
-};
-
-export const ViewButton = ({ href, size }: { href: string; size?: "xs" | "sm" | "lg" | "xl" }) => {
-  const t = useTranslations("actionButtons");
-  return <ActionButton href={href} icon={EyeIcon} tooltip={t("view")} data-testid="button-view" size={size} />;
-};
 
 export type MoreActionType = {
   label: string;
@@ -73,7 +61,7 @@ export const MoreActions = ({ className, actions }: { className?: string; action
         >
           {(close) => (
             <div data-theme="dim" style={{ background: "transparent" }}>
-              <ul className="menu menu-sm px-1 p-0">
+              <ul className="menu menu-sm p-1 p-0">
                 {menuActions.map((a, i) => (
                   <li key={i} className={a.disabled ? "menu-disabled" : undefined}>
                     <Action action={a} close={close} />
@@ -162,63 +150,5 @@ const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => v
       {Icon && <Icon className="size-4" />}
       {!enable && a.label}
     </a>
-  );
-};
-
-export const ArchiveButton = (props: {
-  size?: "xs" | "sm" | "lg" | "xl";
-  onClick?: (e: MouseEvent) => void;
-  href?: string;
-  tooltipId?: string;
-}) => {
-  const t = useTranslations("actionButtons");
-  return (
-    <ActionButton {...props} icon={TrashIcon} data-testid="button-archive" tooltip={t("archive")} size={props.size} />
-  );
-};
-
-export const ActionButton = ({
-  tooltipId = TOOLTIP_GLOBAL_ID,
-  icon,
-  tooltip,
-  className,
-  size,
-  ...props
-}: {
-  size?: "xs" | "sm" | "lg" | "xl";
-  href?: string;
-  onClick?: (e: MouseEvent) => void;
-  className?: string;
-  tooltipId?: string;
-  icon: React.ElementType;
-  tooltip: React.ReactNode;
-  prefetch?: boolean;
-}) => {
-  const params = useParams();
-  const Icon = icon;
-  const L = props.href ? Link : "button";
-
-  if (props.href) {
-    props.href = addLocale(props.href, params.locale as string);
-    props.prefetch = props.prefetch ?? false;
-  }
-
-  return (
-    // @ts-expect-error TS2322
-    <L
-      {...props}
-      data-tooltip-id={tooltipId}
-      data-tooltip-place="top"
-      data-tooltip-content={tooltip}
-      className={cx("btn uppercase btn-ghost", className, {
-        "btn-xs": size === "xs",
-        "btn-sm": size === "sm",
-        "btn-lg": size === "lg",
-        "btn-xl": size === "xl",
-        "btn-xs md:btn-sm": !size,
-      })}
-    >
-      <Icon className="inline" width={16} />
-    </L>
   );
 };

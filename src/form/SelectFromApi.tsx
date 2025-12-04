@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Select, SelectProps } from "@/form/Select";
-import { LoadingComponent } from "@/Loading";
+import { Select, SelectProps } from "./Select";
+import { LoadingComponent } from "../Loading";
 
-export type SelectFromApiProps<TModel extends Record<string, unknown>> = {
+export type SelectFromApiProps<TModel = unknown> = {
   queryFn: () => Promise<TModel[]>;
   queryKey: ReadonlyArray<any>;
   value: number | string | null;
@@ -11,15 +11,15 @@ export type SelectFromApiProps<TModel extends Record<string, unknown>> = {
   optionLabel?: (model: TModel) => string;
   optionValue?: (model: TModel) => string | number;
   filter?: (model: TModel, query: string) => boolean;
-} & Omit<SelectProps<TModel>, "onChange" | "optionLabel" | "value">;
+} & Omit<SelectProps<TModel>, "onChange" | "optionLabel" | "value" | "options">;
 
-export const SelectFromApi = <TModel extends Record<string, unknown>>({
+export const SelectFromApi = <TModel = unknown,>({
   name,
   value,
   queryKey,
   queryFn,
-  optionLabel = (model) => model.name as string,
-  optionValue = (model) => model.id as number | string,
+  optionLabel = (model) => (model as any).name,
+  optionValue = (model) => (model as any).id,
   filter,
   ...rest
 }: SelectFromApiProps<TModel>) => {

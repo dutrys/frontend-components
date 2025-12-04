@@ -42,7 +42,7 @@ export type SelectProps<T> = {
   options: T[];
   minWidth?: number;
   maxHeight?: number;
-  optionLabel: (model: T) => string;
+  optionLabel?: (model: T) => string;
   groupBy?: (model: T) => string;
   onQueryChange?: (query: string) => void;
   afterInput?: React.ReactNode;
@@ -57,7 +57,7 @@ export const Select = <T = unknown,>({
   options,
   name,
   portalEnabled,
-  optionLabel,
+  optionLabel = (m) => (m as any).name,
   value,
   size,
   className,
@@ -134,12 +134,7 @@ export const Select = <T = unknown,>({
             </ComboboxButton>
           </div>
           <PortalSSR enabled={portalEnabled}>
-            <Transition
-              as={Fragment}
-              leave="transition ease-in duration-100"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
+            <Transition as={Fragment} leave="transition-none">
               <div
                 style={floatingStyles}
                 ref={refs.setFloating}
@@ -165,7 +160,7 @@ export const Select = <T = unknown,>({
                       if (currentGroupBy !== group) {
                         currentGroupBy = group;
                         groupNode = (
-                          <div className="p-2 text-xs text-base-content/40 border-b border-b-base-200 cursor-default select-none truncate">
+                          <div className="sticky top-0 bg-base-100 font-bold z-10 p-2 text-xs text-base-content/40 border-b border-b-base-200 cursor-default select-none truncate">
                             {group}
                           </div>
                         );

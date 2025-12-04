@@ -10,7 +10,7 @@ import {
   RectangleStackIcon,
 } from "@heroicons/react/24/outline";
 import { FunnelIcon as FunnelIconSolid } from "@heroicons/react/24/solid";
-import { MoreActions, MoreActionType } from "./ActionButtons";
+import { MoreActions, MoreActionType } from "./MoreAction";
 import { Pagination } from "./Pagination";
 import { useTranslations } from "next-intl";
 import React, { useEffect, useMemo, useState } from "react";
@@ -233,7 +233,6 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
           <div className="truncate pl-2">{titleAbove}</div>
         </div>
       )}
-
       <div
         data-testid="paginate-table"
         className="relative h-[calc(100vh-4rem)]"

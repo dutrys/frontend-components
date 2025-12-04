@@ -20,10 +20,10 @@ import { TimePicker } from "./TimePicker";
 import styles from "./Input.module.css";
 import { NumericFormat } from "react-number-format";
 import { NumericFormatProps } from "react-number-format/types/types";
-import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { CheckIcon } from "@heroicons/react/20/solid";
-import { LoadingComponent } from "@/Loading";
+import { LoadingComponent } from "../Loading";
 import { SelectFromApi, SelectFromApiProps } from "./SelectFromApi";
 
 interface IInputRegisterProps<
@@ -342,18 +342,19 @@ export const DateFormField = <
 };
 
 export const SelectPaginatedFromApiFormField = <
-  T extends { data: { id: number }[]; meta: ResponseMeta },
+  T extends { data: unknown[]; meta: ResponseMeta },
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   fieldSetClassName,
   label,
   disabled,
+  optionValue = (model) => (model as any).id,
   ...props
 }: IInputProps<TName> & {
   control: Control<TFieldValues>;
   onChange?: (model: T["data"][number] | null) => void;
-} & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange">) => {
+} & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => {
   return (
     <div className={fieldSetClassName}>
       <div className="floating-label">
@@ -374,7 +375,7 @@ export const SelectPaginatedFromApiFormField = <
               placeholder={props.required ? `${label}*` : label}
               value={field.value}
               onChange={(model) => {
-                field.onChange(model?.id || null);
+                field.onChange(model ? optionValue(model) : null);
                 props.onChange?.(model || null);
               }}
             />
@@ -387,7 +388,7 @@ export const SelectPaginatedFromApiFormField = <
 };
 
 export const SelectFromApiField = <
-  T extends { id: number },
+  T = unknown,
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
@@ -415,7 +416,7 @@ export const SelectFromApiField = <
 );
 
 export const SelectFromApiFormField = <
-  T extends { id: number },
+  T = unknown,
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
@@ -426,6 +427,7 @@ export const SelectFromApiFormField = <
   error,
   className,
   onChange,
+  optionValue = (model) => (model as any).id,
   fieldSetClassName,
   ...rest
 }: IInputProps<TName> &
@@ -453,7 +455,7 @@ export const SelectFromApiFormField = <
             placeholder={rest.required ? `${label}*` : label}
             value={field.value}
             onChange={(model) => {
-              field.onChange(model?.id ?? null);
+              field.onChange(model ? optionValue(model) : null);
               onChange?.(model);
             }}
           />
@@ -629,7 +631,7 @@ export const Label = ({ text, required }: { required?: boolean; size?: "sm"; tex
   </label>
 );
 
-export const SelectPaginatedFromApiField = <T extends { data: Record<string, unknown>[]; meta: ResponseMeta }>({
+export const SelectPaginatedFromApiField = <T extends { data: unknown[]; meta: ResponseMeta }>({
   label,
   fieldSetClassName,
   className,

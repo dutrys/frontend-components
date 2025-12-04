@@ -1,4 +1,4 @@
-import { MoreActionType } from "./ActionButtons";
+import { MoreActionType } from "./MoreAction";
 import React from "react";
 import { StorageInterface } from "@/pagination/StorageInterface";
 import { ResponseMeta } from "@/utils/paginate";
