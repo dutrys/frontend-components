@@ -96,8 +96,8 @@ export const SidebarMenu = ({
               <div data-theme="dim" className="bg-transparent">
                 {Array.isArray(item.items) ? (
                   <>
-                    <div className="text-xs text-center pt-2 pb-2 text-white">{item.name}</div>
-                    <ul className="menu menu-sm px-1 pt-0 pb-0">
+                    <div className="text-xs text-center p-2 pb-0 text-white">{item.name}</div>
+                    <ul className="menu menu-sm p-1">
                       {item.items?.map((sub, i) => (
                         <li key={i}>
                           <Link href={sub.href} onClick={close} className="text-white">
