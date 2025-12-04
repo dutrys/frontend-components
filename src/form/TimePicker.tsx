@@ -43,12 +43,9 @@ export const TimePicker = ({
       onChange={(e) => {
         setInnerValue(e.target.value);
         if (e.target.value.match(/^\d{2}:\d{2}$/)) {
-          console.log("onChange", e.target.value);
           onChange({
             target: { value: dateToTimeString(timeToDate(e.target.value, "HH:mm") || new Date(), "HH:mm:ss") },
           });
-        } else {
-          console.log("NOT onChange", e.target.value);
         }
       }}
     />

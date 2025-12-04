@@ -54,7 +54,6 @@ export const Popover = ({
 }) => {
   const [isOpen, setIsOpen] = useState(openProp || false);
   const arrowRef = useRef(null);
-  console.log(backgroundColor, borderColor, placement, arrowSize, "popover props");
   const { refs, floatingStyles, context } = useFloating<HTMLElement>({
     placement: placement ?? "bottom-start",
     open: isOpen,

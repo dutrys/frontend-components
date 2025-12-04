@@ -8,31 +8,34 @@ import * as React from "react";
 import { Popover } from "../dialog/Popover";
 import { DayPicker, Matcher } from "react-day-picker";
 import { enGB, lt } from "react-day-picker/locale";
+import cx from "classnames";
 
-export function DateTimePicker({
-  value,
-  onChange,
-  allowEmpty,
-  disabled,
-  required,
-  from,
-  to,
-  placeholder,
-  inputClassName = "input input-bordered",
-  toggleClassName = "",
-  ...rest
-}: {
+export type DateTimePickerProps = {
   required?: boolean;
   disabled?: boolean;
-  allowEmpty?: boolean;
-  inputClassName?: string;
+  className?: string;
   placeholder?: string;
   toggleClassName?: string;
   from?: Date;
   to?: Date;
   value: Date | null;
   onChange: (value: Date | null) => void;
-}) {
+  size?: "sm" | "xs";
+};
+
+export function DateTimePicker({
+  value,
+  size,
+  onChange,
+  disabled,
+  required,
+  from,
+  to,
+  placeholder,
+  className,
+  toggleClassName,
+  ...rest
+}: DateTimePickerProps) {
   const [dateString, setDateString] = useState(value ? format(value, "yyyy-MM-dd HH:mm") : "");
   const params = useParams();
   useEffect(() => {
@@ -72,7 +75,12 @@ export function DateTimePicker({
     matcher = { after: to };
   }
   return (
-    <label className={`w-full ${inputClassName}`}>
+    <label
+      className={cx("w-full input input-bordered", className, {
+        "input-xs": size === "xs",
+        "input-sm": size === "sm",
+      })}
+    >
       <Popover
         title={(ref, popoverProps) => (
           <input
@@ -216,12 +224,12 @@ export function DateTimePicker({
           </>
         )}
       </Popover>
-      {allowEmpty ? (
-        <button disabled={allowEmpty && !value} className={toggleClassName} onClick={() => onChange(null)}>
+      {!required ? (
+        <button disabled={!required && !value} className={toggleClassName} onClick={() => onChange(null)}>
           {value ? <XMarkIcon className="size-4" /> : <ClockIcon className="size-4" />}
         </button>
       ) : (
-        <div className={`cursor-pointer ${toggleClassName}`}>
+        <div className={cx("cursor-pointer", toggleClassName)}>
           <ClockIcon className="size-4" />
         </div>
       )}

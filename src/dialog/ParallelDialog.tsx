@@ -43,9 +43,14 @@ export const ParallelDialog = ({
   };
 
   return (
-    <dialog data-testid="modal-dialog" open className="modal modal-bottom modal-middle z-1100" {...rest}>
+    <dialog
+      data-testid="modal-dialog"
+      open
+      className="modal modal-bottom modal-middle overflow-y-auto z-1100"
+      {...rest}
+    >
       <div
-        className={cx("modal-box rounded-field p-4 my-4 relative", className)}
+        className={cx("modal-box max-h-none overflow-y-visible rounded-field p-4 my-4 relative", className)}
         onKeyDown={(e) => e.key === "Escape" && closeModal()}
       >
         <Tooltip id={TOOLTIP_PARALLEL_ID} place="top" />

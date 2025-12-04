@@ -4,12 +4,7 @@ import { Popover } from "@/dialog/Popover";
 import { Link } from "@/pagination/Link";
 import { ScreenSize, useScreenSize } from "./useScreenSize";
 import { Tooltip } from "react-tooltip";
-import {
-  ChevronDoubleLeftIcon,
-  ChevronDoubleRightIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "@heroicons/react/24/outline";
+import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
 
 export const TOOLTIP_SIDEBAR_ID = "sidebar";
 

@@ -8,7 +8,7 @@ import {
   UseFormRegister,
   Merge,
 } from "react-hook-form";
-import { DateTimePicker } from "./DateTimePicker";
+import { DateTimePicker, DateTimePickerProps } from "./DateTimePicker";
 import { DateInput, DateInputProps } from "./DateInput";
 import { InputErrors } from "./UseForm";
 import { format } from "date-fns";
@@ -73,7 +73,6 @@ export const TextFormField = <
             }
           }}
           required={required}
-          disabled={disabled}
           placeholder={required ? `${label}*` : label}
           className={cx("input input-bordered w-full", className, {
             "input-xs": size === "xs",
@@ -123,7 +122,6 @@ export const SelectFormField = <
       <label className="floating-label">
         <select
           id={id}
-          disabled={disabled}
           {...register(name, {
             required: required,
             disabled: disabled,
@@ -173,7 +171,6 @@ export const TextareaFormField = <
       <label className="floating-label">
         <textarea
           id={props.id}
-          disabled={props.disabled}
           placeholder={props.required ? `${props.label}*` : props.label}
           {...r}
           className={cx("textarea textarea-bordered w-full", props.className, {
@@ -258,7 +255,6 @@ export const CheckboxFormField = <
           <input
             id={props.id}
             type="checkbox"
-            disabled={props.disabled}
             {...props.register(props.name, {
               disabled: props.disabled,
               ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
@@ -297,6 +293,7 @@ export const DateFormField = <
   control,
   error,
   desc,
+  disabled,
   useDate,
   ...props
 }: Omit<IInputProps<TName>, "size"> &
@@ -309,6 +306,7 @@ export const DateFormField = <
     <div className={fieldSetClassName}>
       <label className="floating-label">
         <Controller
+          disabled={disabled}
           control={control}
           name={props.name}
           render={({ field }) => (
@@ -317,6 +315,7 @@ export const DateFormField = <
               className={cx({ "input-error": error }, props.className)}
               placeholder={props.required ? `${label}*` : label}
               value={field.value}
+              disabled={field.disabled}
               onChange={(value) => {
                 if (useDate) {
                   field.onChange(value);
@@ -349,6 +348,7 @@ export const SelectPaginatedFromApiFormField = <
 >({
   fieldSetClassName,
   label,
+  disabled,
   ...props
 }: IInputProps<TName> & {
   control: Control<TFieldValues>;
@@ -364,10 +364,12 @@ export const SelectPaginatedFromApiFormField = <
         <Controller
           control={props.control}
           name={props.name}
+          disabled={disabled}
           rules={{ required: props.required === true }}
           render={({ field }) => (
             <SelectPaginatedFromApi<T>
               {...props}
+              disabled={field.disabled}
               className={cx("w-full mx-0", props.className, { "input-error": props.error })}
               placeholder={props.required ? `${label}*` : label}
               value={field.value}
@@ -472,42 +474,30 @@ export const DateTimeFormField = <
   desc,
   control,
   name,
-  required,
   disabled,
   error,
-  useDate,
   className,
-  size,
-  from,
-  to,
   fieldSetClassName,
+  useDate,
   ...rest
 }: IInputProps<TName> & {
   control: Control<TFieldValues>;
   useDate?: boolean;
-  from?: Date;
-  to?: Date;
-}) => {
+} & DateTimePickerProps) => {
   return (
     <div className={fieldSetClassName}>
       <label className="floating-label">
         <Controller
           control={control}
           name={name}
+          disabled={disabled}
           render={({ field }) => {
             return (
               <DateTimePicker
-                inputClassName={cx("input input-bordered", className, {
-                  "input-xs": size === "xs",
-                  "input-sm": size === "sm",
-                  "input-error": error,
-                })}
-                required={required}
-                allowEmpty={!required}
-                placeholder={required ? `${label}*` : label}
-                from={from}
-                disabled={disabled}
-                to={to}
+                {...rest}
+                className={cx(className, { "input-error": error })}
+                placeholder={rest.required ? `${label}*` : label}
+                disabled={field.disabled}
                 value={field.value ? (useDate ? field.value : stringToDate(field.value)) || null : null}
                 onChange={(value) => {
                   if (useDate) {
@@ -516,14 +506,13 @@ export const DateTimeFormField = <
                     field.onChange(value ? format(value, "yyyy-MM-dd HH:mm:ss") : null);
                   }
                 }}
-                {...rest}
               />
             );
           }}
         />
         <span>
           {label}
-          {required ? <Required /> : null}
+          {rest.required ? <Required /> : null}
         </span>
       </label>
       {desc && (
@@ -556,13 +545,14 @@ export const TimeFormField = <
           </span>
         )}
         <Controller
+          disabled={props.disabled}
           render={({ field }) => (
             <TimePicker
               value={field.value}
               onChange={(v) => field.onChange(v)}
               placeholder={props.required ? `${props.label}*` : props.label}
               required={props.required}
-              disabled={props.disabled}
+              disabled={field.disabled}
               className={cx("input w-full", props.className, {
                 "input-xs": props.size === "xs",
                 "input-sm": props.size === "sm",
@@ -605,11 +595,12 @@ export const NumberFormField = <
       <Controller
         name={props.name}
         control={props.control}
+        disabled={props.disabled}
         render={({ field }) => (
           <NumericFormat
             placeholder={props.required ? `${props.label}*` : props.label}
             {...options}
-            disabled={props?.disabled}
+            disabled={field?.disabled}
             required={props?.required}
             value={field.value}
             className={cx("w-full input input-bordered focus:outline-blue-400", props.className, {
@@ -665,14 +656,6 @@ export const SelectPaginatedFromApiField = <T extends { data: { id: number }[]; 
       <InputErrors className="text-xs text-error mt-1" errors={error} />
     </div>
   );
-};
-
-const splitByData = <T extends Record<string, unknown>>(attrs: T): [Partial<T>, Partial<T>] => {
-  const entries = Object.entries(attrs);
-  const dataEntries = entries.filter(([key]) => !key.startsWith("data-"));
-  const restEntries = entries.filter(([key]) => key.startsWith("data-"));
-
-  return [Object.fromEntries(dataEntries) as Partial<T>, Object.fromEntries(restEntries) as Partial<T>];
 };
 
 export interface IInputProps<TName extends FieldPath<FieldValues>> {

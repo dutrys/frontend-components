@@ -8,6 +8,7 @@ import { LoadingComponent } from "@/Loading";
 import { SelectOption } from "@/form/Select";
 import { autoUpdate, useFloating } from "@floating-ui/react";
 import { size as floatingSize } from "@floating-ui/react-dom";
+import { PortalSSR } from "@/form/SelectPaginatedFromApi";
 
 const SEARCH_FROM_QUERY_LENGTH = 3;
 
@@ -74,9 +75,10 @@ export const SelectFromApi = <TModel extends { id: number }>({
     placement: "bottom-start",
     middleware: [
       floatingSize({
-        apply({ rects, elements }) {
+        apply({ rects, elements, availableHeight }) {
           Object.assign(elements.floating.style, {
             width: `${rects.reference.width}px`,
+            maxHeight: `${Math.min(availableHeight - 10, 600)}px`,
           });
         },
       }),
@@ -124,12 +126,14 @@ export const SelectFromApi = <TModel extends { id: number }>({
             <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </ComboboxButton>
         </div>
-        <Portal enabled={portalEnabled}>
+        <PortalSSR enabled={portalEnabled}>
           <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div style={{ ...floatingStyles, zIndex: 2000 }} ref={refs.setFloating}>
-              <ComboboxOptions
-                className={`absolute z-10 mt-2 max-h-96 w-full border-gray-300 border overflow-auto rounded-md bg-white py-1 text-base shadow-lg sm:text-sm ${optionsClassName || ""}`}
-              >
+            <div
+              style={floatingStyles}
+              ref={refs.setFloating}
+              className="z-[2000] mt-1 pb-1 w-full border-gray-300 border overflow-y-auto rounded-box bg-white shadow-lg"
+            >
+              <ComboboxOptions className={optionsClassName}>
                 {!required && query.length < SEARCH_FROM_QUERY_LENGTH && data && data?.length !== 0 && (
                   <SelectOption data-testid="select-option-empty" key="empty" size={size} value={null}>
                     {empty || t("selectFromApi.select")}
@@ -155,7 +159,7 @@ export const SelectFromApi = <TModel extends { id: number }>({
               </ComboboxOptions>
             </div>
           </Transition>
-        </Portal>
+        </PortalSSR>
       </div>
     </Combobox>
   );

@@ -1,14 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import {
-  Combobox,
-  ComboboxButton,
-  ComboboxInput,
-  ComboboxOption,
-  ComboboxOptions,
-  Portal,
-  Transition,
-} from "@headlessui/react";
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import { Combobox, ComboboxButton, ComboboxInput, ComboboxOptions, Portal, Transition } from "@headlessui/react";
+import { ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import React, { Fragment, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import cx from "classnames";
@@ -40,6 +32,17 @@ export type SelectPaginatedFromApiProps<TModel extends { meta: ResponseMeta; dat
   optionsClassName?: string;
   portalEnabled?: boolean;
 };
+
+export function PortalSSR(props: { enabled?: boolean; children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  if (props.enabled && mounted) {
+    return <Portal>{props.children}</Portal>;
+  }
+  return props.children;
+}
 
 export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data: { id: number }[] }>({
   onChange,
@@ -184,7 +187,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
               <ChevronUpDownIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
             </ComboboxButton>
           </div>
-          <Portal enabled={portalEnabled}>
+          <PortalSSR enabled={portalEnabled}>
             <Transition
               as={Fragment}
               leave="transition ease-in duration-100"
@@ -260,7 +263,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
                 </ComboboxOptions>
               </div>
             </Transition>
-          </Portal>
+          </PortalSSR>
         </div>
       )}
     </Combobox>

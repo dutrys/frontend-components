@@ -26,6 +26,10 @@ export type SelectPaginatedFromApiProps<TModel extends {
     optionsClassName?: string;
     portalEnabled?: boolean;
 };
+export declare function PortalSSR(props: {
+    enabled?: boolean;
+    children: React.ReactNode;
+}): string | number | bigint | boolean | import("react/jsx-runtime").JSX.Element | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined;
 export declare const SelectPaginatedFromApi: <TModel extends {
     meta: ResponseMeta;
     data: {
