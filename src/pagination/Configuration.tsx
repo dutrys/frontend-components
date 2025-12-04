@@ -4,13 +4,13 @@ import { AdjustmentsHorizontalIcon, CheckIcon, Cog6ToothIcon, XMarkIcon } from "
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ArrowsUpDownIcon } from "@heroicons/react/16/solid";
-import { ColumnType, isActionColumn } from "@/pagination/PaginatedTable";
-import { StorageInterface } from "@/pagination/StorageInterface";
-import { LoadingComponent } from "@/Loading";
+import { ColumnType, isActionColumn } from "./PaginatedTable";
+import { StorageInterface } from "./StorageInterface";
+import { LoadingComponent } from "../Loading";
 import { captureException } from "@sentry/nextjs";
 import toast from "react-hot-toast";
-import { Popover } from "@/dialog/Popover";
-import { isServerError } from "@/form/UseForm";
+import { Popover } from "../dialog/Popover";
+import { isServerError } from "../form/UseForm";
 import { createPortal } from "react-dom";
 import cx from "classnames";
 

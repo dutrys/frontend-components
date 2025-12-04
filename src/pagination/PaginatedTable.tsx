@@ -17,16 +17,16 @@ import React, { useEffect, useMemo, useState } from "react";
 import styles from "./PaginatedTable.module.css";
 import cx from "classnames";
 import { Link, addLocale } from "./Link";
-import { Hotkeys } from "@/HotKeys";
-import { HeaderResponsivePaginated } from "@/pagination/HeaderResponsivePaginated";
-import { PaginationConfiguration } from "@/pagination/Configuration";
-import { LocalStorage, StorageInterface } from "@/pagination/StorageInterface";
+import { Hotkeys } from "../HotKeys";
+import { HeaderResponsivePaginated } from "./HeaderResponsivePaginated";
+import { PaginationConfiguration } from "./Configuration";
+import { LocalStorage, StorageInterface } from "./StorageInterface";
 import { useQuery } from "@tanstack/react-query";
-import { ResponseMeta, setPartialParams } from "@/utils/paginate";
-import { IndeterminateCheckbox } from "@/form/Input";
-import { DateTime } from "@/utils/DateTime";
-import { HumanDate } from "@/utils/HumanDate";
-import { TOOLTIP_GLOBAL_ID } from "@/utils/Toaster";
+import { ResponseMeta, setPartialParams } from "../utils/paginate";
+import { IndeterminateCheckbox } from "../form/Input";
+import { DateTime } from "../utils/DateTime";
+import { HumanDate } from "../utils/HumanDate";
+import { TOOLTIP_GLOBAL_ID } from "../utils/Toaster";
 
 const limits = [10, 20, 50, 100];
 

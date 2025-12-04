@@ -4,10 +4,10 @@ import React, { useMemo, useState } from "react";
 import cx from "classnames";
 import { EllipsisVerticalIcon } from "@heroicons/react/16/solid";
 import { useRouter } from "next-nprogress-bar";
-import { LoadingComponent } from "@/Loading";
-import { ScreenSize, useScreenSize } from "@/useScreenSize";
-import { Popover } from "@/dialog/Popover";
-import { TOOLTIP_GLOBAL_ID } from "@/utils/Toaster";
+import { LoadingComponent } from "../Loading";
+import { ScreenSize, useScreenSize } from "../useScreenSize";
+import { Popover } from "../dialog/Popover";
+import { TOOLTIP_GLOBAL_ID } from "../utils/Toaster";
 
 export type MoreActionType = {
   label: string;

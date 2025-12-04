@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import cx from "classnames";
-import { Popover } from "@/dialog/Popover";
-import { Link } from "@/pagination/Link";
+import { Popover } from "./dialog/Popover";
+import { Link } from "./pagination/Link";
 import { ScreenSize, useScreenSize } from "./useScreenSize";
 import { Tooltip } from "react-tooltip";
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from "@heroicons/react/24/outline";

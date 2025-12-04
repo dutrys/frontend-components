@@ -1,4 +1,4 @@
-import { ColumnType, isActionColumn } from "@/pagination/PaginatedTable";
+import { ColumnType, isActionColumn } from "./PaginatedTable";
 
 export interface StorageInterface<T = unknown> {
   getConfigs(

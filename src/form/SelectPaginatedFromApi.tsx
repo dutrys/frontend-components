@@ -2,7 +2,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useInView } from "react-intersection-observer";
-import { getNextPageParam, getPreviousPageParam, PaginateQuery, ResponseMeta } from "@/utils/paginate";
+import { getNextPageParam, getPreviousPageParam, PaginateQuery, ResponseMeta } from "../utils/paginate";
 import { LoadingComponent } from "../Loading";
 import { Select, SelectProps } from "./Select";
 

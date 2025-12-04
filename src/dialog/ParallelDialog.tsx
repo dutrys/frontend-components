@@ -2,7 +2,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Tooltip } from "react-tooltip";
-import { addLocale } from "@/pagination/Link";
+import { addLocale } from "../pagination/Link";
 import cx from "classnames";
 
 export const TOOLTIP_PARALLEL_ID = "parallel-tooltip";

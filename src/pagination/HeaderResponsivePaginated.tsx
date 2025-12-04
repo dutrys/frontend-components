@@ -1,10 +1,10 @@
 import React from "react";
-import { BulkActions, BulkDropDownActions } from "@/pagination/BulkActions";
-import { Link } from "@/pagination/Link";
-import { HeaderResponsive } from "@/pagination/HeaderResponsive";
+import { BulkActions, BulkDropDownActions } from "./BulkActions";
+import { Link } from "./Link";
+import { HeaderResponsive } from "./HeaderResponsive";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { isParamActive, setPartialParams } from "@/utils/paginate";
+import { isParamActive, setPartialParams } from "../utils/paginate";
 import cx from "classnames";
 
 export const HeaderResponsivePaginated = ({

@@ -6,7 +6,7 @@ import { XMarkIcon, CalendarIcon } from "@heroicons/react/24/outline";
 import { useParams } from "next/navigation";
 import { DayPicker, Matcher } from "react-day-picker";
 import { enGB, lt } from "react-day-picker/locale";
-import { Popover } from "@/dialog/Popover";
+import { Popover } from "../dialog/Popover";
 import cx from "classnames";
 import { FocusTrap, FocusTrapFeatures } from "@headlessui/react";
 
