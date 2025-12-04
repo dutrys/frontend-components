@@ -29,7 +29,7 @@ export const Popover = ({
   showOnClick = false,
   showOnFocus = false,
   backgroundColor = "bg-slate-800",
-  borderColor = "border-slate-600",
+  borderColor,
   disabled,
   placement,
   arrowSize,
@@ -54,7 +54,7 @@ export const Popover = ({
 }) => {
   const [isOpen, setIsOpen] = useState(openProp || false);
   const arrowRef = useRef(null);
-
+  console.log(backgroundColor, borderColor, placement, arrowSize, "popover props");
   const { refs, floatingStyles, context } = useFloating<HTMLElement>({
     placement: placement ?? "bottom-start",
     open: isOpen,
@@ -83,6 +83,12 @@ export const Popover = ({
     return title(null, {}, false);
   }
 
+  let opacity = 100;
+  const opacityString = backgroundColor.match(/\/(\d+)$/);
+  if (opacityString) {
+    opacity = parseInt(opacityString[1], 10) ?? 100;
+  }
+
   return (
     <>
       {title(refs.setReference, getReferenceProps(), isOpen)}
@@ -94,16 +100,18 @@ export const Popover = ({
             style={{ ...floatingStyles, zIndex: 1100 }}
             {...getFloatingProps()}
             className={cx(
-              "popover border rounded-box shadow-lg shadow-base-100 border-1",
+              "popover rounded-box shadow-lg shadow-base-100",
               popoverClassName,
               backgroundColor,
               borderColor,
+              { border: borderColor },
             )}
           >
             <FloatingArrow
-              strokeWidth={1}
-              fill={`var(--color-${backgroundColor.replace("bg-", "")})`}
-              stroke={`var(--color-${borderColor.replace("border-", "")})`}
+              fill={`var(--color-${backgroundColor.replace("bg-", "").replace(/\/\d+$/, "")})`}
+              strokeWidth={borderColor ? 1 : 0}
+              opacity={opacity / 100}
+              stroke={borderColor ? `var(--color-${borderColor.replace("border-", "")})` : undefined}
               context={context}
               ref={arrowRef}
               width={arrowSize?.width}

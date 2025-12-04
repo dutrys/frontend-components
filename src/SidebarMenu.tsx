@@ -84,7 +84,6 @@ export const SidebarMenu = ({
           <Popover
             key={`${item.name}-${i}`}
             backgroundColor="bg-nav-popover/95"
-            borderColor="border-nav-popover"
             placement="right-start"
             arrowSize={{ width: 10, height: 5 }}
             title={(ref, props, isOpen) => (
@@ -102,7 +101,7 @@ export const SidebarMenu = ({
               <div data-theme="dim" className="bg-transparent">
                 {Array.isArray(item.items) ? (
                   <>
-                    <div className="text-xs text-center pt-1 pb-2 text-white">{item.name}</div>
+                    <div className="text-xs text-center pt-2 pb-2 text-white">{item.name}</div>
                     <ul className="menu menu-sm px-1 pt-0 pb-0">
                       {item.items?.map((sub, i) => (
                         <li key={i}>
@@ -250,7 +249,11 @@ export const SidebarLayout = ({
             {sideChildren(menuExpanded)}
           </div>
         </div>
-        <Tooltip id={TOOLTIP_SIDEBAR_ID} place="right" style={{ fontSize: 14, zIndex: 2000 }} />
+        <Tooltip
+          id={TOOLTIP_SIDEBAR_ID}
+          place="right"
+          style={{ fontSize: ".875rem", zIndex: 2000, borderRadius: "var(--radius-box)" }}
+        />
       </div>
       <div className="grow shirk">{children}</div>
     </div>
