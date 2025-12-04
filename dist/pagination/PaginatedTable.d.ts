@@ -1,7 +1,7 @@
 import { MoreActionType } from "./MoreAction";
 import React from "react";
-import { StorageInterface } from "@/pagination/StorageInterface";
-import { ResponseMeta } from "@/utils/paginate";
+import { StorageInterface } from "./StorageInterface";
+import { ResponseMeta } from "../utils/paginate";
 export type ActionColumn<TModel> = {
     type: "actions";
     actions: (model: TModel) => MoreActionType[];

@@ -1,4 +1,4 @@
-import { PaginateQuery, ResponseMeta } from "@/utils/paginate";
+import { PaginateQuery, ResponseMeta } from "../utils/paginate";
 import { SelectProps } from "./Select";
 export type SelectPaginatedFromApiProps<TModel extends {
     meta: ResponseMeta;

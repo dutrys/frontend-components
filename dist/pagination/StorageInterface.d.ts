@@ -1,4 +1,4 @@
-import { ColumnType } from "@/pagination/PaginatedTable";
+import { ColumnType } from "./PaginatedTable";
 export interface StorageInterface<T = unknown> {
     getConfigs(title: string | undefined, columns: ColumnType<T>[]): Promise<Record<string, {
         name: string;

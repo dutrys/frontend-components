@@ -2,12 +2,9 @@ import * as react_jsx_runtime from 'react/jsx-runtime';
 import * as React from 'react';
 import React__default, { ChangeEvent } from 'react';
 import { Placement } from '@floating-ui/utils';
-import { ResponseMeta as ResponseMeta$1, PaginateQuery as PaginateQuery$1 } from '@/utils/paginate';
-import { StorageInterface as StorageInterface$1 } from '@/pagination/StorageInterface';
-import { ColumnType as ColumnType$1 } from '@/pagination/PaginatedTable';
+import { ReadonlyURLSearchParams } from 'next/navigation';
 import * as react_hook_form from 'react-hook-form';
 import { FieldErrors, FieldValues, UseFormProps, UseFormSetError, FieldPath, FieldError, Merge, RegisterOptions, UseFormRegister, Control } from 'react-hook-form';
-import { ReadonlyURLSearchParams } from 'next/navigation';
 import { NumericFormatProps } from 'react-number-format/types/types';
 
 declare const LoadingComponent: ({ style, className, loadingClassName, size, }: {
@@ -77,13 +74,73 @@ declare const HeaderResponsive: <T extends ObjOrNode>({ renderVisible, renderDro
     elements: T[];
 }) => react_jsx_runtime.JSX.Element;
 
+type PaginateQuery<T> = {
+    page?: number;
+    limit?: number;
+    sortBy?: T[];
+    search?: string;
+    [key: `filter.${string}`]: string;
+};
+type ResponseMeta = {
+    itemsPerPage: number;
+    totalItems: number;
+    currentPage: number;
+    totalPages: number;
+    sortBy: string[][];
+};
+declare const getPreviousPageParam: <T extends {
+    meta: ResponseMeta;
+}>(page?: T) => number | undefined;
+declare const getNextPageParam: <T extends {
+    meta: ResponseMeta;
+}>(page?: T) => number | undefined;
+declare const setPartialParams: (partialParams: Record<string, string | string[]>, searchParams: ReadonlyURLSearchParams | null) => string;
+declare const isParamActive: (link: Record<string, string | string[]>, searchParams: ReadonlyURLSearchParams) => boolean;
+
 declare const Pagination: ({ page, visiblePages, onClick, size, className, }: {
     className?: string;
     size?: "sm" | "xs";
     onClick?: (page: number) => void;
-    page: ResponseMeta$1;
+    page: ResponseMeta;
     visiblePages: number;
 }) => react_jsx_runtime.JSX.Element;
+
+interface StorageInterface<T = unknown> {
+    getConfigs(title: string | undefined, columns: ColumnType<T>[]): Promise<Record<string, {
+        name: string;
+        enabled: boolean;
+    }[]>>;
+    setConfigs(title: string, configs: Record<string, {
+        name: string;
+        enabled: boolean;
+    }[]>): Promise<void>;
+    getConfigName(title: string): Promise<string>;
+    setConfigName(title: string, configName: string): Promise<void>;
+    setDisplayAs(title: string, displayAs: "grid" | "list"): Promise<void>;
+    getDisplayAs(title: string): Promise<"grid" | "list">;
+    getConfig(title: string, columns: ColumnType<T>[]): Promise<{
+        name: string;
+        enabled: boolean;
+    }[]>;
+}
+declare class LocalStorage<T> implements StorageInterface<T> {
+    setDisplayAs(title: string, displayAs: "grid" | "list"): Promise<void>;
+    getDisplayAs(title: string): Promise<"grid" | "list">;
+    getConfig(title: string | undefined, columns: ColumnType<T>[]): Promise<{
+        name: string;
+        enabled: boolean;
+    }[]>;
+    getConfigName(title: string): Promise<string>;
+    getConfigs(title: string, columns: ColumnType<T>[]): Promise<Record<string, {
+        name: string;
+        enabled: boolean;
+    }[]>>;
+    setConfigName(title: string, configName: string): Promise<void>;
+    setConfigs(title: string, configs: Record<string, {
+        name: string;
+        enabled: boolean;
+    }[]>): Promise<void>;
+}
 
 type ActionColumn<TModel> = {
     type: "actions";
@@ -125,7 +182,7 @@ declare const PaginatedTable: <TModel extends {
     data: {
         id: number;
     }[];
-    meta: ResponseMeta$1;
+    meta: ResponseMeta;
 }>({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, }: {
     titleAbove?: React__default.ReactNode;
     caption?: React__default.ReactNode;
@@ -151,7 +208,7 @@ declare const PaginatedTable: <TModel extends {
     addNewText?: string;
     displayConfig?: {
         name: string;
-        store?: StorageInterface$1<TModel["data"][number]>;
+        store?: StorageInterface<TModel["data"][number]>;
         stored?: {
             name?: string;
             value: Record<string, {
@@ -187,43 +244,6 @@ declare const HeaderResponsivePaginated: ({ elements, bulkActions, }: {
         setSelected: (selected: number[]) => void;
     };
 }) => react_jsx_runtime.JSX.Element;
-
-interface StorageInterface<T = unknown> {
-    getConfigs(title: string | undefined, columns: ColumnType$1<T>[]): Promise<Record<string, {
-        name: string;
-        enabled: boolean;
-    }[]>>;
-    setConfigs(title: string, configs: Record<string, {
-        name: string;
-        enabled: boolean;
-    }[]>): Promise<void>;
-    getConfigName(title: string): Promise<string>;
-    setConfigName(title: string, configName: string): Promise<void>;
-    setDisplayAs(title: string, displayAs: "grid" | "list"): Promise<void>;
-    getDisplayAs(title: string): Promise<"grid" | "list">;
-    getConfig(title: string, columns: ColumnType$1<T>[]): Promise<{
-        name: string;
-        enabled: boolean;
-    }[]>;
-}
-declare class LocalStorage<T> implements StorageInterface<T> {
-    setDisplayAs(title: string, displayAs: "grid" | "list"): Promise<void>;
-    getDisplayAs(title: string): Promise<"grid" | "list">;
-    getConfig(title: string | undefined, columns: ColumnType$1<T>[]): Promise<{
-        name: string;
-        enabled: boolean;
-    }[]>;
-    getConfigName(title: string): Promise<string>;
-    getConfigs(title: string, columns: ColumnType$1<T>[]): Promise<Record<string, {
-        name: string;
-        enabled: boolean;
-    }[]>>;
-    setConfigName(title: string, configName: string): Promise<void>;
-    setConfigs(title: string, configs: Record<string, {
-        name: string;
-        enabled: boolean;
-    }[]>): Promise<void>;
-}
 
 declare class ScreenSize {
     static readonly none: number;
@@ -361,43 +381,20 @@ declare const SelectOption: ({ value, size, children, className, ...rest }: {
 }) => react_jsx_runtime.JSX.Element;
 
 type SelectPaginatedFromApiProps<TModel extends {
-    meta: ResponseMeta$1;
+    meta: ResponseMeta;
     data: unknown[];
 }> = {
     name?: string;
-    queryFn: (query: PaginateQuery$1<any>) => Promise<TModel>;
+    queryFn: (query: PaginateQuery<any>) => Promise<TModel>;
     queryKey: ReadonlyArray<any>;
     value: TModel["data"][0] | string | number | null;
     optionValue?: (model: TModel["data"][0]) => string | number;
     searchFromChars?: number;
 } & Omit<SelectProps<TModel["data"][0]>, "value" | "options">;
 declare const SelectPaginatedFromApi: <TModel extends {
-    meta: ResponseMeta$1;
+    meta: ResponseMeta;
     data: unknown[];
 }>({ onChange, name, value, searchFromChars, queryKey, queryFn, optionLabel, optionValue, ...rest }: SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
-
-type PaginateQuery<T> = {
-    page?: number;
-    limit?: number;
-    sortBy?: T[];
-    search?: string;
-    [key: `filter.${string}`]: string;
-};
-type ResponseMeta = {
-    itemsPerPage: number;
-    totalItems: number;
-    currentPage: number;
-    totalPages: number;
-    sortBy: string[][];
-};
-declare const getPreviousPageParam: <T extends {
-    meta: ResponseMeta;
-}>(page?: T) => number | undefined;
-declare const getNextPageParam: <T extends {
-    meta: ResponseMeta;
-}>(page?: T) => number | undefined;
-declare const setPartialParams: (partialParams: Record<string, string | string[]>, searchParams: ReadonlyURLSearchParams | null) => string;
-declare const isParamActive: (link: Record<string, string | string[]>, searchParams: ReadonlyURLSearchParams) => boolean;
 
 type SelectFromApiProps<TModel = unknown> = {
     queryFn: () => Promise<TModel[]>;

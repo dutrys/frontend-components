@@ -1,4 +1,4 @@
-import { ResponseMeta } from "@/utils/paginate";
+import { ResponseMeta } from "../utils/paginate";
 export declare const Pagination: ({ page, visiblePages, onClick, size, className, }: {
     className?: string;
     size?: "sm" | "xs";
