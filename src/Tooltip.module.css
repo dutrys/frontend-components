@@ -1,0 +1,5 @@
+.sidebar:global(.react-tooltip) {
+    font-size: var(--text-sm);
+    z-index: 2000;
+    border-radius: var(--radius-box);
+}

@@ -77,3 +77,9 @@
   text-overflow: ellipsis;
   overflow: hidden;
 }
+
+.Tooltip-module_sidebar__4Rs5S.react-tooltip {
+    font-size: var(--text-sm);
+    z-index: 2000;
+    border-radius: var(--radius-box);
+}

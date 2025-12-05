@@ -5,6 +5,7 @@ import { Link } from "./pagination/Link";
 import { ScreenSize, useScreenSize } from "./useScreenSize";
 import { Tooltip } from "react-tooltip";
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
+import styles from "./Tooltip.module.css";
 
 export const TOOLTIP_SIDEBAR_ID = "sidebar";
 
@@ -95,19 +96,16 @@ export const SidebarMenu = ({
             {(close) => (
               <div data-theme="dim" className="bg-transparent">
                 {Array.isArray(item.items) ? (
-                  <>
-                    <div className="text-xs text-center p-2 pb-0 text-white">{item.name}</div>
-                    <ul className="menu menu-sm p-1">
-                      {item.items?.map((sub, i) => (
-                        <li key={i}>
-                          <Link href={sub.href} onClick={close} className="text-white">
-                            <sub.icon className="size-4" />
-                            {sub.name}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
+                  <ul className="menu p-1">
+                    {item.items?.map((sub, i) => (
+                      <li key={i}>
+                        <Link href={sub.href} onClick={close} className="text-white">
+                          <sub.icon className="size-5" />
+                          {sub.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 ) : (
                   item.items!()
                 )}
@@ -244,11 +242,7 @@ export const SidebarLayout = ({
             {sideChildren(menuExpanded)}
           </div>
         </div>
-        <Tooltip
-          id={TOOLTIP_SIDEBAR_ID}
-          place="right"
-          style={{ fontSize: ".875rem", zIndex: 2000, borderRadius: "var(--radius-box)" }}
-        />
+        <Tooltip id={TOOLTIP_SIDEBAR_ID} place="right" className={styles.sidebar} />
       </div>
       <div className="grow shirk">{children}</div>
     </div>
