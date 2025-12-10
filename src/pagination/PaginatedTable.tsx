@@ -309,7 +309,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
         {pagination.meta.totalItems === 0 ? (
           <>
             {caption}
-            <div className="text-center mt-20">
+            <div className="text-center pt-40">
               <span className="text-base-content/">
                 {t("pagination.noItems")} <span className="align-middle text-3xl ">😿</span>
               </span>
