@@ -27,6 +27,7 @@ import { IndeterminateCheckbox } from "../form/Input";
 import { DateTime } from "../utils/DateTime";
 import { HumanDate } from "../utils/HumanDate";
 import { TOOLTIP_GLOBAL_ID } from "../utils/Toaster";
+import { Title } from "../Title";
 
 const limits = [10, 20, 50, 100];
 
@@ -229,16 +230,16 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   return (
     <>
       {titleAbove && (
-        <div className="h-16 flex items-center font-bold ml-[var(--top-left-bar)] w-[calc(100vw-var(--sidebar-width)-var(--top-left-bar)-var(--top-right-bar))]">
-          <div className="truncate pl-2">{titleAbove}</div>
-        </div>
+        <Title truncate={typeof titleAbove === "string"} outerHeight="h-28">
+          {titleAbove}
+        </Title>
       )}
       <div
         data-testid="paginate-table"
-        className="relative h-[calc(100vh-4rem)]"
+        className="relative h-screen"
         data-test-sort={(pagination.meta.sortBy || []).flat().join("-")}
       >
-        <div className="flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-screen sm:max-w-[calc(100vw-var(--sidebar-width))]">
+        <div className="absolute z-5 top-16 flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-screen sm:max-w-[calc(100vw-var(--sidebar-width))]">
           <h1 className={`h-16 pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`}>
             {title}
           </h1>
@@ -323,18 +324,18 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
           </>
         ) : (
           <>
-            <div className="overflow-x-auto max-h-[calc(100%-7rem)] w-screen sm:w-[calc(100vw-var(--sidebar-width))]">
+            <div className="overflow-x-auto max-h-screen w-screen sm:w-[calc(100vw-var(--sidebar-width))]">
               {displayAs === "grid" && renderGridItem ? (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m-4 2xl:grid-cols-4">
                   {pagination.data.map((d) => renderGridItem(d))}
                 </div>
               ) : (
                 <table
-                  className={`${styles.table} table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`}
+                  className={`${styles.table} pt-28 pb-16 table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`}
                 >
                   {caption && <caption>{caption}</caption>}
                   <thead>
-                    <tr>
+                    <tr className="top-28">
                       {bulkActions && (
                         <th>
                           <IndeterminateCheckbox
@@ -473,7 +474,10 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                           }
                           if (column.type === "date") {
                             return (
-                              <Component key={`${model.id}-${column.name.toString()}`} className={column.className}>
+                              <Component
+                                key={`${model.id}-${column.name.toString()}`}
+                                className={column.className ?? "text-nowrap"}
+                              >
                                 {model[column.name] &&
                                   (column.format ? (
                                     <DateTime date={model[column.name] as string} format={column.format} />
@@ -514,7 +518,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                 </table>
               )}
             </div>
-            <div className="absolute left-0 bottom-0 w-full h-16 z-1">
+            <div className="absolute box-content left-0 bottom-0 w-full h-16 z-1 border-t border-t-base-content/5">
               <div className="bg-base-100">
                 <div className="flex justify-center items-center">
                   <div

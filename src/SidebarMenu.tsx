@@ -213,13 +213,13 @@ export const SidebarLayout = ({
       >
         <div
           className={cx(
-            "relative z-50 shrink-0 column-1 p-2 h-full justify-center transition-[width] duration-500 ease-in-out overflow-hidden",
+            "relative z-50 shrink-0 column-1 py-2 pl-2 h-full justify-center transition-[width] duration-500 ease-in-out overflow-hidden",
             { "w-60": menuExpanded, "w-24": !menuExpanded },
           )}
         >
           <div className="rounded-box flex flex-col h-full overflow-auto pt-14 bg-navigation group">
             <div className="absolute w-full h-18 left-0 top-2 z-1000">
-              <div className=" rounded-box h-18 mx-2 pl-4 pt-5 bg-gradient-to-b from-[50%] from-navigation to-transparent">
+              <div className="rounded-box h-18 ml-2 pl-4 pt-5 bg-gradient-to-b from-[50%] from-navigation to-transparent">
                 {menuIcon(menuExpanded)}
               </div>
             </div>
@@ -230,7 +230,7 @@ export const SidebarLayout = ({
               }}
               className={cx(
                 "hidden sm:flex absolute top-8 right-0 z-1001 justify-center btn btn-xs btn-circle border-white/40 hover:border-white text-white/70 hover:text-white bg-navigation transition-[translate,opacity] duration-200 ease-in-out group-hover:opacity-100",
-                { "-translate-x-8": expanded, "opacity-0 right-0": !expanded },
+                { "-translate-x-4": expanded, "opacity-0 right-0": !expanded },
               )}
             >
               {menuExpanded ? (

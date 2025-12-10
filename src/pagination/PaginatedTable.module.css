@@ -19,6 +19,26 @@
   border-bottom-color: var(--color-base-200);
 }
 
+.table tbody tr td:first-child,
+.table tbody tr th:first-child,
+.table thead tr th:first-child,
+.table thead tr td:first-child {
+    padding-left: 1rem;
+}
+
+.table tbody td,
+.table tbody th,
+.table thead th,
+.table thead td {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.table tbody th,
+.table tbody td {
+    font-size: var(--text-xs);
+}
+
 .table tbody th {
   font-weight: normal;
 }

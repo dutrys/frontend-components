@@ -23,3 +23,4 @@ export * from "./utils/Toaster";
 export * from "./utils/paginate";
 export * from "./utils/DateTime";
 export * from "./SidebarMenu";
+export * from "./Title";
