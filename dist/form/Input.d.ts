@@ -3,6 +3,7 @@ import { DateTimePickerProps } from "./DateTimePicker";
 import { DateInputProps } from "./DateInput";
 import { SelectPaginatedFromApiProps } from "./SelectPaginatedFromApi";
 import { ResponseMeta } from "../utils/paginate";
+import { TimePickerProps } from "./TimePicker";
 import { NumericFormatProps } from "react-number-format/types/types";
 import React, { ChangeEvent } from "react";
 import { SelectFromApiProps } from "./SelectFromApi";
@@ -38,23 +39,21 @@ export declare const DateFormField: <TFieldValues extends FieldValues = FieldVal
 export declare const SelectPaginatedFromApiFormField: <T extends {
     data: unknown[];
     meta: ResponseMeta;
-}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, disabled, optionValue, ...props }: IInputProps<TName> & {
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ optionValue, ...props }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     onChange?: (model: T["data"][number] | null) => void;
 } & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => import("react/jsx-runtime").JSX.Element;
 export declare const SelectFromApiField: <T = unknown, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, error, className, fieldSetClassName, ...rest }: IInputProps<TName> & SelectFromApiProps<T>) => import("react/jsx-runtime").JSX.Element;
-export declare const SelectFromApiFormField: <T = unknown, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, error, className, onChange, optionValue, fieldSetClassName, ...rest }: IInputProps<TName> & Omit<SelectFromApiProps<T>, "onChange" | "value"> & {
+export declare const SelectFromApiFormField: <T = unknown, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, onChange, optionValue, ...props }: IInputProps<TName> & Omit<SelectFromApiProps<T>, "onChange" | "value"> & {
     control: Control<TFieldValues>;
     onChange?: (model: T | null) => unknown;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const DateTimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, disabled, error, className, fieldSetClassName, useDate, ...rest }: IInputProps<TName> & {
+export declare const DateTimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, disabled, error, className, fieldSetClassName, useDate, ...props }: IInputProps<TName> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
 } & DateTimePickerProps) => import("react/jsx-runtime").JSX.Element;
-export declare const TimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputProps<TName> & {
+export declare const TimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, control, className, ...props }: Omit<TimePickerProps, "onChange" | "value"> & IInputProps<TName> & {
     control: Control<TFieldValues>;
-    useDate?: boolean;
-    allowEmpty?: boolean;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const NumberFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ options, ...props }: IInputProps<TName> & {
     control: Control<TFieldValues>;

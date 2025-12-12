@@ -1115,7 +1115,7 @@ const dateToStringDate = (date) => {
     return format(date, "yyyy-MM-dd");
 };
 
-const TimePicker = ({ className, value, onChange, placeholder, required, disabled, }) => {
+const TimePicker = ({ className, value, onChange, placeholder, required, disabled }) => {
     const formatValue = (value) => value ? dateToTimeString(timeToDate(value) || new Date(), "HH:mm") : undefined;
     const [innerValue, setInnerValue] = useState(formatValue(value) || "");
     useEffect(() => {
@@ -1228,7 +1228,7 @@ const CheckboxFormField = (props) => {
                                 }) }), jsx("span", { className: cx("text-sm text-gray-500 label-text grow pl-2", props.labelClassName), children: props.label })] }) }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$1.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
 const DateFormField = ({ fieldSetClassName, label, control, error, desc, disabled, useDate, ...props }) => {
-    return (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(Controller, { disabled: disabled, control: control, name: props.name, render: ({ field }) => (jsx(DateInput, { ...props, className: cx({ "input-error": error }, props.className), placeholder: props.required ? `${label}*` : label, value: field.value, disabled: field.disabled, onChange: (value) => {
+    return (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(Controller, { disabled: disabled, control: control, rules: { required: props.required === true }, name: props.name, render: ({ field }) => (jsx(DateInput, { ...props, className: cx({ "input-error": error }, props.className), placeholder: props.required ? `${label}*` : label, value: field.value, disabled: field.disabled, onChange: (value) => {
                                 if (useDate) {
                                     field.onChange(value);
                                 }
@@ -1237,22 +1237,20 @@ const DateFormField = ({ fieldSetClassName, label, control, error, desc, disable
                                 }
                             } })) }), jsxs("span", { children: [label, props.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$1.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 };
-const SelectPaginatedFromApiFormField = ({ fieldSetClassName, label, disabled, optionValue = (model) => model.id, ...props }) => {
-    return (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, props.required ? jsx(Required, {}) : null] }), jsx(Controller, { control: props.control, name: props.name, disabled: disabled, rules: { required: props.required === true }, render: ({ field }) => (jsx(SelectPaginatedFromApi, { ...props, disabled: field.disabled, className: cx("w-full mx-0", props.className, { "input-error": props.error }), placeholder: props.required ? `${label}*` : label, value: field.value, onChange: (model) => {
-                                field.onChange(model ? optionValue(model) : null);
-                                props.onChange?.(model || null);
-                            } })) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+const SelectPaginatedFromApiFormField = ({ optionValue = (model) => model.id, ...props }) => {
+    return (jsx(Controller, { control: props.control, name: props.name, disabled: props.disabled, rules: { required: props.required === true }, render: ({ field }) => (jsx(SelectPaginatedFromApiField, { ...props, disabled: field.disabled, value: field.value, onChange: (model) => {
+                field.onChange(model ? optionValue(model) : null);
+                props.onChange?.(model || null);
+            } })) }));
 };
 const SelectFromApiField = ({ label, desc, error, className, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] }), jsx(SelectFromApi, { className: cx(className, { "input-error": error }), ...rest, placeholder: rest.required ? `${label}*` : label })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
-const SelectFromApiFormField = ({ label, desc, control, name, error, className, onChange, optionValue = (model) => model.id, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] }), jsx(Controller, { control: control, name: name, rules: { required: rest.required === true }, render: ({ field }) => (jsx(SelectFromApi, { className: cx("w-full mx-0 input input-bordered", className, {
-                            "input-error": error,
-                        }), name: name, ...rest, placeholder: rest.required ? `${label}*` : label, value: field.value, onChange: (model) => {
-                            field.onChange(model ? optionValue(model) : null);
-                            onChange?.(model);
-                        } })) })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
-const DateTimeFormField = ({ label, desc, control, name, disabled, error, className, fieldSetClassName, useDate, ...rest }) => {
-    return (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(Controller, { control: control, name: name, disabled: disabled, render: ({ field }) => {
-                            return (jsx(DateTimePicker, { ...rest, className: cx(className, { "input-error": error }), placeholder: rest.required ? `${label}*` : label, disabled: field.disabled, value: field.value ? (useDate ? field.value : stringToDate(field.value)) || null : null, onChange: (value) => {
+const SelectFromApiFormField = ({ control, onChange, optionValue = (model) => model.id, ...props }) => (jsx(Controller, { control: control, name: props.name, rules: { required: props.required === true }, render: ({ field }) => (jsx(SelectFromApiField, { ...props, value: field.value, onChange: (model) => {
+            field.onChange(model ? optionValue(model) : null);
+            onChange?.(model);
+        } })) }));
+const DateTimeFormField = ({ label, desc, control, name, disabled, error, className, fieldSetClassName, useDate, ...props }) => {
+    return (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(Controller, { control: control, name: name, rules: { required: props.required === true }, disabled: disabled, render: ({ field }) => {
+                            return (jsx(DateTimePicker, { ...props, className: cx(className, { "input-error": error }), placeholder: props.required ? `${label}*` : label, disabled: field.disabled, value: field.value ? (useDate ? field.value : stringToDate(field.value)) || null : null, onChange: (value) => {
                                     if (useDate) {
                                         field.onChange(value);
                                     }
@@ -1260,14 +1258,14 @@ const DateTimeFormField = ({ label, desc, control, name, disabled, error, classN
                                         field.onChange(value ? format(value, "yyyy-MM-dd HH:mm:ss") : null);
                                     }
                                 } }));
-                        } }), jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: "text-xs my-0.5 text-gray-500", children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+                        } }), jsxs("span", { children: [label, props.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: "text-xs my-0.5 text-gray-500", children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 };
-const TimeFormField = (props) => {
-    return (jsxs("div", { className: props.fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [!props.disabled && (jsxs("span", { children: [props.label, props.required && jsx(Required, {})] })), jsx(Controller, { disabled: props.disabled, render: ({ field }) => (jsx(TimePicker, { value: field.value, onChange: (v) => field.onChange(v), placeholder: props.required ? `${props.label}*` : props.label, required: props.required, disabled: field.disabled, className: cx("input w-full", props.className, {
+const TimeFormField = ({ label, control, className, ...props }) => {
+    return (jsxs("div", { className: props.fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [!props.disabled && (jsxs("span", { children: [label, props.required && jsx(Required, {})] })), jsx(Controller, { disabled: props.disabled, rules: { required: props.required === true }, render: ({ field }) => (jsx(TimePicker, { ...props, value: field.value, onChange: (v) => field.onChange(v), placeholder: props.required ? `${label}*` : label, className: cx("input w-full", className, {
                                 "input-xs": props.size === "xs",
                                 "input-sm": props.size === "sm",
                                 "input-error": props.error,
-                            }) })), name: props.name, control: props.control })] }), props.desc && (jsx("div", { className: "text-xs text-gray-500", children: jsx("span", { children: props.desc }) })), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+                            }) })), name: props.name, control: control })] }), props.desc && (jsx("div", { className: "text-xs text-gray-500", children: jsx("span", { children: props.desc }) })), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
 const NumberFormField = ({ options, ...props }) => (jsxs("div", { className: props.fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [!props?.disabled && (jsxs("span", { children: [props.label, props?.required && jsx(Required, {})] })), jsx(Controller, { name: props.name, control: props.control, disabled: props.disabled, render: ({ field }) => (jsx(NumericFormat, { placeholder: props.required ? `${props.label}*` : props.label, ...options, disabled: field?.disabled, required: props?.required, value: field.value, className: cx("w-full input input-bordered focus:outline-blue-400", props.className, {
                             "input-xs": props.size === "xs",

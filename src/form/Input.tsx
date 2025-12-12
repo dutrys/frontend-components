@@ -16,7 +16,7 @@ import { SelectPaginatedFromApi, SelectPaginatedFromApiProps } from "./SelectPag
 import { ResponseMeta } from "../utils/paginate";
 import { stringToDate } from "../utils/date";
 import cx from "classnames";
-import { TimePicker } from "./TimePicker";
+import { TimePicker, TimePickerProps } from "./TimePicker";
 import styles from "./Input.module.css";
 import { NumericFormat } from "react-number-format";
 import { NumericFormatProps } from "react-number-format/types/types";
@@ -308,6 +308,7 @@ export const DateFormField = <
         <Controller
           disabled={disabled}
           control={control}
+          rules={{ required: props.required === true }}
           name={props.name}
           render={({ field }) => (
             <DateInput
@@ -346,9 +347,6 @@ export const SelectPaginatedFromApiFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
-  fieldSetClassName,
-  label,
-  disabled,
   optionValue = (model) => (model as any).id,
   ...props
 }: IInputProps<TName> & {
@@ -356,34 +354,23 @@ export const SelectPaginatedFromApiFormField = <
   onChange?: (model: T["data"][number] | null) => void;
 } & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => {
   return (
-    <div className={fieldSetClassName}>
-      <div className="floating-label">
-        <span>
-          {label}
-          {props.required ? <Required /> : null}
-        </span>
-        <Controller
-          control={props.control}
-          name={props.name}
-          disabled={disabled}
-          rules={{ required: props.required === true }}
-          render={({ field }) => (
-            <SelectPaginatedFromApi<T>
-              {...props}
-              disabled={field.disabled}
-              className={cx("w-full mx-0", props.className, { "input-error": props.error })}
-              placeholder={props.required ? `${label}*` : label}
-              value={field.value}
-              onChange={(model) => {
-                field.onChange(model ? optionValue(model) : null);
-                props.onChange?.(model || null);
-              }}
-            />
-          )}
+    <Controller
+      control={props.control}
+      name={props.name}
+      disabled={props.disabled}
+      rules={{ required: props.required === true }}
+      render={({ field }) => (
+        <SelectPaginatedFromApiField<T>
+          {...props}
+          disabled={field.disabled}
+          value={field.value}
+          onChange={(model) => {
+            field.onChange(model ? optionValue(model) : null);
+            props.onChange?.(model || null);
+          }}
         />
-      </div>
-      <InputErrors className="text-xs text-error mt-1" errors={props.error} />
-    </div>
+      )}
+    />
   );
 };
 
@@ -420,50 +407,30 @@ export const SelectFromApiFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
-  label,
-  desc,
   control,
-  name,
-  error,
-  className,
   onChange,
   optionValue = (model) => (model as any).id,
-  fieldSetClassName,
-  ...rest
+  ...props
 }: IInputProps<TName> &
   Omit<SelectFromApiProps<T>, "onChange" | "value"> & {
     control: Control<TFieldValues>;
     onChange?: (model: T | null) => unknown;
   }) => (
-  <div className={fieldSetClassName}>
-    <div className="floating-label">
-      <span>
-        {label}
-        {rest.required ? <Required /> : null}
-      </span>
-      <Controller
-        control={control}
-        name={name}
-        rules={{ required: rest.required === true }}
-        render={({ field }) => (
-          <SelectFromApi<T>
-            className={cx("w-full mx-0 input input-bordered", className, {
-              "input-error": error,
-            })}
-            name={name}
-            {...rest}
-            placeholder={rest.required ? `${label}*` : label}
-            value={field.value}
-            onChange={(model) => {
-              field.onChange(model ? optionValue(model) : null);
-              onChange?.(model);
-            }}
-          />
-        )}
+  <Controller
+    control={control}
+    name={props.name}
+    rules={{ required: props.required === true }}
+    render={({ field }) => (
+      <SelectFromApiField<T>
+        {...props}
+        value={field.value}
+        onChange={(model) => {
+          field.onChange(model ? optionValue(model) : null);
+          onChange?.(model);
+        }}
       />
-    </div>
-    <InputErrors className="text-xs text-error mt-1" errors={error} />
-  </div>
+    )}
+  />
 );
 
 export const DateTimeFormField = <
@@ -479,7 +446,7 @@ export const DateTimeFormField = <
   className,
   fieldSetClassName,
   useDate,
-  ...rest
+  ...props
 }: IInputProps<TName> & {
   control: Control<TFieldValues>;
   useDate?: boolean;
@@ -490,13 +457,14 @@ export const DateTimeFormField = <
         <Controller
           control={control}
           name={name}
+          rules={{ required: props.required === true }}
           disabled={disabled}
           render={({ field }) => {
             return (
               <DateTimePicker
-                {...rest}
+                {...props}
                 className={cx(className, { "input-error": error })}
-                placeholder={rest.required ? `${label}*` : label}
+                placeholder={props.required ? `${label}*` : label}
                 disabled={field.disabled}
                 value={field.value ? (useDate ? field.value : stringToDate(field.value)) || null : null}
                 onChange={(value) => {
@@ -512,7 +480,7 @@ export const DateTimeFormField = <
         />
         <span>
           {label}
-          {rest.required ? <Required /> : null}
+          {props.required ? <Required /> : null}
         </span>
       </label>
       {desc && (
@@ -528,32 +496,31 @@ export const DateTimeFormField = <
 export const TimeFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->(
-  props: IInputProps<TName> & {
-    control: Control<TFieldValues>;
-    useDate?: boolean;
-    allowEmpty?: boolean;
-  },
-) => {
+>({
+  label,
+  control,
+  className,
+  ...props
+}: Omit<TimePickerProps, "onChange" | "value"> & IInputProps<TName> & { control: Control<TFieldValues> }) => {
   return (
     <div className={props.fieldSetClassName}>
       <label className="floating-label">
         {!props.disabled && (
           <span>
-            {props.label}
+            {label}
             {props.required && <Required />}
           </span>
         )}
         <Controller
           disabled={props.disabled}
+          rules={{ required: props.required === true }}
           render={({ field }) => (
             <TimePicker
+              {...props}
               value={field.value}
               onChange={(v) => field.onChange(v)}
-              placeholder={props.required ? `${props.label}*` : props.label}
-              required={props.required}
-              disabled={field.disabled}
-              className={cx("input w-full", props.className, {
+              placeholder={props.required ? `${label}*` : label}
+              className={cx("input w-full", className, {
                 "input-xs": props.size === "xs",
                 "input-sm": props.size === "sm",
                 "input-error": props.error,
@@ -561,7 +528,7 @@ export const TimeFormField = <
             />
           )}
           name={props.name}
-          control={props.control}
+          control={control}
         />
       </label>
       {props.desc && (

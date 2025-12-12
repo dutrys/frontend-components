@@ -1,21 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { dateToTimeString, timeToDate } from "../utils/date";
 
-export const TimePicker = ({
-  className,
-  value,
-  onChange,
-  placeholder,
-  required,
-  disabled,
-}: {
+export type TimePickerProps = {
   required?: boolean;
   disabled?: boolean;
   placeholder?: string;
   onChange: (e: any) => void;
   className?: string;
   value: string | undefined | null;
-}) => {
+};
+export const TimePicker = ({ className, value, onChange, placeholder, required, disabled }: TimePickerProps) => {
   const formatValue = (value: string | undefined | null) =>
     value ? dateToTimeString(timeToDate(value) || new Date(), "HH:mm") : undefined;
 
