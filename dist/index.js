@@ -1010,7 +1010,7 @@ const Select = ({ onChange, disabled, required, inputRef, options, name, portalE
         ],
         whileElementsMounted: autoUpdate,
     });
-    let currentGroupBy = null;
+    let currentGroupBy = undefined;
     return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: value, onChange: onChange, ...rest, children: ({ open }) => (jsxs("div", { children: [jsxs("div", { className: cx("relative input input-bordered pr-1", className, {
                         "w-full": !className?.includes("w-"),
                         "input-sm gap-1": size$1 === "sm",

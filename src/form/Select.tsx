@@ -91,7 +91,7 @@ export const Select = <T = unknown,>({
     whileElementsMounted: autoUpdate,
   });
 
-  let currentGroupBy: string | null | undefined = null;
+  let currentGroupBy: string | undefined = undefined;
   return (
     <Combobox<T | null> immediate data-testid="select" disabled={disabled} value={value} onChange={onChange} {...rest}>
       {({ open }) => (
