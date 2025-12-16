@@ -979,7 +979,7 @@ const DatePicker = ({ onChange, value, inputClassName = "input input-bordered", 
                         if (isValid(date)) {
                             onChange(date);
                         }
-                    } })), children: (close) => (jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$1.dayPicker}`, captionLayout: "dropdown", mode: "single", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, disabled: matcher, weekStartsOn: 1, selected: value || undefined, defaultMonth: value || undefined, onSelect: (day) => {
+                    } })), children: (close) => (jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$1.dayPicker}`, captionLayout: "label", mode: "single", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, disabled: matcher, weekStartsOn: 1, selected: value || undefined, defaultMonth: value || undefined, onSelect: (day) => {
                         onChange(day || null);
                         close();
                     } })) }), allowEmpty ? (jsx("button", { type: "button", disabled: allowEmpty && !value, className: toggleClassName, onClick: () => onChange(null), children: value ? jsx(XMarkIcon, { className: "size-4" }) : jsx(ClockIcon, { className: "size-4" }) })) : (jsx("div", { className: `cursor-pointer ${toggleClassName}`, children: jsx(CalendarIcon, { className: "size-4" }) }))] }));
