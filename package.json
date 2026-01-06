@@ -1,7 +1,7 @@
 {
   "name": "frontend-components",
   "type": "module",
-  "version": "2.0.20",
+  "version": "2.0.21",
   "scripts": {
     "build": "rimraf dist/ && rollup -c && git add dist/",
     "format": "prettier --write .",
