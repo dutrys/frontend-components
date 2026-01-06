@@ -143,7 +143,7 @@ export const DateInput = ({
         {(close) => (
           <DayPicker
             className={`react-day-picker bg-transparent border-none text-white ${styles.dayPicker}`}
-            captionLayout="dropdown"
+            captionLayout="label"
             mode="single"
             locale={params.locale === "lt" ? lt : enGB}
             showOutsideDays

@@ -47,7 +47,7 @@ export const SelectFromApi = <TModel = unknown,>({
       disabled={rest.disabled}
       onChange={rest.onChange}
       optionLabel={optionLabel}
-      options={data ?? []}
+      options={filter && data ? data.filter((model) => filter(model, query)) : (data ?? [])}
       onQueryChange={setQuery}
       afterInput={isLoading ? <LoadingComponent loadingClassName="size-4 text-primary" /> : undefined}
       hideNoItemsOption={isLoading}

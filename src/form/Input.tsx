@@ -26,13 +26,32 @@ import { CheckIcon } from "@heroicons/react/20/solid";
 import { LoadingComponent } from "../Loading";
 import { SelectFromApi, SelectFromApiProps } from "./SelectFromApi";
 
-interface IInputRegisterProps<
+export interface IInputProps<TName extends FieldPath<FieldValues>> {
+  id?: string;
+  label: string;
+  name: TName;
+  error?: FieldError | Merge<FieldError, (FieldError | undefined)[]>;
+  required?: boolean;
+  className?: string;
+  fieldSetClassName?: string;
+  disabled?: boolean;
+  desc?: React.ReactNode;
+  size?: "xs" | "sm";
+}
+
+interface IInputRegisterOnlyProps<
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
-> extends IInputProps<TName> {
+> {
   options?: Omit<RegisterOptions<TFieldValues, TName>, "required" | "disabled">;
   register: UseFormRegister<TFieldValues>;
 }
+
+interface IInputRegisterProps<
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+> extends IInputProps<TName>,
+    IInputRegisterOnlyProps<TFieldValues, TName> {}
 
 export const TextFormField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -242,23 +261,74 @@ export const RadioBoxFormField = <T extends string>({
   </div>
 );
 
-export const CheckboxFormField = <
+export const IndeterminateCheckbox = ({
+  checked,
+  className = "checkbox checkbox-xs",
+  indeterminate,
+  onChange,
+  disabled,
+  id,
+}: {
+  id?: string;
+  onChange?: (e: ChangeEvent<HTMLInputElement>) => unknown;
+  checked?: boolean;
+  className?: string;
+  disabled?: boolean;
+  indeterminate?: boolean;
+}) => {
+  const checkboxRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!checkboxRef.current) {
+      return;
+    }
+    if (indeterminate === true) {
+      checkboxRef.current.indeterminate = true;
+    } else {
+      checkboxRef.current.indeterminate = false;
+    }
+  }, [indeterminate, checked]);
+
+  return (
+    <input
+      id={id}
+      type="checkbox"
+      disabled={disabled}
+      ref={checkboxRef}
+      className={className}
+      onChange={onChange}
+      checked={checked || false}
+    />
+  );
+};
+
+type CheckboxFieldProps<TName extends FieldPath<TFieldValues>, TFieldValues extends FieldValues = FieldValues> = Omit<
+  IInputProps<TName>,
+  "required" | "value"
+> & {
+  labelClassName?: string;
+  checkbox?: boolean;
+  checked?: boolean;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => unknown;
+  indeterminate?: boolean;
+};
+
+export const CheckboxField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >(
-  props: Omit<IInputRegisterProps<TFieldValues, TName>, "required"> & { labelClassName?: string; checkbox?: boolean },
+  props: CheckboxFieldProps<TName, TFieldValues>,
 ) => {
   return (
     <>
       <div className={props.fieldSetClassName}>
         <label>
-          <input
+          <IndeterminateCheckbox
             id={props.id}
-            type="checkbox"
-            {...props.register(props.name, {
-              disabled: props.disabled,
-              ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
-            })}
+            indeterminate={props.indeterminate}
+            disabled={props.disabled}
+            checked={props.checked}
+            onChange={props.onChange}
             className={
               props.checkbox
                 ? cx("checkbox", props.className, {
@@ -271,7 +341,14 @@ export const CheckboxFormField = <
                   })
             }
           />
-          <span className={cx("text-sm text-gray-500 label-text grow pl-2", props.labelClassName)}>{props.label}</span>
+          <span
+            className={cx("text-gray-500 label-text grow pl-2", props.labelClassName, {
+              "text-sm": !props.size,
+              "text-xs": props.size === "sm" || props.size === "xs",
+            })}
+          >
+            {props.label}
+          </span>
         </label>
       </div>
       {props.desc && (
@@ -281,6 +358,24 @@ export const CheckboxFormField = <
       )}
       {props.error && <InputErrors className="text-xs text-error mt-1" errors={props.error} />}
     </>
+  );
+};
+
+export const CheckboxFormField = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+>(
+  props: Omit<CheckboxFieldProps<TName, TFieldValues>, "checked" | "onChange"> &
+    IInputRegisterOnlyProps<TFieldValues, TName>,
+) => {
+  return (
+    <CheckboxField
+      {...props}
+      {...props.register(props.name, {
+        disabled: props.disabled,
+        ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
+      })}
+    />
   );
 };
 
@@ -423,6 +518,7 @@ export const SelectFromApiFormField = <
     render={({ field }) => (
       <SelectFromApiField<T>
         {...props}
+        optionValue={optionValue}
         value={field.value}
         onChange={(model) => {
           field.onChange(model ? optionValue(model) : null);
@@ -623,19 +719,6 @@ export const SelectPaginatedFromApiField = <T extends { data: unknown[]; meta: R
   </div>
 );
 
-export interface IInputProps<TName extends FieldPath<FieldValues>> {
-  id?: string;
-  label: string;
-  name: TName;
-  error?: FieldError | Merge<FieldError, (FieldError | undefined)[]>;
-  required?: boolean;
-  className?: string;
-  fieldSetClassName?: string;
-  disabled?: boolean;
-  desc?: React.ReactNode;
-  size?: "xs" | "sm";
-}
-
 export const Required = () => {
   return <span className="text-error align-bottom">*</span>;
 };
@@ -681,34 +764,5 @@ export const SaveButton = ({
       {children ?? t("general.saveButton")}
       {isLoading ? <LoadingComponent className="size-4" /> : <Icon className="size-4" />}
     </button>
-  );
-};
-
-export const IndeterminateCheckbox = ({
-  checked,
-  className = "checkbox checkbox-xs",
-  indeterminate,
-  onChange,
-}: {
-  onChange: (e: ChangeEvent<HTMLInputElement>) => unknown;
-  checked: boolean;
-  className: string;
-  indeterminate?: boolean;
-}) => {
-  const checkboxRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!checkboxRef.current) {
-      return;
-    }
-    if (indeterminate === true) {
-      checkboxRef.current.indeterminate = true;
-    } else {
-      checkboxRef.current.indeterminate = false;
-    }
-  }, [indeterminate, checked]);
-
-  return (
-    <input type="checkbox" ref={checkboxRef} className={className} onChange={onChange} checked={checked || false} />
   );
 };

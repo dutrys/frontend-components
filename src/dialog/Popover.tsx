@@ -99,7 +99,7 @@ export const Popover = ({
             style={{ ...floatingStyles, zIndex: 1100 }}
             {...getFloatingProps()}
             className={cx(
-              "popover rounded-box shadow-lg shadow-base-100",
+              "popover rounded-box shadow-lg shadow-base-content/50",
               popoverClassName,
               backgroundColor,
               borderColor,

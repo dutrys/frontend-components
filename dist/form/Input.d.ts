@@ -7,9 +7,23 @@ import { TimePickerProps } from "./TimePicker";
 import { NumericFormatProps } from "react-number-format/types/types";
 import React, { ChangeEvent } from "react";
 import { SelectFromApiProps } from "./SelectFromApi";
-interface IInputRegisterProps<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>> extends IInputProps<TName> {
+export interface IInputProps<TName extends FieldPath<FieldValues>> {
+    id?: string;
+    label: string;
+    name: TName;
+    error?: FieldError | Merge<FieldError, (FieldError | undefined)[]>;
+    required?: boolean;
+    className?: string;
+    fieldSetClassName?: string;
+    disabled?: boolean;
+    desc?: React.ReactNode;
+    size?: "xs" | "sm";
+}
+interface IInputRegisterOnlyProps<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>> {
     options?: Omit<RegisterOptions<TFieldValues, TName>, "required" | "disabled">;
     register: UseFormRegister<TFieldValues>;
+}
+interface IInputRegisterProps<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>> extends IInputProps<TName>, IInputRegisterOnlyProps<TFieldValues, TName> {
 }
 export declare const TextFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ required, disabled, error, className, id, type, register, label, size, options, desc, name, fieldSetClassName, ref, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
     type?: string;
@@ -28,10 +42,23 @@ export declare const RadioBoxFormField: <T extends string>({ name, options, labe
     options: Record<T, string>;
     onChange: (value: T) => void;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const CheckboxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: Omit<IInputRegisterProps<TFieldValues, TName>, "required"> & {
+export declare const IndeterminateCheckbox: ({ checked, className, indeterminate, onChange, disabled, id, }: {
+    id?: string;
+    onChange?: (e: ChangeEvent<HTMLInputElement>) => unknown;
+    checked?: boolean;
+    className?: string;
+    disabled?: boolean;
+    indeterminate?: boolean;
+}) => import("react/jsx-runtime").JSX.Element;
+type CheckboxFieldProps<TName extends FieldPath<TFieldValues>, TFieldValues extends FieldValues = FieldValues> = Omit<IInputProps<TName>, "required" | "value"> & {
     labelClassName?: string;
     checkbox?: boolean;
-}) => import("react/jsx-runtime").JSX.Element;
+    checked?: boolean;
+    onChange: (e: ChangeEvent<HTMLInputElement>) => unknown;
+    indeterminate?: boolean;
+};
+export declare const CheckboxField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: CheckboxFieldProps<TName, TFieldValues>) => import("react/jsx-runtime").JSX.Element;
+export declare const CheckboxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: Omit<CheckboxFieldProps<TName, TFieldValues>, "checked" | "onChange"> & IInputRegisterOnlyProps<TFieldValues, TName>) => import("react/jsx-runtime").JSX.Element;
 export declare const DateFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, control, error, desc, disabled, useDate, ...props }: Omit<IInputProps<TName>, "size"> & Omit<DateInputProps, "onChange" | "value"> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
@@ -68,18 +95,6 @@ export declare const SelectPaginatedFromApiField: <T extends {
     data: unknown[];
     meta: ResponseMeta;
 }>({ label, fieldSetClassName, className, desc, error, ...props }: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => import("react/jsx-runtime").JSX.Element;
-export interface IInputProps<TName extends FieldPath<FieldValues>> {
-    id?: string;
-    label: string;
-    name: TName;
-    error?: FieldError | Merge<FieldError, (FieldError | undefined)[]>;
-    required?: boolean;
-    className?: string;
-    fieldSetClassName?: string;
-    disabled?: boolean;
-    desc?: React.ReactNode;
-    size?: "xs" | "sm";
-}
 export declare const Required: () => import("react/jsx-runtime").JSX.Element;
 export declare const SaveButton: ({ isLoading, icon, disabled, className, onClick, size, children, type, ...props }: {
     type?: "submit" | "button";
@@ -90,12 +105,6 @@ export declare const SaveButton: ({ isLoading, icon, disabled, className, onClic
     children?: React.ReactNode;
     isLoading?: boolean;
     disabled?: boolean;
-}) => import("react/jsx-runtime").JSX.Element;
-export declare const IndeterminateCheckbox: ({ checked, className, indeterminate, onChange, }: {
-    onChange: (e: ChangeEvent<HTMLInputElement>) => unknown;
-    checked: boolean;
-    className: string;
-    indeterminate?: boolean;
 }) => import("react/jsx-runtime").JSX.Element;
 export {};
 //# sourceMappingURL=Input.d.ts.map

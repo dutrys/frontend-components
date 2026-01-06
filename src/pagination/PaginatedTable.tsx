@@ -239,8 +239,10 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
         className="relative h-screen"
         data-test-sort={(pagination.meta.sortBy || []).flat().join("-")}
       >
-        <div className="absolute z-5 top-16 flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-screen sm:max-w-[calc(100vw-var(--sidebar-width))]">
-          <h1 className={`h-16 pl-4 py-3 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`}>
+        <div className="absolute z-501 top-16 flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-screen sm:max-w-[calc(100vw-var(--sidebar-width))]">
+          <h1
+            className={`h-16 flex items-center pl-4 my-0 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`}
+          >
             {title}
           </h1>
           <Hotkeys id="paginatedTable" hotKeys={hotKeys} />
@@ -331,9 +333,9 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                 </div>
               ) : (
                 <table
-                  className={`${styles.table} pt-28 pb-16 table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`}
+                  className={`${styles.table} pb-16 table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`}
                 >
-                  {caption && <caption>{caption}</caption>}
+                  <caption className="mt-28">{caption ?? ""}</caption>
                   <thead>
                     <tr className="top-28">
                       {bulkActions && (
