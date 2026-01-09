@@ -20,7 +20,7 @@ import { Link, addLocale } from "./Link";
 import { Hotkeys } from "../HotKeys";
 import { HeaderResponsivePaginated } from "./HeaderResponsivePaginated";
 import { PaginationConfiguration } from "./Configuration";
-import { LocalStorage, StorageInterface } from "./StorageInterface";
+import { LocalStorage, PaginationSettings, StorageInterface } from "./StorageInterface";
 import { useQuery } from "@tanstack/react-query";
 import { ResponseMeta, setPartialParams } from "../utils/paginate";
 import { IndeterminateCheckbox } from "../form/Input";
@@ -161,10 +161,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   displayConfig?: {
     name: string;
     store?: StorageInterface<TModel["data"][number]>;
-    stored?: {
-      name?: string;
-      value: Record<string, { name: string; enabled: boolean }[]>;
-    };
+    stored?: PaginationSettings | null;
   };
 }) => {
   const router = useRouter();
@@ -174,25 +171,30 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   const [selected, setSelected] = React.useState<number[]>([]);
   const [displayAs, setDisplayAs] = useState<"list" | "grid">(defaultDisplayAs || "list");
 
-  const store = useMemo(() => displayConfig?.store || new LocalStorage(), [displayConfig]);
-  const [configName, setConfigName] = useState(displayConfig?.stored?.name || "default");
+  const store: StorageInterface<TModel["data"][number]> = useMemo(
+    () => displayConfig?.store ?? new LocalStorage(),
+    [displayConfig],
+  );
+  const [configName, setConfigName] = useState(displayConfig?.stored?.loadByDefault || "default");
 
   const { data: paginationConfigs, refetch: refetchPaginationConfigs } = useQuery({
     enabled: !!displayConfig,
-    queryKey: ["paginationConfiguration", store],
-    queryFn: () => store.getConfigs(displayConfig!.name, columns),
-    initialData: displayConfig?.stored?.value || {},
+    queryKey: ["paginationConfiguration", displayConfig?.name],
+    queryFn: async () =>
+      (await store?.getConfig(displayConfig!.name, columns)) ?? { columns: {}, loadByDefault: "default" },
+    initialData: displayConfig?.stored || {},
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
 
-  paginationConfigs.default = columns.map((c, i) => ({
+  const columnsConfigs: PaginationSettings["columns"] = paginationConfigs?.columns ?? {};
+  columnsConfigs.default = columns.map((c, i) => ({
     name: isActionColumn(c) ? "action" : (c.name as string),
     enabled: !c.hiddenByDefault,
   }));
 
-  if (!paginationConfigs[configName]) {
-    paginationConfigs[configName] = paginationConfigs.default;
+  if (!columnsConfigs[configName]) {
+    columnsConfigs[configName] = columnsConfigs.default;
   }
 
   const hotKeys = [];
@@ -226,6 +228,8 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   }
 
   elements.push(...searchableShortcuts);
+
+  console.log("confog", { ...paginationConfigs, columns: columnsConfigs });
 
   return (
     <>
@@ -271,7 +275,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                 onClick={() => {
                   setDisplayAs("grid");
                   if (displayConfig) {
-                    void store.setDisplayAs(displayConfig.name, "grid");
+                    void store?.setConfig(displayConfig.name, { displayAs: "grid" });
                   }
                 }}
               >
@@ -282,7 +286,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                 onClick={() => {
                   setDisplayAs("list");
                   if (displayConfig) {
-                    void store.setDisplayAs(displayConfig.name, "list");
+                    void store?.setConfig(displayConfig.name, { displayAs: "list" });
                   }
                 }}
               >
@@ -300,7 +304,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                 name={displayConfig.name}
                 configName={configName}
                 columns={columns}
-                configs={paginationConfigs}
+                configs={{ ...paginationConfigs, columns: columnsConfigs }}
                 setConfigName={(name) => setConfigName(name)}
                 refresh={() => void refetchPaginationConfigs()}
               />
@@ -350,7 +354,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                           />
                         </th>
                       )}
-                      {paginationConfigs[configName].map((item, i) => {
+                      {columnsConfigs[configName].map((item, i) => {
                         const column = columns.find((c) =>
                           isActionColumn(c) ? "action" === item.name : (c.name as string) === item.name,
                         );
@@ -448,7 +452,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                             />
                           </th>
                         )}
-                        {paginationConfigs[configName].map((item, i) => {
+                        {columnsConfigs[configName].map((item, i) => {
                           const column = columns.find((c) =>
                             isActionColumn(c) ? "action" === item.name : (c.name as string) === item.name,
                           );

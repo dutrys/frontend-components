@@ -26,6 +26,11 @@
     padding-left: 1rem;
 }
 
+.table thead td,
+.table thead th {
+    white-space: normal;
+}
+
 .table tbody td,
 .table tbody th,
 .table thead th,

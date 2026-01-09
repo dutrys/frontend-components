@@ -87,3 +87,7 @@ export const ParallelDialog = ({
     </dialog>
   );
 };
+
+export const ParallelDialogButtons = ({ children }: { children: React.ReactNode }) => {
+  return <div className="p-4 -mx-4 mt-4 -mb-4 bg-base-200 rounded-b-field flex gap-4 justify-end">{children}</div>;
+};

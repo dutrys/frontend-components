@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ArrowsUpDownIcon } from "@heroicons/react/16/solid";
 import { ColumnType, isActionColumn } from "./PaginatedTable";
-import { StorageInterface } from "./StorageInterface";
+import { PaginationSettings, StorageInterface } from "./StorageInterface";
 import { LoadingComponent } from "../Loading";
 import { captureException } from "@sentry/nextjs";
 import toast from "react-hot-toast";
@@ -60,7 +60,7 @@ export const PaginationConfiguration = <T = unknown,>({
   configName?: string;
   columns: ColumnType<T>[];
   store: StorageInterface<T>;
-  configs: Record<string, { name: string; enabled: boolean }[]> | undefined;
+  configs: PaginationSettings | undefined;
 }) => {
   const [show, setShow] = useState<boolean>();
   const t = useTranslations();
@@ -71,11 +71,12 @@ export const PaginationConfiguration = <T = unknown,>({
       return undefined;
     }
 
-    for (const key of Object.keys(configsFromRemote)) {
-      if (configsFromRemote[key].length < columns.length) {
+    const columnsConfig = configsFromRemote?.columns || {};
+    for (const key of Object.keys(columnsConfig)) {
+      if (columnsConfig[key].length < columns.length) {
         for (const column of columns) {
-          if (!configsFromRemote[key].find((c) => c.name === (isActionColumn(column) ? "action" : column.name))) {
-            configsFromRemote[key].push({
+          if (!columnsConfig[key].find((c) => c.name === (isActionColumn(column) ? "action" : column.name))) {
+            columnsConfig[key].push({
               name: isActionColumn(column) ? "action" : (column.name as string),
               enabled: !column.hiddenByDefault,
             });
@@ -85,7 +86,8 @@ export const PaginationConfiguration = <T = unknown,>({
     }
 
     const configs: Record<string, { name: string; enabled: boolean; column: ColumnType<any> }[]> = {};
-    for (const [key, value] of Object.entries(configsFromRemote)) {
+    console.log("COC", columnsConfig);
+    for (const [key, value] of Object.entries(columnsConfig)) {
       value.forEach((c, i) => {
         configs[key] = configs[key] || [];
         const column = columns.find((col) => (isActionColumn(col) ? "action" : col.name) === c.name);
@@ -125,7 +127,7 @@ export const PaginationConfiguration = <T = unknown,>({
                       setConfigName(configName);
                       close();
                       store
-                        .setConfigName(name, configName)
+                        .setConfig(name, { loadByDefault: configName })
                         .then(() => {
                           toast(configName === "default" ? t("pagination.configuration.defaultTitle") : configName);
                           setActiveConfigName(configName);
@@ -279,10 +281,10 @@ export const PaginationConfiguration = <T = unknown,>({
                             configsWinNoColumns[key] = value.map((d) => ({ enabled: d.enabled, name: d.name }));
                           }
                         }
-
+                        console.log(name, { columns: configsWinNoColumns });
                         setLoading(true);
                         store
-                          .setConfigs(name, configsWinNoColumns)
+                          .setConfig(name, { columns: configsWinNoColumns })
                           .then(() => {
                             setShow(false);
                             refresh();

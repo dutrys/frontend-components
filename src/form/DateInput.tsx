@@ -1,10 +1,10 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { ComponentProps, useEffect, useState } from "react";
 import { format, isValid, parse } from "date-fns";
 import styles from "./DatePicker.module.css";
 import { XMarkIcon, CalendarIcon } from "@heroicons/react/24/outline";
 import { useParams } from "next/navigation";
-import { DayPicker, Matcher } from "react-day-picker";
+import { DateRange, DayPicker, Matcher } from "react-day-picker";
 import { enGB, lt } from "react-day-picker/locale";
 import { Popover } from "../dialog/Popover";
 import cx from "classnames";
@@ -23,8 +23,6 @@ export type DateInputProps = Omit<
   "size" | "value" | "defaultValue" | "defaultChecked" | "onChange"
 > & {
   size?: "sm" | "xs";
-  from?: Date;
-  to?: Date;
   required?: boolean;
   disabled?: boolean;
   value: Date | null;
@@ -32,6 +30,8 @@ export type DateInputProps = Omit<
   toggleClassName?: string;
   placeholder?: string;
   onChange: (date: Date | null) => unknown;
+  matcher?: Matcher;
+  modifiers?: Record<string, Matcher | Matcher[] | undefined> | undefined;
 };
 
 export const DateInput = ({
@@ -43,8 +43,8 @@ export const DateInput = ({
   disabled,
   size,
   placeholder,
-  from,
-  to,
+  matcher,
+  modifiers,
   ...rest
 }: DateInputProps) => {
   const [dateString, setDateString] = useState(value ? formatDate(value) : "");
@@ -52,15 +52,6 @@ export const DateInput = ({
   useEffect(() => {
     setDateString(value ? formatDate(value) : "");
   }, [value]);
-
-  let matcher: Matcher | undefined = undefined;
-  if (from && to) {
-    matcher = { before: from, after: to };
-  } else if (from) {
-    matcher = { before: from };
-  } else if (to) {
-    matcher = { after: to };
-  }
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -149,11 +140,107 @@ export const DateInput = ({
             showOutsideDays
             disabled={matcher}
             weekStartsOn={1}
+            modifiers={modifiers}
             selected={value || undefined}
             defaultMonth={value || undefined}
             onSelect={(day) => {
               onChange(day || null);
               close();
+            }}
+          />
+        )}
+      </Popover>
+    </FocusTrap>
+  );
+};
+
+export type DateRangeInputProps = Omit<DateInputProps, "onChange" | "value"> & {
+  onChange: (date: DateRange | null) => unknown;
+  value: DateRange | null;
+};
+
+export const DateRangeInput = ({
+  onChange,
+  value,
+  className,
+  toggleClassName,
+  required,
+  disabled,
+  size,
+  modifiers,
+  placeholder,
+  matcher,
+  ...rest
+}: DateRangeInputProps) => {
+  const params = useParams();
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <FocusTrap className="grow" features={isOpen ? FocusTrapFeatures.FocusLock : FocusTrapFeatures.None}>
+      <Popover
+        showOnClick
+        showOnFocus
+        showOnHover={false}
+        onShow={(open) => setIsOpen(open)}
+        title={(ref, popoverProps) => (
+          <div
+            ref={ref}
+            {...rest}
+            {...popoverProps}
+            className={cx(
+              "input input-bordered",
+              {
+                "input-xs pl-3 pr-1 gap-0.5": size === "xs",
+                "input-sm pl-3 pr-2 gap-1": size === "sm",
+                ["w-full"]: !className?.includes("w-"),
+              },
+              className,
+            )}
+          >
+            <input
+              value={value ? `${formatDate(value.from)} - ${formatDate(value.to)}` : ""}
+              className="grow"
+              required={required}
+              disabled={disabled}
+              placeholder={placeholder}
+              onChange={(e) => {}}
+            />
+
+            {required || !value ? (
+              <div className={cx(toggleClassName, "cursor-pointer")}>
+                <CalendarIcon className="size-4" />
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={!required && !value}
+                className={cx("cursor-pointer", toggleClassName)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  onChange(null);
+                }}
+              >
+                <XMarkIcon className="size-4" />
+              </button>
+            )}
+          </div>
+        )}
+      >
+        {() => (
+          <DayPicker
+            className={`react-day-picker bg-transparent border-none text-white ${styles.dayPicker}`}
+            captionLayout="label"
+            mode="range"
+            locale={params.locale === "lt" ? lt : enGB}
+            showOutsideDays
+            disabled={matcher}
+            weekStartsOn={1}
+            numberOfMonths={2}
+            selected={value ?? undefined}
+            defaultMonth={value?.from ?? undefined}
+            modifiers={modifiers}
+            onSelect={(range) => {
+              onChange(range ?? null);
             }}
           />
         )}

@@ -1,12 +1,12 @@
 .dayPicker :global(.rdp-button_previous svg),
 .dayPicker :global(.rdp-button_next svg) {
-  fill: var(--color-base-100) !important;
+  fill: var(--color-base-100);
 }
 .dayPicker :global(.rdp-button_previous):hover,
 .dayPicker :global(.rdp-button_next):hover {
-  background: var(--color-primary) !important;
+  background: var(--color-primary);
 }
-.dayPicker :global(.rdp-day_button):hover {
+.dayPicker :global(.rdp-day:not(.rdp-disabled) .rdp-day_button):hover {
   color: var(--color-black);
 }
 
@@ -14,20 +14,28 @@
   text-transform: capitalize;
 }
 .dayPicker :global(.rdp-dropdowns .rdp-chevron) {
-  fill: var(--color-base-100) !important;
+  fill: var(--color-base-100);
 }
 .dayPicker :global(.rdp-today .rdp-day_button) {
   background: transparent;
-  border: 1px solid var(--color-primary) !important;
+  border: 1px solid var(--color-primary);
 }
 .dayPicker :global(.rdp-selected .rdp-day_button):hover,
 .dayPicker :global(.rdp-today .rdp-day_button):hover {
-  background: var(--color-base-100) !important;
+  background: var(--color-base-100);
 }
 .dayPicker :global(.rdp-selected .rdp-day_button) {
-  background: var(--color-primary) !important;
+  background: var(--color-primary);
+}
+.dayPicker :global(.rdp-selected.rdp-range_middle:hover .rdp-day_button) {
+    background: var(--color-white);
+}
+
+
+.dayPicker :global(.rdp-range_start.rdp-range_end .rdp-day_button) {
+    border-radius: var(--radius-field);
 }
 
 .dayPicker :global(.rdp-today) {
-  background: transparent !important;
+  background: transparent;
 }

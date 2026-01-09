@@ -9,7 +9,7 @@ import {
   Merge,
 } from "react-hook-form";
 import { DateTimePicker, DateTimePickerProps } from "./DateTimePicker";
-import { DateInput, DateInputProps } from "./DateInput";
+import { DateInput, DateInputProps, DateRangeInput, DateRangeInputProps } from "./DateInput";
 import { InputErrors } from "./UseForm";
 import { format } from "date-fns";
 import { SelectPaginatedFromApi, SelectPaginatedFromApiProps } from "./SelectPaginatedFromApi";
@@ -379,16 +379,45 @@ export const CheckboxFormField = <
   );
 };
 
-export const DateFormField = <
+export const DateField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   fieldSetClassName,
   label,
-  control,
   error,
   desc,
   disabled,
+  ...props
+}: Omit<IInputProps<TName>, "size"> & DateInputProps) => {
+  return (
+    <div className={fieldSetClassName}>
+      <label className="floating-label">
+        <DateInput
+          {...props}
+          className={cx({ "input-error": error }, props.className)}
+          placeholder={props.required ? `${label}*` : label}
+        />
+        <span>
+          {label}
+          {props.required ? <Required /> : null}
+        </span>
+      </label>
+      {desc && (
+        <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
+          <span>{desc}</span>
+        </div>
+      )}
+      {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
+    </div>
+  );
+};
+
+export const DateFormField = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+>({
+  control,
   useDate,
   ...props
 }: Omit<IInputProps<TName>, "size"> &
@@ -398,29 +427,46 @@ export const DateFormField = <
     useDate?: boolean;
   }) => {
   return (
+    <Controller
+      disabled={props.disabled}
+      control={control}
+      rules={{ required: props.required === true }}
+      name={props.name}
+      render={({ field }) => (
+        <DateField
+          {...props}
+          value={field.value}
+          disabled={field.disabled}
+          onChange={(value) => {
+            if (useDate) {
+              field.onChange(value);
+            } else {
+              field.onChange(value ? format(value as Date, "yyyy-MM-dd") : null);
+            }
+          }}
+        />
+      )}
+    />
+  );
+};
+
+export const DateRangeField = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+>({
+  fieldSetClassName,
+  label,
+  error,
+  desc,
+  ...props
+}: Omit<IInputProps<TName>, "size"> & DateRangeInputProps) => {
+  return (
     <div className={fieldSetClassName}>
       <label className="floating-label">
-        <Controller
-          disabled={disabled}
-          control={control}
-          rules={{ required: props.required === true }}
-          name={props.name}
-          render={({ field }) => (
-            <DateInput
-              {...props}
-              className={cx({ "input-error": error }, props.className)}
-              placeholder={props.required ? `${label}*` : label}
-              value={field.value}
-              disabled={field.disabled}
-              onChange={(value) => {
-                if (useDate) {
-                  field.onChange(value);
-                } else {
-                  field.onChange(value ? format(value as Date, "yyyy-MM-dd") : null);
-                }
-              }}
-            />
-          )}
+        <DateRangeInput
+          {...props}
+          className={cx({ "input-error": error }, props.className)}
+          placeholder={props.required ? `${label}*` : label}
         />
         <span>
           {label}
@@ -730,12 +776,14 @@ export const SaveButton = ({
   className = "btn-block",
   onClick,
   size,
+  color = "btn-primary",
   children,
   type = "submit",
   ...props
 }: {
   type?: "submit" | "button";
   size?: "sm";
+  color?: "btn-primary" | "btn-secondary" | "btn-warning" | "btn-error" | "btn-success" | "btn-neutral" | "btn-info";
   onClick?: () => unknown;
   className?: string;
   icon?: React.ElementType;
@@ -749,12 +797,13 @@ export const SaveButton = ({
   return (
     <button
       type={type}
-      className={`btn btn-primary ${size === "sm" ? "btn-sm" : ""} ${className}`}
+      className={`btn ${color} ${size === "sm" ? "btn-sm" : ""} ${className}`}
       color="primary"
       disabled={isLoading || disabled}
       data-testid={type === "submit" ? "submit" : undefined}
       onClick={(e) => {
         if (onClick) {
+          e.stopPropagation();
           e.preventDefault();
           onClick();
         }
