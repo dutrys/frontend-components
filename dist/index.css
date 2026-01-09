@@ -1,0 +1,118 @@
+.BulkActions-module_menu__m9kWg li {
+  color: var(--color-primary-content);
+}
+
+.PaginatedTable-module_table__efs0Y tr.PaginatedTable-module_selectedRow__Xi-QH {
+  background: color-mix(in oklab, var(--color-base-200) 100%, var(--color-base-100) 80%);
+}
+
+.PaginatedTable-module_table__efs0Y tr.PaginatedTable-module_selectedRow__Xi-QH td,
+.PaginatedTable-module_table__efs0Y tr.PaginatedTable-module_selectedRow__Xi-QH th {
+  background: color-mix(in oklab, var(--color-base-200) 100%, var(--color-base-100) 80%);
+}
+.PaginatedTable-module_table__efs0Y tbody tr.PaginatedTable-module_selectedRow__Xi-QH th {
+  border-top: 1px solid var(--color-base-200);
+  border-bottom: 1px solid var(--color-base-200);
+}
+
+.PaginatedTable-module_table__efs0Y tbody tr:hover,
+.PaginatedTable-module_table__efs0Y tbody tr:hover td,
+.PaginatedTable-module_table__efs0Y tbody tr:hover th {
+  background: var(--color-base-200);
+  border-top-color: var(--color-base-200);
+  border-bottom-color: var(--color-base-200);
+}
+
+.PaginatedTable-module_table__efs0Y tbody tr td:first-child,
+.PaginatedTable-module_table__efs0Y tbody tr th:first-child,
+.PaginatedTable-module_table__efs0Y thead tr th:first-child,
+.PaginatedTable-module_table__efs0Y thead tr td:first-child {
+    padding-left: 1rem;
+}
+
+.PaginatedTable-module_table__efs0Y thead td,
+.PaginatedTable-module_table__efs0Y thead th {
+    white-space: normal;
+}
+
+.PaginatedTable-module_table__efs0Y tbody td,
+.PaginatedTable-module_table__efs0Y tbody th,
+.PaginatedTable-module_table__efs0Y thead th,
+.PaginatedTable-module_table__efs0Y thead td {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.PaginatedTable-module_table__efs0Y tbody th,
+.PaginatedTable-module_table__efs0Y tbody td {
+    font-size: var(--text-xs);
+}
+
+.PaginatedTable-module_table__efs0Y tbody th {
+  font-weight: normal;
+}
+
+.PaginatedTable-module_thead__Jb-pD {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.DatePicker-module_dayPicker__VRSSY .rdp-button_previous svg,
+.DatePicker-module_dayPicker__VRSSY .rdp-button_next svg {
+  fill: var(--color-base-100);
+}
+.DatePicker-module_dayPicker__VRSSY .rdp-button_previous:hover,
+.DatePicker-module_dayPicker__VRSSY .rdp-button_next:hover {
+  background: var(--color-primary);
+}
+.DatePicker-module_dayPicker__VRSSY .rdp-day:not(.rdp-disabled) .rdp-day_button:hover {
+  color: var(--color-black);
+}
+
+.DatePicker-module_dayPicker__VRSSY .rdp-caption_label {
+  text-transform: capitalize;
+}
+.DatePicker-module_dayPicker__VRSSY .rdp-dropdowns .rdp-chevron {
+  fill: var(--color-base-100);
+}
+.DatePicker-module_dayPicker__VRSSY .rdp-today .rdp-day_button {
+  background: transparent;
+  border: 1px solid var(--color-primary);
+}
+.DatePicker-module_dayPicker__VRSSY .rdp-selected .rdp-day_button:hover,
+.DatePicker-module_dayPicker__VRSSY .rdp-today .rdp-day_button:hover {
+  background: var(--color-base-100);
+}
+.DatePicker-module_dayPicker__VRSSY .rdp-selected .rdp-day_button {
+  background: var(--color-primary);
+}
+.DatePicker-module_dayPicker__VRSSY .rdp-selected.rdp-range_middle:hover .rdp-day_button {
+    background: var(--color-white);
+}
+
+
+.DatePicker-module_dayPicker__VRSSY .rdp-range_start.rdp-range_end .rdp-day_button {
+    border-radius: var(--radius-field);
+}
+
+.DatePicker-module_dayPicker__VRSSY .rdp-today {
+  background: transparent;
+}
+
+.Input-module_desc__3D3hV {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+}
+.Input-module_desc__3D3hV span {
+  display: table-cell;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.Tooltip-module_sidebar__4Rs5S.react-tooltip {
+    font-size: var(--text-sm);
+    z-index: 2000;
+    border-radius: var(--radius-box);
+}
