@@ -387,7 +387,6 @@ export const DateField = <
   label,
   error,
   desc,
-  disabled,
   ...props
 }: Omit<IInputProps<TName>, "size"> & DateInputProps) => {
   return (
@@ -564,6 +563,7 @@ export const SelectFromApiFormField = <
     render={({ field }) => (
       <SelectFromApiField<T>
         {...props}
+        disabled={field.disabled}
         optionValue={optionValue}
         value={field.value}
         onChange={(model) => {

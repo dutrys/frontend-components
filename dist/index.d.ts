@@ -449,7 +449,7 @@ type CheckboxFieldProps<TName extends FieldPath<TFieldValues>, TFieldValues exte
 };
 declare const CheckboxField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: CheckboxFieldProps<TName, TFieldValues>) => react_jsx_runtime.JSX.Element;
 declare const CheckboxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: Omit<CheckboxFieldProps<TName, TFieldValues>, "checked" | "onChange"> & IInputRegisterOnlyProps<TFieldValues, TName>) => react_jsx_runtime.JSX.Element;
-declare const DateField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, error, desc, disabled, ...props }: Omit<IInputProps<TName>, "size"> & DateInputProps) => react_jsx_runtime.JSX.Element;
+declare const DateField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, error, desc, ...props }: Omit<IInputProps<TName>, "size"> & DateInputProps) => react_jsx_runtime.JSX.Element;
 declare const DateFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, useDate, ...props }: Omit<IInputProps<TName>, "size"> & Omit<DateInputProps, "onChange" | "value"> & {
     control: Control<TFieldValues>;
     useDate?: boolean;

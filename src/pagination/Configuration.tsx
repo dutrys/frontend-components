@@ -86,7 +86,6 @@ export const PaginationConfiguration = <T = unknown,>({
     }
 
     const configs: Record<string, { name: string; enabled: boolean; column: ColumnType<any> }[]> = {};
-    console.log("COC", columnsConfig);
     for (const [key, value] of Object.entries(columnsConfig)) {
       value.forEach((c, i) => {
         configs[key] = configs[key] || [];

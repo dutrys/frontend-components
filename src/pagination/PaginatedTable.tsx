@@ -229,8 +229,6 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
 
   elements.push(...searchableShortcuts);
 
-  console.log("confog", { ...paginationConfigs, columns: columnsConfigs });
-
   return (
     <>
       {titleAbove && (

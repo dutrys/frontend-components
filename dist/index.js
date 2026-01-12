@@ -619,7 +619,6 @@ const PaginationConfiguration = ({ name, configName, columns, setConfigName, sto
             }
         }
         const configs = {};
-        console.log("COC", columnsConfig);
         for (const [key, value] of Object.entries(columnsConfig)) {
             value.forEach((c, i) => {
                 configs[key] = configs[key] || [];
@@ -1197,7 +1196,7 @@ const CheckboxFormField = (props) => {
             ...(props.options || {}),
         }) }));
 };
-const DateField = ({ fieldSetClassName, label, error, desc, disabled, ...props }) => {
+const DateField = ({ fieldSetClassName, label, error, desc, ...props }) => {
     return (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(DateInput, { ...props, className: cx({ "input-error": error }, props.className), placeholder: props.required ? `${label}*` : label }), jsxs("span", { children: [label, props.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$1.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 };
 const DateFormField = ({ control, useDate, ...props }) => {
@@ -1220,7 +1219,7 @@ const SelectPaginatedFromApiFormField = ({ optionValue = (model) => model.id, ..
             } })) }));
 };
 const SelectFromApiField = ({ label, desc, error, className, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] }), jsx(SelectFromApi, { className: cx(className, { "input-error": error }), ...rest, placeholder: rest.required ? `${label}*` : label })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
-const SelectFromApiFormField = ({ control, onChange, optionValue = (model) => model.id, ...props }) => (jsx(Controller, { control: control, name: props.name, rules: { required: props.required === true }, render: ({ field }) => (jsx(SelectFromApiField, { ...props, optionValue: optionValue, value: field.value, onChange: (model) => {
+const SelectFromApiFormField = ({ control, onChange, optionValue = (model) => model.id, ...props }) => (jsx(Controller, { control: control, name: props.name, rules: { required: props.required === true }, render: ({ field }) => (jsx(SelectFromApiField, { ...props, disabled: field.disabled, optionValue: optionValue, value: field.value, onChange: (model) => {
             field.onChange(model ? optionValue(model) : null);
             onChange?.(model);
         } })) }));
@@ -1403,7 +1402,6 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
         }
     }
     elements.push(...searchableShortcuts);
-    console.log("confog", { ...paginationConfigs, columns: columnsConfigs });
     return (jsxs(Fragment, { children: [titleAbove && (jsx(Title, { truncate: typeof titleAbove === "string", outerHeight: "h-28", children: titleAbove })), jsxs("div", { "data-testid": "paginate-table", className: "relative h-screen", "data-test-sort": (pagination.meta.sortBy || []).flat().join("-"), children: [jsxs("div", { className: "absolute z-501 top-16 flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-screen sm:max-w-[calc(100vw-var(--sidebar-width))]", children: [jsx("h1", { className: `h-16 flex items-center pl-4 my-0 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (elements.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsivePaginated, { bulkActions: bulkActions ? { actions: bulkActions, setSelected, selected } : undefined, elements: elements })), extraHeading, addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: addNewText || t("pagination.addNew") })] })), renderGridItem && (jsxs("div", { className: "join mr-2", children: [jsx("button", { className: cx("btn btn-xs join-item", { "btn-active": displayAs === "grid" }), onClick: () => {
                                             setDisplayAs("grid");
                                             if (displayConfig) {
