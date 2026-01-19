@@ -432,13 +432,14 @@ declare const RadioBoxFormField: <T extends string>({ name, options, label, valu
     options: Record<T, string>;
     onChange: (value: T) => void;
 }) => react_jsx_runtime.JSX.Element;
-declare const IndeterminateCheckbox: ({ checked, className, indeterminate, onChange, disabled, id, }: {
+declare const IndeterminateCheckbox: ({ checked, className, indeterminate, onChange, disabled, id, ref, }: {
     id?: string;
     onChange?: (e: ChangeEvent<HTMLInputElement>) => unknown;
     checked?: boolean;
     className?: string;
     disabled?: boolean;
     indeterminate?: boolean;
+    ref?: (input: HTMLInputElement | null) => void;
 }) => react_jsx_runtime.JSX.Element;
 type CheckboxFieldProps<TName extends FieldPath<TFieldValues>, TFieldValues extends FieldValues = FieldValues> = Omit<IInputProps<TName>, "required" | "value"> & {
     labelClassName?: string;
@@ -447,8 +448,10 @@ type CheckboxFieldProps<TName extends FieldPath<TFieldValues>, TFieldValues exte
     onChange: (e: ChangeEvent<HTMLInputElement>) => unknown;
     indeterminate?: boolean;
 };
-declare const CheckboxField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: CheckboxFieldProps<TName, TFieldValues>) => react_jsx_runtime.JSX.Element;
-declare const CheckboxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: Omit<CheckboxFieldProps<TName, TFieldValues>, "checked" | "onChange"> & IInputRegisterOnlyProps<TFieldValues, TName>) => react_jsx_runtime.JSX.Element;
+declare const CheckboxField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, fieldSetClassName, checkbox, className, labelClassName, size, indeterminate, ref, ...props }: {
+    ref?: (input: HTMLInputElement | null) => void;
+} & CheckboxFieldProps<TName, TFieldValues>) => react_jsx_runtime.JSX.Element;
+declare const CheckboxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ name, disabled, options, ...props }: Omit<CheckboxFieldProps<TName, TFieldValues>, "checked" | "onChange"> & IInputRegisterOnlyProps<TFieldValues, TName>) => react_jsx_runtime.JSX.Element;
 declare const DateField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, error, desc, ...props }: Omit<IInputProps<TName>, "size"> & DateInputProps) => react_jsx_runtime.JSX.Element;
 declare const DateFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, useDate, ...props }: Omit<IInputProps<TName>, "size"> & Omit<DateInputProps, "onChange" | "value"> & {
     control: Control<TFieldValues>;
@@ -565,17 +568,18 @@ declare const DateTime: ({ date, format }: {
 }) => string | null;
 
 declare const TOOLTIP_SIDEBAR_ID = "sidebar";
-type MenuItem = {
+type MenuItem<T = string> = {
     href: string;
     name: string;
     icon: React__default.ComponentType<{
         className?: string;
     }>;
+    claim?: T[];
 };
-type MenuItemWithSubmenu = Omit<MenuItem, "href"> & {
+type MenuItemWithSubmenu<T = string> = Omit<MenuItem<T>, "href"> & {
     href?: string;
     onClick?: () => void;
-    items?: MenuItem[] | (() => React__default.ReactNode);
+    items?: MenuItem<T>[] | (() => React__default.ReactNode);
 };
 declare const SidebarMenu: ({ menu, active, expanded, }: {
     expanded?: boolean;

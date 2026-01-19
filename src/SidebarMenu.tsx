@@ -9,16 +9,17 @@ import styles from "./Tooltip.module.css";
 
 export const TOOLTIP_SIDEBAR_ID = "sidebar";
 
-export type MenuItem = {
+export type MenuItem<T = string> = {
   href: string;
   name: string;
   icon: React.ComponentType<{ className?: string }>;
+  claim?: T[];
 };
 
-export type MenuItemWithSubmenu = Omit<MenuItem, "href"> & {
+export type MenuItemWithSubmenu<T = string> = Omit<MenuItem<T>, "href"> & {
   href?: string;
   onClick?: () => void;
-  items?: MenuItem[] | (() => React.ReactNode);
+  items?: MenuItem<T>[] | (() => React.ReactNode);
 };
 
 const Item = ({
@@ -75,7 +76,11 @@ export const SidebarMenu = ({
 }) => (
   <ul className={cx("menu w-full")}>
     {menu.map((item, i) => {
-      if (item.items && !expanded) {
+      if (
+        (typeof item.items === "function" || (Array.isArray(item.items) && item.items.length > 0)) &&
+        item.items &&
+        !expanded
+      ) {
         return (
           <Popover
             key={`${item.name}-${i}`}
@@ -115,7 +120,7 @@ export const SidebarMenu = ({
         );
       }
 
-      if (expanded && Array.isArray(item.items)) {
+      if (expanded && Array.isArray(item.items) && item.items.length > 0) {
         const isActive = item.items.some((s) => active(s));
         return (
           <li key={`${item.name}-${i}`}>

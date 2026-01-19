@@ -268,6 +268,7 @@ export const IndeterminateCheckbox = ({
   onChange,
   disabled,
   id,
+  ref,
 }: {
   id?: string;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => unknown;
@@ -275,6 +276,7 @@ export const IndeterminateCheckbox = ({
   className?: string;
   disabled?: boolean;
   indeterminate?: boolean;
+  ref?: (input: HTMLInputElement | null) => void;
 }) => {
   const checkboxRef = useRef<HTMLInputElement>(null);
 
@@ -294,7 +296,10 @@ export const IndeterminateCheckbox = ({
       id={id}
       type="checkbox"
       disabled={disabled}
-      ref={checkboxRef}
+      ref={(r) => {
+        checkboxRef.current = r;
+        ref?.(r);
+      }}
       className={className}
       onChange={onChange}
       checked={checked || false}
@@ -316,38 +321,60 @@ type CheckboxFieldProps<TName extends FieldPath<TFieldValues>, TFieldValues exte
 export const CheckboxField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->(
-  props: CheckboxFieldProps<TName, TFieldValues>,
-) => {
+>({
+  label,
+  fieldSetClassName,
+  checkbox,
+  className,
+  labelClassName,
+  size,
+  indeterminate,
+  ref,
+  ...props
+}: { ref?: (input: HTMLInputElement | null) => void } & CheckboxFieldProps<TName, TFieldValues>) => {
+  const checkboxRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!checkboxRef.current) {
+      return;
+    }
+    if (indeterminate === true) {
+      checkboxRef.current.indeterminate = true;
+    } else {
+      checkboxRef.current.indeterminate = false;
+    }
+  }, [indeterminate, props.checked]);
+
   return (
     <>
-      <div className={props.fieldSetClassName}>
+      <div className={fieldSetClassName}>
         <label>
-          <IndeterminateCheckbox
-            id={props.id}
-            indeterminate={props.indeterminate}
-            disabled={props.disabled}
-            checked={props.checked}
-            onChange={props.onChange}
+          <input
+            type="checkbox"
+            {...props}
+            ref={(r) => {
+              checkboxRef.current = r;
+              ref?.(r);
+            }}
             className={
-              props.checkbox
-                ? cx("checkbox", props.className, {
-                    "checkbox-sm": props.size === "sm",
-                    "checkbox-xs": props.size === "xs",
+              checkbox
+                ? cx("checkbox", className, {
+                    "checkbox-sm": size === "sm",
+                    "checkbox-xs": size === "xs",
                   })
-                : cx("toggle", props.className, {
-                    "toggle-sm": props.size === "sm",
-                    "toggle-xs": props.size === "xs",
+                : cx("toggle", className, {
+                    "toggle-sm": size === "sm",
+                    "toggle-xs": size === "xs",
                   })
             }
           />
           <span
-            className={cx("text-gray-500 label-text grow pl-2", props.labelClassName, {
-              "text-sm": !props.size,
-              "text-xs": props.size === "sm" || props.size === "xs",
+            className={cx("text-gray-500 label-text grow pl-2", labelClassName, {
+              "text-sm": !size,
+              "text-xs": size === "sm" || size === "xs",
             })}
           >
-            {props.label}
+            {label}
           </span>
         </label>
       </div>
@@ -364,16 +391,19 @@ export const CheckboxField = <
 export const CheckboxFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->(
-  props: Omit<CheckboxFieldProps<TName, TFieldValues>, "checked" | "onChange"> &
-    IInputRegisterOnlyProps<TFieldValues, TName>,
-) => {
+>({
+  name,
+  disabled,
+  options,
+  ...props
+}: Omit<CheckboxFieldProps<TName, TFieldValues>, "checked" | "onChange"> &
+  IInputRegisterOnlyProps<TFieldValues, TName>) => {
   return (
     <CheckboxField
       {...props}
-      {...props.register(props.name, {
-        disabled: props.disabled,
-        ...((props.options as RegisterOptions<TFieldValues, TName>) || {}),
+      {...props.register(name, {
+        disabled,
+        ...((options as RegisterOptions<TFieldValues, TName>) || {}),
       })}
     />
   );

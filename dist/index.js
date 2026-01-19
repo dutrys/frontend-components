@@ -1161,7 +1161,7 @@ const TextareaFormField = (props) => {
                         } }), props.maxLength && (jsx("div", { className: "badge badge-xs badge-ghost absolute right-1 bottom-1", children: `${length}/${props.maxLength}` })), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$1.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
 const RadioBoxFormField = ({ name, options, label = "", value, onChange, }) => (jsxs("div", { children: [label || "", jsx("div", { className: "flex flex-col pt-2 gap-2", children: Object.entries(options).map(([key, label]) => (jsxs("label", { children: [jsx("input", { type: "radio", checked: value === key, name: name, value: key, onChange: () => onChange(key), className: "radio radio-primary" }, key), " ", typeof label === "string" ? label : null] }, key))) })] }));
-const IndeterminateCheckbox = ({ checked, className = "checkbox checkbox-xs", indeterminate, onChange, disabled, id, }) => {
+const IndeterminateCheckbox = ({ checked, className = "checkbox checkbox-xs", indeterminate, onChange, disabled, id, ref, }) => {
     const checkboxRef = useRef(null);
     useEffect(() => {
         if (!checkboxRef.current) {
@@ -1174,26 +1174,44 @@ const IndeterminateCheckbox = ({ checked, className = "checkbox checkbox-xs", in
             checkboxRef.current.indeterminate = false;
         }
     }, [indeterminate, checked]);
-    return (jsx("input", { id: id, type: "checkbox", disabled: disabled, ref: checkboxRef, className: className, onChange: onChange, checked: checked || false }));
+    return (jsx("input", { id: id, type: "checkbox", disabled: disabled, ref: (r) => {
+            checkboxRef.current = r;
+            ref?.(r);
+        }, className: className, onChange: onChange, checked: checked || false }));
 };
-const CheckboxField = (props) => {
-    return (jsxs(Fragment, { children: [jsx("div", { className: props.fieldSetClassName, children: jsxs("label", { children: [jsx(IndeterminateCheckbox, { id: props.id, indeterminate: props.indeterminate, disabled: props.disabled, checked: props.checked, onChange: props.onChange, className: props.checkbox
-                                ? cx("checkbox", props.className, {
-                                    "checkbox-sm": props.size === "sm",
-                                    "checkbox-xs": props.size === "xs",
+const CheckboxField = ({ label, fieldSetClassName, checkbox, className, labelClassName, size, indeterminate, ref, ...props }) => {
+    const checkboxRef = useRef(null);
+    useEffect(() => {
+        if (!checkboxRef.current) {
+            return;
+        }
+        if (indeterminate === true) {
+            checkboxRef.current.indeterminate = true;
+        }
+        else {
+            checkboxRef.current.indeterminate = false;
+        }
+    }, [indeterminate, props.checked]);
+    return (jsxs(Fragment, { children: [jsx("div", { className: fieldSetClassName, children: jsxs("label", { children: [jsx("input", { type: "checkbox", ...props, ref: (r) => {
+                                checkboxRef.current = r;
+                                ref?.(r);
+                            }, className: checkbox
+                                ? cx("checkbox", className, {
+                                    "checkbox-sm": size === "sm",
+                                    "checkbox-xs": size === "xs",
                                 })
-                                : cx("toggle", props.className, {
-                                    "toggle-sm": props.size === "sm",
-                                    "toggle-xs": props.size === "xs",
-                                }) }), jsx("span", { className: cx("text-gray-500 label-text grow pl-2", props.labelClassName, {
-                                "text-sm": !props.size,
-                                "text-xs": props.size === "sm" || props.size === "xs",
-                            }), children: props.label })] }) }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$1.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+                                : cx("toggle", className, {
+                                    "toggle-sm": size === "sm",
+                                    "toggle-xs": size === "xs",
+                                }) }), jsx("span", { className: cx("text-gray-500 label-text grow pl-2", labelClassName, {
+                                "text-sm": !size,
+                                "text-xs": size === "sm" || size === "xs",
+                            }), children: label })] }) }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$1.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
-const CheckboxFormField = (props) => {
-    return (jsx(CheckboxField, { ...props, ...props.register(props.name, {
-            disabled: props.disabled,
-            ...(props.options || {}),
+const CheckboxFormField = ({ name, disabled, options, ...props }) => {
+    return (jsx(CheckboxField, { ...props, ...props.register(name, {
+            disabled,
+            ...(options || {}),
         }) }));
 };
 const DateField = ({ fieldSetClassName, label, error, desc, ...props }) => {
@@ -1630,10 +1648,12 @@ const Item = ({ item, active, children, disableTooltip, forceHover, expanded, })
             "bg-white/10 text-white": forceHover,
         }), children: [jsx(item.icon, { className: cx("mx-auto", { "size-5": expanded, "size-7": !expanded }) }), expanded && item.name, children] }) }));
 const SidebarMenu = ({ menu, active, expanded, }) => (jsx("ul", { className: cx("menu w-full"), children: menu.map((item, i) => {
-        if (item.items && !expanded) {
+        if ((typeof item.items === "function" || (Array.isArray(item.items) && item.items.length > 0)) &&
+            item.items &&
+            !expanded) {
             return (jsx(Popover, { backgroundColor: "bg-nav-popover/95", placement: "right-start", arrowSize: { width: 10, height: 5 }, title: (ref, props, isOpen) => (jsx("div", { ref: ref, children: jsx(Item, { disableTooltip: true, item: item, active: active(item) || (Array.isArray(item.items) && item.items.some((i) => active(i))), forceHover: isOpen }) })), children: (close) => (jsx("div", { "data-theme": "dim", className: "bg-transparent", children: Array.isArray(item.items) ? (jsx("ul", { className: "menu p-1", children: item.items?.map((sub, i) => (jsx("li", { children: jsxs(Link, { href: sub.href, onClick: close, className: "text-white", children: [jsx(sub.icon, { className: "size-5" }), sub.name] }) }, i))) })) : (item.items()) })) }, `${item.name}-${i}`));
         }
-        if (expanded && Array.isArray(item.items)) {
+        if (expanded && Array.isArray(item.items) && item.items.length > 0) {
             const isActive = item.items.some((s) => active(s));
             return (jsx("li", { children: jsxs("details", { className: cx({ "rounded-box bg-gradient-to-b from-white/20 to-white/5": isActive }), open: isActive, children: [jsxs("summary", { className: "hover:bg-white/10 text-white/80 hover:text-white", children: [jsx(item.icon, { className: "mx-auto size-5" }), item.name] }), jsx("ul", { children: item.items.map((sub, i) => (jsx(Item, { expanded: expanded, item: sub, active: active(sub) }, `${i}-${sub.name}`))) })] }) }, `${item.name}-${i}`));
         }

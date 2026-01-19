@@ -42,13 +42,14 @@ export declare const RadioBoxFormField: <T extends string>({ name, options, labe
     options: Record<T, string>;
     onChange: (value: T) => void;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const IndeterminateCheckbox: ({ checked, className, indeterminate, onChange, disabled, id, }: {
+export declare const IndeterminateCheckbox: ({ checked, className, indeterminate, onChange, disabled, id, ref, }: {
     id?: string;
     onChange?: (e: ChangeEvent<HTMLInputElement>) => unknown;
     checked?: boolean;
     className?: string;
     disabled?: boolean;
     indeterminate?: boolean;
+    ref?: (input: HTMLInputElement | null) => void;
 }) => import("react/jsx-runtime").JSX.Element;
 type CheckboxFieldProps<TName extends FieldPath<TFieldValues>, TFieldValues extends FieldValues = FieldValues> = Omit<IInputProps<TName>, "required" | "value"> & {
     labelClassName?: string;
@@ -57,8 +58,10 @@ type CheckboxFieldProps<TName extends FieldPath<TFieldValues>, TFieldValues exte
     onChange: (e: ChangeEvent<HTMLInputElement>) => unknown;
     indeterminate?: boolean;
 };
-export declare const CheckboxField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: CheckboxFieldProps<TName, TFieldValues>) => import("react/jsx-runtime").JSX.Element;
-export declare const CheckboxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: Omit<CheckboxFieldProps<TName, TFieldValues>, "checked" | "onChange"> & IInputRegisterOnlyProps<TFieldValues, TName>) => import("react/jsx-runtime").JSX.Element;
+export declare const CheckboxField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, fieldSetClassName, checkbox, className, labelClassName, size, indeterminate, ref, ...props }: {
+    ref?: (input: HTMLInputElement | null) => void;
+} & CheckboxFieldProps<TName, TFieldValues>) => import("react/jsx-runtime").JSX.Element;
+export declare const CheckboxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ name, disabled, options, ...props }: Omit<CheckboxFieldProps<TName, TFieldValues>, "checked" | "onChange"> & IInputRegisterOnlyProps<TFieldValues, TName>) => import("react/jsx-runtime").JSX.Element;
 export declare const DateField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, error, desc, ...props }: Omit<IInputProps<TName>, "size"> & DateInputProps) => import("react/jsx-runtime").JSX.Element;
 export declare const DateFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, useDate, ...props }: Omit<IInputProps<TName>, "size"> & Omit<DateInputProps, "onChange" | "value"> & {
     control: Control<TFieldValues>;

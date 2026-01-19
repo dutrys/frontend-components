@@ -1,16 +1,17 @@
 import React from "react";
 export declare const TOOLTIP_SIDEBAR_ID = "sidebar";
-export type MenuItem = {
+export type MenuItem<T = string> = {
     href: string;
     name: string;
     icon: React.ComponentType<{
         className?: string;
     }>;
+    claim?: T[];
 };
-export type MenuItemWithSubmenu = Omit<MenuItem, "href"> & {
+export type MenuItemWithSubmenu<T = string> = Omit<MenuItem<T>, "href"> & {
     href?: string;
     onClick?: () => void;
-    items?: MenuItem[] | (() => React.ReactNode);
+    items?: MenuItem<T>[] | (() => React.ReactNode);
 };
 export declare const SidebarMenu: ({ menu, active, expanded, }: {
     expanded?: boolean;
