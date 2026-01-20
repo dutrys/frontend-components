@@ -36,8 +36,8 @@ export type FunctionColumn<TModel> = {
     hiddenByDefault?: boolean;
 };
 export type ColumnType<TModel> = SimpleColumn<TModel> | FunctionColumn<TModel> | ActionColumn<TModel> | DateColumn<TModel>;
-export declare function isActionColumn<TModel>(column: ColumnType<TModel>): column is ActionColumn<TModel>;
-export declare function isFunctionColumn<TModel>(column: ColumnType<TModel>): column is FunctionColumn<TModel>;
+export declare const isActionColumn: <TModel = any>(column: ColumnType<TModel>) => column is ActionColumn<TModel>;
+export declare const isFunctionColumn: <TModel = any>(column: ColumnType<TModel>) => column is FunctionColumn<TModel>;
 export declare const PaginatedTable: <TModel extends {
     data: {
         id: number;

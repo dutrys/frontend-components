@@ -23,7 +23,7 @@ export type DateTimePickerProps = {
   size?: "sm" | "xs";
 };
 
-export function DateTimePicker({
+export const DateTimePicker = ({
   value,
   size,
   onChange,
@@ -35,7 +35,7 @@ export function DateTimePicker({
   className,
   toggleClassName,
   ...rest
-}: DateTimePickerProps) {
+}: DateTimePickerProps) => {
   const [dateString, setDateString] = useState(value ? format(value, "yyyy-MM-dd HH:mm") : "");
   const params = useParams();
   useEffect(() => {
@@ -235,4 +235,4 @@ export function DateTimePicker({
       )}
     </label>
   );
-}
+};

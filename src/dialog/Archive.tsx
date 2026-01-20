@@ -20,7 +20,7 @@ const Error = ({ key, error, translationId }: { key: string; error: string; tran
   );
 };
 
-function FormatErrors({ errors, translationId }: { errors: Record<string, string[]>; translationId?: string }) {
+const FormatErrors = ({ errors, translationId }: { errors: Record<string, string[]>; translationId?: string }) => {
   const entries = Object.entries(errors);
   if (entries.length === 1 && entries[0][1].length === 1) {
     return <Error key={entries[0][0]} error={entries[0][1][0]} translationId={translationId} />;
@@ -39,7 +39,7 @@ function FormatErrors({ errors, translationId }: { errors: Record<string, string
         .flat()}
     </ul>
   );
-}
+};
 
 export const Archive = <T,>({
   title,

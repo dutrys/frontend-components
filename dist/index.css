@@ -27,25 +27,25 @@
 .PaginatedTable-module_table__efs0Y tbody tr th:first-child,
 .PaginatedTable-module_table__efs0Y thead tr th:first-child,
 .PaginatedTable-module_table__efs0Y thead tr td:first-child {
-    padding-left: 1rem;
+  padding-left: 1rem;
 }
 
 .PaginatedTable-module_table__efs0Y thead td,
 .PaginatedTable-module_table__efs0Y thead th {
-    white-space: normal;
+  white-space: normal;
 }
 
 .PaginatedTable-module_table__efs0Y tbody td,
 .PaginatedTable-module_table__efs0Y tbody th,
 .PaginatedTable-module_table__efs0Y thead th,
 .PaginatedTable-module_table__efs0Y thead td {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 .PaginatedTable-module_table__efs0Y tbody th,
 .PaginatedTable-module_table__efs0Y tbody td {
-    font-size: var(--text-xs);
+  font-size: var(--text-xs);
 }
 
 .PaginatedTable-module_table__efs0Y tbody th {
@@ -55,6 +55,15 @@
 .PaginatedTable-module_thead__Jb-pD {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+}
+
+.PaginatedTable-module_rowHref__bPoWN {
+  position: relative;
+}
+
+.PaginatedTable-module_rowHref__bPoWN td:not(.action-cell),
+.PaginatedTable-module_rowHref__bPoWN th:not(.action-cell) {
+  cursor: pointer;
 }
 
 .DatePicker-module_dayPicker__VRSSY .rdp-button_previous svg,
@@ -87,12 +96,11 @@
   background: var(--color-primary);
 }
 .DatePicker-module_dayPicker__VRSSY .rdp-selected.rdp-range_middle:hover .rdp-day_button {
-    background: var(--color-white);
+  background: var(--color-white);
 }
 
-
 .DatePicker-module_dayPicker__VRSSY .rdp-range_start.rdp-range_end .rdp-day_button {
-    border-radius: var(--radius-field);
+  border-radius: var(--radius-field);
 }
 
 .DatePicker-module_dayPicker__VRSSY .rdp-today {
@@ -112,7 +120,7 @@
 }
 
 .Tooltip-module_sidebar__4Rs5S.react-tooltip {
-    font-size: var(--text-sm);
-    z-index: 2000;
-    border-radius: var(--radius-box);
+  font-size: var(--text-sm);
+  z-index: 2000;
+  border-radius: var(--radius-box);
 }

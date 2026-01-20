@@ -71,13 +71,11 @@ export type ColumnType<TModel> =
   | ActionColumn<TModel>
   | DateColumn<TModel>;
 
-export function isActionColumn<TModel>(column: ColumnType<TModel>): column is ActionColumn<TModel> {
-  return typeof column === "object" && (column as any).type === "actions";
-}
+export const isActionColumn = <TModel = any,>(column: ColumnType<TModel>): column is ActionColumn<TModel> =>
+  typeof column === "object" && (column as any).type === "actions";
 
-export function isFunctionColumn<TModel>(column: ColumnType<TModel>): column is FunctionColumn<TModel> {
-  return typeof column === "object" && typeof (column as any).body === "function";
-}
+export const isFunctionColumn = <TModel = any,>(column: ColumnType<TModel>): column is FunctionColumn<TModel> =>
+  typeof column === "object" && typeof (column as any).body === "function";
 
 const SearchField = () => {
   const t = useTranslations();
@@ -415,7 +413,12 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                           rowClickHref
                             ? (event) => {
                                 const target = event.nativeEvent.target as HTMLElement;
-                                if (target.closest("a") || target.closest("button") || target.closest("input")) {
+                                if (
+                                  target.closest("a") ||
+                                  target.closest(".action-cell") ||
+                                  target.closest("button") ||
+                                  target.closest("input")
+                                ) {
                                   return;
                                 }
 
@@ -431,11 +434,11 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                         }
                         className={cx({
                           [styles.selectedRow]: selected.includes(model.id),
-                          "cursor-pointer relative": rowClickHref,
+                          [styles.rowHref]: rowClickHref,
                         })}
                       >
                         {bulkActions && (
-                          <th>
+                          <th className="action-cell">
                             <input
                               type="checkbox"
                               className="checkbox checkbox-xs"
@@ -461,7 +464,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                             return (
                               <th
                                 key={`actions-td-${i}`}
-                                className={column.className || "whitespace-nowrap text-right"}
+                                className={cx("action-cell", column.className ?? "whitespace-nowrap text-right")}
                               >
                                 <MoreActions actions={column.actions(model)} />
                               </th>
@@ -563,17 +566,15 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   );
 };
 
-const LimitLink = ({ href, text, isActive }: { href: string; text: string; isActive: boolean }) => {
-  return (
-    <Link
-      prefetch={false}
-      className={`text-gray-400 hover:text-primary-600 mr-1 ${isActive ? "font-bold text-primary-600" : ""}`}
-      href={href}
-    >
-      {text}
-    </Link>
-  );
-};
+const LimitLink = ({ href, text, isActive }: { href: string; text: string; isActive: boolean }) => (
+  <Link
+    prefetch={false}
+    className={`text-gray-400 hover:text-primary-600 mr-1 ${isActive ? "font-bold text-primary-600" : ""}`}
+    href={href}
+  >
+    {text}
+  </Link>
+);
 
 export const TableLink = ({
   href,
@@ -595,7 +596,7 @@ export const TableLink = ({
       href={addLocale(href, useParams().locale as string)}
       {...rest}
       prefetch={false}
-      className={cx(styles.link, className, "text-primary")}
+      className={cx(styles.link, className, "link link-primary link-hover")}
     >
       {children}{" "}
     </Link>
@@ -655,15 +656,13 @@ export const FilterLink = ({
   );
 };
 
-const TruncateText = ({ text, length }: { text: string; length: number }) => {
-  return (
-    <div
-      data-tooltip-id={TOOLTIP_GLOBAL_ID}
-      data-tooltip-content={text}
-      className="text-left text-ellipsis overflow-hidden"
-      style={{ width: length }}
-    >
-      {text}
-    </div>
-  );
-};
+const TruncateText = ({ text, length }: { text: string; length: number }) => (
+  <div
+    data-tooltip-id={TOOLTIP_GLOBAL_ID}
+    data-tooltip-content={text}
+    className="text-left text-ellipsis overflow-hidden"
+    style={{ width: length }}
+  >
+    {text}
+  </div>
+);

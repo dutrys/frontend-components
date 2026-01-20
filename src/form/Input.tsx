@@ -135,8 +135,7 @@ export const SelectFormField = <
   ...rest
 }: IInputRegisterProps<TFieldValues, TName> & {
   children: React.ReactNode;
-}) => {
-  return (
+}) => (
     <div className={fieldSetClassName}>
       <label className="floating-label">
         <select
@@ -168,7 +167,6 @@ export const SelectFormField = <
       {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
     </div>
   );
-};
 
 export const TextareaFormField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -397,8 +395,7 @@ export const CheckboxFormField = <
   options,
   ...props
 }: Omit<CheckboxFieldProps<TName, TFieldValues>, "checked" | "onChange"> &
-  IInputRegisterOnlyProps<TFieldValues, TName>) => {
-  return (
+  IInputRegisterOnlyProps<TFieldValues, TName>) => (
     <CheckboxField
       {...props}
       {...props.register(name, {
@@ -407,7 +404,6 @@ export const CheckboxFormField = <
       })}
     />
   );
-};
 
 export const DateField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -418,8 +414,7 @@ export const DateField = <
   error,
   desc,
   ...props
-}: Omit<IInputProps<TName>, "size"> & DateInputProps) => {
-  return (
+}: Omit<IInputProps<TName>, "size"> & DateInputProps) => (
     <div className={fieldSetClassName}>
       <label className="floating-label">
         <DateInput
@@ -440,7 +435,6 @@ export const DateField = <
       {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
     </div>
   );
-};
 
 export const DateFormField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -454,8 +448,7 @@ export const DateFormField = <
     control: Control<TFieldValues>;
     // @deprecated
     useDate?: boolean;
-  }) => {
-  return (
+  }) => (
     <Controller
       disabled={props.disabled}
       control={control}
@@ -477,7 +470,6 @@ export const DateFormField = <
       )}
     />
   );
-};
 
 export const DateRangeField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -488,8 +480,7 @@ export const DateRangeField = <
   error,
   desc,
   ...props
-}: Omit<IInputProps<TName>, "size"> & DateRangeInputProps) => {
-  return (
+}: Omit<IInputProps<TName>, "size"> & DateRangeInputProps) => (
     <div className={fieldSetClassName}>
       <label className="floating-label">
         <DateRangeInput
@@ -510,7 +501,6 @@ export const DateRangeField = <
       {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
     </div>
   );
-};
 
 export const SelectPaginatedFromApiFormField = <
   T extends { data: unknown[]; meta: ResponseMeta },
@@ -522,8 +512,7 @@ export const SelectPaginatedFromApiFormField = <
 }: IInputProps<TName> & {
   control: Control<TFieldValues>;
   onChange?: (model: T["data"][number] | null) => void;
-} & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => {
-  return (
+} & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => (
     <Controller
       control={props.control}
       name={props.name}
@@ -542,7 +531,6 @@ export const SelectPaginatedFromApiFormField = <
       )}
     />
   );
-};
 
 export const SelectFromApiField = <
   T = unknown,
@@ -622,8 +610,7 @@ export const DateTimeFormField = <
 }: IInputProps<TName> & {
   control: Control<TFieldValues>;
   useDate?: boolean;
-} & DateTimePickerProps) => {
-  return (
+} & DateTimePickerProps) => (
     <div className={fieldSetClassName}>
       <label className="floating-label">
         <Controller
@@ -631,8 +618,7 @@ export const DateTimeFormField = <
           name={name}
           rules={{ required: props.required === true }}
           disabled={disabled}
-          render={({ field }) => {
-            return (
+          render={({ field }) => (
               <DateTimePicker
                 {...props}
                 className={cx(className, { "input-error": error })}
@@ -647,8 +633,7 @@ export const DateTimeFormField = <
                   }
                 }}
               />
-            );
-          }}
+            )}
         />
         <span>
           {label}
@@ -663,7 +648,6 @@ export const DateTimeFormField = <
       {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
     </div>
   );
-};
 
 export const TimeFormField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -673,8 +657,7 @@ export const TimeFormField = <
   control,
   className,
   ...props
-}: Omit<TimePickerProps, "onChange" | "value"> & IInputProps<TName> & { control: Control<TFieldValues> }) => {
-  return (
+}: Omit<TimePickerProps, "onChange" | "value"> & IInputProps<TName> & { control: Control<TFieldValues> }) => (
     <div className={props.fieldSetClassName}>
       <label className="floating-label">
         {!props.disabled && (
@@ -711,7 +694,6 @@ export const TimeFormField = <
       <InputErrors className="text-xs text-error mt-1" errors={props.error} />
     </div>
   );
-};
 
 export const NumberFormField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -795,9 +777,7 @@ export const SelectPaginatedFromApiField = <T extends { data: unknown[]; meta: R
   </div>
 );
 
-export const Required = () => {
-  return <span className="text-error align-bottom">*</span>;
-};
+export const Required = () => <span className="text-error align-bottom">*</span>;
 
 export const SaveButton = ({
   isLoading,

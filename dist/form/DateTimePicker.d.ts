@@ -10,5 +10,5 @@ export type DateTimePickerProps = {
     onChange: (value: Date | null) => void;
     size?: "sm" | "xs";
 };
-export declare function DateTimePicker({ value, size, onChange, disabled, required, from, to, placeholder, className, toggleClassName, ...rest }: DateTimePickerProps): import("react/jsx-runtime").JSX.Element;
+export declare const DateTimePicker: ({ value, size, onChange, disabled, required, from, to, placeholder, className, toggleClassName, ...rest }: DateTimePickerProps) => import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=DateTimePicker.d.ts.map

@@ -29,7 +29,7 @@ const options: {
 
 export const TOOLTIP_GLOBAL_ID = "global";
 
-export function Toaster() {
+export const Toaster = () => {
   const { toasts } = useToasterStore();
 
   // Enforce Limit (1 toast)
@@ -71,4 +71,4 @@ export function Toaster() {
       </ReactHotToast>
     </>
   );
-}
+};

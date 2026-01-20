@@ -12,6 +12,9 @@ export default [
   pluginReact.configs.flat.recommended,
   {
     rules: {
+      "func-style": ["error"],
+      "arrow-body-style": ["error", "as-needed"],
+      "no-empty-pattern": "error",
       "@typescript-eslint/no-explicit-any": ["off"],
       "@typescript-eslint/no-unused-vars": ["off"],
     },

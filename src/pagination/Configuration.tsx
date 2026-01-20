@@ -14,7 +14,7 @@ import { isServerError } from "../form/UseForm";
 import { createPortal } from "react-dom";
 import cx from "classnames";
 
-function AddNew({ onAdd, names }: { onAdd: (name: string) => void; names: string[] }) {
+const AddNew = ({ onAdd, names }: { onAdd: (name: string) => void; names: string[] }) => {
   const [name, setName] = useState("");
   const t = useTranslations();
   return (
@@ -41,7 +41,7 @@ function AddNew({ onAdd, names }: { onAdd: (name: string) => void; names: string
       </button>
     </div>
   );
-}
+};
 
 export const PaginationConfiguration = <T = unknown,>({
   name,
@@ -321,82 +321,13 @@ export const PaginationConfiguration = <T = unknown,>({
   );
 };
 
-export const OrderColumns = ({
-  name,
-  items,
-  setOrder,
-}: {
-  name: string;
-  items: { column: ColumnType<any>; enabled: boolean; name: string }[];
-  setOrder: (columns: { column: ColumnType<any>; enabled: boolean; name: string }[]) => void;
-}) => {
-  return (
-    <Reorder.Group axis="y" values={items} onReorder={setOrder} className="space-y-2 w-full max-w-2xl mx-auto">
-      {items.map((column, i) => (
-        <ColumnItem
-          onChange={(e) => {
-            const itemCopy = [...items];
-            const col = itemCopy.find((c) => c === column);
-            if (col) {
-              col.enabled = e.target.checked;
-              setOrder(itemCopy);
-            }
-          }}
-          key={`${name}-${isActionColumn(column.column) ? "action" : column.column.title}`}
-          item={column}
-        />
-      ))}
-    </Reorder.Group>
-  );
-};
-
-function ReorderHandle({ dragControls }: { dragControls: DragControls }) {
-  return (
-    <motion.div
-      whileTap={{ scale: 0.95 }}
-      onPointerDown={(e) => {
-        e.preventDefault();
-        dragControls.start(e);
-      }}
-      className="cursor-grab text-base-content/40 active:cursor-grabbing p-2"
-    >
-      <ArrowsUpDownIcon className="size-4" />
-    </motion.div>
-  );
-}
-const inactiveShadow = "0px 0px 0px rgba(0,0,0,0.8)";
-
-function useRaisedShadow(value: MotionValue<number>) {
-  const boxShadow = useMotionValue(inactiveShadow);
-
-  useEffect(() => {
-    let isActive = false;
-    value.on("change", (latest) => {
-      const wasActive = isActive;
-      if (latest !== 0) {
-        isActive = true;
-        if (isActive !== wasActive) {
-          animate(boxShadow, "5px 5px 15px rgba(0,0,0,0.15)");
-        }
-      } else {
-        isActive = false;
-        if (isActive !== wasActive) {
-          animate(boxShadow, inactiveShadow);
-        }
-      }
-    });
-  }, [value]);
-
-  return boxShadow;
-}
-
-function ColumnItem({
+const ColumnItem = ({
   item,
   onChange,
 }: {
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   item: { column: ColumnType<any>; enabled: boolean; name: string };
-}) {
+}) => {
   const y = useMotionValue(0);
   const boxShadow = useRaisedShadow(y);
   const dragControls = useDragControls();
@@ -420,4 +351,69 @@ function ColumnItem({
       <ReorderHandle dragControls={dragControls} />
     </Reorder.Item>
   );
-}
+};
+
+export const OrderColumns = ({
+  name,
+  items,
+  setOrder,
+}: {
+  name: string;
+  items: { column: ColumnType<any>; enabled: boolean; name: string }[];
+  setOrder: (columns: { column: ColumnType<any>; enabled: boolean; name: string }[]) => void;
+}) => (
+  <Reorder.Group axis="y" values={items} onReorder={setOrder} className="space-y-2 w-full max-w-2xl mx-auto">
+    {items.map((column, i) => (
+      <ColumnItem
+        onChange={(e) => {
+          const itemCopy = [...items];
+          const col = itemCopy.find((c) => c === column);
+          if (col) {
+            col.enabled = e.target.checked;
+            setOrder(itemCopy);
+          }
+        }}
+        key={`${name}-${isActionColumn(column.column) ? "action" : column.column.title}`}
+        item={column}
+      />
+    ))}
+  </Reorder.Group>
+);
+
+const ReorderHandle = ({ dragControls }: { dragControls: DragControls }) => (
+  <motion.div
+    whileTap={{ scale: 0.95 }}
+    onPointerDown={(e) => {
+      e.preventDefault();
+      dragControls.start(e);
+    }}
+    className="cursor-grab text-base-content/40 active:cursor-grabbing p-2"
+  >
+    <ArrowsUpDownIcon className="size-4" />
+  </motion.div>
+);
+const inactiveShadow = "0px 0px 0px rgba(0,0,0,0.8)";
+
+const useRaisedShadow = (value: MotionValue<number>) => {
+  const boxShadow = useMotionValue(inactiveShadow);
+
+  useEffect(() => {
+    let isActive = false;
+    value.on("change", (latest) => {
+      const wasActive = isActive;
+      if (latest !== 0) {
+        isActive = true;
+        if (isActive !== wasActive) {
+          animate(boxShadow, "5px 5px 15px rgba(0,0,0,0.15)");
+        }
+      } else {
+        isActive = false;
+        if (isActive !== wasActive) {
+          animate(boxShadow, inactiveShadow);
+        }
+      }
+    });
+  }, [value]);
+
+  return boxShadow;
+};

@@ -1,21 +1,21 @@
 import { format, isValid, parse } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
-export function timeInUtcStringToDate(stopFromArrivalTime: string): Date | null {
+export const timeInUtcStringToDate = (stopFromArrivalTime: string): Date | null => {
   const date = parse(stopFromArrivalTime, "HH:mm:ss", new Date());
   if (isValid(date)) {
     return fromZonedTime(date, "UTC");
   }
   return null;
-}
+};
 
-export function convertTimeToUtcString(time: string, timeFormat = "HH:mm:ss"): string | undefined {
+export const convertTimeToUtcString = (time: string, timeFormat = "HH:mm:ss"): string | undefined => {
   const date = parse(time, "HH:mm:ss", new Date());
   if (isValid(date)) {
     return format(fromZonedTime(date, "UTC"), timeFormat);
   }
   return undefined;
-}
+};
 
 export const stringToTime = (time: string): Date | undefined => {
   const parsed: Date = parse(time, "yyyy-MM-dd HH:mm:ss", new Date());
@@ -56,6 +56,4 @@ export const dateToString = (date: Date, timeZone?: string) => {
   }
   return format(toZonedTime(date, timeZone), "yyyy-MM-dd HH:mm:ss");
 };
-export const dateToStringDate = (date: Date) => {
-  return format(date, "yyyy-MM-dd");
-};
+export const dateToStringDate = (date: Date) => format(date, "yyyy-MM-dd");

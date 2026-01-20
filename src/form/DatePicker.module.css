@@ -28,12 +28,11 @@
   background: var(--color-primary);
 }
 .dayPicker :global(.rdp-selected.rdp-range_middle:hover .rdp-day_button) {
-    background: var(--color-white);
+  background: var(--color-white);
 }
 
-
 .dayPicker :global(.rdp-range_start.rdp-range_end .rdp-day_button) {
-    border-radius: var(--radius-field);
+  border-radius: var(--radius-field);
 }
 
 .dayPicker :global(.rdp-today) {

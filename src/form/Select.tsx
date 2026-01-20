@@ -13,7 +13,7 @@ import {
 import { CheckIcon, ChevronUpDownIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import cx from "classnames";
 
-export function PortalSSR(props: { enabled?: boolean; children: React.ReactNode }) {
+export const PortalSSR = (props: { enabled?: boolean; children: React.ReactNode }) => {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
@@ -22,7 +22,7 @@ export function PortalSSR(props: { enabled?: boolean; children: React.ReactNode 
     return <Portal>{props.children}</Portal>;
   }
   return props.children;
-}
+};
 
 export type SelectProps<T> = {
   size?: "sm" | "xs";

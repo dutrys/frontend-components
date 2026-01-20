@@ -23,25 +23,25 @@
 .table tbody tr th:first-child,
 .table thead tr th:first-child,
 .table thead tr td:first-child {
-    padding-left: 1rem;
+  padding-left: 1rem;
 }
 
 .table thead td,
 .table thead th {
-    white-space: normal;
+  white-space: normal;
 }
 
 .table tbody td,
 .table tbody th,
 .table thead th,
 .table thead td {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 .table tbody th,
 .table tbody td {
-    font-size: var(--text-xs);
+  font-size: var(--text-xs);
 }
 
 .table tbody th {
@@ -51,4 +51,13 @@
 .thead {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+}
+
+.rowHref {
+  position: relative;
+}
+
+.rowHref td:not(:global(.action-cell)),
+.rowHref th:not(:global(.action-cell)) {
+  cursor: pointer;
 }

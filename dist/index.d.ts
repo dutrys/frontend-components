@@ -65,7 +65,7 @@ declare const BulkDropDownActions: ({ bulkActions, disabled, }: {
         children: React__default.ReactNode;
         onSelect: () => Promise<boolean | void>;
     }[];
-}) => react_jsx_runtime.JSX.Element;
+}) => react_jsx_runtime.JSX.Element[];
 
 type ObjOrNode = object | ((isVisible: boolean) => React__default.ReactNode);
 declare const HeaderResponsive: <T extends ObjOrNode>({ renderVisible, renderDropdown, heightClassName, elements, }: {
@@ -157,8 +157,8 @@ type FunctionColumn<TModel> = {
     hiddenByDefault?: boolean;
 };
 type ColumnType<TModel> = SimpleColumn<TModel> | FunctionColumn<TModel> | ActionColumn<TModel> | DateColumn<TModel>;
-declare function isActionColumn<TModel>(column: ColumnType<TModel>): column is ActionColumn<TModel>;
-declare function isFunctionColumn<TModel>(column: ColumnType<TModel>): column is FunctionColumn<TModel>;
+declare const isActionColumn: <TModel = any>(column: ColumnType<TModel>) => column is ActionColumn<TModel>;
+declare const isFunctionColumn: <TModel = any>(column: ColumnType<TModel>) => column is FunctionColumn<TModel>;
 declare const PaginatedTable: <TModel extends {
     data: {
         id: number;
@@ -303,7 +303,7 @@ type DateTimePickerProps = {
     onChange: (value: Date | null) => void;
     size?: "sm" | "xs";
 };
-declare function DateTimePicker({ value, size, onChange, disabled, required, from, to, placeholder, className, toggleClassName, ...rest }: DateTimePickerProps): react_jsx_runtime.JSX.Element;
+declare const DateTimePicker: ({ value, size, onChange, disabled, required, from, to, placeholder, className, toggleClassName, ...rest }: DateTimePickerProps) => react_jsx_runtime.JSX.Element;
 
 type DateInputProps = Omit<React.ComponentPropsWithoutRef<"input">, "size" | "value" | "defaultValue" | "defaultChecked" | "onChange"> & {
     size?: "sm" | "xs";
@@ -324,10 +324,10 @@ type DateRangeInputProps = Omit<DateInputProps, "onChange" | "value"> & {
 };
 declare const DateRangeInput: ({ onChange, value, className, toggleClassName, required, disabled, size, modifiers, placeholder, matcher, ...rest }: DateRangeInputProps) => react_jsx_runtime.JSX.Element;
 
-declare function PortalSSR(props: {
+declare const PortalSSR: (props: {
     enabled?: boolean;
     children: React__default.ReactNode;
-}): string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React__default.ReactNode> | Promise<string | number | bigint | boolean | React__default.ReactPortal | React__default.ReactElement<unknown, string | React__default.JSXElementConstructor<any>> | Iterable<React__default.ReactNode> | null | undefined> | null | undefined;
+}) => string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React__default.ReactNode> | Promise<string | number | bigint | boolean | React__default.ReactPortal | React__default.ReactElement<unknown, string | React__default.JSXElementConstructor<any>> | Iterable<React__default.ReactNode> | null | undefined> | null | undefined;
 type SelectProps<T> = {
     size?: "sm" | "xs";
     name?: string;
@@ -560,7 +560,7 @@ declare const HumanDate: ({ date, from, includeSeconds, tooltipId, disableToolti
 }) => react_jsx_runtime.JSX.Element | null;
 
 declare const TOOLTIP_GLOBAL_ID = "global";
-declare function Toaster(): react_jsx_runtime.JSX.Element;
+declare const Toaster: () => react_jsx_runtime.JSX.Element;
 
 declare const DateTime: ({ date, format }: {
     date: string;

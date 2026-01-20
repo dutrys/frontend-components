@@ -12,5 +12,5 @@ export declare const BulkDropDownActions: ({ bulkActions, disabled, }: {
         children: React.ReactNode;
         onSelect: () => Promise<boolean | void>;
     }[];
-}) => import("react/jsx-runtime").JSX.Element;
+}) => import("react/jsx-runtime").JSX.Element[];
 //# sourceMappingURL=BulkActions.d.ts.map

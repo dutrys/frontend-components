@@ -14,8 +14,7 @@ export const Title = ({
   paddingLeft?: string;
   noOverlap?: boolean;
   noBackground?: boolean;
-}) => {
-  return (
+}) => (
     <>
       {!noBackground && (
         <div
@@ -37,4 +36,3 @@ export const Title = ({
       </div>
     </>
   );
-};
