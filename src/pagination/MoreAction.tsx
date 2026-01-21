@@ -21,7 +21,13 @@ export type MoreActionType = {
   testId?: string;
 };
 
-export const MoreActions = ({ className, actions }: { className?: string; actions: MoreActionType[] }) => {
+export const MoreActions = ({
+  className = "btn-ghost",
+  actions,
+}: {
+  className?: string;
+  actions: MoreActionType[];
+}) => {
   const screenSize = useScreenSize();
   if (actions.filter((a) => !a.hidden).length === 0) {
     return null;
@@ -45,16 +51,16 @@ export const MoreActions = ({ className, actions }: { className?: string; action
   }, [actions, enable]);
 
   return (
-    <>
+    <div className="flex more-actions gap-0.5">
       {buttonActions.map((a) => (
-        <Action enable key={a.label} action={a} close={() => {}} />
+        <Action className={className} enable key={a.label} action={a} close={() => {}} />
       ))}
 
       {menuActions.length > 0 && (
         <Popover
           showOnClick
-          title={(ref, props) => (
-            <button className={cx("btn btn-xs md:btn-xs btn-ghost", className)} ref={ref} {...props}>
+          title={(ref, props, open) => (
+            <button className={cx("btn btn-xs md:btn-xs", className, { "btn-active": open })} ref={ref} {...props}>
               <EllipsisVerticalIcon className="size-4" />
             </button>
           )}
@@ -72,11 +78,21 @@ export const MoreActions = ({ className, actions }: { className?: string; action
           )}
         </Popover>
       )}
-    </>
+    </div>
   );
 };
 
-const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => void; action: MoreActionType }) => {
+const Action = ({
+  className,
+  action: a,
+  close,
+  enable,
+}: {
+  className?: string;
+  enable?: boolean;
+  close: () => void;
+  action: MoreActionType;
+}) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const Icon = isLoading ? LoadingComponent : a.icon;
@@ -96,7 +112,7 @@ const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => v
         <Link
           data-testid={a.testId}
           data-disable-nprogress={a.disableNProgress}
-          className={`btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}`}
+          className={cx("btn btn-xs md:btn-xs", className, { "btn-disabled": a.disabled })}
           href={href}
           onClick={() => !a.disabled && close()}
           data-tooltip-id={TOOLTIP_GLOBAL_ID}
@@ -112,7 +128,7 @@ const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => v
       <Link
         data-testid={a.testId}
         data-disable-nprogress={a.disableNProgress}
-        className=""
+        className={className}
         href={href}
         onClick={() => close()}
         prefetch={false}
@@ -126,7 +142,7 @@ const Action = ({ action: a, close, enable }: { enable?: boolean; close: () => v
   return (
     <a
       data-testid={a.testId}
-      className={enable ? `btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}` : undefined}
+      className={enable ? cx("btn btn-xs md:btn-xs", className, { "btn-disabled": a.disabled }) : undefined}
       onClick={(e) => {
         e.preventDefault();
         if (a.disabled) {
