@@ -47,7 +47,7 @@ type MoreActionType = {
     disabled?: boolean;
     testId?: string;
 };
-declare const MoreActions: ({ className, actions }: {
+declare const MoreActions: ({ className, actions, }: {
     className?: string;
     actions: MoreActionType[];
 }) => react_jsx_runtime.JSX.Element | null;

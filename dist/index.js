@@ -146,7 +146,7 @@ const Toaster = () => {
                 } })] }));
 };
 
-const MoreActions = ({ className, actions }) => {
+const MoreActions = ({ className = "btn-ghost", actions, }) => {
     const screenSize = useScreenSize();
     if (actions.filter((a) => !a.hidden).length === 0) {
         return null;
@@ -164,9 +164,9 @@ const MoreActions = ({ className, actions }) => {
         }
         return { buttonActions, menuActions };
     }, [actions, enable]);
-    return (jsxs(Fragment, { children: [buttonActions.map((a) => (jsx(Action, { enable: true, action: a, close: () => { } }, a.label))), menuActions.length > 0 && (jsx(Popover, { showOnClick: true, title: (ref, props) => (jsx("button", { className: cx("btn btn-xs md:btn-xs btn-ghost", className), ref: ref, ...props, children: jsx(EllipsisVerticalIcon, { className: "size-4" }) })), children: (close) => (jsx("div", { "data-theme": "dim", style: { background: "transparent" }, children: jsx("ul", { className: "menu menu-sm p-1 p-0", children: menuActions.map((a, i) => (jsx("li", { className: a.disabled ? "menu-disabled" : undefined, children: jsx(Action, { action: a, close: close }) }, i))) }) })) }))] }));
+    return (jsxs("div", { className: "flex more-actions gap-0.5", children: [buttonActions.map((a) => (jsx(Action, { className: className, enable: true, action: a, close: () => { } }, a.label))), menuActions.length > 0 && (jsx(Popover, { showOnClick: true, title: (ref, props, open) => (jsx("button", { className: cx("btn btn-xs md:btn-xs", className, { "btn-active": open }), ref: ref, ...props, children: jsx(EllipsisVerticalIcon, { className: "size-4" }) })), children: (close) => (jsx("div", { "data-theme": "dim", style: { background: "transparent" }, children: jsx("ul", { className: "menu menu-sm p-1 p-0", children: menuActions.map((a, i) => (jsx("li", { className: a.disabled ? "menu-disabled" : undefined, children: jsx(Action, { action: a, close: close }) }, i))) }) })) }))] }));
 };
-const Action = ({ action: a, close, enable }) => {
+const Action = ({ className, action: a, close, enable, }) => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const Icon = isLoading ? LoadingComponent : a.icon;
@@ -180,11 +180,11 @@ const Action = ({ action: a, close, enable }) => {
             href += `?${searchParams.toString()}`;
         }
         if (enable) {
-            return (jsx(Link, { "data-testid": a.testId, "data-disable-nprogress": a.disableNProgress, className: `btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}`, href: href, onClick: () => !a.disabled && close(), "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": a.label, prefetch: false, children: Icon ? jsx(Icon, { className: "size-4" }) : a.label }));
+            return (jsx(Link, { "data-testid": a.testId, "data-disable-nprogress": a.disableNProgress, className: cx("btn btn-xs md:btn-xs", className, { "btn-disabled": a.disabled }), href: href, onClick: () => !a.disabled && close(), "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": a.label, prefetch: false, children: Icon ? jsx(Icon, { className: "size-4" }) : a.label }));
         }
-        return (jsxs(Link, { "data-testid": a.testId, "data-disable-nprogress": a.disableNProgress, className: "", href: href, onClick: () => close(), prefetch: false, children: [Icon && jsx(Icon, { className: "size-4" }), a.label] }));
+        return (jsxs(Link, { "data-testid": a.testId, "data-disable-nprogress": a.disableNProgress, className: className, href: href, onClick: () => close(), prefetch: false, children: [Icon && jsx(Icon, { className: "size-4" }), a.label] }));
     }
-    return (jsxs("a", { "data-testid": a.testId, className: enable ? `btn btn-xs md:btn-xs btn-ghost ${a.disabled ? "btn-disabled" : ""}` : undefined, onClick: (e) => {
+    return (jsxs("a", { "data-testid": a.testId, className: enable ? cx("btn btn-xs md:btn-xs", className, { "btn-disabled": a.disabled }) : undefined, onClick: (e) => {
             e.preventDefault();
             if (a.disabled) {
                 return;
@@ -987,6 +987,7 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
         enabled: !rest.disabled,
         queryKey: [...queryKey, rest.disabled, query.length < searchFromChars ? "" : query],
         initialPageParam: 1,
+        retry: rest.disabled ? 0 : undefined,
         queryFn: ({ queryKey, pageParam }) => {
             if (rest.disabled) {
                 return Promise.reject();

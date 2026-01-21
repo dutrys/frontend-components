@@ -33,6 +33,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
     enabled: !rest.disabled,
     queryKey: [...queryKey, rest.disabled, query.length < searchFromChars ? "" : query],
     initialPageParam: 1,
+    retry: rest.disabled ? 0 : undefined,
     queryFn: ({ queryKey, pageParam }) => {
       if (rest.disabled) {
         return Promise.reject();

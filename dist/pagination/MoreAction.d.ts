@@ -12,7 +12,7 @@ export type MoreActionType = {
     disabled?: boolean;
     testId?: string;
 };
-export declare const MoreActions: ({ className, actions }: {
+export declare const MoreActions: ({ className, actions, }: {
     className?: string;
     actions: MoreActionType[];
 }) => import("react/jsx-runtime").JSX.Element | null;
