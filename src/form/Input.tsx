@@ -136,37 +136,37 @@ export const SelectFormField = <
 }: IInputRegisterProps<TFieldValues, TName> & {
   children: React.ReactNode;
 }) => (
-    <div className={fieldSetClassName}>
-      <label className="floating-label">
-        <select
-          id={id}
-          {...register(name, {
-            required: required,
-            disabled: disabled,
-            ...((options as RegisterOptions<TFieldValues, TName>) || {}),
-          })}
-          className={cx("select select-bordered w-full", className, {
-            "select-xs": size === "xs",
-            "select-sm": size === "sm",
-            "select-error": error,
-          })}
-          {...rest}
-        >
-          {children}
-        </select>
-        <span>
-          {label}
-          {required ? <Required /> : null}
-        </span>
-      </label>
-      {desc && (
-        <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
-          <span>{desc}</span>
-        </div>
-      )}
-      {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
-    </div>
-  );
+  <div className={fieldSetClassName}>
+    <label className="floating-label">
+      <select
+        id={id}
+        {...register(name, {
+          required: required,
+          disabled: disabled,
+          ...((options as RegisterOptions<TFieldValues, TName>) || {}),
+        })}
+        className={cx("select select-bordered w-full", className, {
+          "select-xs": size === "xs",
+          "select-sm": size === "sm",
+          "select-error": error,
+        })}
+        {...rest}
+      >
+        {children}
+      </select>
+      <span>
+        {label}
+        {required ? <Required /> : null}
+      </span>
+    </label>
+    {desc && (
+      <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
+        <span>{desc}</span>
+      </div>
+    )}
+    {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
+  </div>
+);
 
 export const TextareaFormField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -393,17 +393,18 @@ export const CheckboxFormField = <
   name,
   disabled,
   options,
+  register,
   ...props
 }: Omit<CheckboxFieldProps<TName, TFieldValues>, "checked" | "onChange"> &
   IInputRegisterOnlyProps<TFieldValues, TName>) => (
-    <CheckboxField
-      {...props}
-      {...props.register(name, {
-        disabled,
-        ...((options as RegisterOptions<TFieldValues, TName>) || {}),
-      })}
-    />
-  );
+  <CheckboxField
+    {...props}
+    {...register(name, {
+      disabled,
+      ...((options as RegisterOptions<TFieldValues, TName>) || {}),
+    })}
+  />
+);
 
 export const DateField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -415,26 +416,26 @@ export const DateField = <
   desc,
   ...props
 }: Omit<IInputProps<TName>, "size"> & DateInputProps) => (
-    <div className={fieldSetClassName}>
-      <label className="floating-label">
-        <DateInput
-          {...props}
-          className={cx({ "input-error": error }, props.className)}
-          placeholder={props.required ? `${label}*` : label}
-        />
-        <span>
-          {label}
-          {props.required ? <Required /> : null}
-        </span>
-      </label>
-      {desc && (
-        <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
-          <span>{desc}</span>
-        </div>
-      )}
-      {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
-    </div>
-  );
+  <div className={fieldSetClassName}>
+    <label className="floating-label">
+      <DateInput
+        {...props}
+        className={cx({ "input-error": error }, props.className)}
+        placeholder={props.required ? `${label}*` : label}
+      />
+      <span>
+        {label}
+        {props.required ? <Required /> : null}
+      </span>
+    </label>
+    {desc && (
+      <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
+        <span>{desc}</span>
+      </div>
+    )}
+    {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
+  </div>
+);
 
 export const DateFormField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -449,27 +450,27 @@ export const DateFormField = <
     // @deprecated
     useDate?: boolean;
   }) => (
-    <Controller
-      disabled={props.disabled}
-      control={control}
-      rules={{ required: props.required === true }}
-      name={props.name}
-      render={({ field }) => (
-        <DateField
-          {...props}
-          value={field.value}
-          disabled={field.disabled}
-          onChange={(value) => {
-            if (useDate) {
-              field.onChange(value);
-            } else {
-              field.onChange(value ? format(value as Date, "yyyy-MM-dd") : null);
-            }
-          }}
-        />
-      )}
-    />
-  );
+  <Controller
+    disabled={props.disabled}
+    control={control}
+    rules={{ required: props.required === true }}
+    name={props.name}
+    render={({ field }) => (
+      <DateField
+        {...props}
+        value={field.value}
+        disabled={field.disabled}
+        onChange={(value) => {
+          if (useDate) {
+            field.onChange(value);
+          } else {
+            field.onChange(value ? format(value as Date, "yyyy-MM-dd") : null);
+          }
+        }}
+      />
+    )}
+  />
+);
 
 export const DateRangeField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -481,26 +482,26 @@ export const DateRangeField = <
   desc,
   ...props
 }: Omit<IInputProps<TName>, "size"> & DateRangeInputProps) => (
-    <div className={fieldSetClassName}>
-      <label className="floating-label">
-        <DateRangeInput
-          {...props}
-          className={cx({ "input-error": error }, props.className)}
-          placeholder={props.required ? `${label}*` : label}
-        />
-        <span>
-          {label}
-          {props.required ? <Required /> : null}
-        </span>
-      </label>
-      {desc && (
-        <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
-          <span>{desc}</span>
-        </div>
-      )}
-      {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
-    </div>
-  );
+  <div className={fieldSetClassName}>
+    <label className="floating-label">
+      <DateRangeInput
+        {...props}
+        className={cx({ "input-error": error }, props.className)}
+        placeholder={props.required ? `${label}*` : label}
+      />
+      <span>
+        {label}
+        {props.required ? <Required /> : null}
+      </span>
+    </label>
+    {desc && (
+      <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
+        <span>{desc}</span>
+      </div>
+    )}
+    {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
+  </div>
+);
 
 export const SelectPaginatedFromApiFormField = <
   T extends { data: unknown[]; meta: ResponseMeta },
@@ -513,24 +514,24 @@ export const SelectPaginatedFromApiFormField = <
   control: Control<TFieldValues>;
   onChange?: (model: T["data"][number] | null) => void;
 } & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => (
-    <Controller
-      control={props.control}
-      name={props.name}
-      disabled={props.disabled}
-      rules={{ required: props.required === true }}
-      render={({ field }) => (
-        <SelectPaginatedFromApiField<T>
-          {...props}
-          disabled={field.disabled}
-          value={field.value}
-          onChange={(model) => {
-            field.onChange(model ? optionValue(model) : null);
-            props.onChange?.(model || null);
-          }}
-        />
-      )}
-    />
-  );
+  <Controller
+    control={props.control}
+    name={props.name}
+    disabled={props.disabled}
+    rules={{ required: props.required === true }}
+    render={({ field }) => (
+      <SelectPaginatedFromApiField<T>
+        {...props}
+        disabled={field.disabled}
+        value={field.value}
+        onChange={(model) => {
+          field.onChange(model ? optionValue(model) : null);
+          props.onChange?.(model || null);
+        }}
+      />
+    )}
+  />
+);
 
 export const SelectFromApiField = <
   T = unknown,
@@ -611,43 +612,43 @@ export const DateTimeFormField = <
   control: Control<TFieldValues>;
   useDate?: boolean;
 } & DateTimePickerProps) => (
-    <div className={fieldSetClassName}>
-      <label className="floating-label">
-        <Controller
-          control={control}
-          name={name}
-          rules={{ required: props.required === true }}
-          disabled={disabled}
-          render={({ field }) => (
-              <DateTimePicker
-                {...props}
-                className={cx(className, { "input-error": error })}
-                placeholder={props.required ? `${label}*` : label}
-                disabled={field.disabled}
-                value={field.value ? (useDate ? field.value : stringToDate(field.value)) || null : null}
-                onChange={(value) => {
-                  if (useDate) {
-                    field.onChange(value);
-                  } else {
-                    field.onChange(value ? format(value, "yyyy-MM-dd HH:mm:ss") : null);
-                  }
-                }}
-              />
-            )}
-        />
-        <span>
-          {label}
-          {props.required ? <Required /> : null}
-        </span>
-      </label>
-      {desc && (
-        <div className="text-xs my-0.5 text-gray-500">
-          <span>{desc}</span>
-        </div>
-      )}
-      {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
-    </div>
-  );
+  <div className={fieldSetClassName}>
+    <label className="floating-label">
+      <Controller
+        control={control}
+        name={name}
+        rules={{ required: props.required === true }}
+        disabled={disabled}
+        render={({ field }) => (
+          <DateTimePicker
+            {...props}
+            className={cx(className, { "input-error": error })}
+            placeholder={props.required ? `${label}*` : label}
+            disabled={field.disabled}
+            value={field.value ? (useDate ? field.value : stringToDate(field.value)) || null : null}
+            onChange={(value) => {
+              if (useDate) {
+                field.onChange(value);
+              } else {
+                field.onChange(value ? format(value, "yyyy-MM-dd HH:mm:ss") : null);
+              }
+            }}
+          />
+        )}
+      />
+      <span>
+        {label}
+        {props.required ? <Required /> : null}
+      </span>
+    </label>
+    {desc && (
+      <div className="text-xs my-0.5 text-gray-500">
+        <span>{desc}</span>
+      </div>
+    )}
+    {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
+  </div>
+);
 
 export const TimeFormField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -658,42 +659,42 @@ export const TimeFormField = <
   className,
   ...props
 }: Omit<TimePickerProps, "onChange" | "value"> & IInputProps<TName> & { control: Control<TFieldValues> }) => (
-    <div className={props.fieldSetClassName}>
-      <label className="floating-label">
-        {!props.disabled && (
-          <span>
-            {label}
-            {props.required && <Required />}
-          </span>
-        )}
-        <Controller
-          disabled={props.disabled}
-          rules={{ required: props.required === true }}
-          render={({ field }) => (
-            <TimePicker
-              {...props}
-              value={field.value}
-              onChange={(v) => field.onChange(v)}
-              placeholder={props.required ? `${label}*` : label}
-              className={cx("input w-full", className, {
-                "input-xs": props.size === "xs",
-                "input-sm": props.size === "sm",
-                "input-error": props.error,
-              })}
-            />
-          )}
-          name={props.name}
-          control={control}
-        />
-      </label>
-      {props.desc && (
-        <div className="text-xs text-gray-500">
-          <span>{props.desc}</span>
-        </div>
+  <div className={props.fieldSetClassName}>
+    <label className="floating-label">
+      {!props.disabled && (
+        <span>
+          {label}
+          {props.required && <Required />}
+        </span>
       )}
-      <InputErrors className="text-xs text-error mt-1" errors={props.error} />
-    </div>
-  );
+      <Controller
+        disabled={props.disabled}
+        rules={{ required: props.required === true }}
+        render={({ field }) => (
+          <TimePicker
+            {...props}
+            value={field.value}
+            onChange={(v) => field.onChange(v)}
+            placeholder={props.required ? `${label}*` : label}
+            className={cx("input w-full", className, {
+              "input-xs": props.size === "xs",
+              "input-sm": props.size === "sm",
+              "input-error": props.error,
+            })}
+          />
+        )}
+        name={props.name}
+        control={control}
+      />
+    </label>
+    {props.desc && (
+      <div className="text-xs text-gray-500">
+        <span>{props.desc}</span>
+      </div>
+    )}
+    <InputErrors className="text-xs text-error mt-1" errors={props.error} />
+  </div>
+);
 
 export const NumberFormField = <
   TFieldValues extends FieldValues = FieldValues,

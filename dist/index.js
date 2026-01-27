@@ -1193,7 +1193,7 @@ const CheckboxField = ({ label, fieldSetClassName, checkbox, className, labelCla
                                 "text-xs": size === "sm" || size === "xs",
                             }), children: label })] }) }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$1.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
-const CheckboxFormField = ({ name, disabled, options, ...props }) => (jsx(CheckboxField, { ...props, ...props.register(name, {
+const CheckboxFormField = ({ name, disabled, options, register, ...props }) => (jsx(CheckboxField, { ...props, ...register(name, {
         disabled,
         ...(options || {}),
     }) }));
