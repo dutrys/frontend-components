@@ -31,11 +31,14 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
     getPreviousPageParam,
     getNextPageParam,
     enabled: !rest.disabled,
-    queryKey: [...queryKey, rest.disabled, query.length < searchFromChars ? "" : query],
+    queryKey: [...queryKey, { disabled: rest.disabled }, query.length < searchFromChars ? "" : query],
     initialPageParam: 1,
-    retry: rest.disabled ? 0 : undefined,
+    retry: rest.disabled && !value ? 0 : undefined,
     queryFn: ({ queryKey, pageParam }) => {
       if (rest.disabled) {
+        if (value) {
+          return queryFn({ "filter.id": [`$eq:${value}`] });
+        }
         return Promise.reject();
       }
       const page = typeof pageParam === "number" ? pageParam : undefined;

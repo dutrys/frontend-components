@@ -4,7 +4,7 @@ export type PaginateQuery<T> = {
     limit?: number;
     sortBy?: T[];
     search?: string;
-    [key: `filter.${string}`]: string;
+    [key: `filter.${string}`]: string[];
 };
 export type ResponseMeta = {
     itemsPerPage: number;

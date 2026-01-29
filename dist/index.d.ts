@@ -80,7 +80,7 @@ type PaginateQuery<T> = {
     limit?: number;
     sortBy?: T[];
     search?: string;
-    [key: `filter.${string}`]: string;
+    [key: `filter.${string}`]: string[];
 };
 type ResponseMeta = {
     itemsPerPage: number;
