@@ -365,7 +365,7 @@ type SelectPaginatedFromApiProps<TModel extends {
     data: unknown[];
 }> = {
     name?: string;
-    queryFn: (query: PaginateQuery<any>) => Promise<TModel>;
+    queryFn: (query: Omit<PaginateQuery<any>, "sortBy">) => Promise<TModel>;
     queryKey: ReadonlyArray<any>;
     value: TModel["data"][0] | string | number | null;
     optionValue?: (model: TModel["data"][0]) => string | number;
