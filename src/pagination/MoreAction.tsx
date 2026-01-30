@@ -22,10 +22,12 @@ export type MoreActionType = {
 };
 
 export const MoreActions = ({
-  className = "btn-ghost",
+  itemClassName = "btn-ghost",
+  rootClassName,
   actions,
 }: {
-  className?: string;
+  itemClassName?: string;
+  rootClassName?: string;
   actions: MoreActionType[];
 }) => {
   const screenSize = useScreenSize();
@@ -51,16 +53,16 @@ export const MoreActions = ({
   }, [actions, enable]);
 
   return (
-    <div className="flex more-actions gap-0.5">
+    <div className={cx("flex more-actions items-center gap-0.5", rootClassName)}>
       {buttonActions.map((a) => (
-        <Action className={className} enable key={a.label} action={a} close={() => {}} />
+        <Action className={itemClassName} enable key={a.label} action={a} close={() => {}} />
       ))}
 
       {menuActions.length > 0 && (
         <Popover
           showOnClick
           title={(ref, props, open) => (
-            <button className={cx("btn btn-xs md:btn-xs", className, { "btn-active": open })} ref={ref} {...props}>
+            <button className={cx("btn btn-xs md:btn-xs", itemClassName, { "btn-active": open })} ref={ref} {...props}>
               <EllipsisVerticalIcon className="size-4" />
             </button>
           )}

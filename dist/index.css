@@ -15,9 +15,9 @@
   border-bottom: 1px solid var(--color-base-200);
 }
 
-.PaginatedTable-module_table__efs0Y tbody tr:hover,
-.PaginatedTable-module_table__efs0Y tbody tr:hover td,
-.PaginatedTable-module_table__efs0Y tbody tr:hover th {
+.PaginatedTable-module_table__efs0Y tbody tr.PaginatedTable-module_rowHover__l-B2Q,
+.PaginatedTable-module_table__efs0Y tbody tr.PaginatedTable-module_rowHover__l-B2Q td,
+.PaginatedTable-module_table__efs0Y tbody tr.PaginatedTable-module_rowHover__l-B2Q th {
   background: var(--color-base-200);
   border-top-color: var(--color-base-200);
   border-bottom-color: var(--color-base-200);
@@ -64,6 +64,47 @@
 .PaginatedTable-module_rowHref__bPoWN td:not(.action-cell),
 .PaginatedTable-module_rowHref__bPoWN th:not(.action-cell) {
   cursor: pointer;
+}
+
+.PaginatedTable-module_table__efs0Y tr th.PaginatedTable-module_colAction__BMb6M,
+.PaginatedTable-module_table__efs0Y tr td.PaginatedTable-module_colAction__BMb6M {
+  width: 0;
+  padding:0;
+}
+
+.PaginatedTable-module_actionCellContent__wc9Um {
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+tr .PaginatedTable-module_actionCellContent__wc9Um .PaginatedTable-module_moreActionsContainer__xdZwk {
+  display: none;
+}
+
+tr.PaginatedTable-module_rowHover__l-B2Q .PaginatedTable-module_actionCellContent__wc9Um {
+  overflow: visible;
+}
+
+tr.PaginatedTable-module_rowHover__l-B2Q .PaginatedTable-module_actionCellContent__wc9Um .PaginatedTable-module_moreActionsContainer__xdZwk {
+  position: absolute;
+  display: flex;
+  right: 0;
+  top: 0;
+  height: 100%;
+  background: var(--color-base-200);
+  padding-left: 5px;
+  padding-right: 5px;
+  align-items: center;
+}
+
+tr.PaginatedTable-module_rowHover__l-B2Q .PaginatedTable-module_actionCellContent__wc9Um .PaginatedTable-module_moreActionsContainer__xdZwk .PaginatedTable-module_moreActions__8DPhG {
+  height: 30px;
+  padding: 2px;
+  border: 1px solid #bbb;
+  border-radius: var(--radius-field);
+  background: #d5d7e4;
+  box-shadow: 0px 0px 10px #999;
 }
 
 .DatePicker-module_dayPicker__VRSSY .rdp-button_previous svg,

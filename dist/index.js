@@ -146,7 +146,7 @@ const Toaster = () => {
                 } })] }));
 };
 
-const MoreActions = ({ className = "btn-ghost", actions, }) => {
+const MoreActions = ({ itemClassName = "btn-ghost", rootClassName, actions, }) => {
     const screenSize = useScreenSize();
     if (actions.filter((a) => !a.hidden).length === 0) {
         return null;
@@ -164,7 +164,7 @@ const MoreActions = ({ className = "btn-ghost", actions, }) => {
         }
         return { buttonActions, menuActions };
     }, [actions, enable]);
-    return (jsxs("div", { className: "flex more-actions gap-0.5", children: [buttonActions.map((a) => (jsx(Action, { className: className, enable: true, action: a, close: () => { } }, a.label))), menuActions.length > 0 && (jsx(Popover, { showOnClick: true, title: (ref, props, open) => (jsx("button", { className: cx("btn btn-xs md:btn-xs", className, { "btn-active": open }), ref: ref, ...props, children: jsx(EllipsisVerticalIcon, { className: "size-4" }) })), children: (close) => (jsx("div", { "data-theme": "dim", style: { background: "transparent" }, children: jsx("ul", { className: "menu menu-sm p-1 p-0", children: menuActions.map((a, i) => (jsx("li", { className: a.disabled ? "menu-disabled" : undefined, children: jsx(Action, { action: a, close: close }) }, i))) }) })) }))] }));
+    return (jsxs("div", { className: cx("flex more-actions items-center gap-0.5", rootClassName), children: [buttonActions.map((a) => (jsx(Action, { className: itemClassName, enable: true, action: a, close: () => { } }, a.label))), menuActions.length > 0 && (jsx(Popover, { showOnClick: true, title: (ref, props, open) => (jsx("button", { className: cx("btn btn-xs md:btn-xs", itemClassName, { "btn-active": open }), ref: ref, ...props, children: jsx(EllipsisVerticalIcon, { className: "size-4" }) })), children: (close) => (jsx("div", { "data-theme": "dim", style: { background: "transparent" }, children: jsx("ul", { className: "menu menu-sm p-1 p-0", children: menuActions.map((a, i) => (jsx("li", { className: a.disabled ? "menu-disabled" : undefined, children: jsx(Action, { action: a, close: close }) }, i))) }) })) }))] }));
 };
 const Action = ({ className, action: a, close, enable, }) => {
     const router = useRouter();
@@ -332,7 +332,7 @@ const Pagination = ({ page, visiblePages, onClick, size, className = "py-2", }) 
     return jsx("div", { className: cx("join mx-auto", className), children: pageNumbers });
 };
 
-var styles$3 = {"table":"PaginatedTable-module_table__efs0Y","selectedRow":"PaginatedTable-module_selectedRow__Xi-QH","thead":"PaginatedTable-module_thead__Jb-pD","rowHref":"PaginatedTable-module_rowHref__bPoWN"};
+var styles$3 = {"table":"PaginatedTable-module_table__efs0Y","selectedRow":"PaginatedTable-module_selectedRow__Xi-QH","rowHover":"PaginatedTable-module_rowHover__l-B2Q","thead":"PaginatedTable-module_thead__Jb-pD","rowHref":"PaginatedTable-module_rowHref__bPoWN","colAction":"PaginatedTable-module_colAction__BMb6M","actionCellContent":"PaginatedTable-module_actionCellContent__wc9Um","moreActionsContainer":"PaginatedTable-module_moreActionsContainer__xdZwk","moreActions":"PaginatedTable-module_moreActions__8DPhG"};
 
 const HotkeysContext = createContext({
     addHotKey: () => { },
@@ -1384,6 +1384,7 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
         }
     }
     elements.push(...searchableShortcuts);
+    const [hover, setHover] = useState(null);
     return (jsxs(Fragment, { children: [titleAbove && (jsx(Title, { truncate: typeof titleAbove === "string", outerHeight: "h-28", children: titleAbove })), jsxs("div", { "data-testid": "paginate-table", className: "relative h-screen", "data-test-sort": (pagination.meta.sortBy || []).flat().join("-"), children: [jsxs("div", { className: "absolute z-501 top-16 flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-screen sm:max-w-[calc(100vw-var(--sidebar-width))]", children: [jsx("h1", { className: `h-16 flex items-center pl-4 my-0 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (elements.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsivePaginated, { bulkActions: bulkActions ? { actions: bulkActions, setSelected, selected } : undefined, elements: elements })), extraHeading, addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: addNewText || t("pagination.addNew") })] })), renderGridItem && (jsxs("div", { className: "join mr-2", children: [jsx("button", { className: cx("btn btn-xs join-item", { "btn-active": displayAs === "grid" }), onClick: () => {
                                             setDisplayAs("grid");
                                             if (displayConfig) {
@@ -1402,7 +1403,7 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                             return null;
                                                         }
                                                         if (isActionColumn(column)) {
-                                                            return (jsx("th", { className: `${styles$3.thead} w-12 max-w-24 text-xs`, children: "\u00A0" }, `actions-${i}`));
+                                                            return (jsx("th", { className: `${styles$3.thead} ${styles$3.colAction} w-12 max-w-24 text-xs` }, `actions-${i}`));
                                                         }
                                                         const [sortBy, sortOrder] = Array.isArray(pagination.meta.sortBy)
                                                             ? pagination.meta.sortBy[0]
@@ -1439,7 +1440,8 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                     : undefined, className: cx({
                                                     [styles$3.selectedRow]: selected.includes(model.id),
                                                     [styles$3.rowHref]: rowClickHref,
-                                                }), children: [bulkActions && (jsx("th", { className: "action-cell", children: jsx("input", { type: "checkbox", className: "checkbox checkbox-xs", onChange: (e) => {
+                                                    [styles$3.rowHover]: hover === model.id,
+                                                }), onMouseEnter: () => setHover(model.id), children: [bulkActions && (jsx("th", { className: "action-cell", children: jsx("input", { type: "checkbox", className: "checkbox checkbox-xs", onChange: (e) => {
                                                                 if (e.target.checked) {
                                                                     setSelected((prev) => [...prev, model.id]);
                                                                 }
@@ -1452,7 +1454,7 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                             return null;
                                                         }
                                                         if (isActionColumn(column)) {
-                                                            return (jsx("th", { className: cx("action-cell", column.className ?? "whitespace-nowrap text-right"), children: jsx(MoreActions, { actions: column.actions(model) }) }, `actions-td-${i}`));
+                                                            return (jsx("th", { className: cx("action-cell", styles$3.colAction, column.className ?? "whitespace-nowrap text-right"), children: jsx("div", { className: styles$3.actionCellContent, children: jsx("div", { className: styles$3.moreActionsContainer, children: jsx(MoreActions, { rootClassName: styles$3.moreActions, actions: column.actions(model) }) }) }) }, `actions-td-${i}`));
                                                         }
                                                         const Component = column.pin ? "th" : "td";
                                                         if (isFunctionColumn(column)) {

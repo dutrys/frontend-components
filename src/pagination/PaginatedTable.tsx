@@ -227,6 +227,8 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
 
   elements.push(...searchableShortcuts);
 
+  const [hover, setHover] = useState<number | null>(null);
+
   return (
     <>
       {titleAbove && (
@@ -359,9 +361,10 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                         }
                         if (isActionColumn(column)) {
                           return (
-                            <th key={`actions-${i}`} className={`${styles.thead} w-12 max-w-24 text-xs`}>
-                              &nbsp;
-                            </th>
+                            <th
+                              key={`actions-${i}`}
+                              className={`${styles.thead} ${styles.colAction} w-12 max-w-24 text-xs`}
+                            ></th>
                           );
                         }
 
@@ -435,7 +438,9 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                         className={cx({
                           [styles.selectedRow]: selected.includes(model.id),
                           [styles.rowHref]: rowClickHref,
+                          [styles.rowHover]: hover === model.id,
                         })}
+                        onMouseEnter={() => setHover(model.id)}
                       >
                         {bulkActions && (
                           <th className="action-cell">
@@ -464,9 +469,17 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                             return (
                               <th
                                 key={`actions-td-${i}`}
-                                className={cx("action-cell", column.className ?? "whitespace-nowrap text-right")}
+                                className={cx(
+                                  "action-cell",
+                                  styles.colAction,
+                                  column.className ?? "whitespace-nowrap text-right",
+                                )}
                               >
-                                <MoreActions actions={column.actions(model)} />
+                                <div className={styles.actionCellContent}>
+                                  <div className={styles.moreActionsContainer}>
+                                    <MoreActions rootClassName={styles.moreActions} actions={column.actions(model)} />
+                                  </div>
+                                </div>
                               </th>
                             );
                           }

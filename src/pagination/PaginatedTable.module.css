@@ -11,9 +11,9 @@
   border-bottom: 1px solid var(--color-base-200);
 }
 
-.table tbody tr:hover,
-.table tbody tr:hover td,
-.table tbody tr:hover th {
+.table tbody tr.rowHover,
+.table tbody tr.rowHover td,
+.table tbody tr.rowHover th {
   background: var(--color-base-200);
   border-top-color: var(--color-base-200);
   border-bottom-color: var(--color-base-200);
@@ -60,4 +60,45 @@
 .rowHref td:not(:global(.action-cell)),
 .rowHref th:not(:global(.action-cell)) {
   cursor: pointer;
+}
+
+.table tr th.colAction,
+.table tr td.colAction {
+  width: 0;
+  padding:0;
+}
+
+.actionCellContent {
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+tr .actionCellContent .moreActionsContainer {
+  display: none;
+}
+
+tr.rowHover .actionCellContent {
+  overflow: visible;
+}
+
+tr.rowHover .actionCellContent .moreActionsContainer {
+  position: absolute;
+  display: flex;
+  right: 0;
+  top: 0;
+  height: 100%;
+  background: var(--color-base-200);
+  padding-left: 5px;
+  padding-right: 5px;
+  align-items: center;
+}
+
+tr.rowHover .actionCellContent .moreActionsContainer .moreActions {
+  height: 30px;
+  padding: 2px;
+  border: 1px solid #bbb;
+  border-radius: var(--radius-field);
+  background: #d5d7e4;
+  box-shadow: 0px 0px 10px #999;
 }
