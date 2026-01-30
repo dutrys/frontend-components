@@ -98,15 +98,6 @@ tr.PaginatedTable-module_rowHover__l-B2Q .PaginatedTable-module_actionCellConten
   align-items: center;
 }
 
-tr.PaginatedTable-module_rowHover__l-B2Q .PaginatedTable-module_actionCellContent__wc9Um .PaginatedTable-module_moreActionsContainer__xdZwk .PaginatedTable-module_moreActions__8DPhG {
-  height: 30px;
-  padding: 2px;
-  border: 1px solid #bbb;
-  border-radius: var(--radius-field);
-  background: #d5d7e4;
-  box-shadow: 0px 0px 10px #999;
-}
-
 .DatePicker-module_dayPicker__VRSSY .rdp-button_previous svg,
 .DatePicker-module_dayPicker__VRSSY .rdp-button_next svg {
   fill: var(--color-base-100);

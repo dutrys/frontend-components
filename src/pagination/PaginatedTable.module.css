@@ -93,12 +93,3 @@ tr.rowHover .actionCellContent .moreActionsContainer {
   padding-right: 5px;
   align-items: center;
 }
-
-tr.rowHover .actionCellContent .moreActionsContainer .moreActions {
-  height: 30px;
-  padding: 2px;
-  border: 1px solid #bbb;
-  border-radius: var(--radius-field);
-  background: #d5d7e4;
-  box-shadow: 0px 0px 10px #999;
-}

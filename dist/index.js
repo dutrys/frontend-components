@@ -332,7 +332,7 @@ const Pagination = ({ page, visiblePages, onClick, size, className = "py-2", }) 
     return jsx("div", { className: cx("join mx-auto", className), children: pageNumbers });
 };
 
-var styles$3 = {"table":"PaginatedTable-module_table__efs0Y","selectedRow":"PaginatedTable-module_selectedRow__Xi-QH","rowHover":"PaginatedTable-module_rowHover__l-B2Q","thead":"PaginatedTable-module_thead__Jb-pD","rowHref":"PaginatedTable-module_rowHref__bPoWN","colAction":"PaginatedTable-module_colAction__BMb6M","actionCellContent":"PaginatedTable-module_actionCellContent__wc9Um","moreActionsContainer":"PaginatedTable-module_moreActionsContainer__xdZwk","moreActions":"PaginatedTable-module_moreActions__8DPhG"};
+var styles$3 = {"table":"PaginatedTable-module_table__efs0Y","selectedRow":"PaginatedTable-module_selectedRow__Xi-QH","rowHover":"PaginatedTable-module_rowHover__l-B2Q","thead":"PaginatedTable-module_thead__Jb-pD","rowHref":"PaginatedTable-module_rowHref__bPoWN","colAction":"PaginatedTable-module_colAction__BMb6M","actionCellContent":"PaginatedTable-module_actionCellContent__wc9Um","moreActionsContainer":"PaginatedTable-module_moreActionsContainer__xdZwk"};
 
 const HotkeysContext = createContext({
     addHotKey: () => { },
@@ -1454,7 +1454,7 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                             return null;
                                                         }
                                                         if (isActionColumn(column)) {
-                                                            return (jsx("th", { className: cx("action-cell", styles$3.colAction, column.className ?? "whitespace-nowrap text-right"), children: jsx("div", { className: styles$3.actionCellContent, children: jsx("div", { className: styles$3.moreActionsContainer, children: jsx(MoreActions, { rootClassName: styles$3.moreActions, actions: column.actions(model) }) }) }) }, `actions-td-${i}`));
+                                                            return (jsx("th", { className: cx("action-cell", styles$3.colAction, column.className ?? "whitespace-nowrap text-right"), children: jsx("div", { className: styles$3.actionCellContent, children: jsx("div", { className: styles$3.moreActionsContainer, children: jsx(MoreActions, { itemClassName: "btn-neutral", rootClassName: "bg-neutral/60 p-1 rounded-field border border-base-300 shadow-lg", actions: column.actions(model) }) }) }) }, `actions-td-${i}`));
                                                         }
                                                         const Component = column.pin ? "th" : "td";
                                                         if (isFunctionColumn(column)) {

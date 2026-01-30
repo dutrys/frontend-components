@@ -477,7 +477,11 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                               >
                                 <div className={styles.actionCellContent}>
                                   <div className={styles.moreActionsContainer}>
-                                    <MoreActions rootClassName={styles.moreActions} actions={column.actions(model)} />
+                                    <MoreActions
+                                      itemClassName="btn-neutral"
+                                      rootClassName="bg-neutral/60 p-1 rounded-field border border-base-300 shadow-lg"
+                                      actions={column.actions(model)}
+                                    />
                                   </div>
                                 </div>
                               </th>
