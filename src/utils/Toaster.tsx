@@ -42,7 +42,7 @@ export const Toaster = () => {
 
   return (
     <>
-      <Tooltip id={TOOLTIP_GLOBAL_ID} place="top" />
+      <Tooltip id={TOOLTIP_GLOBAL_ID} className="text-xs!" place="top" />
 
       <ReactHotToast position="top-center">
         {(t) => {

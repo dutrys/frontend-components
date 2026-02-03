@@ -12,7 +12,7 @@ export declare const Popover: ({ title, children, popoverClassName, onShow, open
         height: number;
     };
     title: (ref: ((node: HTMLElement | null) => void) | null, props: Record<string, unknown>, isOpen: boolean) => React.ReactNode;
-    children: (close: () => void) => React.ReactNode;
+    children: ((close: () => void) => React.ReactNode) | React.ReactNode;
     onShow?: (show: boolean) => void;
     borderColor?: `border-${string}`;
     backgroundColor?: `bg-${string}`;

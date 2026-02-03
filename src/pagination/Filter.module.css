@@ -1,0 +1,13 @@
+.field {
+  width: 150px;
+}
+
+.fieldDate {
+  width: 190px;
+}
+
+:global(.popover) .field,
+:global(.popover) .fieldDate {
+  width: 100%;
+  padding: 7px 4px;
+}

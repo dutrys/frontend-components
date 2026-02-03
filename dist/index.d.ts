@@ -27,7 +27,7 @@ declare const Popover: ({ title, children, popoverClassName, onShow, open: openP
         height: number;
     };
     title: (ref: ((node: HTMLElement | null) => void) | null, props: Record<string, unknown>, isOpen: boolean) => React.ReactNode;
-    children: (close: () => void) => React.ReactNode;
+    children: ((close: () => void) => React.ReactNode) | React.ReactNode;
     onShow?: (show: boolean) => void;
     borderColor?: `border-${string}`;
     backgroundColor?: `bg-${string}`;
@@ -597,7 +597,7 @@ declare const SidebarLayout: ({ sidebarExpanded, onExpandChanged, sideChildren, 
     className?: string;
 }) => react_jsx_runtime.JSX.Element;
 
-declare const Title: ({ children, outerHeight, truncate, paddingLeft, noBackground, }: {
+declare const Title: ({ children, outerHeight, truncate, noOverlap, paddingLeft, noBackground, }: {
     truncate?: boolean;
     outerHeight?: string;
     children: React__default.ReactNode;

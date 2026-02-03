@@ -61,7 +61,7 @@ const Popover = ({ title, children, popoverClassName, onShow, open: openProp, sh
     if (opacityString) {
         opacity = parseInt(opacityString[1], 10) ?? 100;
     }
-    return (jsxs(Fragment, { children: [title(refs.setReference, getReferenceProps(), isOpen), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100 }, ...getFloatingProps(), className: cx("popover rounded-box shadow-lg shadow-base-content/50", popoverClassName, backgroundColor, borderColor, { border: borderColor }), children: [jsx(FloatingArrow, { fill: `var(--color-${backgroundColor.replace("bg-", "").replace(/\/\d+$/, "")})`, strokeWidth: borderColor ? 1 : 0, opacity: opacity / 100, stroke: borderColor ? `var(--color-${borderColor.replace("border-", "")})` : undefined, context: context, ref: arrowRef, width: arrowSize?.width, height: arrowSize?.height }), children(() => context.onOpenChange(false))] }) }))] }));
+    return (jsxs(Fragment, { children: [title(refs.setReference, getReferenceProps(), isOpen), isOpen && (jsx(FloatingPortal, { children: jsxs("div", { ref: refs.setFloating, style: { ...floatingStyles, zIndex: 1100 }, ...getFloatingProps(), className: cx("popover rounded-box shadow-lg shadow-base-content/50", popoverClassName, backgroundColor, borderColor, { border: borderColor }), children: [jsx(FloatingArrow, { fill: `var(--color-${backgroundColor.replace("bg-", "").replace(/\/\d+$/, "")})`, strokeWidth: borderColor ? 1 : 0, opacity: opacity / 100, stroke: borderColor ? `var(--color-${borderColor.replace("border-", "")})` : undefined, context: context, ref: arrowRef, width: arrowSize?.width, height: arrowSize?.height }), typeof children === "function" ? children(() => context.onOpenChange(false)) : children] }) }))] }));
 };
 
 const Link = (props) => {
@@ -140,7 +140,7 @@ const Toaster = () => {
             .filter((_, i) => i >= 1)
             .forEach((t) => toast.dismiss(t.id));
     }, [toasts]);
-    return (jsxs(Fragment, { children: [jsx(Tooltip, { id: TOOLTIP_GLOBAL_ID, place: "top" }), jsx(Toaster$1, { position: "top-center", children: (t) => {
+    return (jsxs(Fragment, { children: [jsx(Tooltip, { id: TOOLTIP_GLOBAL_ID, className: "text-xs!", place: "top" }), jsx(Toaster$1, { position: "top-center", children: (t) => {
                     const type = options[t.type] || options.success;
                     return (jsxs("div", { "data-testid": "toast", onClick: () => toast.remove(t.id), className: "cursor-pointer flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow-sm dark:text-gray-400 dark:bg-gray-800", role: "alert", children: [t.icon ? (t.icon) : (jsxs("div", { className: `inline-flex items-center justify-center shrink-0 w-8 h-8 rounded-lg ${type.classNames} ${t.className}`, children: [type.icon, jsx("span", { className: "sr-only", children: t.type })] })), jsx("div", { className: "ml-3 text-sm font-normal sentry-unmask", children: resolveValue(t.message, t) })] }));
                 } })] }));
@@ -1316,7 +1316,7 @@ const HumanDate = ({ date, from = new Date(), includeSeconds = false, tooltipId 
     return (jsx(Fragment, { children: jsx("span", { "data-testid": "datewithtooltip", className: `date-with-tooltip-${dateDate.getTime()}`, "data-tooltip-id": disableTooltip ? undefined : tooltipId, "data-tooltip-content": disableTooltip ? undefined : format(dateDate, displayDate ? "HH:mm:ss" : "yyyy-MM-dd HH:mm:ss"), children: displayDate ? dateToStringDate(dateDate) : dateString }) }));
 };
 
-const Title = ({ children, outerHeight, truncate, paddingLeft = "pl-4", noBackground, }) => (jsxs(Fragment, { children: [!noBackground && (jsx("div", { className: cx("absolute bg-base-100/50 backdrop-blur-xs z-500 w-full left-0 top-0", { "h-16": !outerHeight }, outerHeight) })), jsx("div", { className: cx("h-16 absolute z-501 flex items-center font-bold ml-[var(--top-left-bar)] w-[calc(100vw-var(--sidebar-width)-var(--top-right-bar)-var(--top-left-bar))]", { truncate }, paddingLeft), children: children })] }));
+const Title = ({ children, outerHeight, truncate, noOverlap, paddingLeft = "pl-4", noBackground, }) => (jsxs(Fragment, { children: [!noBackground && (jsx("div", { className: cx("absolute bg-base-100/50 backdrop-blur-xs z-500 w-full left-0 top-0", { "h-16": !outerHeight }, outerHeight) })), jsx("div", { className: cx("h-16 absolute z-501 flex items-center font-bold ml-[var(--top-left-bar)] w-[calc(100vw-var(--sidebar-width)-var(--top-right-bar)-var(--top-left-bar))]", { truncate }, paddingLeft), children: children }), noOverlap && jsx("div", { className: cx({ "h-16": !outerHeight }, outerHeight) })] }));
 
 const limits = [10, 20, 50, 100];
 const isActionColumn = (column) => typeof column === "object" && column.type === "actions";

@@ -1,5 +1,5 @@
 import React from "react";
-export declare const Title: ({ children, outerHeight, truncate, paddingLeft, noBackground, }: {
+export declare const Title: ({ children, outerHeight, truncate, noOverlap, paddingLeft, noBackground, }: {
     truncate?: boolean;
     outerHeight?: string;
     children: React.ReactNode;

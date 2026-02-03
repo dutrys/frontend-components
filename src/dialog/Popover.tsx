@@ -46,7 +46,7 @@ export const Popover = ({
     props: Record<string, unknown>,
     isOpen: boolean,
   ) => React.ReactNode;
-  children: (close: () => void) => React.ReactNode;
+  children: ((close: () => void) => React.ReactNode) | React.ReactNode;
   onShow?: (show: boolean) => void;
   borderColor?: `border-${string}`;
   backgroundColor?: `bg-${string}`;
@@ -116,7 +116,7 @@ export const Popover = ({
               width={arrowSize?.width}
               height={arrowSize?.height}
             />
-            {children(() => context.onOpenChange(false))}
+            {typeof children === "function" ? children(() => context.onOpenChange(false)) : children}
           </div>
         </FloatingPortal>
       )}
