@@ -583,6 +583,8 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   );
 };
 
+export const PAGINATED_IGNORE_ROW_CLICK = "action-cell";
+
 const LimitLink = ({ href, text, isActive }: { href: string; text: string; isActive: boolean }) => (
   <Link
     prefetch={false}

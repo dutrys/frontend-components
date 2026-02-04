@@ -72,6 +72,7 @@ export declare const PaginatedTable: <TModel extends {
         stored?: PaginationSettings | null;
     };
 }) => import("react/jsx-runtime").JSX.Element;
+export declare const PAGINATED_IGNORE_ROW_CLICK = "action-cell";
 export declare const TableLink: ({ href, children, className, isLink, ...rest }: {
     className?: string;
     href: string;
