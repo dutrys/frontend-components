@@ -3,7 +3,7 @@ export declare const HeaderResponsivePaginated: ({ elements, bulkActions, }: {
     elements: ({
         link: Record<string, string>;
         text: string;
-    }[] | ((isVisible: boolean) => React.ReactNode))[];
+    }[] | ((isVisible: boolean) => React.ReactNode) | React.ReactNode)[];
     bulkActions?: {
         actions: {
             children: React.ReactNode;

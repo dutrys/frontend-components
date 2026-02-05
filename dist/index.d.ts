@@ -69,7 +69,7 @@ declare const BulkDropDownActions: ({ bulkActions, disabled, }: {
     }[];
 }) => react_jsx_runtime.JSX.Element[];
 
-type ObjOrNode = object | ((isVisible: boolean) => React__default.ReactNode);
+type ObjOrNode = object | (((isVisible: boolean) => React__default.ReactNode) | React__default.ReactNode);
 declare const HeaderResponsive: <T extends ObjOrNode>({ renderVisible, renderDropdown, heightClassName, elements, }: {
     heightClassName: string;
     renderVisible: (r: T, i: number) => React__default.ReactNode;
@@ -185,7 +185,7 @@ declare const PaginatedTable: <TModel extends {
         name: string;
         filters: string[];
     }[];
-    searchableShortcuts?: ((isVisible: boolean) => React__default.ReactNode)[];
+    searchableShortcuts?: (((isVisible: boolean) => React__default.ReactNode) | React__default.ReactNode)[];
     columns: Array<ColumnType<TModel["data"][number]>>;
     pagination: TModel;
     addNewText?: string;
@@ -212,7 +212,7 @@ declare const HeaderResponsivePaginated: ({ elements, bulkActions, }: {
     elements: ({
         link: Record<string, string>;
         text: string;
-    }[] | ((isVisible: boolean) => React__default.ReactNode))[];
+    }[] | ((isVisible: boolean) => React__default.ReactNode) | React__default.ReactNode)[];
     bulkActions?: {
         actions: {
             children: React__default.ReactNode;

@@ -4,7 +4,7 @@ import { Popover } from "../dialog/Popover";
 
 const MORE_WIDTH = 40;
 
-type ObjOrNode = object | ((isVisible: boolean) => React.ReactNode);
+type ObjOrNode = object | (((isVisible: boolean) => React.ReactNode) | React.ReactNode);
 
 export const HeaderResponsive = <T extends ObjOrNode>({
   renderVisible,

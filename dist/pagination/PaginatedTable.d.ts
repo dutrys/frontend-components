@@ -62,7 +62,7 @@ export declare const PaginatedTable: <TModel extends {
         name: string;
         filters: string[];
     }[];
-    searchableShortcuts?: ((isVisible: boolean) => React.ReactNode)[];
+    searchableShortcuts?: (((isVisible: boolean) => React.ReactNode) | React.ReactNode)[];
     columns: Array<ColumnType<TModel["data"][number]>>;
     pagination: TModel;
     addNewText?: string;

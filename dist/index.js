@@ -374,7 +374,9 @@ const HeaderResponsivePaginated = ({ elements, bulkActions, }) => {
     const t = useTranslations();
     const searchParams = useSearchParams();
     return (jsx(HeaderResponsive, { heightClassName: "h-12", elements: elements, renderDropdown: (shortcuts, i) => (jsxs(React__default.Fragment, { children: [i !== 0 && jsx("li", { className: "disabled" }), !Array.isArray(shortcuts)
-                    ? shortcuts(false)
+                    ? typeof shortcuts === "function"
+                        ? shortcuts(false)
+                        : shortcuts
                     : shortcuts.map(({ link, text }) => {
                         if (bulkActions && bulkActions.actions.length > 0 && link.bulk === "bulk") {
                             return (jsxs(Fragment, { children: [jsx("li", { className: "menu-disabled", children: jsx("span", { children: t("pagination.bulkActions") }) }), jsx(BulkDropDownActions, { disabled: bulkActions.selected.length === 0, bulkActions: bulkActions.actions.map((b) => ({
@@ -398,7 +400,7 @@ const HeaderResponsivePaginated = ({ elements, bulkActions, }) => {
                         return (jsx("li", { children: jsx(Link, { prefetch: false, className: cx({ "bg-base-300/50 font-bold hover:bg-base-300": active }), href: params === "" ? "?" : params, children: text }) }, text));
                     })] }, i)), renderVisible: (element, i) => {
             if (!Array.isArray(element)) {
-                return element(true);
+                return typeof element === "function" ? element(true) : element;
             }
             if (i === 0 && bulkActions && bulkActions.actions.length > 0) {
                 return (jsx(BulkActions, { disabled: bulkActions.selected.length === 0, bulkActions: bulkActions.actions.map((b) => ({

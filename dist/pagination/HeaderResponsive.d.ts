@@ -1,5 +1,5 @@
 import React from "react";
-type ObjOrNode = object | ((isVisible: boolean) => React.ReactNode);
+type ObjOrNode = object | (((isVisible: boolean) => React.ReactNode) | React.ReactNode);
 export declare const HeaderResponsive: <T extends ObjOrNode>({ renderVisible, renderDropdown, heightClassName, elements, }: {
     heightClassName: string;
     renderVisible: (r: T, i: number) => React.ReactNode;

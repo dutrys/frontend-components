@@ -11,7 +11,11 @@ export const HeaderResponsivePaginated = ({
   elements,
   bulkActions,
 }: {
-  elements: ({ link: Record<string, string>; text: string }[] | ((isVisible: boolean) => React.ReactNode))[];
+  elements: (
+    | { link: Record<string, string>; text: string }[]
+    | ((isVisible: boolean) => React.ReactNode)
+    | React.ReactNode
+  )[];
   bulkActions?: {
     actions: {
       children: React.ReactNode;
@@ -32,7 +36,9 @@ export const HeaderResponsivePaginated = ({
           {i !== 0 && <li className="disabled"></li>}
 
           {!Array.isArray(shortcuts)
-            ? shortcuts(false)
+            ? typeof shortcuts === "function"
+              ? shortcuts(false)
+              : shortcuts
             : shortcuts.map(({ link, text }) => {
                 if (bulkActions && bulkActions.actions.length > 0 && link.bulk === "bulk") {
                   return (
@@ -84,7 +90,7 @@ export const HeaderResponsivePaginated = ({
       )}
       renderVisible={(element, i) => {
         if (!Array.isArray(element)) {
-          return element(true);
+          return typeof element === "function" ? element(true) : element;
         }
         if (i === 0 && bulkActions && bulkActions.actions.length > 0) {
           return (
