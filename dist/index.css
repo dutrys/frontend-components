@@ -156,3 +156,17 @@ tr.PaginatedTable-module_rowHover__l-B2Q .PaginatedTable-module_actionCellConten
   z-index: 2000;
   border-radius: var(--radius-box);
 }
+
+.Filter-module_field__vtsXb {
+  width: 150px;
+}
+
+.Filter-module_fieldDate__tuqgJ {
+  width: 190px;
+}
+
+.popover .Filter-module_field__vtsXb,
+.popover .Filter-module_fieldDate__tuqgJ {
+  width: 100%;
+  padding: 7px 4px;
+}
