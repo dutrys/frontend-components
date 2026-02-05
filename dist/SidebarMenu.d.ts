@@ -24,7 +24,7 @@ export declare const SidebarLayout: ({ sidebarExpanded, onExpandChanged, sideChi
     sideChildren: (expanded: boolean) => React.ReactNode;
     menuIcon: (expanded: boolean) => React.ReactNode;
     children: React.ReactNode;
-    icon: React.ReactNode;
+    icon?: React.ReactNode;
     className?: string;
 }) => import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=SidebarMenu.d.ts.map

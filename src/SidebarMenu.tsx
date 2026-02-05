@@ -161,7 +161,7 @@ export const SidebarLayout = ({
   sideChildren: (expanded: boolean) => React.ReactNode;
   menuIcon: (expanded: boolean) => React.ReactNode;
   children: React.ReactNode;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   className?: string;
 }) => {
   const [showSidebar, setShowSidebar] = useState(false);
@@ -184,7 +184,7 @@ export const SidebarLayout = ({
         />
       )}
       <div className="sm:hidden absolute h-16 flex items-center" style={{ zIndex: 1000 }}>
-        <span onChange={() => setShowSidebar(!showSidebar)}>{icon}</span>
+        {icon && <span onChange={() => setShowSidebar(!showSidebar)}>{icon}</span>}
         <label className="px-2 sm:hidden text-black ml-2 mr-2 swap swap-rotate">
           <input type="checkbox" checked={showSidebar} onChange={() => setShowSidebar(!showSidebar)} />
 

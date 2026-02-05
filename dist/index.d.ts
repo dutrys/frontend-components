@@ -202,10 +202,11 @@ declare const TableLink: ({ href, children, className, isLink, ...rest }: {
     children: React__default.ReactNode;
     isLink?: boolean;
 }) => string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React__default.ReactNode> | Promise<string | number | bigint | boolean | React__default.ReactPortal | React__default.ReactElement<unknown, string | React__default.JSXElementConstructor<any>> | Iterable<React__default.ReactNode> | null | undefined> | null | undefined;
-declare const FilterLink: ({ children, className, params, }: {
+declare const FilterLink: ({ children, className, params, href, }: {
     className: string;
     children?: string;
     params: Record<string, string>;
+    href: string;
 }) => react_jsx_runtime.JSX.Element;
 
 declare const HeaderResponsivePaginated: ({ elements, bulkActions, }: {
@@ -595,7 +596,7 @@ declare const SidebarLayout: ({ sidebarExpanded, onExpandChanged, sideChildren, 
     sideChildren: (expanded: boolean) => React__default.ReactNode;
     menuIcon: (expanded: boolean) => React__default.ReactNode;
     children: React__default.ReactNode;
-    icon: React__default.ReactNode;
+    icon?: React__default.ReactNode;
     className?: string;
 }) => react_jsx_runtime.JSX.Element;
 

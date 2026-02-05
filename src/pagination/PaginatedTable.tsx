@@ -630,10 +630,12 @@ export const FilterLink = ({
   children,
   className,
   params,
+  href,
 }: {
   className: string;
   children?: string;
   params: Record<string, string>;
+  href: string;
 }) => {
   const t = useTranslations();
   const searchParams = useSearchParams();
@@ -654,28 +656,21 @@ export const FilterLink = ({
     });
   }
 
-  const text = children?.split(" ") ?? [];
-  const firstWords = text.slice(0, text.length - 1).join(" ");
-  const lastWords = text[text.length - 1];
-
   return (
-    <TableLink
-      data-tooltip-id={TOOLTIP_GLOBAL_ID}
-      data-tooltip-content={isFiltering ? t("general.filter") : t("general.clearFilter")}
-      href={`${pathname}${setPartialParams(p, searchParams)}`}
-    >
-      <div className="text-wrap text-base-content">
-        {firstWords}{" "}
-        <span className="inline-flex items-center gap-1 whitespace-nowrap">
-          {lastWords}{" "}
-          {isFiltering ? (
-            <FunnelIcon className={cx(className, "inline size-5 text-primary")} />
-          ) : (
-            <FunnelIconSolid className={cx(className, "inline size-5 text-primary")} />
-          )}
-        </span>
-      </div>
-    </TableLink>
+    <>
+      <TableLink href={href}>{children}</TableLink>{" "}
+      <TableLink
+        data-tooltip-id={TOOLTIP_GLOBAL_ID}
+        data-tooltip-content={isFiltering ? t("general.filter") : t("general.clearFilter")}
+        href={`${pathname}${setPartialParams(p, searchParams)}`}
+      >
+        {isFiltering ? (
+          <FunnelIcon className={cx(className, "inline size-5 text-primary")} />
+        ) : (
+          <FunnelIconSolid className={cx(className, "inline size-5 text-primary")} />
+        )}
+      </TableLink>
+    </>
   );
 };
 

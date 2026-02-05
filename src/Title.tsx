@@ -28,7 +28,7 @@ export const Title = ({
     )}
     <div
       className={cx(
-        "h-16 absolute z-501 flex items-center font-bold ml-[var(--top-left-bar)] w-[calc(100vw-var(--sidebar-width)-var(--top-right-bar)-var(--top-left-bar))]",
+        "h-16 hidden sm:flex absolute z-501 flex items-center font-bold ml-[var(--top-left-bar)] w-[calc(100vw-var(--sidebar-width)-var(--top-right-bar)-var(--top-left-bar))]",
         { truncate },
         paddingLeft,
       )}
