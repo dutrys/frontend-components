@@ -429,7 +429,10 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                                   return;
                                 }
 
-                                const url = addLocale(rowClickHref(model), params.locale as string);
+                                let url = addLocale(rowClickHref(model), params.locale as string);
+                                if (!url.includes("?")) {
+                                  url += "?" + searchParams.toString();
+                                }
 
                                 if (event.ctrlKey || event.metaKey || event.button === 1) {
                                   window.open(url, "_blank");

@@ -954,7 +954,7 @@ const Select = ({ onChange, disabled, required, inputRef, options, name, portalE
                         "input-xs gap-0.5": size$1 === "xs",
                     }), ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, displayValue: (model) => (model ? optionLabel(model) : ""), onChange: onQueryChange && ((event) => onQueryChange(event.target.value)) }), header, !required && value ? (jsx("button", { className: "z-1 cursor-pointer", type: "button", onClick: () => onChange(null), children: jsx(XMarkIcon, { className: "size-4" }) })) : (!open && afterInput), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "", onClick: (e) => {
                                 e.target?.parentNode?.parentNode?.querySelector("input")?.select();
-                            }, children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(PortalSSR, { enabled: portalEnabled, children: jsx(Transition, { as: Fragment$1, leave: "transition-none", children: jsx("div", { style: floatingStyles, ref: refs.setFloating, className: "z-[2000] bg-base-100 mt-1 pb-1 w-full border-base-content/10 border overflow-y-auto rounded-box shadow-lg", children: jsxs(ComboboxOptions, { children: [beforeOptions, !required && (jsx(SelectOption, { size: size$1, "data-testid": "select-option-empty", value: null, children: empty || t("selectFromApi.select") }, "empty")), options.length === 0 && !hideNoItemsOption ? (jsx("div", { className: "cursor-default select-none py-2 px-4 text-base-content/60", children: jsx("span", { className: cx({ "text-xs": "xs" === size$1 || "sm" === size$1 }), children: t("selectFromApi.nothingFound") }) })) : (options.map((model, i) => {
+                            }, children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(PortalSSR, { enabled: portalEnabled, children: jsx(Transition, { as: Fragment$1, leave: "transition-none", children: jsx("div", { style: floatingStyles, ref: refs.setFloating, className: "z-[2000] bg-base-100 mt-1 w-full border-base-content/10 border overflow-y-auto rounded-box shadow-lg", children: jsxs(ComboboxOptions, { children: [beforeOptions, !required && (jsx(SelectOption, { size: size$1, "data-testid": "select-option-empty", value: null, children: empty || t("selectFromApi.select") }, "empty")), options.length === 0 && !hideNoItemsOption ? (jsx("div", { className: "cursor-default select-none py-2 px-4 text-base-content/60", children: jsx("span", { className: cx({ "text-xs": "xs" === size$1 || "sm" === size$1 }), children: t("selectFromApi.nothingFound") }) })) : (options.map((model, i) => {
                                         const group = groupBy?.(model);
                                         let groupNode;
                                         if (currentGroupBy !== group) {
@@ -1024,13 +1024,22 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
                 setValueModel(valueM);
                 return;
             }
-            queryFn({ "filter.id": [`${value}`] }).then(({ data }) => {
-                if (data.length !== 1) {
-                    console.error(`Expected 1 model, got ${data.length}, filtered by { "filter.id": [\`${value}\`] }`);
-                    captureException(`Expected 1 model, got ${data.length}, filtered by { "filter.id": [\`${value}\`] }`);
+            queryFn({ "filter.id": [`${value}`] }).then((pager) => {
+                if (pager.data.length !== 1 || (pager.data[0] && optionValue(pager.data[0])?.toString() !== `${value}`)) {
+                    captureException(`Expected 1 model, but pagination filtering does not work in your backend api`, {
+                        extra: { pager },
+                    });
+                    const a = pager.data.find((v) => optionValue(v)?.toString() !== `${value}`);
+                    if (a) {
+                        console.error(`Found model ${optionLabel(a)}, but pagination filtering does not work in your backend api`);
+                        setValueModel(a);
+                    }
+                    else {
+                        console.error(`No model found for ${value}, but pagination filtering does not work in your backend api`, pager);
+                    }
                     return;
                 }
-                setValueModel(data[0]);
+                setValueModel(pager.data[0]);
             });
         }
     }, [setValueModel, value]);
@@ -1456,7 +1465,10 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                             target.closest("input")) {
                                                             return;
                                                         }
-                                                        const url = addLocale(rowClickHref(model), params.locale);
+                                                        let url = addLocale(rowClickHref(model), params.locale);
+                                                        if (!url.includes("?")) {
+                                                            url += "?" + searchParams.toString();
+                                                        }
                                                         if (event.ctrlKey || event.metaKey || event.button === 1) {
                                                             window.open(url, "_blank");
                                                         }

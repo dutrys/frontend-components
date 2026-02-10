@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useInView } from "react-intersection-observer";
 import { getNextPageParam, getPreviousPageParam, PaginateQuery, ResponseMeta } from "../utils/paginate";
@@ -71,13 +71,24 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
         setValueModel(valueM);
         return;
       }
-      queryFn({ "filter.id": [`${value}`] }).then(({ data }) => {
-        if (data.length !== 1) {
-          console.error(`Expected 1 model, got ${data.length}, filtered by { "filter.id": [\`${value}\`] }`);
-          captureException(`Expected 1 model, got ${data.length}, filtered by { "filter.id": [\`${value}\`] }`);
+      queryFn({ "filter.id": [`${value}`] }).then((pager) => {
+        if (pager.data.length !== 1 || (pager.data[0] && optionValue(pager.data[0])?.toString() !== `${value}`)) {
+          captureException(`Expected 1 model, but pagination filtering does not work in your backend api`, {
+            extra: { pager },
+          });
+          const a = pager.data.find((v) => optionValue(v)?.toString() !== `${value}`);
+          if (a) {
+            console.error(`Found model ${optionLabel(a)}, but pagination filtering does not work in your backend api`);
+            setValueModel(a);
+          } else {
+            console.error(
+              `No model found for ${value}, but pagination filtering does not work in your backend api`,
+              pager,
+            );
+          }
           return;
         }
-        setValueModel(data[0]);
+        setValueModel(pager.data[0]);
       });
     }
   }, [setValueModel, value]);

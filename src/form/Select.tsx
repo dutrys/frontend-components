@@ -138,7 +138,7 @@ export const Select = <T = unknown,>({
               <div
                 style={floatingStyles}
                 ref={refs.setFloating}
-                className="z-[2000] bg-base-100 mt-1 pb-1 w-full border-base-content/10 border overflow-y-auto rounded-box shadow-lg"
+                className="z-[2000] bg-base-100 mt-1 w-full border-base-content/10 border overflow-y-auto rounded-box shadow-lg"
               >
                 <ComboboxOptions>
                   {beforeOptions}

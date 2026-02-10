@@ -20,7 +20,7 @@ export const Pagination = ({
   const searchParams = useSearchParams();
   let minPage = Math.max(1, page.currentPage - Math.floor(visiblePages / 2));
   const maxPage = Math.min(page.totalPages, minPage + visiblePages - 1);
-  const pageNumbers = [];
+  const pageNumbers: React.ReactNode[] = [];
 
   if (maxPage - minPage + 1 < visiblePages) {
     minPage = Math.max(1, maxPage - visiblePages + 1);

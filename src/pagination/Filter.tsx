@@ -1,7 +1,7 @@
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next-nprogress-bar";
 import cx from "classnames";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import styles from "./Filter.module.css";
 import { NumericFormat, NumericFormatProps } from "react-number-format";
 import { format, parse } from "date-fns";
