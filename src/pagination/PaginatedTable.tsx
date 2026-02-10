@@ -13,10 +13,10 @@ import { FunnelIcon as FunnelIconSolid } from "@heroicons/react/24/solid";
 import { MoreActions, MoreActionType } from "./MoreAction";
 import { Pagination } from "./Pagination";
 import { useTranslations } from "next-intl";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import styles from "./PaginatedTable.module.css";
 import cx from "classnames";
-import { Link, addLocale } from "./Link";
+import { addLocale, Link } from "./Link";
 import { Hotkeys } from "../HotKeys";
 import { HeaderResponsivePaginated } from "./HeaderResponsivePaginated";
 import { PaginationConfiguration } from "./Configuration";
@@ -640,20 +640,16 @@ export const FilterLink = ({
   const t = useTranslations();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-
-  const [isFiltering, setIsFiltering] = useState(
-    !Object.entries(params).every(([key, value]) => searchParams.get(key) === value.toString()),
-  );
-
-  useEffect(() => {
-    setIsFiltering(!Object.entries(params).every(([key, value]) => searchParams.get(key) === value.toString()));
-  }, [searchParams, setIsFiltering, params]);
-
-  const p = params;
+  const isFiltering = !Object.entries(params).every(([key, value]) => searchParams.get(key) === value.toString());
+  let p = params;
   if (!isFiltering) {
-    Object.keys(params).forEach((key) => {
-      p[key] = "";
-    });
+    p = Object.keys(params).reduce(
+      (acc, curr) => {
+        acc[curr] = "";
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
   }
 
   return (

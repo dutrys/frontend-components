@@ -1,7 +1,7 @@
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next-nprogress-bar";
 import cx from "classnames";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./Filter.module.css";
 import { NumericFormat, NumericFormatProps } from "react-number-format";
 import { format, parse } from "date-fns";
@@ -288,10 +288,9 @@ export const FilterPagination = <T extends { data: unknown[]; meta: ResponseMeta
   groupBy?: (model: T["data"][number]) => string;
 }) => {
   const searchParams = useSearchParams();
-  const defaultValue = searchParams.get(`filter.${filter}`) || "";
   const router = useRouter();
-  const [value, setValue] = useState<number | string | T | null>(parseInt(defaultValue, 10) || null);
 
+  const value = searchParams.has(`filter.${filter}`) ? (parseInt(searchParams.get(`filter.${filter}`)!) ?? null) : null;
   return (
     <SelectPaginatedFromApiField<T>
       label={label}
@@ -309,8 +308,11 @@ export const FilterPagination = <T extends { data: unknown[]; meta: ResponseMeta
       optionLabel={optionLabel}
       groupBy={groupBy}
       onChange={(m) => {
-        setValue(m ? optionValue(m) : null);
-        router.replace(setPartialParams({ [`filter.${filter}`]: m ? `${optionValue(m)}%` : "" }, searchParams));
+        const value = m ? `${optionValue(m)}` : "";
+        if (searchParams.get(filter) === value) {
+          return;
+        }
+        router.replace(setPartialParams({ [`filter.${filter}`]: value }, searchParams));
       }}
     />
   );

@@ -280,7 +280,6 @@ export const PaginationConfiguration = <T = unknown,>({
                             configsWinNoColumns[key] = value.map((d) => ({ enabled: d.enabled, name: d.name }));
                           }
                         }
-                        console.log(name, { columns: configsWinNoColumns });
                         setLoading(true);
                         store
                           .setConfig(name, { columns: configsWinNoColumns })

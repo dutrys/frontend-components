@@ -1,10 +1,11 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useInView } from "react-intersection-observer";
 import { getNextPageParam, getPreviousPageParam, PaginateQuery, ResponseMeta } from "../utils/paginate";
 import { LoadingComponent } from "../Loading";
 import { Select, SelectProps } from "./Select";
+import { captureException } from "@sentry/nextjs";
 
 export type SelectPaginatedFromApiProps<TModel extends { meta: ResponseMeta; data: unknown[] }> = {
   name?: string;
@@ -26,19 +27,21 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
   optionValue = (model) => (model as any).id,
   ...rest
 }: SelectPaginatedFromApiProps<TModel>) => {
-  const [query, setQuery] = useState(value ? `${value}` : "");
+  const [query, setQuery] = useState("");
+  const [valueModel, setValueModel] = useState<TModel["data"][0] | null>(typeof value === "object" ? value : null);
   const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<TModel>({
     getPreviousPageParam,
     getNextPageParam,
     enabled: !rest.disabled,
-    queryKey: [...queryKey, { disabled: rest.disabled }, query.length < searchFromChars ? "" : query],
+    queryKey: [
+      ...queryKey,
+      { disabled: rest.disabled, fetchSelected: value && typeof valueModel },
+      query.length < searchFromChars ? "" : query,
+    ],
     initialPageParam: 1,
     retry: rest.disabled && !value ? 0 : undefined,
     queryFn: ({ queryKey, pageParam }) => {
       if (rest.disabled) {
-        if (value) {
-          return queryFn({ "filter.id": [`$eq:${value}`] });
-        }
         return Promise.reject();
       }
       const page = typeof pageParam === "number" ? pageParam : undefined;
@@ -52,6 +55,33 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
+
+  useEffect(() => {
+    if (!value) {
+      if (valueModel) {
+        setValueModel(null);
+      }
+      return;
+    } else if (!valueModel || value !== optionValue(valueModel)) {
+      const valueM = data?.pages
+        ?.map((p) => p.data)
+        ?.flat()
+        ?.find((v) => optionValue(v) !== value);
+      if (valueM) {
+        setValueModel(valueM);
+        return;
+      }
+      queryFn({ "filter.id": [`${value}`] }).then(({ data }) => {
+        if (data.length !== 1) {
+          console.error(`Expected 1 model, got ${data.length}, filtered by { "filter.id": [\`${value}\`] }`);
+          captureException(`Expected 1 model, got ${data.length}, filtered by { "filter.id": [\`${value}\`] }`);
+          return;
+        }
+        setValueModel(data[0]);
+      });
+    }
+  }, [setValueModel, value]);
+
   const t = useTranslations();
 
   useEffect(() => {
@@ -82,17 +112,13 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
     <Select<TModel["data"][0]>
       {...rest}
       disabled={rest.disabled}
-      onChange={onChange}
+      onChange={(v) => {
+        setValueModel(v);
+        onChange(v);
+      }}
       onQueryChange={setQuery}
       options={data?.pages.flatMap((d) => d?.data || []) ?? []}
-      value={
-        typeof value === "number" || typeof value === "string"
-          ? ((data?.pages || [])
-              .map((d) => d?.data || [])
-              .flat()
-              .find((b: TModel["data"][0]) => optionValue(b) === value) ?? null)
-          : (value ?? null)
-      }
+      value={valueModel}
       optionLabel={optionLabel}
       afterInput={isLoading ? <LoadingComponent loadingClassName="size-4 text-primary" /> : undefined}
       hideNoItemsOption={isLoading}

@@ -678,7 +678,6 @@ const PaginationConfiguration = ({ name, configName, columns, setConfigName, sto
                                                             configsWinNoColumns[key] = value.map((d) => ({ enabled: d.enabled, name: d.name }));
                                                         }
                                                     }
-                                                    console.log(name, { columns: configsWinNoColumns });
                                                     setLoading(true);
                                                     store
                                                         .setConfig(name, { columns: configsWinNoColumns })
@@ -982,19 +981,21 @@ const SelectOption = ({ value, size, children, className, ...rest }) => (jsx(Com
                 }), children: jsx(CheckIcon, { className: "h-5 w-5", "aria-hidden": "true" }) }))] })) }));
 
 const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, ...rest }) => {
-    const [query, setQuery] = useState(value ? `${value}` : "");
+    const [query, setQuery] = useState("");
+    const [valueModel, setValueModel] = useState(typeof value === "object" ? value : null);
     const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
         getPreviousPageParam,
         getNextPageParam,
         enabled: !rest.disabled,
-        queryKey: [...queryKey, { disabled: rest.disabled }, query.length < searchFromChars ? "" : query],
+        queryKey: [
+            ...queryKey,
+            { disabled: rest.disabled, fetchSelected: value && typeof valueModel },
+            query.length < searchFromChars ? "" : query,
+        ],
         initialPageParam: 1,
         retry: rest.disabled && !value ? 0 : undefined,
         queryFn: ({ queryKey, pageParam }) => {
             if (rest.disabled) {
-                if (value) {
-                    return queryFn({ "filter.id": [`$eq:${value}`] });
-                }
                 return Promise.reject();
             }
             const page = typeof pageParam === "number" ? pageParam : undefined;
@@ -1007,6 +1008,32 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
     });
+    useEffect(() => {
+        if (!value) {
+            if (valueModel) {
+                setValueModel(null);
+            }
+            return;
+        }
+        else if (!valueModel || value !== optionValue(valueModel)) {
+            const valueM = data?.pages
+                ?.map((p) => p.data)
+                ?.flat()
+                ?.find((v) => optionValue(v) !== value);
+            if (valueM) {
+                setValueModel(valueM);
+                return;
+            }
+            queryFn({ "filter.id": [`${value}`] }).then(({ data }) => {
+                if (data.length !== 1) {
+                    console.error(`Expected 1 model, got ${data.length}, filtered by { "filter.id": [\`${value}\`] }`);
+                    captureException(`Expected 1 model, got ${data.length}, filtered by { "filter.id": [\`${value}\`] }`);
+                    return;
+                }
+                setValueModel(data[0]);
+            });
+        }
+    }, [setValueModel, value]);
     const t = useTranslations();
     useEffect(() => {
         void refetch();
@@ -1028,12 +1055,10 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
             }
         }
     }, [isLoading]);
-    return (jsx(Select, { ...rest, disabled: rest.disabled, onChange: onChange, onQueryChange: setQuery, options: data?.pages.flatMap((d) => d?.data || []) ?? [], value: typeof value === "number" || typeof value === "string"
-            ? ((data?.pages || [])
-                .map((d) => d?.data || [])
-                .flat()
-                .find((b) => optionValue(b) === value) ?? null)
-            : (value ?? null), optionLabel: optionLabel, afterInput: isLoading ? jsx(LoadingComponent, { loadingClassName: "size-4 text-primary" }) : undefined, hideNoItemsOption: isLoading, afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isFetchingNextPage || isLoading ? (jsx(LoadingComponent, { className: "my-2" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }));
+    return (jsx(Select, { ...rest, disabled: rest.disabled, onChange: (v) => {
+            setValueModel(v);
+            onChange(v);
+        }, onQueryChange: setQuery, options: data?.pages.flatMap((d) => d?.data || []) ?? [], value: valueModel, optionLabel: optionLabel, afterInput: isLoading ? jsx(LoadingComponent, { loadingClassName: "size-4 text-primary" }) : undefined, hideNoItemsOption: isLoading, afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isFetchingNextPage || isLoading ? (jsx(LoadingComponent, { className: "my-2" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }));
 };
 
 const timeToDate = (date, format = "HH:mm:ss") => {
@@ -1491,15 +1516,13 @@ const FilterLink = ({ children, className, params, href, }) => {
     const t = useTranslations();
     const searchParams = useSearchParams();
     const pathname = usePathname();
-    const [isFiltering, setIsFiltering] = useState(!Object.entries(params).every(([key, value]) => searchParams.get(key) === value.toString()));
-    useEffect(() => {
-        setIsFiltering(!Object.entries(params).every(([key, value]) => searchParams.get(key) === value.toString()));
-    }, [searchParams, setIsFiltering, params]);
-    const p = params;
+    const isFiltering = !Object.entries(params).every(([key, value]) => searchParams.get(key) === value.toString());
+    let p = params;
     if (!isFiltering) {
-        Object.keys(params).forEach((key) => {
-            p[key] = "";
-        });
+        p = Object.keys(params).reduce((acc, curr) => {
+            acc[curr] = "";
+            return acc;
+        }, {});
     }
     return (jsxs(Fragment, { children: [jsx(TableLink, { href: href, children: children }), " ", jsx(TableLink, { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": isFiltering ? t("general.filter") : t("general.clearFilter"), href: `${pathname}${setPartialParams(p, searchParams)}`, children: isFiltering ? (jsx(FunnelIcon, { className: cx(className, "inline size-5 text-primary") })) : (jsx(FunnelIcon$1, { className: cx(className, "inline size-5 text-primary") })) })] }));
 };
@@ -1774,12 +1797,14 @@ const FilterText = ({ filter, label, fieldsetClassName, isLike, }) => {
 };
 const FilterPagination = ({ filter, label, queryFn, queryKey, optionLabel, optionValue = (m) => m.id, groupBy, fieldsetClassName, }) => {
     const searchParams = useSearchParams();
-    const defaultValue = searchParams.get(`filter.${filter}`) || "";
     const router = useRouter();
-    const [value, setValue] = useState(parseInt(defaultValue, 10) || null);
+    const value = searchParams.has(`filter.${filter}`) ? (parseInt(searchParams.get(`filter.${filter}`)) ?? null) : null;
     return (jsx(SelectPaginatedFromApiField, { label: label, fieldSetClassName: cx(styles.field, fieldsetClassName), name: filter, size: "xs", className: value ? "select-neutral" : undefined, value: value, optionValue: optionValue, portalEnabled: true, minWidth: 200, required: false, queryFn: queryFn, queryKey: queryKey, optionLabel: optionLabel, groupBy: groupBy, onChange: (m) => {
-            setValue(m ? optionValue(m) : null);
-            router.replace(setPartialParams({ [`filter.${filter}`]: m ? `${optionValue(m)}%` : "" }, searchParams));
+            const value = m ? `${optionValue(m)}` : "";
+            if (searchParams.get(filter) === value) {
+                return;
+            }
+            router.replace(setPartialParams({ [`filter.${filter}`]: value }, searchParams));
         } }));
 };
 const FilterSelectOptions = ({ filter, label, options, fieldsetClassName, }) => {
