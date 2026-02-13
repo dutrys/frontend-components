@@ -59,40 +59,75 @@ export const TextFormField = <
 >({
   required,
   disabled,
-  error,
-  className,
-  id,
-  type,
   register,
-  label,
-  size,
   options,
-  desc,
   name,
-  fieldSetClassName,
   ref,
   ...rest
-}: IInputRegisterProps<TFieldValues, TName> & { type?: string; ref?: (input: HTMLInputElement | null) => void }) => {
+}: IInputRegisterProps<TFieldValues, TName> & {
+  append?: React.ReactNode;
+  prepend?: React.ReactNode;
+  type?: string;
+  ref?: (input: HTMLInputElement | null) => void;
+}) => {
   const r = register(name, {
     required: required,
     disabled: disabled,
     ...((options as RegisterOptions<TFieldValues, TName>) || {}),
   });
   return (
-    <div className={fieldSetClassName}>
-      <label className="floating-label">
+    <TextField
+      {...rest}
+      {...r}
+      ref={(reference) => {
+        r.ref(reference);
+        if (ref) {
+          ref(reference);
+        }
+      }}
+    />
+  );
+};
+
+export const TextField = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+>({
+  error,
+  className,
+  type = "text",
+  label,
+  size,
+  desc,
+  fieldSetClassName,
+  append,
+  prepend,
+  ...rest
+}: IInputProps<TName> & {
+  onChange: (e: ChangeEvent<HTMLInputElement>) => unknown;
+  append?: React.ReactNode;
+  prepend?: React.ReactNode;
+  type?: string;
+  ref?: (input: HTMLInputElement | null) => void;
+}) => (
+  <div className={fieldSetClassName}>
+    <label className="floating-label">
+      {append || prepend ? (
+        <div
+          className={cx("input input-bordered w-full", className, {
+            "input-xs": size === "xs",
+            "input-sm": size === "sm",
+            "input-error": error,
+          })}
+        >
+          {prepend}
+          <input type={type} placeholder={rest.required ? `${label}*` : label} {...rest} />
+          {append}
+        </div>
+      ) : (
         <input
-          id={id}
-          type={type || "text"}
-          {...r}
-          ref={(i) => {
-            r.ref(i);
-            if (ref) {
-              ref(i);
-            }
-          }}
-          required={required}
-          placeholder={required ? `${label}*` : label}
+          type={type}
+          placeholder={rest.required ? `${label}*` : label}
           className={cx("input input-bordered w-full", className, {
             "input-xs": size === "xs",
             "input-sm": size === "sm",
@@ -100,20 +135,21 @@ export const TextFormField = <
           })}
           {...rest}
         />
-        <span>
-          {label}
-          {required ? <Required /> : null}
-        </span>
-      </label>
-      {desc && (
-        <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
-          <span>{desc}</span>
-        </div>
       )}
-      {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
-    </div>
-  );
-};
+
+      <span>
+        {label}
+        {rest.required ? <Required /> : null}
+      </span>
+    </label>
+    {desc && (
+      <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
+        <span>{desc}</span>
+      </div>
+    )}
+    {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
+  </div>
+);
 
 export const SelectFormField = <
   TFieldValues extends FieldValues = FieldValues,

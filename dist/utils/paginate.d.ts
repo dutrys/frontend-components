@@ -19,6 +19,6 @@ export declare const getPreviousPageParam: <T extends {
 export declare const getNextPageParam: <T extends {
     meta: ResponseMeta;
 }>(page?: T) => number | undefined;
-export declare const setPartialParams: (partialParams: Record<string, string | string[]>, searchParams: ReadonlyURLSearchParams | null) => string;
+export declare const setPartialParams: (partialParams: Record<string, number | string | string[]>, searchParams: ReadonlyURLSearchParams | null) => string;
 export declare const isParamActive: (link: Record<string, string | string[]>, searchParams: ReadonlyURLSearchParams) => boolean;
 //# sourceMappingURL=paginate.d.ts.map

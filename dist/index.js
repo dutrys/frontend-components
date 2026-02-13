@@ -285,7 +285,7 @@ const setPartialParams = (partialParams, searchParams) => {
         }
         else {
             params.delete(`${key}[]`);
-            params.set(key, value);
+            params.set(key, typeof value === "number" ? value.toString() : value);
         }
     });
     return `?${params}`;
@@ -1067,7 +1067,7 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
     return (jsx(Select, { ...rest, disabled: rest.disabled, onChange: (v) => {
             setValueModel(v);
             onChange(v);
-        }, onQueryChange: setQuery, options: data?.pages.flatMap((d) => d?.data || []) ?? [], value: valueModel, optionLabel: optionLabel, afterInput: isLoading ? jsx(LoadingComponent, { loadingClassName: "size-4 text-primary" }) : undefined, hideNoItemsOption: isLoading, afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isFetchingNextPage || isLoading ? (jsx(LoadingComponent, { className: "my-2" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }));
+        }, onQueryChange: setQuery, options: data?.pages.flatMap((d) => d?.data || []) ?? [], value: valueModel, optionLabel: optionLabel, afterInput: isLoading && !rest.disabled ? jsx(LoadingComponent, { loadingClassName: "size-4 text-primary" }) : undefined, hideNoItemsOption: isLoading, afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isFetchingNextPage || isLoading ? (jsx(LoadingComponent, { className: "my-2" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }));
 };
 
 const timeToDate = (date, format = "HH:mm:ss") => {
@@ -1136,23 +1136,28 @@ const SelectFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model) =
             : (value ?? null), afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isLoading && jsx(LoadingComponent, { className: "my-2" })] }) }));
 };
 
-const TextFormField = ({ required, disabled, error, className, id, type, register, label, size, options, desc, name, fieldSetClassName, ref, ...rest }) => {
+const TextFormField = ({ required, disabled, register, options, name, ref, ...rest }) => {
     const r = register(name, {
         required: required,
         disabled: disabled,
         ...(options || {}),
     });
-    return (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx("input", { id: id, type: type || "text", ...r, ref: (i) => {
-                            r.ref(i);
-                            if (ref) {
-                                ref(i);
-                            }
-                        }, required: required, placeholder: required ? `${label}*` : label, className: cx("input input-bordered w-full", className, {
-                            "input-xs": size === "xs",
-                            "input-sm": size === "sm",
-                            "input-error": error,
-                        }), ...rest }), jsxs("span", { children: [label, required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+    return (jsx(TextField, { ...rest, ...r, ref: (reference) => {
+            r.ref(reference);
+            if (ref) {
+                ref(reference);
+            }
+        } }));
 };
+const TextField = ({ error, className, type = "text", label, size, desc, fieldSetClassName, append, prepend, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [append || prepend ? (jsxs("div", { className: cx("input input-bordered w-full", className, {
+                        "input-xs": size === "xs",
+                        "input-sm": size === "sm",
+                        "input-error": error,
+                    }), children: [prepend, jsx("input", { type: type, placeholder: rest.required ? `${label}*` : label, ...rest }), append] })) : (jsx("input", { type: type, placeholder: rest.required ? `${label}*` : label, className: cx("input input-bordered w-full", className, {
+                        "input-xs": size === "xs",
+                        "input-sm": size === "sm",
+                        "input-error": error,
+                    }), ...rest })), jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 const SelectFormField = ({ id, disabled, fieldSetClassName, label, register, required, name, error, desc, options, size, className, children, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx("select", { id: id, ...register(name, {
                         required: required,
                         disabled: disabled,
@@ -1649,7 +1654,7 @@ const SidebarMenu = ({ menu, active, expanded, }) => (jsx("ul", { className: cx(
         if ((typeof item.items === "function" || (Array.isArray(item.items) && item.items.length > 0)) &&
             item.items &&
             !expanded) {
-            return (jsx(Popover, { backgroundColor: "bg-nav-popover/95", placement: "right-start", arrowSize: { width: 10, height: 5 }, title: (ref, props, isOpen) => (jsx("div", { ref: ref, children: jsx(Item, { disableTooltip: true, item: item, active: active(item) || (Array.isArray(item.items) && item.items.some((i) => active(i))), forceHover: isOpen }) })), children: (close) => (jsx("div", { "data-theme": "dim", className: "bg-transparent", children: Array.isArray(item.items) ? (jsx("ul", { className: "menu p-1", children: item.items?.map((sub, i) => (jsx("li", { children: jsxs(Link, { href: sub.href, onClick: close, className: "text-white", children: [jsx(sub.icon, { className: "size-5" }), sub.name] }) }, i))) })) : (item.items()) })) }, `${item.name}-${i}`));
+            return (jsx(Popover, { backgroundColor: "bg-nav-popover/95", placement: "right-start", arrowSize: { width: 10, height: 5 }, title: (ref, props, isOpen) => (jsx("div", { ref: ref, ...props, children: jsx(Item, { disableTooltip: true, item: item, active: active(item) || (Array.isArray(item.items) && item.items.some((i) => active(i))), forceHover: isOpen }) })), children: (close) => (jsx("div", { "data-theme": "dim", style: { background: "unset" }, children: Array.isArray(item.items) ? (jsx("ul", { className: "menu p-1", children: item.items?.map((sub, i) => (jsx("li", { children: jsxs(Link, { href: sub.href, onClick: close, className: "text-white", children: [jsx(sub.icon, { className: "size-5" }), sub.name] }) }, i))) })) : (item.items()) })) }, `${item.name}-${i}`));
         }
         if (expanded && Array.isArray(item.items) && item.items.length > 0) {
             const isActive = item.items.some((s) => active(s));
@@ -2086,5 +2091,5 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                                         : undefined, size: "sm" })] })), v.type === FilterType.PAGINATION && (jsx(SelectPaginatedFromApiFormField, { queryFn: v.queryFn, queryKey: v.queryKey, optionLabel: v.optionLabel, groupBy: v.groupBy, portalEnabled: true, control: control, label: v.label, name: key, size: "sm" })), v.type === FilterType.BOOLEAN && (jsxs("div", { className: "join w-full", children: [jsx("button", { className: cx("btn grow btn-sm join-item", { "btn-success": watched[key] === true }), type: "button", onClick: () => (watched[key] === true ? setValue(key, undefined) : setValue(key, true)), children: v.label }), jsx("button", { onClick: () => (watched[key] === false ? setValue(key, undefined) : setValue(key, false)), className: cx("btn grow btn-sm join-item", { "btn-error": watched[key] === false }), type: "button", children: `${t("general.no")} ${v.label.toLowerCase()}` })] }))] }, `${key}-${i}`))), jsx(SaveButton, { className: "btn-sm w-full", children: t("general.filter") })] }) }));
 };
 
-export { Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Select, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
+export { Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Select, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
 //# sourceMappingURL=index.js.map

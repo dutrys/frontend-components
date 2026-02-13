@@ -97,7 +97,7 @@ declare const getPreviousPageParam: <T extends {
 declare const getNextPageParam: <T extends {
     meta: ResponseMeta;
 }>(page?: T) => number | undefined;
-declare const setPartialParams: (partialParams: Record<string, string | string[]>, searchParams: ReadonlyURLSearchParams | null) => string;
+declare const setPartialParams: (partialParams: Record<string, number | string | string[]>, searchParams: ReadonlyURLSearchParams | null) => string;
 declare const isParamActive: (link: Record<string, string | string[]>, searchParams: ReadonlyURLSearchParams) => boolean;
 
 declare const Pagination: ({ page, visiblePages, onClick, size, className, }: {
@@ -205,7 +205,7 @@ declare const TableLink: ({ href, children, className, isLink, ...rest }: {
 declare const FilterLink: ({ children, className, params, href, }: {
     className: string;
     children?: string;
-    params: Record<string, string>;
+    params: Record<string, string | number>;
     href: string;
 }) => react_jsx_runtime.JSX.Element;
 
@@ -419,7 +419,16 @@ interface IInputRegisterOnlyProps<TFieldValues extends FieldValues = FieldValues
 }
 interface IInputRegisterProps<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>> extends IInputProps<TName>, IInputRegisterOnlyProps<TFieldValues, TName> {
 }
-declare const TextFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ required, disabled, error, className, id, type, register, label, size, options, desc, name, fieldSetClassName, ref, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
+declare const TextFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ required, disabled, register, options, name, ref, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
+    append?: React__default.ReactNode;
+    prepend?: React__default.ReactNode;
+    type?: string;
+    ref?: (input: HTMLInputElement | null) => void;
+}) => react_jsx_runtime.JSX.Element;
+declare const TextField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ error, className, type, label, size, desc, fieldSetClassName, append, prepend, ...rest }: IInputProps<TName> & {
+    onChange: (e: ChangeEvent<HTMLInputElement>) => unknown;
+    append?: React__default.ReactNode;
+    prepend?: React__default.ReactNode;
     type?: string;
     ref?: (input: HTMLInputElement | null) => void;
 }) => react_jsx_runtime.JSX.Element;
@@ -716,4 +725,4 @@ declare const FilterButton: ({ className, filter, onSubmitParams, onParseParams,
     className?: string;
 }) => react_jsx_runtime.JSX.Element;
 
-export { type ActionColumn, Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, type ColumnType, ConfirmSave, type DateColumn, DateField, DateFormField, DateInput, type DateInputProps, DateRangeField, DateRangeInput, type DateRangeInputProps, DateTime, DateTimeFormField, DateTimePicker, type DateTimePickerProps, FilterButton, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, type FilterPaginationColumn, FilterSelectOptions, FilterText, FilterType, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MenuItem, type MenuItemWithSubmenu, type MoreActionType, MoreActions, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, type PaginateQuery, PaginatedTable, Pagination, type PaginationSettings, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, type ResponseMeta, SaveButton, ScreenSize, Select, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, type SelectFromApiProps, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, type SelectPaginatedFromApiProps, type SelectProps, type ServerError, SidebarLayout, SidebarMenu, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextFormField, TextareaFormField, TimeFormField, TimePicker, type TimePickerProps, Title, Toaster, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
+export { type ActionColumn, Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, type ColumnType, ConfirmSave, type DateColumn, DateField, DateFormField, DateInput, type DateInputProps, DateRangeField, DateRangeInput, type DateRangeInputProps, DateTime, DateTimeFormField, DateTimePicker, type DateTimePickerProps, FilterButton, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, type FilterPaginationColumn, FilterSelectOptions, FilterText, FilterType, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MenuItem, type MenuItemWithSubmenu, type MoreActionType, MoreActions, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, type PaginateQuery, PaginatedTable, Pagination, type PaginationSettings, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, type ResponseMeta, SaveButton, ScreenSize, Select, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, type SelectFromApiProps, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, type SelectPaginatedFromApiProps, type SelectProps, type ServerError, SidebarLayout, SidebarMenu, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, type TimePickerProps, Title, Toaster, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };

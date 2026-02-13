@@ -82,7 +82,7 @@ export declare const TableLink: ({ href, children, className, isLink, ...rest }:
 export declare const FilterLink: ({ children, className, params, href, }: {
     className: string;
     children?: string;
-    params: Record<string, string>;
+    params: Record<string, string | number>;
     href: string;
 }) => import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=PaginatedTable.d.ts.map

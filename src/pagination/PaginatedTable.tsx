@@ -637,7 +637,7 @@ export const FilterLink = ({
 }: {
   className: string;
   children?: string;
-  params: Record<string, string>;
+  params: Record<string, string | number>;
   href: string;
 }) => {
   const t = useTranslations();

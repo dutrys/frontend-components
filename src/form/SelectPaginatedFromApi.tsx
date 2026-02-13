@@ -131,7 +131,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
       options={data?.pages.flatMap((d) => d?.data || []) ?? []}
       value={valueModel}
       optionLabel={optionLabel}
-      afterInput={isLoading ? <LoadingComponent loadingClassName="size-4 text-primary" /> : undefined}
+      afterInput={isLoading && !rest.disabled ? <LoadingComponent loadingClassName="size-4 text-primary" /> : undefined}
       hideNoItemsOption={isLoading}
       afterOptions={
         <>

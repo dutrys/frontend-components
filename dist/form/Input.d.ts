@@ -25,7 +25,16 @@ interface IInputRegisterOnlyProps<TFieldValues extends FieldValues = FieldValues
 }
 interface IInputRegisterProps<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>> extends IInputProps<TName>, IInputRegisterOnlyProps<TFieldValues, TName> {
 }
-export declare const TextFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ required, disabled, error, className, id, type, register, label, size, options, desc, name, fieldSetClassName, ref, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
+export declare const TextFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ required, disabled, register, options, name, ref, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
+    append?: React.ReactNode;
+    prepend?: React.ReactNode;
+    type?: string;
+    ref?: (input: HTMLInputElement | null) => void;
+}) => import("react/jsx-runtime").JSX.Element;
+export declare const TextField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ error, className, type, label, size, desc, fieldSetClassName, append, prepend, ...rest }: IInputProps<TName> & {
+    onChange: (e: ChangeEvent<HTMLInputElement>) => unknown;
+    append?: React.ReactNode;
+    prepend?: React.ReactNode;
     type?: string;
     ref?: (input: HTMLInputElement | null) => void;
 }) => import("react/jsx-runtime").JSX.Element;

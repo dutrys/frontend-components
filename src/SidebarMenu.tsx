@@ -88,7 +88,7 @@ export const SidebarMenu = ({
             placement="right-start"
             arrowSize={{ width: 10, height: 5 }}
             title={(ref, props, isOpen) => (
-              <div ref={ref}>
+              <div ref={ref} {...props}>
                 <Item
                   disableTooltip
                   item={item}
@@ -99,7 +99,7 @@ export const SidebarMenu = ({
             )}
           >
             {(close) => (
-              <div data-theme="dim" className="bg-transparent">
+              <div data-theme="dim" style={{ background: "unset" }}>
                 {Array.isArray(item.items) ? (
                   <ul className="menu p-1">
                     {item.items?.map((sub, i) => (

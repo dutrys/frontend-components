@@ -23,7 +23,7 @@ export const getNextPageParam = <T extends { meta: ResponseMeta }>(page?: T): nu
   !page?.meta || page?.meta?.currentPage >= page.meta?.totalPages ? undefined : page.meta.currentPage + 1;
 
 export const setPartialParams = (
-  partialParams: Record<string, string | string[]>,
+  partialParams: Record<string, number | string | string[]>,
   searchParams: ReadonlyURLSearchParams | null,
 ): string => {
   const params = new URLSearchParams(Array.from(searchParams?.entries() || []));
@@ -40,7 +40,7 @@ export const setPartialParams = (
       }
     } else {
       params.delete(`${key}[]`);
-      params.set(key, value);
+      params.set(key, typeof value === "number" ? value.toString() : value);
     }
   });
   return `?${params}`;
