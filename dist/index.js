@@ -1136,10 +1136,10 @@ const SelectFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model) =
             : (value ?? null), afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isLoading && jsx(LoadingComponent, { className: "my-2" })] }) }));
 };
 
-const TextFormField = ({ required, disabled, register, options, name, ref, ...rest }) => {
+const TextFormField = ({ register, options, name, ref, ...rest }) => {
     const r = register(name, {
-        required: required,
-        disabled: disabled,
+        required: rest.required,
+        disabled: rest.disabled,
         ...(options || {}),
     });
     return (jsx(TextField, { ...rest, ...r, ref: (reference) => {

@@ -419,7 +419,7 @@ interface IInputRegisterOnlyProps<TFieldValues extends FieldValues = FieldValues
 }
 interface IInputRegisterProps<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>> extends IInputProps<TName>, IInputRegisterOnlyProps<TFieldValues, TName> {
 }
-declare const TextFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ required, disabled, register, options, name, ref, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
+declare const TextFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ register, options, name, ref, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
     append?: React__default.ReactNode;
     prepend?: React__default.ReactNode;
     type?: string;

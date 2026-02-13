@@ -57,8 +57,6 @@ export const TextFormField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
-  required,
-  disabled,
   register,
   options,
   name,
@@ -71,8 +69,8 @@ export const TextFormField = <
   ref?: (input: HTMLInputElement | null) => void;
 }) => {
   const r = register(name, {
-    required: required,
-    disabled: disabled,
+    required: rest.required,
+    disabled: rest.disabled,
     ...((options as RegisterOptions<TFieldValues, TName>) || {}),
   });
   return (
