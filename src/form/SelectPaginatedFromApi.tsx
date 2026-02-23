@@ -66,7 +66,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
       const valueM = data?.pages
         ?.map((p) => p.data)
         ?.flat()
-        ?.find((v) => optionValue(v) !== value);
+        ?.find((v) => optionValue(v) === value);
       if (valueM) {
         setValueModel(valueM);
         return;

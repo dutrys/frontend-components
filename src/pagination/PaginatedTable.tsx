@@ -244,6 +244,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
         data-testid="paginate-table"
         className="relative h-screen"
         data-test-sort={(pagination.meta.sortBy || []).flat().join("-")}
+        onMouseLeave={() => setHover(null)}
       >
         <div className="absolute z-501 top-16 flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-screen sm:max-w-[calc(100vw-var(--sidebar-width))]">
           <h1
