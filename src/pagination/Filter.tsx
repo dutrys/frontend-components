@@ -4,7 +4,7 @@ import cx from "classnames";
 import React, { useMemo, useRef, useState } from "react";
 import styles from "./Filter.module.css";
 import { NumericFormat, NumericFormatProps } from "react-number-format";
-import { format, parse } from "date-fns";
+import { endOfDay, format, parse, parseJSON, startOfDay } from "date-fns";
 import Link from "next/link";
 import { ChevronDoubleDownIcon } from "@heroicons/react/24/outline";
 import { PaginateQuery, ResponseMeta, setPartialParams } from "../utils/paginate";
@@ -96,6 +96,55 @@ export const FilterNumberRange = ({
           onBlur={() => submit()}
         />
         <span className="label-text-alt">{to}</span>
+      </label>
+    </div>
+  );
+};
+
+export const FilterDate = ({
+  filter,
+  fieldsetClassName,
+  label,
+  parseDate,
+}: {
+  fieldsetClassName?: string;
+  filter: string;
+  label: string;
+  parseDate?: (date: string | undefined) => Date;
+}) => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  let defaultValue: Date | null = null;
+
+  const stringValue = searchParams.get(`filter.${filter}`) ?? "";
+  const match = stringValue.match(/^\$btw:(.*),(.*)$/);
+  if (match && match[1]) {
+    defaultValue = (parseDate ?? parseJSON)(match[1]);
+  }
+
+  const submit = (date: Date | null) => {
+    let params: Record<string, string> = {};
+    params = {};
+    if (date) {
+      params[`filter.${filter}`] =
+        `$btw:${format(startOfDay(date), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(date), "yyyy-MM-dd HH:mm:ss")}`;
+    }
+
+    router.replace(setPartialParams(params, searchParams));
+  };
+
+  return (
+    <div className={cx(fieldsetClassName)}>
+      <label className="floating-label grow">
+        <DateInput
+          placeholder={label}
+          value={defaultValue}
+          size="xs"
+          className="join-item"
+          onChange={(date) => submit(date)}
+        />
+        <span className="label-text-alt">{label.toString()}</span>
       </label>
     </div>
   );

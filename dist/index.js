@@ -18,7 +18,7 @@ import { captureException } from '@sentry/nextjs';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 import { createPortal } from 'react-dom';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { format, isSameDay, isSameHour, parse, isValid, parseJSON, differenceInSeconds, formatDistance, differenceInMinutes, differenceInDays } from 'date-fns';
+import { format, isSameDay, isSameHour, parse, isValid, parseJSON, differenceInSeconds, formatDistance, differenceInMinutes, differenceInDays, startOfDay, endOfDay } from 'date-fns';
 import { DayPicker } from 'react-day-picker';
 import { lt, enGB } from 'react-day-picker/locale';
 import { FocusTrap, FocusTrapFeatures, Portal, Combobox, ComboboxInput, ComboboxButton, Transition, ComboboxOptions, ComboboxOption } from '@headlessui/react';
@@ -1722,6 +1722,26 @@ const FilterNumberRange = ({ filter, fieldsetClassName, from, to, options, onCon
                             }
                         }, onBlur: () => submit() }), jsx("span", { className: "label-text-alt", children: to })] })] }));
 };
+const FilterDate = ({ filter, fieldsetClassName, label, parseDate, }) => {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    let defaultValue = null;
+    const stringValue = searchParams.get(`filter.${filter}`) ?? "";
+    const match = stringValue.match(/^\$btw:(.*),(.*)$/);
+    if (match && match[1]) {
+        defaultValue = (parseDate ?? parseJSON)(match[1]);
+    }
+    const submit = (date) => {
+        let params = {};
+        params = {};
+        if (date) {
+            params[`filter.${filter}`] =
+                `$btw:${format(startOfDay(date), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(date), "yyyy-MM-dd HH:mm:ss")}`;
+        }
+        router.replace(setPartialParams(params, searchParams));
+    };
+    return (jsx("div", { className: cx(fieldsetClassName), children: jsxs("label", { className: "floating-label grow", children: [jsx(DateInput, { placeholder: label, value: defaultValue, size: "xs", className: "join-item", onChange: (date) => submit(date) }), jsx("span", { className: "label-text-alt", children: label.toString() })] }) }));
+};
 const FilterDateRange = ({ filter, fieldsetClassName, from, to, options, }) => {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -2091,5 +2111,5 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                                         : undefined, size: "sm" })] })), v.type === FilterType.PAGINATION && (jsx(SelectPaginatedFromApiFormField, { queryFn: v.queryFn, queryKey: v.queryKey, optionLabel: v.optionLabel, groupBy: v.groupBy, portalEnabled: true, control: control, label: v.label, name: key, size: "sm" })), v.type === FilterType.BOOLEAN && (jsxs("div", { className: "join w-full", children: [jsx("button", { className: cx("btn grow btn-sm join-item", { "btn-success": watched[key] === true }), type: "button", onClick: () => (watched[key] === true ? setValue(key, undefined) : setValue(key, true)), children: v.label }), jsx("button", { onClick: () => (watched[key] === false ? setValue(key, undefined) : setValue(key, false)), className: cx("btn grow btn-sm join-item", { "btn-error": watched[key] === false }), type: "button", children: `${t("general.no")} ${v.label.toLowerCase()}` })] }))] }, `${key}-${i}`))), jsx(SaveButton, { className: "btn-sm w-full", children: t("general.filter") })] }) }));
 };
 
-export { Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Select, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
+export { Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDate, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Select, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
 //# sourceMappingURL=index.js.map
