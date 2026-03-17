@@ -101,12 +101,26 @@ export const FilterNumberRange = ({
   );
 };
 
+const parseDateFromUri = (val: string) => {
+  const btw = val.match(/^\$btw:(.*),(.*)$/);
+  if (btw && btw[1]) {
+    return btw[1];
+  }
+  const match = val.match(/^\$(lte|gte|lt|gt):(.*)$/);
+  if (match && match[2]) {
+    return match[2];
+  }
+  return undefined;
+};
+
 export const FilterDate = ({
   filter,
   fieldsetClassName,
   label,
   parseDate,
+  mode,
 }: {
+  mode: "btw" | "gte" | "lte";
   fieldsetClassName?: string;
   filter: string;
   label: string;
@@ -115,20 +129,19 @@ export const FilterDate = ({
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  let defaultValue: Date | null = null;
-
-  const stringValue = searchParams.get(`filter.${filter}`) ?? "";
-  const match = stringValue.match(/^\$btw:(.*),(.*)$/);
-  if (match && match[1]) {
-    defaultValue = (parseDate ?? parseJSON)(match[1]);
-  }
+  const dateString = parseDateFromUri(searchParams.get(`filter.${filter}`) ?? "");
+  const defaultValue: Date | null = dateString ? (parseDate ?? parseJSON)(dateString) : null;
 
   const submit = (date: Date | null) => {
     let params: Record<string, string> = {};
     params = {};
     if (date) {
-      params[`filter.${filter}`] =
-        `$btw:${format(startOfDay(date), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(date), "yyyy-MM-dd HH:mm:ss")}`;
+      if (mode === "btw") {
+        params[`filter.${filter}`] =
+          `$btw:${format(startOfDay(date), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(date), "yyyy-MM-dd HH:mm:ss")}`;
+      } else {
+        params[`filter.${filter}`] = `$${mode}:${format(startOfDay(date), "yyyy-MM-dd HH:mm:ss")}`;
+      }
     }
 
     router.replace(setPartialParams(params, searchParams));

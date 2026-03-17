@@ -9,7 +9,8 @@ export declare const FilterNumberRange: ({ filter, fieldsetClassName, from, to, 
     onConvertValueSubmit: (value: number | null) => string | number;
     onCovertFromValue: (value: number | null) => number;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const FilterDate: ({ filter, fieldsetClassName, label, parseDate, }: {
+export declare const FilterDate: ({ filter, fieldsetClassName, label, parseDate, mode, }: {
+    mode: "btw" | "gte" | "lte";
     fieldsetClassName?: string;
     filter: string;
     label: string;

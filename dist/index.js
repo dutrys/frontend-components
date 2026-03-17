@@ -1722,21 +1722,33 @@ const FilterNumberRange = ({ filter, fieldsetClassName, from, to, options, onCon
                             }
                         }, onBlur: () => submit() }), jsx("span", { className: "label-text-alt", children: to })] })] }));
 };
-const FilterDate = ({ filter, fieldsetClassName, label, parseDate, }) => {
+const parseDateFromUri = (val) => {
+    const btw = val.match(/^\$btw:(.*),(.*)$/);
+    if (btw && btw[1]) {
+        return btw[1];
+    }
+    const match = val.match(/^\$(lte|gte|lt|gt):(.*)$/);
+    if (match && match[2]) {
+        return match[2];
+    }
+    return undefined;
+};
+const FilterDate = ({ filter, fieldsetClassName, label, parseDate, mode, }) => {
     const searchParams = useSearchParams();
     const router = useRouter();
-    let defaultValue = null;
-    const stringValue = searchParams.get(`filter.${filter}`) ?? "";
-    const match = stringValue.match(/^\$btw:(.*),(.*)$/);
-    if (match && match[1]) {
-        defaultValue = (parseDate ?? parseJSON)(match[1]);
-    }
+    const dateString = parseDateFromUri(searchParams.get(`filter.${filter}`) ?? "");
+    const defaultValue = dateString ? (parseDate ?? parseJSON)(dateString) : null;
     const submit = (date) => {
         let params = {};
         params = {};
         if (date) {
-            params[`filter.${filter}`] =
-                `$btw:${format(startOfDay(date), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(date), "yyyy-MM-dd HH:mm:ss")}`;
+            if (mode === "btw") {
+                params[`filter.${filter}`] =
+                    `$btw:${format(startOfDay(date), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(date), "yyyy-MM-dd HH:mm:ss")}`;
+            }
+            else {
+                params[`filter.${filter}`] = `$${mode}:${format(startOfDay(date), "yyyy-MM-dd HH:mm:ss")}`;
+            }
         }
         router.replace(setPartialParams(params, searchParams));
     };
