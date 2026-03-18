@@ -62,12 +62,13 @@ export const TextFormField = <
   name,
   ref,
   ...rest
-}: IInputRegisterProps<TFieldValues, TName> & {
-  append?: React.ReactNode;
-  prepend?: React.ReactNode;
-  type?: string;
-  ref?: (input: HTMLInputElement | null) => void;
-}) => {
+}: Omit<React.InputHTMLAttributes<HTMLInputElement>, "size" | "defaultValue" | "type" | "value" | "children"> &
+  IInputRegisterProps<TFieldValues, TName> & {
+    append?: React.ReactNode;
+    prepend?: React.ReactNode;
+    type?: string;
+    ref?: (input: HTMLInputElement | null) => void;
+  }) => {
   const r = register(name, {
     required: rest.required,
     disabled: rest.disabled,
@@ -101,13 +102,14 @@ export const TextField = <
   append,
   prepend,
   ...rest
-}: IInputProps<TName> & {
-  onChange: (e: ChangeEvent<HTMLInputElement>) => unknown;
-  append?: React.ReactNode;
-  prepend?: React.ReactNode;
-  type?: string;
-  ref?: (input: HTMLInputElement | null) => void;
-}) => (
+}: Omit<React.InputHTMLAttributes<HTMLInputElement>, "size" | "defaultValue" | "type" | "value" | "children"> &
+  IInputProps<TName> & {
+    onChange: (e: ChangeEvent<HTMLInputElement>) => unknown;
+    append?: React.ReactNode;
+    prepend?: React.ReactNode;
+    type?: string;
+    ref?: (input: HTMLInputElement | null) => void;
+  }) => (
   <div className={fieldSetClassName}>
     <label className="floating-label">
       {append || prepend ? (
