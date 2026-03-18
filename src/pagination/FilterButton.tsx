@@ -7,7 +7,7 @@ import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next-nprogress-bar";
-import { format, isValid } from "date-fns";
+import { endOfDay, format, isValid, startOfDay } from "date-fns";
 import { NumericFormatProps } from "react-number-format";
 import { PaginateQuery, ResponseMeta, setPartialParams } from "../utils/paginate";
 import { stringToDate } from "../utils/date";
@@ -202,7 +202,8 @@ export const FilterButton = ({
                   } else if (!to) {
                     params[`filter.${key}`] = `$gte:${format(from, "yyyy-MM-dd")}`;
                   } else {
-                    params[`filter.${key}`] = `$btw:${format(from, "yyyy-MM-dd")},${format(to, "yyyy-MM-dd")}`;
+                    params[`filter.${key}`] =
+                      `$btw:${format(startOfDay(from), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(to), "yyyy-MM-dd HH:mm:ss")}`;
                   }
                 }
               } else if (filter[key].type === FilterType.PAGINATION) {

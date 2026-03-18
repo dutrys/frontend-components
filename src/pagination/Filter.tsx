@@ -216,7 +216,9 @@ export const FilterDateRange = ({
       }
     } else {
       if (fromValue && toValue) {
-        params = { [`filter.${filter}`]: `$btw:${format(fromValue, "yyyy-MM-dd")},${format(toValue, "yyyy-MM-dd")}` };
+        params = {
+          [`filter.${filter}`]: `$btw:${format(startOfDay(fromValue), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(toValue), "yyyy-MM-dd HH:mm:ss")}`,
+        };
       } else if (fromValue) {
         params = { [`filter.${filter}`]: `$gte:${format(fromValue, "yyyy-MM-dd")}` };
       } else if (toValue) {

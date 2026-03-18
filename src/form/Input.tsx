@@ -19,8 +19,8 @@ import cx from "classnames";
 import { TimePicker, TimePickerProps } from "./TimePicker";
 import styles from "./Input.module.css";
 import { NumericFormat } from "react-number-format";
-import { NumericFormatProps } from "react-number-format/types/types";
-import React, { ChangeEvent, useEffect, useRef, useState } from "react";
+import { InputAttributes, NumericFormatProps } from "react-number-format/types/types";
+import React, { ChangeEvent, HTMLAttributes, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import { LoadingComponent } from "../Loading";
@@ -544,10 +544,14 @@ export const SelectPaginatedFromApiFormField = <
 >({
   optionValue = (model) => (model as any).id,
   ...props
-}: IInputProps<TName> & {
-  control: Control<TFieldValues>;
-  onChange?: (model: T["data"][number] | null) => void;
-} & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => (
+}: Omit<
+  React.SelectHTMLAttributes<HTMLSelectElement>,
+  "size" | "onChange" | "multiple" | "defaultValue" | "type" | "value" | "children"
+> &
+  IInputProps<TName> & {
+    control: Control<TFieldValues>;
+    onChange?: (model: T["data"][number] | null) => void;
+  } & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => (
   <Controller
     control={props.control}
     name={props.name}
@@ -735,46 +739,55 @@ export const NumberFormField = <
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   options,
+  control,
+  label,
+  desc,
+  error,
+  className,
+  fieldSetClassName,
+  size,
   ...props
-}: IInputProps<TName> & {
-  control: Control<TFieldValues>;
-  options?: NumericFormatProps;
-}) => (
-  <div className={props.fieldSetClassName}>
+}: Omit<React.InputHTMLAttributes<HTMLInputElement>, "size" | "defaultValue" | "type" | "value" | "children"> &
+  IInputProps<TName> & {
+    control: Control<TFieldValues>;
+    options?: NumericFormatProps;
+  }) => (
+  <div className={fieldSetClassName}>
     <div className="floating-label">
       {!props?.disabled && (
         <span>
-          {props.label}
+          {label}
           {props?.required && <Required />}
         </span>
       )}
       <Controller
         name={props.name}
-        control={props.control}
+        control={control}
         disabled={props.disabled}
         render={({ field }) => (
           <NumericFormat
-            placeholder={props.required ? `${props.label}*` : props.label}
+            {...props}
             {...options}
+            placeholder={props.required ? `${label}*` : label}
             disabled={field?.disabled}
             required={props?.required}
             value={field.value}
-            className={cx("w-full input input-bordered focus:outline-blue-400", props.className, {
-              "input-xs": props.size === "xs",
-              "input-sm": props.size === "sm",
-              "input-error": props.error,
+            className={cx("w-full input input-bordered focus:outline-blue-400", className, {
+              "input-xs": size === "xs",
+              "input-sm": size === "sm",
+              "input-error": error,
             })}
             onValueChange={(values) => field.onChange(values.floatValue ?? null)}
           />
         )}
       />
     </div>
-    {props.desc && (
+    {desc && (
       <div className="text-xs text-gray-500">
-        <span>{props.desc}</span>
+        <span>{desc}</span>
       </div>
     )}
-    {props.error && <InputErrors className="text-xs text-error mt-1" errors={props.error} />}
+    {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
   </div>
 );
 
@@ -794,7 +807,12 @@ export const SelectPaginatedFromApiField = <T extends { data: unknown[]; meta: R
   desc,
   error,
   ...props
-}: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => (
+}: Omit<
+  React.SelectHTMLAttributes<HTMLSelectElement>,
+  "size" | "onChange" | "multiple" | "defaultValue" | "type" | "value" | "children"
+> &
+  IInputProps<any> &
+  Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => (
   <div className={fieldSetClassName}>
     <div className="floating-label">
       <span>

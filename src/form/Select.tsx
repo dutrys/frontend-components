@@ -72,8 +72,13 @@ export const Select = <T = unknown,>({
   maxHeight = 500,
   afterInput,
   hideNoItemsOption,
+  autoFocus,
   ...rest
-}: SelectProps<T>) => {
+}: Omit<
+  React.SelectHTMLAttributes<HTMLSelectElement>,
+  "size" | "multiple" | "onChange" | "defaultValue" | "type" | "value" | "children"
+> &
+  SelectProps<T>) => {
   const t = useTranslations();
 
   const { refs, floatingStyles } = useFloating({
@@ -112,6 +117,7 @@ export const Select = <T = unknown,>({
               onFocus={(e) => e?.target?.select()}
               autoComplete="off"
               name={name}
+              autoFocus={autoFocus}
               displayValue={(model) => (model ? optionLabel(model) : "")}
               onChange={onQueryChange && ((event) => onQueryChange(event.target.value))}
             />

@@ -80,7 +80,7 @@ export declare const DateRangeField: <TFieldValues extends FieldValues = FieldVa
 export declare const SelectPaginatedFromApiFormField: <T extends {
     data: unknown[];
     meta: ResponseMeta;
-}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ optionValue, ...props }: IInputProps<TName> & {
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ optionValue, ...props }: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "size" | "onChange" | "multiple" | "defaultValue" | "type" | "value" | "children"> & IInputProps<TName> & {
     control: Control<TFieldValues>;
     onChange?: (model: T["data"][number] | null) => void;
 } & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => import("react/jsx-runtime").JSX.Element;
@@ -96,7 +96,7 @@ export declare const DateTimeFormField: <TFieldValues extends FieldValues = Fiel
 export declare const TimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, control, className, ...props }: Omit<TimePickerProps, "onChange" | "value"> & IInputProps<TName> & {
     control: Control<TFieldValues>;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const NumberFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ options, ...props }: IInputProps<TName> & {
+export declare const NumberFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ options, control, label, desc, error, className, fieldSetClassName, size, ...props }: Omit<React.InputHTMLAttributes<HTMLInputElement>, "size" | "defaultValue" | "type" | "value" | "children"> & IInputProps<TName> & {
     control: Control<TFieldValues>;
     options?: NumericFormatProps;
 }) => import("react/jsx-runtime").JSX.Element;
@@ -108,7 +108,7 @@ export declare const Label: ({ text, required }: {
 export declare const SelectPaginatedFromApiField: <T extends {
     data: unknown[];
     meta: ResponseMeta;
-}>({ label, fieldSetClassName, className, desc, error, ...props }: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => import("react/jsx-runtime").JSX.Element;
+}>({ label, fieldSetClassName, className, desc, error, ...props }: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "size" | "onChange" | "multiple" | "defaultValue" | "type" | "value" | "children"> & IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => import("react/jsx-runtime").JSX.Element;
 export declare const Required: () => import("react/jsx-runtime").JSX.Element;
 export declare const SaveButton: ({ isLoading, icon, disabled, className, onClick, size, color, children, type, ...props }: {
     type?: "submit" | "button";

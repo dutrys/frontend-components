@@ -931,7 +931,7 @@ const PortalSSR = (props) => {
     }
     return props.children;
 };
-const Select = ({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel = (m) => m.name, value, size: size$1, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth = 100, maxHeight = 500, afterInput, hideNoItemsOption, ...rest }) => {
+const Select = ({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel = (m) => m.name, value, size: size$1, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth = 100, maxHeight = 500, afterInput, hideNoItemsOption, autoFocus, ...rest }) => {
     const t = useTranslations();
     const { refs, floatingStyles } = useFloating({
         placement: "bottom-start",
@@ -952,7 +952,7 @@ const Select = ({ onChange, disabled, required, inputRef, options, name, portalE
                         "w-full": !className?.includes("w-"),
                         "input-sm gap-1": size$1 === "sm",
                         "input-xs gap-0.5": size$1 === "xs",
-                    }), ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, displayValue: (model) => (model ? optionLabel(model) : ""), onChange: onQueryChange && ((event) => onQueryChange(event.target.value)) }), header, !required && value ? (jsx("button", { className: "z-1 cursor-pointer", type: "button", onClick: () => onChange(null), children: jsx(XMarkIcon, { className: "size-4" }) })) : (!open && afterInput), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "", onClick: (e) => {
+                    }), ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, autoFocus: autoFocus, displayValue: (model) => (model ? optionLabel(model) : ""), onChange: onQueryChange && ((event) => onQueryChange(event.target.value)) }), header, !required && value ? (jsx("button", { className: "z-1 cursor-pointer", type: "button", onClick: () => onChange(null), children: jsx(XMarkIcon, { className: "size-4" }) })) : (!open && afterInput), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "", onClick: (e) => {
                                 e.target?.parentNode?.parentNode?.querySelector("input")?.select();
                             }, children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(PortalSSR, { enabled: portalEnabled, children: jsx(Transition, { as: Fragment$1, leave: "transition-none", children: jsx("div", { style: floatingStyles, ref: refs.setFloating, className: "z-[2000] bg-base-100 mt-1 w-full border-base-content/10 border overflow-y-auto rounded-box shadow-lg", children: jsxs(ComboboxOptions, { children: [beforeOptions, !required && (jsx(SelectOption, { size: size$1, "data-testid": "select-option-empty", value: null, children: empty || t("selectFromApi.select") }, "empty")), options.length === 0 && !hideNoItemsOption ? (jsx("div", { className: "cursor-default select-none py-2 px-4 text-base-content/60", children: jsx("span", { className: cx({ "text-xs": "xs" === size$1 || "sm" === size$1 }), children: t("selectFromApi.nothingFound") }) })) : (options.map((model, i) => {
                                         const group = groupBy?.(model);
@@ -1273,11 +1273,11 @@ const TimeFormField = ({ label, control, className, ...props }) => (jsxs("div", 
                             "input-sm": props.size === "sm",
                             "input-error": props.error,
                         }) })), name: props.name, control: control })] }), props.desc && (jsx("div", { className: "text-xs text-gray-500", children: jsx("span", { children: props.desc }) })), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
-const NumberFormField = ({ options, ...props }) => (jsxs("div", { className: props.fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [!props?.disabled && (jsxs("span", { children: [props.label, props?.required && jsx(Required, {})] })), jsx(Controller, { name: props.name, control: props.control, disabled: props.disabled, render: ({ field }) => (jsx(NumericFormat, { placeholder: props.required ? `${props.label}*` : props.label, ...options, disabled: field?.disabled, required: props?.required, value: field.value, className: cx("w-full input input-bordered focus:outline-blue-400", props.className, {
-                            "input-xs": props.size === "xs",
-                            "input-sm": props.size === "sm",
-                            "input-error": props.error,
-                        }), onValueChange: (values) => field.onChange(values.floatValue ?? null) })) })] }), props.desc && (jsx("div", { className: "text-xs text-gray-500", children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+const NumberFormField = ({ options, control, label, desc, error, className, fieldSetClassName, size, ...props }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [!props?.disabled && (jsxs("span", { children: [label, props?.required && jsx(Required, {})] })), jsx(Controller, { name: props.name, control: control, disabled: props.disabled, render: ({ field }) => (jsx(NumericFormat, { ...props, ...options, placeholder: props.required ? `${label}*` : label, disabled: field?.disabled, required: props?.required, value: field.value, className: cx("w-full input input-bordered focus:outline-blue-400", className, {
+                            "input-xs": size === "xs",
+                            "input-sm": size === "sm",
+                            "input-error": error,
+                        }), onValueChange: (values) => field.onChange(values.floatValue ?? null) })) })] }), desc && (jsx("div", { className: "text-xs text-gray-500", children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 const Label = ({ text, required }) => (jsx("label", { className: "label", children: jsxs("span", { className: "text-sm", children: [text, required && jsx(Required, {})] }) }));
 const SelectPaginatedFromApiField = ({ label, fieldSetClassName, className, desc, error, ...props }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, props.required ? jsx(Required, {}) : null] }), jsx(SelectPaginatedFromApi, { ...props, className: cx("mx-0", className, { "input-error": error }), placeholder: props.required ? `${label}*` : label })] }), desc, jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 const Required = () => jsx("span", { className: "text-error align-bottom", children: "*" });
@@ -1796,7 +1796,9 @@ const FilterDateRange = ({ filter, fieldsetClassName, from, to, options, }) => {
         }
         else {
             if (fromValue && toValue) {
-                params = { [`filter.${filter}`]: `$btw:${format(fromValue, "yyyy-MM-dd")},${format(toValue, "yyyy-MM-dd")}` };
+                params = {
+                    [`filter.${filter}`]: `$btw:${format(startOfDay(fromValue), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(toValue), "yyyy-MM-dd HH:mm:ss")}`,
+                };
             }
             else if (fromValue) {
                 params = { [`filter.${filter}`]: `$gte:${format(fromValue, "yyyy-MM-dd")}` };
@@ -2096,7 +2098,8 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                                 params[`filter.${key}`] = `$gte:${format(from, "yyyy-MM-dd")}`;
                             }
                             else {
-                                params[`filter.${key}`] = `$btw:${format(from, "yyyy-MM-dd")},${format(to, "yyyy-MM-dd")}`;
+                                params[`filter.${key}`] =
+                                    `$btw:${format(startOfDay(from), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(to), "yyyy-MM-dd HH:mm:ss")}`;
                             }
                         }
                     }

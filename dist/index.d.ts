@@ -356,7 +356,7 @@ type SelectProps<T> = {
     afterInput?: React__default.ReactNode;
     hideNoItemsOption?: boolean;
 };
-declare const Select: <T = unknown>({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel, value, size, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth, maxHeight, afterInput, hideNoItemsOption, ...rest }: SelectProps<T>) => react_jsx_runtime.JSX.Element;
+declare const Select: <T = unknown>({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel, value, size, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth, maxHeight, afterInput, hideNoItemsOption, autoFocus, ...rest }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "onChange" | "defaultValue" | "type" | "value" | "children"> & SelectProps<T>) => react_jsx_runtime.JSX.Element;
 declare const SelectOption: ({ value, size, children, className, ...rest }: {
     children: React__default.ReactNode;
     value: unknown;
@@ -378,7 +378,7 @@ type SelectPaginatedFromApiProps<TModel extends {
 declare const SelectPaginatedFromApi: <TModel extends {
     meta: ResponseMeta;
     data: unknown[];
-}>({ onChange, name, value, searchFromChars, queryKey, queryFn, optionLabel, optionValue, ...rest }: SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
+}>({ onChange, name, value, searchFromChars, queryKey, queryFn, optionLabel, optionValue, ...rest }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "defaultValue" | "type" | "value" | "children"> & SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
 
 type TimePickerProps = {
     required?: boolean;
@@ -474,7 +474,7 @@ declare const DateRangeField: <TFieldValues extends FieldValues = FieldValues, T
 declare const SelectPaginatedFromApiFormField: <T extends {
     data: unknown[];
     meta: ResponseMeta;
-}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ optionValue, ...props }: IInputProps<TName> & {
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ optionValue, ...props }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "onChange" | "multiple" | "defaultValue" | "type" | "value" | "children"> & IInputProps<TName> & {
     control: Control<TFieldValues>;
     onChange?: (model: T["data"][number] | null) => void;
 } & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => react_jsx_runtime.JSX.Element;
@@ -490,7 +490,7 @@ declare const DateTimeFormField: <TFieldValues extends FieldValues = FieldValues
 declare const TimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, control, className, ...props }: Omit<TimePickerProps, "onChange" | "value"> & IInputProps<TName> & {
     control: Control<TFieldValues>;
 }) => react_jsx_runtime.JSX.Element;
-declare const NumberFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ options, ...props }: IInputProps<TName> & {
+declare const NumberFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ options, control, label, desc, error, className, fieldSetClassName, size, ...props }: Omit<React__default.InputHTMLAttributes<HTMLInputElement>, "size" | "defaultValue" | "type" | "value" | "children"> & IInputProps<TName> & {
     control: Control<TFieldValues>;
     options?: NumericFormatProps;
 }) => react_jsx_runtime.JSX.Element;
@@ -502,7 +502,7 @@ declare const Label: ({ text, required }: {
 declare const SelectPaginatedFromApiField: <T extends {
     data: unknown[];
     meta: ResponseMeta;
-}>({ label, fieldSetClassName, className, desc, error, ...props }: IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => react_jsx_runtime.JSX.Element;
+}>({ label, fieldSetClassName, className, desc, error, ...props }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "onChange" | "multiple" | "defaultValue" | "type" | "value" | "children"> & IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => react_jsx_runtime.JSX.Element;
 declare const Required: () => react_jsx_runtime.JSX.Element;
 declare const SaveButton: ({ isLoading, icon, disabled, className, onClick, size, color, children, type, ...props }: {
     type?: "submit" | "button";

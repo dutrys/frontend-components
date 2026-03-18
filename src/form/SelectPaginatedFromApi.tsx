@@ -26,7 +26,11 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
   optionLabel = (model) => (model as any).name,
   optionValue = (model) => (model as any).id,
   ...rest
-}: SelectPaginatedFromApiProps<TModel>) => {
+}: Omit<
+  React.SelectHTMLAttributes<HTMLSelectElement>,
+  "size" | "multiple" | "defaultValue" | "type" | "value" | "children"
+> &
+  SelectPaginatedFromApiProps<TModel>) => {
   const [query, setQuery] = useState("");
   const [valueModel, setValueModel] = useState<TModel["data"][0] | null>(typeof value === "object" ? value : null);
   const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<TModel>({
