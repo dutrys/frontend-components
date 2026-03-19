@@ -1,4 +1,4 @@
-import { Control, FieldValues, FieldPath, FieldError, RegisterOptions, UseFormRegister, Merge } from "react-hook-form";
+import { Control, FieldError, FieldPath, FieldValues, Merge, RegisterOptions, UseFormRegister } from "react-hook-form";
 import { DateTimePickerProps } from "./DateTimePicker";
 import { DateInputProps, DateRangeInputProps } from "./DateInput";
 import { SelectPaginatedFromApiProps } from "./SelectPaginatedFromApi";
@@ -31,7 +31,7 @@ export declare const TextFormField: <TFieldValues extends FieldValues = FieldVal
     type?: string;
     ref?: (input: HTMLInputElement | null) => void;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const TextField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ error, className, type, label, size, desc, fieldSetClassName, append, prepend, ...rest }: Omit<React.InputHTMLAttributes<HTMLInputElement>, "size" | "defaultValue" | "type" | "value" | "children"> & IInputProps<TName> & {
+export declare const TextField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ error, className, type, label, size, desc, fieldSetClassName, append, prepend, ...rest }: Omit<React.InputHTMLAttributes<HTMLInputElement>, "size" | "type" | "children"> & IInputProps<TName> & {
     onChange: (e: ChangeEvent<HTMLInputElement>) => unknown;
     append?: React.ReactNode;
     prepend?: React.ReactNode;

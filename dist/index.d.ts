@@ -425,7 +425,7 @@ declare const TextFormField: <TFieldValues extends FieldValues = FieldValues, TN
     type?: string;
     ref?: (input: HTMLInputElement | null) => void;
 }) => react_jsx_runtime.JSX.Element;
-declare const TextField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ error, className, type, label, size, desc, fieldSetClassName, append, prepend, ...rest }: Omit<React__default.InputHTMLAttributes<HTMLInputElement>, "size" | "defaultValue" | "type" | "value" | "children"> & IInputProps<TName> & {
+declare const TextField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ error, className, type, label, size, desc, fieldSetClassName, append, prepend, ...rest }: Omit<React__default.InputHTMLAttributes<HTMLInputElement>, "size" | "type" | "children"> & IInputProps<TName> & {
     onChange: (e: ChangeEvent<HTMLInputElement>) => unknown;
     append?: React__default.ReactNode;
     prepend?: React__default.ReactNode;
