@@ -133,7 +133,6 @@ export const FilterButton = ({
 }: {
   onParseParams?: (params: Record<string, unknown>) => Record<string, unknown>;
   onSubmitParams?: (params: Record<string, unknown>) => Record<string, unknown>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   filter: Record<string, FilterColumn<any>>;
   className?: string;
 }) => {
@@ -221,7 +220,7 @@ export const FilterButton = ({
           },
           (e) => {
             toast.error(t("general.error"));
-            console.error(e); // eslint-disable-line no-console
+            console.error(e);
           },
         )}
       >

@@ -2118,7 +2118,7 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                 router.replace(setPartialParams(params, searchParams));
             }, (e) => {
                 toast.error(t("general.error"));
-                console.error(e); // eslint-disable-line no-console
+                console.error(e);
             }), children: [Object.entries(filter).map(([key, v], i) => (jsxs("div", { className: "", children: [v.type === FilterType.TEXT && jsx(TextFormField, { register: register, label: v.label, name: key, size: "sm" }), v.type === FilterType.NUMBER_RANGE && (jsxs("div", { className: "join", children: [jsx(NumberFormField, { className: "join-item", control: control, label: t("general.fromWithArgs", { value: v.label.toLowerCase() }), name: `${key}.0`, size: "sm", options: v.options }), jsx(NumberFormField, { className: "join-item", control: control, label: t("general.toWithArgs", { value: v.label.toLowerCase() }), name: `${key}.1`, size: "sm", options: v.options })] })), v.type === FilterType.DATE_RANGE && (jsxs("div", { className: "join", children: [jsx(DateFormField, { useDate: true, className: "join-item", control: control, label: t("general.fromWithArgs", { value: v.label.toLowerCase() }), name: `${key}.0`, matcher: Array.isArray(watched[key]) && watched[key][1] instanceof Date
                                         ? { after: watched[key][1] }
                                         : undefined, size: "sm" }), jsx(DateFormField, { useDate: true, className: "join-item", control: control, label: t("general.toWithArgs", { value: v.label.toLowerCase() }), name: `${key}.1`, matcher: Array.isArray(watched[key]) && watched[key][0] instanceof Date
