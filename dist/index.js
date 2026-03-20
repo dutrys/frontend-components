@@ -1070,6 +1070,25 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
         }, onQueryChange: setQuery, options: data?.pages.flatMap((d) => d?.data || []) ?? [], value: valueModel, optionLabel: optionLabel, afterInput: isLoading && !rest.disabled ? jsx(LoadingComponent, { loadingClassName: "size-4 text-primary" }) : undefined, hideNoItemsOption: isLoading, afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isFetchingNextPage || isLoading ? (jsx(LoadingComponent, { className: "my-2" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }));
 };
 
+const parseDateTime = (date, defaultValue) => {
+    let parsed = parseJSON(date);
+    if (isValid(parsed)) {
+        return parsed;
+    }
+    parsed = parse(date, "yyyy-MM-dd HH:mm:ss", new Date());
+    if (isValid(parsed)) {
+        return parsed;
+    }
+    parsed = parse(date, "yyyy-MM-dd HH:mm", new Date());
+    if (isValid(parsed)) {
+        return parsed;
+    }
+    parsed = parse(date, "yyyy-MM-dd", new Date());
+    if (isValid(parsed)) {
+        return parsed;
+    }
+    return defaultValue;
+};
 const timeToDate = (date, format = "HH:mm:ss") => {
     const parsed = parse(date, format, new Date());
     if (isValid(parsed)) {
@@ -1706,7 +1725,7 @@ const FilterNumberRange = ({ filter, fieldsetClassName, from, to, options, onCon
         else if (toValue) {
             value = `$lte:${onConvertValueSubmit(toValue)}`;
         }
-        router.replace(setPartialParams({ [`filter.${filter}`]: value }, searchParams));
+        router.replace(setPartialParams({ [`filter.${filter}`]: value, page: "" }, searchParams));
     };
     const [[fromValue, toValue], setValues] = useState([
         defaultFromValue,
@@ -1733,14 +1752,13 @@ const parseDateFromUri = (val) => {
     }
     return undefined;
 };
-const FilterDate = ({ filter, fieldsetClassName, label, parseDate, mode, }) => {
+const FilterDate = ({ filter, fieldsetClassName, label, mode, defaultValue = null, }) => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const dateString = parseDateFromUri(searchParams.get(`filter.${filter}`) ?? "");
-    const defaultValue = dateString ? (parseDate ?? parseJSON)(dateString) : null;
+    const defaultDate = (dateString ? parseDateTime(dateString, null) : null) ?? defaultValue;
     const submit = (date) => {
-        let params = {};
-        params = {};
+        const params = { page: "" };
         if (date) {
             if (mode === "btw") {
                 params[`filter.${filter}`] =
@@ -1752,7 +1770,7 @@ const FilterDate = ({ filter, fieldsetClassName, label, parseDate, mode, }) => {
         }
         router.replace(setPartialParams(params, searchParams));
     };
-    return (jsx("div", { className: cx(fieldsetClassName), children: jsxs("label", { className: "floating-label grow", children: [jsx(DateInput, { placeholder: label, value: defaultValue, size: "xs", className: "join-item", onChange: (date) => submit(date) }), jsx("span", { className: "label-text-alt", children: label.toString() })] }) }));
+    return (jsx("div", { className: cx(fieldsetClassName), children: jsxs("label", { className: "floating-label grow", children: [jsx(DateInput, { placeholder: label, value: defaultDate, size: "xs", className: "join-item", onChange: (date) => submit(date) }), jsx("span", { className: "label-text-alt", children: label.toString() })] }) }));
 };
 const FilterDateRange = ({ filter, fieldsetClassName, from, to, options, }) => {
     const searchParams = useSearchParams();
@@ -1784,9 +1802,10 @@ const FilterDateRange = ({ filter, fieldsetClassName, from, to, options, }) => {
         }
     }
     const submit = () => {
-        let params = {};
+        const params = { page: "" };
         if (Array.isArray(filter)) {
-            params = { [`filter.${filter[0]}`]: "", [`filter.${filter[1]}`]: "" };
+            params[`filter.${filter[0]}`] = "";
+            params[`filter.${filter[1]}`] = "";
             if (fromValue) {
                 params[`filter.${filter[0]}`] = `$gte:${format(fromValue, "yyyy-MM-dd")}`;
             }
@@ -1796,15 +1815,14 @@ const FilterDateRange = ({ filter, fieldsetClassName, from, to, options, }) => {
         }
         else {
             if (fromValue && toValue) {
-                params = {
-                    [`filter.${filter}`]: `$btw:${format(startOfDay(fromValue), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(toValue), "yyyy-MM-dd HH:mm:ss")}`,
-                };
+                params[`filter.${filter}`] =
+                    `$btw:${format(startOfDay(fromValue), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(toValue), "yyyy-MM-dd HH:mm:ss")}`;
             }
             else if (fromValue) {
-                params = { [`filter.${filter}`]: `$gte:${format(fromValue, "yyyy-MM-dd")}` };
+                params[`filter.${filter}`] = `$gte:${format(fromValue, "yyyy-MM-dd")}`;
             }
             else if (toValue) {
-                params = { [`filter.${filter}`]: `$lte:${format(toValue, "yyyy-MM-dd")}` };
+                params[`filter.${filter}`] = `$lte:${format(toValue, "yyyy-MM-dd")}`;
             }
         }
         router.replace(setPartialParams(params, searchParams));
@@ -1839,7 +1857,7 @@ const FilterText = ({ filter, label, fieldsetClassName, isLike, }) => {
     const searchParams = useSearchParams();
     const defaultValue = (searchParams.get(`filter.${filter}`) || "").replace(/^\$(ilike|eq|in):/, "") || "";
     const router = useRouter();
-    const submit = (val) => router.replace(setPartialParams({ [`filter.${filter}`]: val === "" ? "" : `${isLike ? "$ilike:" : "$eq:"}${val}` }, searchParams));
+    const submit = (val) => router.replace(setPartialParams({ [`filter.${filter}`]: val === "" ? "" : `${isLike ? "$ilike:" : "$eq:"}${val}`, page: "" }, searchParams));
     return (jsxs("label", { className: cx("floating-label", styles.field, fieldsetClassName), children: [jsx("span", { children: label }), jsx("input", { type: "text", className: "input input-xs", placeholder: label, defaultValue: typeof defaultValue === "string" ? defaultValue : "", onKeyUp: (e) => {
                     if (e.code === "Enter" && e.target instanceof HTMLInputElement) {
                         submit(e.target.value);
@@ -1855,7 +1873,7 @@ const FilterPagination = ({ filter, label, queryFn, queryKey, optionLabel, optio
             if (searchParams.get(filter) === value) {
                 return;
             }
-            router.replace(setPartialParams({ [`filter.${filter}`]: value }, searchParams));
+            router.replace(setPartialParams({ [`filter.${filter}`]: value, page: "" }, searchParams));
         } }));
 };
 const FilterSelectOptions = ({ filter, label, options, fieldsetClassName, }) => {
@@ -1865,7 +1883,7 @@ const FilterSelectOptions = ({ filter, label, options, fieldsetClassName, }) => 
     const [value, setValue] = useState(defaultValue ?? null);
     return (jsxs("label", { className: cx("floating-label", styles.field, fieldsetClassName), children: [jsx("span", { children: label }), jsx(Select, { placeholder: label, name: filter, size: "xs", value: options.find((o) => o.value === value) || null, optionLabel: (option) => option.label, required: false, options: options, onChange: (m) => {
                     setValue(m?.label ?? null);
-                    router.replace(setPartialParams({ [`filter.${filter}`]: m?.value ? `${m.value}` : "" }, searchParams));
+                    router.replace(setPartialParams({ page: "", [`filter.${filter}`]: m?.value ? `${m.value}` : "" }, searchParams));
                 } })] }));
 };
 const FilterOptionsExpandable = ({ filter, label, options, isVisible, }) => {
@@ -1892,9 +1910,9 @@ const FilterOptionsExpandable = ({ filter, label, options, isVisible, }) => {
         return value;
     }, [searchParams, filter, options]);
     if (isVisible) {
-        return (jsx(Popover, { showOnHover: true, showOnClick: true, backgroundColor: "bg-base-200", borderColor: "border-base-300", title: (ref, props) => (jsxs("span", { ref: ref, ...props, className: cx("btn btn-xs uppercase gap-0.5", { "btn-neutral": values.length > 0 }), children: [label, " ", jsx(ChevronDoubleDownIcon, { className: "size-3" })] })), children: jsx("div", { className: "overflow-auto max-h-96", children: jsx("ul", { className: "menu menu-sm", children: options.map((option) => (jsx("li", { children: jsx(Link$1, { className: cx({ "bg-base-300/50 font-bold hover:bg-base-300": values.includes(option.value) }), href: setPartialParams({ [`filter.${filter}`]: getOptionValue(option.value, values) }, searchParams), children: option.label }) }, option.value))) }) }) }));
+        return (jsx(Popover, { showOnHover: true, showOnClick: true, backgroundColor: "bg-base-200", borderColor: "border-base-300", title: (ref, props) => (jsxs("span", { ref: ref, ...props, className: cx("btn btn-xs uppercase gap-0.5", { "btn-neutral": values.length > 0 }), children: [label, " ", jsx(ChevronDoubleDownIcon, { className: "size-3" })] })), children: jsx("div", { className: "overflow-auto max-h-96", children: jsx("ul", { className: "menu menu-sm", children: options.map((option) => (jsx("li", { children: jsx(Link$1, { className: cx({ "bg-base-300/50 font-bold hover:bg-base-300": values.includes(option.value) }), href: setPartialParams({ page: "", [`filter.${filter}`]: getOptionValue(option.value, values) }, searchParams), children: option.label }) }, option.value))) }) }) }));
     }
-    return (jsx("li", { children: jsxs("details", { children: [jsxs("summary", { className: cx({ "font-bold": values.length > 0 }), children: [label, values.length > 0 && ` (${values.length})`] }), jsx("ul", { children: options.map((option) => (jsx("li", { children: jsx(Link$1, { className: cx({ "bg-base-300/50 font-bold hover:bg-base-300": values.includes(option.value) }), href: setPartialParams({ [`filter.${filter}`]: getOptionValue(option.value, values) }, searchParams), children: option.label }) }, option.value))) })] }) }));
+    return (jsx("li", { children: jsxs("details", { children: [jsxs("summary", { className: cx({ "font-bold": values.length > 0 }), children: [label, values.length > 0 && ` (${values.length})`] }), jsx("ul", { children: options.map((option) => (jsx("li", { children: jsx(Link$1, { className: cx({ "bg-base-300/50 font-bold hover:bg-base-300": values.includes(option.value) }), href: setPartialParams({ page: "", [`filter.${filter}`]: getOptionValue(option.value, values) }, searchParams), children: option.label }) }, option.value))) })] }) }));
 };
 const FilterOptions = ({ filter, options, isVisible, equals, }) => {
     const searchParams = useSearchParams();
@@ -1920,7 +1938,7 @@ const FilterOptions = ({ filter, options, isVisible, equals, }) => {
         return defaultValue;
     }, [searchParams, filter, options]);
     if (isVisible) {
-        return (jsx("div", { className: "join", children: options.map((option) => (jsx(Link$1, { href: setPartialParams({ [`filter.${filter}`]: getOptionValue(option.value, value, { equals }) }, searchParams), className: cx("btn btn-xs uppercase join-item", { "btn-neutral": value.includes(option.value) }), children: option.label }, option.value))) }));
+        return (jsx("div", { className: "join", children: options.map((option) => (jsx(Link$1, { href: setPartialParams({ page: "", [`filter.${filter}`]: getOptionValue(option.value, value, { equals }) }, searchParams), className: cx("btn btn-xs uppercase join-item", { "btn-neutral": value.includes(option.value) }), children: option.label }, option.value))) }));
     }
     return options.map((option) => (jsx("li", { children: jsx(Link$1, { className: cx({ "bg-base-300/50 font-bold hover:bg-base-300": value.includes(option.value) }), href: setPartialParams({ [`filter.${filter}`]: getOptionValue(option.value, value, { equals }) }, searchParams), children: option.label }) }, option.value)));
 };
@@ -1980,24 +1998,24 @@ const getDefaultValues = (searchParams, filter) => {
             }
         }
         else if (type === FilterType.DATE_RANGE) {
-            if (value.startsWith("$btw:")) {
-                const [fromString, toString] = value.split(":")[1].split(",");
-                const from = stringToDate(fromString) ?? null;
-                const to = stringToDate(toString) ?? null;
+            const btw = value.match(/^\$btw:(.*),(.*)$/);
+            if (btw && btw[1] && btw[2]) {
+                const from = parseDateTime(btw[1], null) ?? null;
+                const to = parseDateTime(btw[2], null) ?? null;
                 if (from || to) {
                     filterIsActive = true;
                 }
                 defaultValues[key.substring("filter.".length)] = [from, to];
             }
             else if (value.startsWith("$gte:") || value.startsWith("$gt:")) {
-                const from = stringToDate(value.split(":")[1]) ?? null;
+                const from = parseDateTime(value.split(":")[1], null);
                 if (from) {
                     filterIsActive = true;
                 }
                 defaultValues[key.substring("filter.".length)] = [from, null];
             }
             else if (value.startsWith("$lte:") || value.startsWith("$lt:")) {
-                const to = stringToDate(value.split(":")[1]) ?? null;
+                const to = parseDateTime(value.split(":")[1], null);
                 if (to) {
                     filterIsActive = true;
                 }
@@ -2008,31 +2026,29 @@ const getDefaultValues = (searchParams, filter) => {
             }
         }
         else if (type === FilterType.NUMBER_RANGE) {
-            if (value.startsWith("$btw:")) {
-                const [fromString, toString] = value.split(":")[1].split(",");
-                const from = parseInt(fromString, 10) || null;
-                const to = parseInt(toString, 10) || null;
-                if (from || to) {
+            const btw = value.match(/^\$btw:(.*),(.*)$/);
+            if (btw && btw[1] && btw[2]) {
+                const from = parseInt(btw[1], 10) || null;
+                const to = parseInt(btw[2], 10) || null;
+                if ((typeof from === "number" && isNaN(from)) || (typeof to === "number" && isNaN(to))) {
                     filterIsActive = true;
                 }
                 defaultValues[key.substring("filter.".length)] = [from, to];
             }
-            else if (value.startsWith("$gte:") || value.startsWith("$gt:")) {
-                const from = parseInt(value.split(":")[1], 10) || null;
-                if (from) {
-                    filterIsActive = true;
-                }
-                defaultValues[key.substring("filter.".length)] = [from, null];
-            }
-            else if (value.startsWith("$lte:") || value.startsWith("$lt:")) {
-                const to = parseInt(value.split(":")[1], 10) || null;
-                if (to) {
-                    filterIsActive = true;
-                }
-                defaultValues[key.substring("filter.".length)] = [null, to];
-            }
             else {
-                defaultValues[key.substring("filter.".length)] = [null, null];
+                const match = value.match(/^\$(gt|gte|lt|lte):\d+$/);
+                if (match && match[1] && match[2]) {
+                    const from = parseInt(match[2], 10);
+                    if (from) {
+                        filterIsActive = true;
+                    }
+                    defaultValues[key.substring("filter.".length)] = ["gt", "gte"].includes(match[1])
+                        ? [from, null]
+                        : [null, from];
+                }
+                else {
+                    defaultValues[key.substring("filter.".length)] = [null, null];
+                }
             }
         }
         else {
@@ -2054,7 +2070,7 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
     });
     const watched = useWatch({ control });
     return (jsx(Popover, { placement: "bottom-end", popoverClassName: "w-55 sm:w-70 rounded-box!", showOnClick: true, showOnHover: false, borderColor: "border-gray-300", backgroundColor: "bg-gray-200", title: (ref, props) => (jsx("button", { ref: ref, ...props, className: cx("btn btn-xs", { "btn-accent": filterIsActive }, className), children: filterIsActive ? jsx(FunnelIcon$1, { className: "size-4" }) : jsx(FunnelIcon, { className: "size-4" }) })), children: jsxs("form", { className: "px-2 py-3 space-y-2", onSubmit: handleSubmit((v) => {
-                const params = {};
+                const params = { page: "" };
                 v = onSubmitParams ? onSubmitParams(v) : v;
                 for (const [key, val] of Object.entries(v)) {
                     if (filter[key].type === FilterType.NUMBER_RANGE) {

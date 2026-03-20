@@ -12,6 +12,7 @@ import { SelectPaginatedFromApiField } from "../form/Input";
 import { Select } from "../form/Select";
 import { Popover } from "../dialog/Popover";
 import { DateInput } from "../form/DateInput";
+import { parseDateTime } from "../utils/date";
 
 export const FilterNumberRange = ({
   filter,
@@ -55,7 +56,7 @@ export const FilterNumberRange = ({
     } else if (toValue) {
       value = `$lte:${onConvertValueSubmit(toValue)}`;
     }
-    router.replace(setPartialParams({ [`filter.${filter}`]: value }, searchParams));
+    router.replace(setPartialParams({ [`filter.${filter}`]: value, page: "" }, searchParams));
   };
 
   const [[fromValue, toValue], setValues] = useState<[number | null, number | null]>([
@@ -117,24 +118,24 @@ export const FilterDate = ({
   filter,
   fieldsetClassName,
   label,
-  parseDate,
   mode,
+  defaultValue = null,
 }: {
   mode: "btw" | "gte" | "lte";
   fieldsetClassName?: string;
   filter: string;
   label: string;
-  parseDate?: (date: string | undefined) => Date;
+  defaultValue?: Date | null;
 }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
   const dateString = parseDateFromUri(searchParams.get(`filter.${filter}`) ?? "");
-  const defaultValue: Date | null = dateString ? (parseDate ?? parseJSON)(dateString) : null;
+  const defaultDate: Date | null =
+    (dateString ? (parseDateTime(dateString, null) as Date | null) : null) ?? defaultValue;
 
   const submit = (date: Date | null) => {
-    let params: Record<string, string> = {};
-    params = {};
+    const params: Record<string, string | string[]> = { page: "" };
     if (date) {
       if (mode === "btw") {
         params[`filter.${filter}`] =
@@ -152,7 +153,7 @@ export const FilterDate = ({
       <label className="floating-label grow">
         <DateInput
           placeholder={label}
-          value={defaultValue}
+          value={defaultDate}
           size="xs"
           className="join-item"
           onChange={(date) => submit(date)}
@@ -204,9 +205,10 @@ export const FilterDateRange = ({
   }
 
   const submit = () => {
-    let params: Record<string, string> = {};
+    const params: Record<string, string> = { page: "" };
     if (Array.isArray(filter)) {
-      params = { [`filter.${filter[0]}`]: "", [`filter.${filter[1]}`]: "" };
+      params[`filter.${filter[0]}`] = "";
+      params[`filter.${filter[1]}`] = "";
 
       if (fromValue) {
         params[`filter.${filter[0]}`] = `$gte:${format(fromValue, "yyyy-MM-dd")}`;
@@ -216,13 +218,12 @@ export const FilterDateRange = ({
       }
     } else {
       if (fromValue && toValue) {
-        params = {
-          [`filter.${filter}`]: `$btw:${format(startOfDay(fromValue), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(toValue), "yyyy-MM-dd HH:mm:ss")}`,
-        };
+        params[`filter.${filter}`] =
+          `$btw:${format(startOfDay(fromValue), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(toValue), "yyyy-MM-dd HH:mm:ss")}`;
       } else if (fromValue) {
-        params = { [`filter.${filter}`]: `$gte:${format(fromValue, "yyyy-MM-dd")}` };
+        params[`filter.${filter}`] = `$gte:${format(fromValue, "yyyy-MM-dd")}`;
       } else if (toValue) {
-        params = { [`filter.${filter}`]: `$lte:${format(toValue, "yyyy-MM-dd")}` };
+        params[`filter.${filter}`] = `$lte:${format(toValue, "yyyy-MM-dd")}`;
       }
     }
 
@@ -308,7 +309,7 @@ export const FilterText = ({
   const submit = (val: string) =>
     router.replace(
       setPartialParams(
-        { [`filter.${filter}`]: val === "" ? "" : `${isLike ? "$ilike:" : "$eq:"}${val}` },
+        { [`filter.${filter}`]: val === "" ? "" : `${isLike ? "$ilike:" : "$eq:"}${val}`, page: "" },
         searchParams,
       ),
     );
@@ -376,7 +377,7 @@ export const FilterPagination = <T extends { data: unknown[]; meta: ResponseMeta
         if (searchParams.get(filter) === value) {
           return;
         }
-        router.replace(setPartialParams({ [`filter.${filter}`]: value }, searchParams));
+        router.replace(setPartialParams({ [`filter.${filter}`]: value, page: "" }, searchParams));
       }}
     />
   );
@@ -411,7 +412,9 @@ export const FilterSelectOptions = ({
         options={options}
         onChange={(m) => {
           setValue(m?.label ?? null);
-          router.replace(setPartialParams({ [`filter.${filter}`]: m?.value ? `${m.value}` : "" }, searchParams));
+          router.replace(
+            setPartialParams({ page: "", [`filter.${filter}`]: m?.value ? `${m.value}` : "" }, searchParams),
+          );
         }}
       />
     </label>
@@ -475,7 +478,10 @@ export const FilterOptionsExpandable = ({
               <li key={option.value}>
                 <Link
                   className={cx({ "bg-base-300/50 font-bold hover:bg-base-300": values.includes(option.value) })}
-                  href={setPartialParams({ [`filter.${filter}`]: getOptionValue(option.value, values) }, searchParams)}
+                  href={setPartialParams(
+                    { page: "", [`filter.${filter}`]: getOptionValue(option.value, values) },
+                    searchParams,
+                  )}
                 >
                   {option.label}
                 </Link>
@@ -499,7 +505,10 @@ export const FilterOptionsExpandable = ({
             <li key={option.value}>
               <Link
                 className={cx({ "bg-base-300/50 font-bold hover:bg-base-300": values.includes(option.value) })}
-                href={setPartialParams({ [`filter.${filter}`]: getOptionValue(option.value, values) }, searchParams)}
+                href={setPartialParams(
+                  { page: "", [`filter.${filter}`]: getOptionValue(option.value, values) },
+                  searchParams,
+                )}
               >
                 {option.label}
               </Link>
@@ -553,7 +562,7 @@ export const FilterOptions = ({
           <Link
             key={option.value}
             href={setPartialParams(
-              { [`filter.${filter}`]: getOptionValue(option.value, value, { equals }) },
+              { page: "", [`filter.${filter}`]: getOptionValue(option.value, value, { equals }) },
               searchParams,
             )}
             className={cx("btn btn-xs uppercase join-item", { "btn-neutral": value.includes(option.value) })}

@@ -9,12 +9,12 @@ export declare const FilterNumberRange: ({ filter, fieldsetClassName, from, to, 
     onConvertValueSubmit: (value: number | null) => string | number;
     onCovertFromValue: (value: number | null) => number;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const FilterDate: ({ filter, fieldsetClassName, label, parseDate, mode, }: {
+export declare const FilterDate: ({ filter, fieldsetClassName, label, mode, defaultValue, }: {
     mode: "btw" | "gte" | "lte";
     fieldsetClassName?: string;
     filter: string;
     label: string;
-    parseDate?: (date: string | undefined) => Date;
+    defaultValue?: Date | null;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const FilterDateRange: ({ filter, fieldsetClassName, from, to, options, }: {
     fieldsetClassName?: string;

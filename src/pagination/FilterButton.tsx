@@ -10,7 +10,7 @@ import { useRouter } from "next-nprogress-bar";
 import { endOfDay, format, isValid, startOfDay } from "date-fns";
 import { NumericFormatProps } from "react-number-format";
 import { PaginateQuery, ResponseMeta, setPartialParams } from "../utils/paginate";
-import { stringToDate } from "../utils/date";
+import { parseDateTime, stringToDate } from "../utils/date";
 import { Popover } from "../dialog/Popover";
 import {
   DateFormField,
@@ -53,22 +53,22 @@ const getDefaultValues = (
         defaultValues[key.substring("filter.".length)] = false;
       }
     } else if (type === FilterType.DATE_RANGE) {
-      if (value.startsWith("$btw:")) {
-        const [fromString, toString] = value.split(":")[1].split(",");
-        const from = stringToDate(fromString) ?? null;
-        const to = stringToDate(toString) ?? null;
+      const btw = value.match(/^\$btw:(.*),(.*)$/);
+      if (btw && btw[1] && btw[2]) {
+        const from = parseDateTime(btw[1], null) ?? null;
+        const to = parseDateTime(btw[2], null) ?? null;
         if (from || to) {
           filterIsActive = true;
         }
         defaultValues[key.substring("filter.".length)] = [from, to];
       } else if (value.startsWith("$gte:") || value.startsWith("$gt:")) {
-        const from = stringToDate(value.split(":")[1]) ?? null;
+        const from = parseDateTime(value.split(":")[1], null);
         if (from) {
           filterIsActive = true;
         }
         defaultValues[key.substring("filter.".length)] = [from, null];
       } else if (value.startsWith("$lte:") || value.startsWith("$lt:")) {
-        const to = stringToDate(value.split(":")[1]) ?? null;
+        const to = parseDateTime(value.split(":")[1], null);
         if (to) {
           filterIsActive = true;
         }
@@ -77,28 +77,27 @@ const getDefaultValues = (
         defaultValues[key.substring("filter.".length)] = [null, null];
       }
     } else if (type === FilterType.NUMBER_RANGE) {
-      if (value.startsWith("$btw:")) {
-        const [fromString, toString] = value.split(":")[1].split(",");
-        const from = parseInt(fromString, 10) || null;
-        const to = parseInt(toString, 10) || null;
-        if (from || to) {
+      const btw = value.match(/^\$btw:(.*),(.*)$/);
+      if (btw && btw[1] && btw[2]) {
+        const from = parseInt(btw[1], 10) || null;
+        const to = parseInt(btw[2], 10) || null;
+        if ((typeof from === "number" && isNaN(from)) || (typeof to === "number" && isNaN(to))) {
           filterIsActive = true;
         }
         defaultValues[key.substring("filter.".length)] = [from, to];
-      } else if (value.startsWith("$gte:") || value.startsWith("$gt:")) {
-        const from = parseInt(value.split(":")[1], 10) || null;
-        if (from) {
-          filterIsActive = true;
-        }
-        defaultValues[key.substring("filter.".length)] = [from, null];
-      } else if (value.startsWith("$lte:") || value.startsWith("$lt:")) {
-        const to = parseInt(value.split(":")[1], 10) || null;
-        if (to) {
-          filterIsActive = true;
-        }
-        defaultValues[key.substring("filter.".length)] = [null, to];
       } else {
-        defaultValues[key.substring("filter.".length)] = [null, null];
+        const match = value.match(/^\$(gt|gte|lt|lte):\d+$/);
+        if (match && match[1] && match[2]) {
+          const from = parseInt(match[2], 10);
+          if (from) {
+            filterIsActive = true;
+          }
+          defaultValues[key.substring("filter.".length)] = ["gt", "gte"].includes(match[1])
+            ? [from, null]
+            : [null, from];
+        } else {
+          defaultValues[key.substring("filter.".length)] = [null, null];
+        }
       }
     } else {
       defaultValues[key.substring("filter.".length)] = value;
@@ -165,7 +164,7 @@ export const FilterButton = ({
         className="px-2 py-3 space-y-2"
         onSubmit={handleSubmit(
           (v) => {
-            const params: Record<string, string | string[]> = {};
+            const params: Record<string, string | string[]> = { page: "" };
 
             v = onSubmitParams ? onSubmitParams(v) : v;
 

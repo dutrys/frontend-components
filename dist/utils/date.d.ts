@@ -1,4 +1,5 @@
 export declare const timeInUtcStringToDate: (stopFromArrivalTime: string) => Date | null;
+export declare const parseDateTime: (date: string, defaultValue?: unknown) => Date | unknown;
 export declare const convertTimeToUtcString: (time: string, timeFormat?: string) => string | undefined;
 export declare const stringToTime: (time: string) => Date | undefined;
 export declare const timeToDate: (date: string, format?: string) => Date | undefined;

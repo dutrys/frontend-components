@@ -1,4 +1,4 @@
-import { format, isValid, parse } from "date-fns";
+import { format, isValid, parse, parseJSON } from "date-fns";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 
 export const timeInUtcStringToDate = (stopFromArrivalTime: string): Date | null => {
@@ -7,6 +7,32 @@ export const timeInUtcStringToDate = (stopFromArrivalTime: string): Date | null 
     return fromZonedTime(date, "UTC");
   }
   return null;
+};
+
+export const parseDateTime = (date: string, defaultValue?: unknown): Date | unknown => {
+  let parsed = parseJSON(date);
+  if (isValid(parsed)) {
+    return parsed;
+  }
+
+  parsed = parse(date, "yyyy-MM-dd HH:mm:ss", new Date());
+  if (isValid(parsed)) {
+    return parsed;
+  }
+  parsed = parse(date, "yyyy-MM-dd HH:mm", new Date());
+  if (isValid(parsed)) {
+    return parsed;
+  }
+
+  parsed = parse(date, "yyyy-MM-dd", new Date());
+  if (isValid(parsed)) {
+    return parsed;
+  }
+
+  if (typeof defaultValue === "undefined") {
+    throw new Error(`Invalid date: ${date}`);
+  }
+  return defaultValue;
 };
 
 export const convertTimeToUtcString = (time: string, timeFormat = "HH:mm:ss"): string | undefined => {
