@@ -378,27 +378,25 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                           : ["id", "DESC"];
                         const Component: React.ElementType = column.pin ? "th" : "td";
                         if (column.name && Object.values(sortEnum).includes(`${column.name.toString()}:DESC`)) {
-                          const args = {
-                            className: "inline",
-                            width: 10,
-                          };
-
+                          const order = column.name !== sortBy ? "ASC" : sortOrder === "DESC" ? "ASC" : "DESC";
                           return (
                             <Component key={column.name.toString()} className={`${styles.thead} text-xs`}>
                               <Link
                                 prefetch={false}
-                                data-testid={`sort-table-${column.name.toString()}-${sortOrder === "DESC" ? "asc" : "desc"}`}
+                                data-testid={`sort-table-${column.name.toString()}-${order.toLowerCase()}`}
                                 {...(sortBy === column.name ? { className: "text-primary" } : {})}
                                 href={setPartialParams(
                                   {
                                     page: "1",
-                                    sortBy: `${column.name.toString()}:${sortOrder === "DESC" ? "ASC" : "DESC"}`,
+                                    sortBy:
+                                      column.name === sortBy
+                                        ? `${column.name.toString()}:${order}`
+                                        : `${column.name.toString()}:${order === "ASC" ? "DESC" : "ASC"}`,
                                   },
                                   searchParams,
                                 )}
                               >
-                                {column.title}
-                                {sortOrder === "DESC" ? <ChevronDownIcon {...args} /> : <ChevronUpIcon {...args} />}
+                                {column.title}&nbsp;{order === "DESC" ? "▲" : "▼"}
                               </Link>
                             </Component>
                           );

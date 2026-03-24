@@ -9,7 +9,7 @@ import { useParams, useSearchParams, useRouter as useRouter$1, usePathname } fro
 import { EllipsisVerticalIcon, ArrowsUpDownIcon } from '@heroicons/react/16/solid';
 import { useRouter } from 'next-nprogress-bar';
 import toast, { useToasterStore, Toaster as Toaster$1, resolveValue } from 'react-hot-toast';
-import { ExclamationTriangleIcon, CheckCircleIcon, ExclamationCircleIcon, ChevronDownIcon, EllipsisHorizontalIcon, CheckIcon, Cog6ToothIcon, AdjustmentsHorizontalIcon, XMarkIcon, ClockIcon, CalendarIcon, ChevronUpDownIcon, PlusIcon, RectangleStackIcon, QueueListIcon, ChevronUpIcon, FunnelIcon, MagnifyingGlassIcon, ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronDoubleDownIcon } from '@heroicons/react/24/outline';
+import { ExclamationTriangleIcon, CheckCircleIcon, ExclamationCircleIcon, ChevronDownIcon, EllipsisHorizontalIcon, CheckIcon, Cog6ToothIcon, AdjustmentsHorizontalIcon, XMarkIcon, ClockIcon, CalendarIcon, ChevronUpDownIcon, PlusIcon, RectangleStackIcon, QueueListIcon, FunnelIcon, MagnifyingGlassIcon, ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronDoubleDownIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from 'react-tooltip';
 import { useTranslations } from 'next-intl';
 import { ChevronLeftIcon, ChevronRightIcon, FunnelIcon as FunnelIcon$1 } from '@heroicons/react/24/solid';
@@ -1477,14 +1477,13 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                             : ["id", "DESC"];
                                                         const Component = column.pin ? "th" : "td";
                                                         if (column.name && Object.values(sortEnum).includes(`${column.name.toString()}:DESC`)) {
-                                                            const args = {
-                                                                className: "inline",
-                                                                width: 10,
-                                                            };
-                                                            return (jsx(Component, { className: `${styles$4.thead} text-xs`, children: jsxs(Link, { prefetch: false, "data-testid": `sort-table-${column.name.toString()}-${sortOrder === "DESC" ? "asc" : "desc"}`, ...(sortBy === column.name ? { className: "text-primary" } : {}), href: setPartialParams({
+                                                            const order = column.name !== sortBy ? "ASC" : sortOrder === "DESC" ? "ASC" : "DESC";
+                                                            return (jsx(Component, { className: `${styles$4.thead} text-xs`, children: jsxs(Link, { prefetch: false, "data-testid": `sort-table-${column.name.toString()}-${order.toLowerCase()}`, ...(sortBy === column.name ? { className: "text-primary" } : {}), href: setPartialParams({
                                                                         page: "1",
-                                                                        sortBy: `${column.name.toString()}:${sortOrder === "DESC" ? "ASC" : "DESC"}`,
-                                                                    }, searchParams), children: [column.title, sortOrder === "DESC" ? jsx(ChevronDownIcon, { ...args }) : jsx(ChevronUpIcon, { ...args })] }) }, column.name.toString()));
+                                                                        sortBy: column.name === sortBy
+                                                                            ? `${column.name.toString()}:${order}`
+                                                                            : `${column.name.toString()}:${order === "ASC" ? "DESC" : "ASC"}`,
+                                                                    }, searchParams), children: [column.title, "\u00A0", order === "DESC" ? "▲" : "▼"] }) }, column.name.toString()));
                                                         }
                                                         return (jsx(Component, { className: `${styles$4.thead} text-xs`, children: column.title }, column.title.toString()));
                                                     })] }) }), jsx("tbody", { children: pagination.data.map((model, o) => (jsxs("tr", { "data-testid": `table-row-${o}`, onClick: rowClickHref
