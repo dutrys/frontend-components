@@ -3,6 +3,8 @@ import { useSearchParams } from "next/navigation";
 import { Link } from "./Link";
 import { ResponseMeta, setPartialParams } from "../utils/paginate";
 import cx from "classnames";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
+import { useTranslations } from "next-intl";
 
 export const Pagination = ({
   page,
@@ -61,4 +63,30 @@ export const Pagination = ({
   }
 
   return <div className={cx("join mx-auto", className)}>{pageNumbers}</div>;
+};
+
+export const NoCountPagination = ({ nextPageAvailable }: { nextPageAvailable: boolean }) => {
+  const searchParams = useSearchParams();
+  const t = useTranslations();
+  const pageString = searchParams.get("page");
+  const page = Math.max(Number(pageString), 1);
+
+  return (
+    <div className="my-4 gap-2">
+      <Link
+        className={cx("btn btn-sm mr-2 w-30", { "btn-disabled": page <= 1 })}
+        href={setPartialParams({ page: page <= 2 ? "" : `${page - 1}` }, searchParams)}
+        prefetch={false}
+      >
+        <ChevronLeftIcon className="size-4" /> {t("pagination.previous")}
+      </Link>
+      <Link
+        href={setPartialParams(nextPageAvailable ? { page: `${page + 1}` } : {}, searchParams)}
+        className={cx("btn btn-sm w-30", { "btn-disabled": !nextPageAvailable })}
+        prefetch={false}
+      >
+        {t("pagination.next")} <ChevronRightIcon className="size-4" />
+      </Link>
+    </div>
+  );
 };

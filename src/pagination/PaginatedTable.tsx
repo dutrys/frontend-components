@@ -9,9 +9,9 @@ import {
   QueueListIcon,
   RectangleStackIcon,
 } from "@heroicons/react/24/outline";
-import { FunnelIcon as FunnelIconSolid } from "@heroicons/react/24/solid";
+import { ChevronLeftIcon, ChevronRightIcon, FunnelIcon as FunnelIconSolid } from "@heroicons/react/24/solid";
 import { MoreActions, MoreActionType } from "./MoreAction";
-import { Pagination } from "./Pagination";
+import { NoCountPagination, Pagination } from "./Pagination";
 import { useTranslations } from "next-intl";
 import React, { useMemo, useState } from "react";
 import styles from "./PaginatedTable.module.css";
@@ -315,7 +315,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
           )}
         </div>
 
-        {pagination.meta.totalItems === 0 ? (
+        {(pagination.meta.withoutCount ? pagination.data.length === 0 : pagination.meta.totalItems === 0) ? (
           <>
             {caption}
             <div className="text-center pt-40">
@@ -553,20 +553,26 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
             <div className="absolute box-content left-0 bottom-0 w-full h-16 z-1 border-t border-t-base-content/5">
               <div className="bg-base-100">
                 <div className="flex justify-center items-center">
-                  <div
-                    className={`shrink-1 w-60 text-xs pl-4 ${pagination.meta.totalPages > 1 ? "hidden md:block" : ""}`}
-                  >
-                    {t("pagination.showing", {
-                      from: (pagination.meta.currentPage - 1) * pagination.meta.itemsPerPage + 1,
-                      to: Math.min(
-                        pagination.meta.currentPage * pagination.meta.itemsPerPage,
-                        pagination.meta.totalItems,
-                      ),
-                      total: pagination.meta.totalItems,
-                    })}
-                  </div>
+                  {!pagination.meta.withoutCount && (
+                    <div
+                      className={`shrink-1 w-60 text-xs pl-4 ${pagination.meta.totalPages > 1 ? "hidden md:block" : ""}`}
+                    >
+                      {t("pagination.showing", {
+                        from: (pagination.meta.currentPage - 1) * pagination.meta.itemsPerPage + 1,
+                        to: Math.min(
+                          pagination.meta.currentPage * pagination.meta.itemsPerPage,
+                          pagination.meta.totalItems,
+                        ),
+                        total: pagination.meta.totalItems,
+                      })}
+                    </div>
+                  )}
                   <div className="grow text-center h-16">
-                    {pagination.meta.totalPages > 1 && <Pagination visiblePages={5} page={pagination.meta} />}
+                    {pagination.meta.withoutCount ? (
+                      <NoCountPagination nextPageAvailable={pagination.data.length === pagination.meta.itemsPerPage} />
+                    ) : (
+                      pagination.meta.totalPages > 1 && <Pagination visiblePages={5} page={pagination.meta} />
+                    )}
                   </div>
                   {pagination.meta.totalPages > 1 && (
                     <div className="shrink-1 w-60 hidden md:block text-xs text-right pr-4">
@@ -639,7 +645,7 @@ export const FilterLink = ({
   className: string;
   children?: string;
   params: Record<string, string | number>;
-  href: string;
+  href?: string;
 }) => {
   const t = useTranslations();
   const searchParams = useSearchParams();
@@ -658,7 +664,7 @@ export const FilterLink = ({
 
   return (
     <>
-      <TableLink href={href}>{children}</TableLink>{" "}
+      {href ? <TableLink href={href}>{children}</TableLink> : children}{" "}
       <TableLink
         data-tooltip-id={TOOLTIP_GLOBAL_ID}
         data-tooltip-content={isFiltering ? t("general.filter") : t("general.clearFilter")}

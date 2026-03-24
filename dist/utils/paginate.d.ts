@@ -7,6 +7,7 @@ export type PaginateQuery<T> = {
     [key: `filter.${string}`]: string[];
 };
 export type ResponseMeta = {
+    withoutCount?: boolean;
     itemsPerPage: number;
     totalItems: number;
     currentPage: number;

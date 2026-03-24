@@ -6,4 +6,7 @@ export declare const Pagination: ({ page, visiblePages, onClick, size, className
     page: ResponseMeta;
     visiblePages: number;
 }) => import("react/jsx-runtime").JSX.Element;
+export declare const NoCountPagination: ({ nextPageAvailable }: {
+    nextPageAvailable: boolean;
+}) => import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=Pagination.d.ts.map

@@ -9,6 +9,7 @@ export type PaginateQuery<T> = {
 };
 
 export type ResponseMeta = {
+  withoutCount?: boolean;
   itemsPerPage: number;
   totalItems: number;
   currentPage: number;
