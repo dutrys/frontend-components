@@ -70,4 +70,11 @@ export declare const FilterOptions: ({ filter, options, isVisible, equals, }: {
         value: string;
     }[];
 }) => import("react/jsx-runtime").JSX.Element | import("react/jsx-runtime").JSX.Element[];
+export declare const FilterDateFromTo: ({ filter, fieldsetClassName, from, to, required, }: {
+    fieldsetClassName?: string;
+    filter: string | [string, string];
+    from: string;
+    to: string;
+    required?: boolean;
+}) => import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=Filter.d.ts.map

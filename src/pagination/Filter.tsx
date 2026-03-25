@@ -549,3 +549,126 @@ const getOptionValue = (value: string, values: string[], { equals }: { equals?: 
   }
   return optionValue;
 };
+
+export const FilterDateFromTo = ({
+  filter,
+  fieldsetClassName,
+  from,
+  to,
+  required,
+}: {
+  fieldsetClassName?: string;
+  filter: string | [string, string];
+  from: string;
+  to: string;
+  required?: boolean;
+}) => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  let defaultFromValue: Date | null = null;
+  let defaultToValue: Date | null = null;
+  if (Array.isArray(filter)) {
+    const stringToValue = searchParams.get(`filter.${filter[0]}`) ?? "";
+    if (/^\$gte:/.test(stringToValue)) {
+      defaultFromValue = parse(stringToValue.replace(/^\$gte?:/, ""), "yyyy-MM-dd", new Date());
+    }
+    const stringFromValue = searchParams.get(`filter.${filter[1]}`) ?? "";
+    if (/^\$lte:/.test(stringFromValue)) {
+      defaultToValue = parse(stringFromValue.replace(/^\$lte?:/, ""), "yyyy-MM-dd", new Date());
+    }
+  } else {
+    const stringValue = searchParams.get(`filter.${filter}`) ?? searchParams.get(`filter.${filter}[]`) ?? "";
+    const btw = getBtwDates(stringValue);
+    if (btw) {
+      defaultFromValue = btw[0];
+      defaultToValue = btw[1];
+    }
+  }
+
+  const submit = () => {
+    const params: Record<string, string> = { page: "" };
+    if (Array.isArray(filter)) {
+      params[`filter.${filter[0]}`] = "";
+      params[`filter.${filter[1]}`] = "";
+
+      if (fromValue) {
+        params[`filter.${filter[0]}`] = `$gte:${format(fromValue, "yyyy-MM-dd")}`;
+      }
+      if (toValue) {
+        params[`filter.${filter[1]}`] = `$lte:${format(toValue, "yyyy-MM-dd")}`;
+      }
+    } else {
+      if (fromValue && toValue) {
+        params[`filter.${filter}`] =
+          `$btw:${format(startOfDay(fromValue), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(toValue), "yyyy-MM-dd HH:mm:ss")}`;
+      } else if (fromValue) {
+        params[`filter.${filter}`] = `$gte:${format(fromValue, "yyyy-MM-dd")}`;
+      } else if (toValue) {
+        params[`filter.${filter}`] = `$lte:${format(toValue, "yyyy-MM-dd")}`;
+      }
+    }
+
+    router.replace(setPartialParams(params, searchParams));
+  };
+
+  const [[fromValue, toValue], setValues] = useState<[Date | null, Date | null]>([defaultFromValue, defaultToValue]);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleBlur = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      submit();
+    }, 100);
+  };
+
+  const handleFocus = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
+
+  return (
+    <div className={cx(fieldsetClassName, styles.fieldDate, "join")}>
+      <label className="floating-label grow">
+        <DateInput
+          placeholder={from}
+          value={fromValue}
+          size="xs"
+          className="join-item"
+          onChange={(date) => setValues((prev) => [date, prev[1]])}
+          onKeyUp={(e) => {
+            if (e.code === "Enter") {
+              submit();
+            }
+          }}
+          required={required}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+        />
+        <span className="label-text-alt">{from}</span>
+      </label>
+      <label className="floating-label grow">
+        <DateInput
+          placeholder={to}
+          value={toValue}
+          size="xs"
+          className="join-item"
+          onChange={(date) => setValues((prev) => [prev[0], date])}
+          onKeyUp={(e) => {
+            if (e.code === "Enter") {
+              submit();
+            }
+          }}
+          required={required}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+        />
+        <span className="label-text-alt">{to}</span>
+      </label>
+    </div>
+  );
+};

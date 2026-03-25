@@ -1974,6 +1974,81 @@ const getOptionValue = (value, values, { equals } = {}) => {
     }
     return optionValue;
 };
+const FilterDateFromTo = ({ filter, fieldsetClassName, from, to, required, }) => {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    let defaultFromValue = null;
+    let defaultToValue = null;
+    if (Array.isArray(filter)) {
+        const stringToValue = searchParams.get(`filter.${filter[0]}`) ?? "";
+        if (/^\$gte:/.test(stringToValue)) {
+            defaultFromValue = parse(stringToValue.replace(/^\$gte?:/, ""), "yyyy-MM-dd", new Date());
+        }
+        const stringFromValue = searchParams.get(`filter.${filter[1]}`) ?? "";
+        if (/^\$lte:/.test(stringFromValue)) {
+            defaultToValue = parse(stringFromValue.replace(/^\$lte?:/, ""), "yyyy-MM-dd", new Date());
+        }
+    }
+    else {
+        const stringValue = searchParams.get(`filter.${filter}`) ?? searchParams.get(`filter.${filter}[]`) ?? "";
+        const btw = getBtwDates(stringValue);
+        if (btw) {
+            defaultFromValue = btw[0];
+            defaultToValue = btw[1];
+        }
+    }
+    const submit = () => {
+        const params = { page: "" };
+        if (Array.isArray(filter)) {
+            params[`filter.${filter[0]}`] = "";
+            params[`filter.${filter[1]}`] = "";
+            if (fromValue) {
+                params[`filter.${filter[0]}`] = `$gte:${format(fromValue, "yyyy-MM-dd")}`;
+            }
+            if (toValue) {
+                params[`filter.${filter[1]}`] = `$lte:${format(toValue, "yyyy-MM-dd")}`;
+            }
+        }
+        else {
+            if (fromValue && toValue) {
+                params[`filter.${filter}`] =
+                    `$btw:${format(startOfDay(fromValue), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(toValue), "yyyy-MM-dd HH:mm:ss")}`;
+            }
+            else if (fromValue) {
+                params[`filter.${filter}`] = `$gte:${format(fromValue, "yyyy-MM-dd")}`;
+            }
+            else if (toValue) {
+                params[`filter.${filter}`] = `$lte:${format(toValue, "yyyy-MM-dd")}`;
+            }
+        }
+        router.replace(setPartialParams(params, searchParams));
+    };
+    const [[fromValue, toValue], setValues] = useState([defaultFromValue, defaultToValue]);
+    const timeoutRef = useRef(null);
+    const handleBlur = () => {
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+        timeoutRef.current = setTimeout(() => {
+            submit();
+        }, 100);
+    };
+    const handleFocus = () => {
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+            timeoutRef.current = null;
+        }
+    };
+    return (jsxs("div", { className: cx(fieldsetClassName, styles.fieldDate, "join"), children: [jsxs("label", { className: "floating-label grow", children: [jsx(DateInput, { placeholder: from, value: fromValue, size: "xs", className: "join-item", onChange: (date) => setValues((prev) => [date, prev[1]]), onKeyUp: (e) => {
+                            if (e.code === "Enter") {
+                                submit();
+                            }
+                        }, required: required, onFocus: handleFocus, onBlur: handleBlur }), jsx("span", { className: "label-text-alt", children: from })] }), jsxs("label", { className: "floating-label grow", children: [jsx(DateInput, { placeholder: to, value: toValue, size: "xs", className: "join-item", onChange: (date) => setValues((prev) => [prev[0], date]), onKeyUp: (e) => {
+                            if (e.code === "Enter") {
+                                submit();
+                            }
+                        }, required: required, onFocus: handleFocus, onBlur: handleBlur }), jsx("span", { className: "label-text-alt", children: to })] })] }));
+};
 
 var FilterType;
 (function (FilterType) {
@@ -2162,5 +2237,5 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                                         : undefined, size: "sm" })] })), v.type === FilterType.PAGINATION && (jsx(SelectPaginatedFromApiFormField, { queryFn: v.queryFn, queryKey: v.queryKey, optionLabel: v.optionLabel, groupBy: v.groupBy, portalEnabled: true, control: control, label: v.label, name: key, size: "sm" })), v.type === FilterType.BOOLEAN && (jsxs("div", { className: "join w-full", children: [jsx("button", { type: "button", className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === true }), onClick: () => (watched[key] === true ? setValue(key, undefined) : setValue(key, true)), children: v.label.toUpperCase() }), jsx("button", { onClick: () => (watched[key] === false ? setValue(key, undefined) : setValue(key, false)), className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === false }), type: "button", children: `${t("general.no").toUpperCase()} ${v.label.toUpperCase()}` })] })), v.type === FilterType.OPTIONS && (jsx("div", { className: cx("join w-full", { "join-vertical": Object.entries(v.options ?? {}).length > 2 }), children: Object.entries(v.options ?? {}).map(([value, label]) => (jsx("button", { className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === value }), type: "button", onClick: () => setValue(key, value), children: label }, value))) }))] }, `${key}-${i}`))), jsx(SaveButton, { className: "btn-sm w-full", children: t("general.filter") })] }) }));
 };
 
-export { Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDate, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Select, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
+export { Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Select, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
 //# sourceMappingURL=index.js.map
