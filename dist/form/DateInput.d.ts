@@ -2,6 +2,7 @@ import * as React from "react";
 import { DateRange, Matcher } from "react-day-picker";
 export type DateInputProps = Omit<React.ComponentPropsWithoutRef<"input">, "size" | "value" | "defaultValue" | "defaultChecked" | "onChange"> & {
     size?: "sm" | "xs";
+    hideCalendarIcon?: boolean;
     required?: boolean;
     disabled?: boolean;
     value: Date | null;
@@ -16,6 +17,7 @@ export declare const DateInput: ({ onChange, value, className, toggleClassName, 
 export type DateRangeInputProps = Omit<DateInputProps, "onChange" | "value"> & {
     onChange: (date: DateRange | null) => unknown;
     value: DateRange | null;
+    displayHelpers?: boolean;
 };
-export declare const DateRangeInput: ({ onChange, value, className, toggleClassName, required, disabled, size, modifiers, placeholder, matcher, ...rest }: DateRangeInputProps) => import("react/jsx-runtime").JSX.Element;
+export declare const DateRangeInput: ({ onChange, value, className, toggleClassName, required, disabled, size, modifiers, placeholder, matcher, hideCalendarIcon, displayHelpers, ...rest }: DateRangeInputProps) => import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=DateInput.d.ts.map

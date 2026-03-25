@@ -83,3 +83,23 @@ export const dateToString = (date: Date, timeZone?: string) => {
   return format(toZonedTime(date, timeZone), "yyyy-MM-dd HH:mm:ss");
 };
 export const dateToStringDate = (date: Date) => format(date, "yyyy-MM-dd");
+
+export const getBtwDates = (btw: string | string[]): null | [Date, Date] => {
+  if (!Array.isArray(btw)) {
+    btw = [btw];
+  }
+
+  for (const b of btw) {
+    const match = b.match(/^\$btw:(.+),(.+)$/);
+    if (match) {
+      try {
+        const from = parseDateTime(match[1]) as Date;
+        const to = parseDateTime(match[2]) as Date;
+        return [from, to];
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+  return null;
+};

@@ -139,6 +139,11 @@ tr.PaginatedTable-module_rowHover__l-B2Q .PaginatedTable-module_actionCellConten
   background: transparent;
 }
 
+.DatePicker-module_dayPicker__VRSSY .rdp-button_previous .rdp-chevron,
+.DatePicker-module_dayPicker__VRSSY .rdp-button_next .rdp-chevron {
+  fill: var(--color-white);
+}
+
 .Input-module_desc__3D3hV {
   display: table;
   table-layout: fixed;
@@ -162,7 +167,7 @@ tr.PaginatedTable-module_rowHover__l-B2Q .PaginatedTable-module_actionCellConten
 }
 
 .Filter-module_fieldDate__tuqgJ {
-  width: 200px;
+  width: 180px;
 }
 
 .popover .Filter-module_field__vtsXb,

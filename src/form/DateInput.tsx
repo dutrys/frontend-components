@@ -1,6 +1,17 @@
 import * as React from "react";
 import { ComponentProps, useEffect, useState } from "react";
-import { format, isValid, parse } from "date-fns";
+import {
+  endOfMonth,
+  endOfWeek,
+  format,
+  isValid,
+  parse,
+  startOfMonth,
+  startOfWeek,
+  subDays,
+  subMonths,
+  subWeeks,
+} from "date-fns";
 import styles from "./DatePicker.module.css";
 import { XMarkIcon, CalendarIcon } from "@heroicons/react/24/outline";
 import { useParams } from "next/navigation";
@@ -9,6 +20,7 @@ import { enGB, lt } from "react-day-picker/locale";
 import { Popover } from "../dialog/Popover";
 import cx from "classnames";
 import { FocusTrap, FocusTrapFeatures } from "@headlessui/react";
+import { useTranslations } from "next-intl";
 
 const formatDate = (date: Date | null | undefined) => {
   if (!date) {
@@ -23,6 +35,7 @@ export type DateInputProps = Omit<
   "size" | "value" | "defaultValue" | "defaultChecked" | "onChange"
 > & {
   size?: "sm" | "xs";
+  hideCalendarIcon?: boolean;
   required?: boolean;
   disabled?: boolean;
   value: Date | null;
@@ -157,6 +170,7 @@ export const DateInput = ({
 export type DateRangeInputProps = Omit<DateInputProps, "onChange" | "value"> & {
   onChange: (date: DateRange | null) => unknown;
   value: DateRange | null;
+  displayHelpers?: boolean;
 };
 
 export const DateRangeInput = ({
@@ -170,8 +184,11 @@ export const DateRangeInput = ({
   modifiers,
   placeholder,
   matcher,
+  hideCalendarIcon,
+  displayHelpers,
   ...rest
 }: DateRangeInputProps) => {
+  const t = useTranslations();
   const params = useParams();
   const [isOpen, setIsOpen] = useState(false);
   return (
@@ -206,9 +223,11 @@ export const DateRangeInput = ({
             />
 
             {required || !value ? (
-              <div className={cx(toggleClassName, "cursor-pointer")}>
-                <CalendarIcon className="size-4" />
-              </div>
+              hideCalendarIcon ? null : (
+                <div className={cx(toggleClassName, "cursor-pointer")}>
+                  <CalendarIcon className="size-4" />
+                </div>
+              )
             ) : (
               <button
                 type="button"
@@ -226,23 +245,85 @@ export const DateRangeInput = ({
           </div>
         )}
       >
-        {() => (
-          <DayPicker
-            className={`react-day-picker bg-transparent border-none text-white ${styles.dayPicker}`}
-            captionLayout="label"
-            mode="range"
-            locale={params.locale === "lt" ? lt : enGB}
-            showOutsideDays
-            disabled={matcher}
-            weekStartsOn={1}
-            numberOfMonths={2}
-            selected={value ?? undefined}
-            defaultMonth={value?.from ?? undefined}
-            modifiers={modifiers}
-            onSelect={(range) => {
-              onChange(range ?? null);
-            }}
-          />
+        {(close) => (
+          <div className="flex">
+            <DayPicker
+              className={`react-day-picker bg-transparent border-none text-white ${styles.dayPicker}`}
+              captionLayout="label"
+              mode="range"
+              locale={params.locale === "lt" ? lt : enGB}
+              showOutsideDays
+              disabled={matcher}
+              weekStartsOn={1}
+              numberOfMonths={2}
+              selected={value ?? undefined}
+              defaultMonth={value?.from ?? undefined}
+              modifiers={modifiers}
+              onSelect={(range) => {
+                onChange(range ?? null);
+              }}
+            />
+            {displayHelpers && (
+              <div className="menu menu-xs text-white pt-14" data-theme="dim" style={{ background: "unset" }}>
+                <li>
+                  <button
+                    onClick={() => {
+                      onChange({ from: subDays(new Date(), 30), to: new Date() });
+                      close();
+                    }}
+                  >
+                    {t("dateHelper.last30Days")}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      onChange({ from: startOfMonth(new Date()), to: new Date() });
+                      close();
+                    }}
+                  >
+                    {t("dateHelper.thisMonth")}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      onChange({
+                        from: startOfMonth(subMonths(new Date(), 1)),
+                        to: endOfMonth(subMonths(new Date(), 1)),
+                      });
+                      close();
+                    }}
+                  >
+                    {t("dateHelper.lastMonth")}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      onChange({ from: startOfWeek(new Date(), { weekStartsOn: 1 }), to: new Date() });
+                      close();
+                    }}
+                  >
+                    {t("dateHelper.thisWeek")}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      onChange({
+                        from: startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }),
+                        to: endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }),
+                      });
+                      close();
+                    }}
+                  >
+                    {t("dateHelper.lastWeek")}
+                  </button>
+                </li>
+              </div>
+            )}
+          </div>
         )}
       </Popover>
     </FocusTrap>

@@ -18,7 +18,7 @@ import { captureException } from '@sentry/nextjs';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 import { createPortal } from 'react-dom';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { format, isSameDay, isSameHour, parse, isValid, parseJSON, differenceInSeconds, formatDistance, differenceInMinutes, differenceInDays, startOfDay, endOfDay } from 'date-fns';
+import { format, isSameDay, isSameHour, parse, isValid, subDays, startOfMonth, endOfMonth, subMonths, startOfWeek, endOfWeek, subWeeks, parseJSON, differenceInSeconds, formatDistance, differenceInMinutes, differenceInDays, startOfDay, endOfDay } from 'date-fns';
 import { DayPicker } from 'react-day-picker';
 import { lt, enGB } from 'react-day-picker/locale';
 import { FocusTrap, FocusTrapFeatures, Portal, Combobox, ComboboxInput, ComboboxButton, Transition, ComboboxOptions, ComboboxOption } from '@headlessui/react';
@@ -912,20 +912,42 @@ const DateInput = ({ onChange, value, className, toggleClassName, required, disa
                     close();
                 } })) }) }));
 };
-const DateRangeInput = ({ onChange, value, className, toggleClassName, required, disabled, size, modifiers, placeholder, matcher, ...rest }) => {
+const DateRangeInput = ({ onChange, value, className, toggleClassName, required, disabled, size, modifiers, placeholder, matcher, hideCalendarIcon, displayHelpers, ...rest }) => {
+    const t = useTranslations();
     const params = useParams();
     const [isOpen, setIsOpen] = useState(false);
     return (jsx(FocusTrap, { className: "grow", features: isOpen ? FocusTrapFeatures.FocusLock : FocusTrapFeatures.None, children: jsx(Popover, { showOnClick: true, showOnFocus: true, showOnHover: false, onShow: (open) => setIsOpen(open), title: (ref, popoverProps) => (jsxs("div", { ref: ref, ...rest, ...popoverProps, className: cx("input input-bordered", {
                     "input-xs pl-3 pr-1 gap-0.5": size === "xs",
                     "input-sm pl-3 pr-2 gap-1": size === "sm",
                     ["w-full"]: !className?.includes("w-"),
-                }, className), children: [jsx("input", { value: value ? `${formatDate(value.from)} - ${formatDate(value.to)}` : "", className: "grow", required: required, disabled: disabled, placeholder: placeholder, onChange: (e) => { } }), required || !value ? (jsx("div", { className: cx(toggleClassName, "cursor-pointer"), children: jsx(CalendarIcon, { className: "size-4" }) })) : (jsx("button", { type: "button", disabled: !required && !value, className: cx("cursor-pointer", toggleClassName), onClick: (e) => {
+                }, className), children: [jsx("input", { value: value ? `${formatDate(value.from)} - ${formatDate(value.to)}` : "", className: "grow", required: required, disabled: disabled, placeholder: placeholder, onChange: (e) => { } }), required || !value ? (hideCalendarIcon ? null : (jsx("div", { className: cx(toggleClassName, "cursor-pointer"), children: jsx(CalendarIcon, { className: "size-4" }) }))) : (jsx("button", { type: "button", disabled: !required && !value, className: cx("cursor-pointer", toggleClassName), onClick: (e) => {
                             e.stopPropagation();
                             e.preventDefault();
                             onChange(null);
-                        }, children: jsx(XMarkIcon, { className: "size-4" }) }))] })), children: () => (jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$3.dayPicker}`, captionLayout: "label", mode: "range", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, disabled: matcher, weekStartsOn: 1, numberOfMonths: 2, selected: value ?? undefined, defaultMonth: value?.from ?? undefined, modifiers: modifiers, onSelect: (range) => {
-                    onChange(range ?? null);
-                } })) }) }));
+                        }, children: jsx(XMarkIcon, { className: "size-4" }) }))] })), children: (close) => (jsxs("div", { className: "flex", children: [jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$3.dayPicker}`, captionLayout: "label", mode: "range", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, disabled: matcher, weekStartsOn: 1, numberOfMonths: 2, selected: value ?? undefined, defaultMonth: value?.from ?? undefined, modifiers: modifiers, onSelect: (range) => {
+                            onChange(range ?? null);
+                        } }), displayHelpers && (jsxs("div", { className: "menu menu-xs text-white pt-14", "data-theme": "dim", style: { background: "unset" }, children: [jsx("li", { children: jsx("button", { onClick: () => {
+                                        onChange({ from: subDays(new Date(), 30), to: new Date() });
+                                        close();
+                                    }, children: t("dateHelper.last30Days") }) }), jsx("li", { children: jsx("button", { onClick: () => {
+                                        onChange({ from: startOfMonth(new Date()), to: new Date() });
+                                        close();
+                                    }, children: t("dateHelper.thisMonth") }) }), jsx("li", { children: jsx("button", { onClick: () => {
+                                        onChange({
+                                            from: startOfMonth(subMonths(new Date(), 1)),
+                                            to: endOfMonth(subMonths(new Date(), 1)),
+                                        });
+                                        close();
+                                    }, children: t("dateHelper.lastMonth") }) }), jsx("li", { children: jsx("button", { onClick: () => {
+                                        onChange({ from: startOfWeek(new Date(), { weekStartsOn: 1 }), to: new Date() });
+                                        close();
+                                    }, children: t("dateHelper.thisWeek") }) }), jsx("li", { children: jsx("button", { onClick: () => {
+                                        onChange({
+                                            from: startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }),
+                                            to: endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }),
+                                        });
+                                        close();
+                                    }, children: t("dateHelper.lastWeek") }) })] }))] })) }) }));
 };
 
 const PortalSSR = (props) => {
@@ -1094,6 +1116,9 @@ const parseDateTime = (date, defaultValue) => {
     if (isValid(parsed)) {
         return parsed;
     }
+    if (typeof defaultValue === "undefined") {
+        throw new Error(`Invalid date: ${date}`);
+    }
     return defaultValue;
 };
 const timeToDate = (date, format = "HH:mm:ss") => {
@@ -1114,6 +1139,25 @@ const stringToDate = (date, timeZone) => {
     return undefined;
 };
 const dateToStringDate = (date) => format(date, "yyyy-MM-dd");
+const getBtwDates = (btw) => {
+    if (!Array.isArray(btw)) {
+        btw = [btw];
+    }
+    for (const b of btw) {
+        const match = b.match(/^\$btw:(.+),(.+)$/);
+        if (match) {
+            try {
+                const from = parseDateTime(match[1]);
+                const to = parseDateTime(match[2]);
+                return [from, to];
+            }
+            catch {
+                /* ignore */
+            }
+        }
+    }
+    return null;
+};
 
 const TimePicker = ({ className, value, onChange, placeholder, required, disabled }) => {
     const formatValue = (value) => value ? dateToTimeString(timeToDate(value) || new Date(), "HH:mm") : undefined;
@@ -1778,7 +1822,7 @@ const FilterDate = ({ filter, fieldsetClassName, label, mode, defaultValue = nul
     };
     return (jsx("div", { className: cx(fieldsetClassName), children: jsxs("label", { className: "floating-label grow", children: [jsx(DateInput, { placeholder: label, value: defaultDate, size: "xs", className: "join-item", onChange: (date) => submit(date) }), jsx("span", { className: "label-text-alt", children: label.toString() })] }) }));
 };
-const FilterDateRange = ({ filter, fieldsetClassName, from, to, required, }) => {
+const FilterDateRange = ({ filter, fieldsetClassName, label, required, }) => {
     const searchParams = useSearchParams();
     const router = useRouter();
     let defaultFromValue = null;
@@ -1794,68 +1838,29 @@ const FilterDateRange = ({ filter, fieldsetClassName, from, to, required, }) => 
         }
     }
     else {
-        const stringValue = searchParams.get(`filter.${filter}`) ?? "";
-        const btw = stringValue.match(/^\$btw:(.*),(.*)$/);
-        if (btw && btw[1] && btw[2]) {
-            const from = parseDateTime(btw[1], null) ?? null;
-            const to = parseDateTime(btw[2], null) ?? null;
-            if (from && to) {
-                defaultFromValue = from;
-                defaultToValue = to;
-            }
+        const stringValue = searchParams.get(`filter.${filter}`) ?? searchParams.get(`filter.${filter}[]`) ?? "";
+        const btw = getBtwDates(stringValue);
+        if (btw) {
+            defaultFromValue = btw[0];
+            defaultToValue = btw[1];
         }
     }
-    const submit = () => {
+    const submit = ([fromValue, toValue]) => {
         const params = { page: "" };
-        if (Array.isArray(filter)) {
-            params[`filter.${filter[0]}`] = "";
-            params[`filter.${filter[1]}`] = "";
-            if (fromValue) {
-                params[`filter.${filter[0]}`] = `$gte:${format(fromValue, "yyyy-MM-dd")}`;
-            }
-            if (toValue) {
-                params[`filter.${filter[1]}`] = `$lte:${format(toValue, "yyyy-MM-dd")}`;
-            }
+        if (fromValue && toValue) {
+            params[`filter.${filter}`] =
+                `$btw:${format(startOfDay(fromValue), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(toValue), "yyyy-MM-dd HH:mm:ss")}`;
         }
         else {
-            if (fromValue && toValue) {
-                params[`filter.${filter}`] =
-                    `$btw:${format(startOfDay(fromValue), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(toValue), "yyyy-MM-dd HH:mm:ss")}`;
-            }
-            else if (fromValue) {
-                params[`filter.${filter}`] = `$gte:${format(fromValue, "yyyy-MM-dd")}`;
-            }
-            else if (toValue) {
-                params[`filter.${filter}`] = `$lte:${format(toValue, "yyyy-MM-dd")}`;
-            }
+            params[`filter.${filter}`] = "";
         }
         router.replace(setPartialParams(params, searchParams));
     };
     const [[fromValue, toValue], setValues] = useState([defaultFromValue, defaultToValue]);
-    const timeoutRef = useRef(null);
-    const handleBlur = () => {
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-        }
-        timeoutRef.current = setTimeout(() => {
-            submit();
-        }, 100);
-    };
-    const handleFocus = () => {
-        if (timeoutRef.current) {
-            clearTimeout(timeoutRef.current);
-            timeoutRef.current = null;
-        }
-    };
-    return (jsxs("div", { className: cx(fieldsetClassName, styles.fieldDate, "join"), children: [jsxs("label", { className: "floating-label grow", children: [jsx(DateInput, { placeholder: from, value: fromValue, size: "xs", className: "join-item", onChange: (date) => setValues((prev) => [date, prev[1]]), onKeyUp: (e) => {
-                            if (e.code === "Enter") {
-                                submit();
-                            }
-                        }, required: required, onFocus: handleFocus, onBlur: handleBlur }), jsx("span", { className: "label-text-alt", children: from })] }), jsxs("label", { className: "floating-label grow", children: [jsx(DateInput, { placeholder: to, value: toValue, size: "xs", className: "join-item", onChange: (date) => setValues((prev) => [prev[0], date]), onKeyUp: (e) => {
-                            if (e.code === "Enter") {
-                                submit();
-                            }
-                        }, required: required, onFocus: handleFocus, onBlur: handleBlur }), jsx("span", { className: "label-text-alt", children: to })] })] }));
+    return (jsx("div", { className: cx(fieldsetClassName, styles.fieldDate), children: jsxs("label", { className: "floating-label grow", children: [jsx(DateRangeInput, { onChange: (d) => {
+                        setValues([d?.from ?? null, d?.to ?? null]);
+                        submit([d?.from ?? null, d?.to ?? null]);
+                    }, displayHelpers: true, placeholder: label, value: fromValue && toValue ? { from: fromValue, to: toValue } : null, size: "xs", required: required }), jsx("span", { className: "label-text-alt", children: label })] }) }));
 };
 const FilterText = ({ filter, label, fieldsetClassName, isLike, }) => {
     const searchParams = useSearchParams();
@@ -1982,10 +1987,12 @@ var FilterType;
 const getDefaultValues = (searchParams, filter) => {
     const defaultValues = {};
     let filterIsActive = false;
-    for (const [key, value] of Array.from(searchParams.entries())) {
+    for (const [k, v] of Array.from(searchParams.entries())) {
+        const key = k.endsWith("[]") ? k.slice(0, -2) : k;
         if (!key.startsWith("filter.") || filter[key.substring("filter.".length)] === undefined) {
             continue;
         }
+        const value = Array.isArray(v) ? v[0] : v;
         const type = filter[key.substring("filter.".length)]?.type;
         if (type === FilterType.PAGINATION) {
             const val = parseInt(value, 10) || null;
@@ -1995,14 +2002,19 @@ const getDefaultValues = (searchParams, filter) => {
             }
         }
         else if (type === FilterType.OPTIONS) {
-            defaultValues[key.substring("filter.".length)] = value;
+            if (value) {
+                filterIsActive = true;
+                defaultValues[key.substring("filter.".length)] = value;
+            }
         }
         else if (type === FilterType.BOOLEAN) {
             if (value === "1" || value === "true") {
                 defaultValues[key.substring("filter.".length)] = true;
+                filterIsActive = true;
             }
             else if (value === "0" || value === "false") {
                 defaultValues[key.substring("filter.".length)] = false;
+                filterIsActive = true;
             }
         }
         else if (type === FilterType.DATE_RANGE) {

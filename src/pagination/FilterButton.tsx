@@ -35,11 +35,12 @@ const getDefaultValues = (
 ) => {
   const defaultValues: Partial<Record<string, unknown>> = {};
   let filterIsActive = false;
-  for (const [key, value] of Array.from(searchParams.entries())) {
+  for (const [k, v] of Array.from(searchParams.entries())) {
+    const key = k.endsWith("[]") ? k.slice(0, -2) : k;
     if (!key.startsWith("filter.") || filter[key.substring("filter.".length)] === undefined) {
       continue;
     }
-
+    const value = Array.isArray(v) ? v[0] : v;
     const type = filter[key.substring("filter.".length)]?.type;
     if (type === FilterType.PAGINATION) {
       const val = parseInt(value, 10) || null;
@@ -48,12 +49,17 @@ const getDefaultValues = (
         filterIsActive = true;
       }
     } else if (type === FilterType.OPTIONS) {
-      defaultValues[key.substring("filter.".length)] = value;
+      if (value) {
+        filterIsActive = true;
+        defaultValues[key.substring("filter.".length)] = value;
+      }
     } else if (type === FilterType.BOOLEAN) {
       if (value === "1" || value === "true") {
         defaultValues[key.substring("filter.".length)] = true;
+        filterIsActive = true;
       } else if (value === "0" || value === "false") {
         defaultValues[key.substring("filter.".length)] = false;
+        filterIsActive = true;
       }
     } else if (type === FilterType.DATE_RANGE) {
       const btw = value.match(/^\$btw:(.*),(.*)$/);

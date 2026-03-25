@@ -38,3 +38,8 @@
 .dayPicker :global(.rdp-today) {
   background: transparent;
 }
+
+.dayPicker :global(.rdp-button_previous .rdp-chevron),
+.dayPicker :global(.rdp-button_next .rdp-chevron) {
+  fill: var(--color-white);
+}

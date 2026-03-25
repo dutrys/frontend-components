@@ -7,4 +7,5 @@ export declare const dateToTimeString: (date: Date, timeFormat?: string) => stri
 export declare const stringToDate: (date: string, timeZone?: string) => Date | undefined;
 export declare const dateToString: (date: Date, timeZone?: string) => string;
 export declare const dateToStringDate: (date: Date) => string;
+export declare const getBtwDates: (btw: string | string[]) => null | [Date, Date];
 //# sourceMappingURL=date.d.ts.map

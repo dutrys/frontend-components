@@ -315,6 +315,7 @@ declare const DateTimePicker: ({ value, size, onChange, disabled, required, from
 
 type DateInputProps = Omit<React.ComponentPropsWithoutRef<"input">, "size" | "value" | "defaultValue" | "defaultChecked" | "onChange"> & {
     size?: "sm" | "xs";
+    hideCalendarIcon?: boolean;
     required?: boolean;
     disabled?: boolean;
     value: Date | null;
@@ -329,8 +330,9 @@ declare const DateInput: ({ onChange, value, className, toggleClassName, require
 type DateRangeInputProps = Omit<DateInputProps, "onChange" | "value"> & {
     onChange: (date: DateRange | null) => unknown;
     value: DateRange | null;
+    displayHelpers?: boolean;
 };
-declare const DateRangeInput: ({ onChange, value, className, toggleClassName, required, disabled, size, modifiers, placeholder, matcher, ...rest }: DateRangeInputProps) => react_jsx_runtime.JSX.Element;
+declare const DateRangeInput: ({ onChange, value, className, toggleClassName, required, disabled, size, modifiers, placeholder, matcher, hideCalendarIcon, displayHelpers, ...rest }: DateRangeInputProps) => react_jsx_runtime.JSX.Element;
 
 declare const PortalSSR: (props: {
     enabled?: boolean;
@@ -638,11 +640,10 @@ declare const FilterDate: ({ filter, fieldsetClassName, label, mode, defaultValu
     label: string;
     defaultValue?: Date | null;
 }) => react_jsx_runtime.JSX.Element;
-declare const FilterDateRange: ({ filter, fieldsetClassName, from, to, required, }: {
+declare const FilterDateRange: ({ filter, fieldsetClassName, label, required, }: {
     fieldsetClassName?: string;
     filter: string | [string, string];
-    from: string;
-    to: string;
+    label: string;
     required?: boolean;
 }) => react_jsx_runtime.JSX.Element;
 declare const FilterText: ({ filter, label, fieldsetClassName, isLike, }: {

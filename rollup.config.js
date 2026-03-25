@@ -40,8 +40,25 @@ export default [
     ],
   },
   {
+    input: "src/server/index.ts",
+    output: [
+      {
+        file: "dist/server/index.js",
+        format: "es",
+        sourcemap: true,
+      },
+    ],
+    plugins: [typescript()],
+    external: [],
+  },
+  {
     input: "dist/index.d.ts",
     output: [{ file: "dist/index.d.ts", format: "es" }],
+    plugins: [dts()],
+  },
+  {
+    input: "dist/server/index.d.ts",
+    output: [{ file: "dist/server/index.d.ts", format: "es" }],
     plugins: [dts()],
   },
 ];

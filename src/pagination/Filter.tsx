@@ -4,15 +4,15 @@ import cx from "classnames";
 import React, { useMemo, useRef, useState } from "react";
 import styles from "./Filter.module.css";
 import { NumericFormat, NumericFormatProps } from "react-number-format";
-import { endOfDay, format, isValid, parse, parseJSON, startOfDay } from "date-fns";
+import { endOfDay, format, parse, startOfDay } from "date-fns";
 import Link from "next/link";
 import { ChevronDoubleDownIcon } from "@heroicons/react/24/outline";
 import { PaginateQuery, ResponseMeta, setPartialParams } from "../utils/paginate";
 import { SelectPaginatedFromApiField } from "../form/Input";
 import { Select } from "../form/Select";
 import { Popover } from "../dialog/Popover";
-import { DateInput } from "../form/DateInput";
-import { parseDateTime } from "../utils/date";
+import { DateInput, DateRangeInput } from "../form/DateInput";
+import { getBtwDates, parseDateTime } from "../utils/date";
 
 export const FilterNumberRange = ({
   filter,
@@ -167,14 +167,12 @@ export const FilterDate = ({
 export const FilterDateRange = ({
   filter,
   fieldsetClassName,
-  from,
-  to,
+  label,
   required,
 }: {
   fieldsetClassName?: string;
   filter: string | [string, string];
-  from: string;
-  to: string;
+  label: string;
   required?: boolean;
 }) => {
   const searchParams = useSearchParams();
@@ -192,100 +190,44 @@ export const FilterDateRange = ({
       defaultToValue = parse(stringFromValue.replace(/^\$lte?:/, ""), "yyyy-MM-dd", new Date());
     }
   } else {
-    const stringValue = searchParams.get(`filter.${filter}`) ?? "";
-    const btw = stringValue.match(/^\$btw:(.*),(.*)$/);
-    if (btw && btw[1] && btw[2]) {
-      const from = (parseDateTime(btw[1], null) as Date | null) ?? null;
-      const to = (parseDateTime(btw[2], null) as Date | null) ?? null;
-      if (from && to) {
-        defaultFromValue = from;
-        defaultToValue = to;
-      }
+    const stringValue = searchParams.get(`filter.${filter}`) ?? searchParams.get(`filter.${filter}[]`) ?? "";
+    const btw = getBtwDates(stringValue);
+    if (btw) {
+      defaultFromValue = btw[0];
+      defaultToValue = btw[1];
     }
   }
 
-  const submit = () => {
+  const submit = ([fromValue, toValue]: [Date | null, Date | null]) => {
     const params: Record<string, string> = { page: "" };
-    if (Array.isArray(filter)) {
-      params[`filter.${filter[0]}`] = "";
-      params[`filter.${filter[1]}`] = "";
 
-      if (fromValue) {
-        params[`filter.${filter[0]}`] = `$gte:${format(fromValue, "yyyy-MM-dd")}`;
-      }
-      if (toValue) {
-        params[`filter.${filter[1]}`] = `$lte:${format(toValue, "yyyy-MM-dd")}`;
-      }
+    if (fromValue && toValue) {
+      params[`filter.${filter}`] =
+        `$btw:${format(startOfDay(fromValue), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(toValue), "yyyy-MM-dd HH:mm:ss")}`;
     } else {
-      if (fromValue && toValue) {
-        params[`filter.${filter}`] =
-          `$btw:${format(startOfDay(fromValue), "yyyy-MM-dd HH:mm:ss")},${format(endOfDay(toValue), "yyyy-MM-dd HH:mm:ss")}`;
-      } else if (fromValue) {
-        params[`filter.${filter}`] = `$gte:${format(fromValue, "yyyy-MM-dd")}`;
-      } else if (toValue) {
-        params[`filter.${filter}`] = `$lte:${format(toValue, "yyyy-MM-dd")}`;
-      }
+      params[`filter.${filter}`] = "";
     }
 
     router.replace(setPartialParams(params, searchParams));
   };
 
   const [[fromValue, toValue], setValues] = useState<[Date | null, Date | null]>([defaultFromValue, defaultToValue]);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const handleBlur = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = setTimeout(() => {
-      submit();
-    }, 100);
-  };
-
-  const handleFocus = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-  };
 
   return (
-    <div className={cx(fieldsetClassName, styles.fieldDate, "join")}>
+    <div className={cx(fieldsetClassName, styles.fieldDate)}>
       <label className="floating-label grow">
-        <DateInput
-          placeholder={from}
-          value={fromValue}
-          size="xs"
-          className="join-item"
-          onChange={(date) => setValues((prev) => [date, prev[1]])}
-          onKeyUp={(e) => {
-            if (e.code === "Enter") {
-              submit();
-            }
+        <DateRangeInput
+          onChange={(d) => {
+            setValues([d?.from ?? null, d?.to ?? null]);
+            submit([d?.from ?? null, d?.to ?? null]);
           }}
-          required={required}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-        />
-        <span className="label-text-alt">{from}</span>
-      </label>
-      <label className="floating-label grow">
-        <DateInput
-          placeholder={to}
-          value={toValue}
+          displayHelpers
+          placeholder={label}
+          value={fromValue && toValue ? { from: fromValue, to: toValue } : null}
           size="xs"
-          className="join-item"
-          onChange={(date) => setValues((prev) => [prev[0], date])}
-          onKeyUp={(e) => {
-            if (e.code === "Enter") {
-              submit();
-            }
-          }}
           required={required}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
         />
-        <span className="label-text-alt">{to}</span>
+        <span className="label-text-alt">{label}</span>
       </label>
     </div>
   );
