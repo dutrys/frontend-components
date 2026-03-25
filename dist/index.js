@@ -1778,7 +1778,7 @@ const FilterDate = ({ filter, fieldsetClassName, label, mode, defaultValue = nul
     };
     return (jsx("div", { className: cx(fieldsetClassName), children: jsxs("label", { className: "floating-label grow", children: [jsx(DateInput, { placeholder: label, value: defaultDate, size: "xs", className: "join-item", onChange: (date) => submit(date) }), jsx("span", { className: "label-text-alt", children: label.toString() })] }) }));
 };
-const FilterDateRange = ({ filter, fieldsetClassName, from, to, options, }) => {
+const FilterDateRange = ({ filter, fieldsetClassName, from, to, required, }) => {
     const searchParams = useSearchParams();
     const router = useRouter();
     let defaultFromValue = null;
@@ -1795,16 +1795,14 @@ const FilterDateRange = ({ filter, fieldsetClassName, from, to, options, }) => {
     }
     else {
         const stringValue = searchParams.get(`filter.${filter}`) ?? "";
-        if (/^\$btw:/.test(stringValue)) {
-            const splitted = stringValue.replace(/^\$btw:/, "").split(",");
-            defaultFromValue = parse(splitted[0], "yyyy-MM-dd", new Date());
-            defaultToValue = parse(splitted[1], "yyyy-MM-dd", new Date());
-        }
-        else if (/^\$gte:/.test(stringValue)) {
-            defaultFromValue = parse(stringValue.replace(/^\$gte?:/, ""), "yyyy-MM-dd", new Date());
-        }
-        else if (/^\$lte:/.test(stringValue)) {
-            defaultToValue = parse(stringValue.replace(/^\$lte?:/, ""), "yyyy-MM-dd", new Date());
+        const btw = stringValue.match(/^\$btw:(.*),(.*)$/);
+        if (btw && btw[1] && btw[2]) {
+            const from = parseDateTime(btw[1], null) ?? null;
+            const to = parseDateTime(btw[2], null) ?? null;
+            if (from && to) {
+                defaultFromValue = from;
+                defaultToValue = to;
+            }
         }
     }
     const submit = () => {
@@ -1849,15 +1847,15 @@ const FilterDateRange = ({ filter, fieldsetClassName, from, to, options, }) => {
             timeoutRef.current = null;
         }
     };
-    return (jsxs("div", { className: cx(fieldsetClassName, styles.fieldDate, "join"), children: [jsxs("label", { className: "floating-label grow", children: [jsx(DateInput, { placeholder: from, ...options, value: fromValue, size: "xs", className: "join-item", onChange: (date) => setValues((prev) => [date, prev[1]]), onKeyUp: (e) => {
+    return (jsxs("div", { className: cx(fieldsetClassName, styles.fieldDate, "join"), children: [jsxs("label", { className: "floating-label grow", children: [jsx(DateInput, { placeholder: from, value: fromValue, size: "xs", className: "join-item", onChange: (date) => setValues((prev) => [date, prev[1]]), onKeyUp: (e) => {
                             if (e.code === "Enter") {
                                 submit();
                             }
-                        }, onFocus: handleFocus, onBlur: handleBlur }), jsx("span", { className: "label-text-alt", children: from })] }), jsxs("label", { className: "floating-label grow", children: [jsx(DateInput, { placeholder: to, ...options, value: toValue, size: "xs", className: "join-item", onChange: (date) => setValues((prev) => [prev[0], date]), onKeyUp: (e) => {
+                        }, required: required, onFocus: handleFocus, onBlur: handleBlur }), jsx("span", { className: "label-text-alt", children: from })] }), jsxs("label", { className: "floating-label grow", children: [jsx(DateInput, { placeholder: to, value: toValue, size: "xs", className: "join-item", onChange: (date) => setValues((prev) => [prev[0], date]), onKeyUp: (e) => {
                             if (e.code === "Enter") {
                                 submit();
                             }
-                        }, onFocus: handleFocus, onBlur: handleBlur }), jsx("span", { className: "label-text-alt", children: to })] })] }));
+                        }, required: required, onFocus: handleFocus, onBlur: handleBlur }), jsx("span", { className: "label-text-alt", children: to })] })] }));
 };
 const FilterText = ({ filter, label, fieldsetClassName, isLike, }) => {
     const searchParams = useSearchParams();
@@ -1979,6 +1977,7 @@ var FilterType;
     FilterType["PAGINATION"] = "pagination";
     FilterType["DATE_RANGE"] = "date-range";
     FilterType["NUMBER_RANGE"] = "number-range";
+    FilterType["OPTIONS"] = "options";
 })(FilterType || (FilterType = {}));
 const getDefaultValues = (searchParams, filter) => {
     const defaultValues = {};
@@ -1994,6 +1993,9 @@ const getDefaultValues = (searchParams, filter) => {
             if (val) {
                 filterIsActive = true;
             }
+        }
+        else if (type === FilterType.OPTIONS) {
+            defaultValues[key.substring("filter.".length)] = value;
         }
         else if (type === FilterType.BOOLEAN) {
             if (value === "1" || value === "true") {
@@ -2145,7 +2147,7 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                                         ? { after: watched[key][1] }
                                         : undefined, size: "sm" }), jsx(DateFormField, { useDate: true, className: "join-item", control: control, label: t("general.toWithArgs", { value: v.label.toLowerCase() }), name: `${key}.1`, matcher: Array.isArray(watched[key]) && watched[key][0] instanceof Date
                                         ? { before: watched[key][0] }
-                                        : undefined, size: "sm" })] })), v.type === FilterType.PAGINATION && (jsx(SelectPaginatedFromApiFormField, { queryFn: v.queryFn, queryKey: v.queryKey, optionLabel: v.optionLabel, groupBy: v.groupBy, portalEnabled: true, control: control, label: v.label, name: key, size: "sm" })), v.type === FilterType.BOOLEAN && (jsxs("div", { className: "join w-full", children: [jsx("button", { className: cx("btn grow btn-sm join-item", { "btn-success": watched[key] === true }), type: "button", onClick: () => (watched[key] === true ? setValue(key, undefined) : setValue(key, true)), children: v.label }), jsx("button", { onClick: () => (watched[key] === false ? setValue(key, undefined) : setValue(key, false)), className: cx("btn grow btn-sm join-item", { "btn-error": watched[key] === false }), type: "button", children: `${t("general.no")} ${v.label.toLowerCase()}` })] }))] }, `${key}-${i}`))), jsx(SaveButton, { className: "btn-sm w-full", children: t("general.filter") })] }) }));
+                                        : undefined, size: "sm" })] })), v.type === FilterType.PAGINATION && (jsx(SelectPaginatedFromApiFormField, { queryFn: v.queryFn, queryKey: v.queryKey, optionLabel: v.optionLabel, groupBy: v.groupBy, portalEnabled: true, control: control, label: v.label, name: key, size: "sm" })), v.type === FilterType.BOOLEAN && (jsxs("div", { className: "join w-full", children: [jsx("button", { type: "button", className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === true }), onClick: () => (watched[key] === true ? setValue(key, undefined) : setValue(key, true)), children: v.label.toUpperCase() }), jsx("button", { onClick: () => (watched[key] === false ? setValue(key, undefined) : setValue(key, false)), className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === false }), type: "button", children: `${t("general.no").toUpperCase()} ${v.label.toUpperCase()}` })] })), v.type === FilterType.OPTIONS && (jsx("div", { className: cx("join w-full", { "join-vertical": Object.entries(v.options ?? {}).length > 2 }), children: Object.entries(v.options ?? {}).map(([value, label]) => (jsx("button", { className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === value }), type: "button", onClick: () => setValue(key, value), children: label }, value))) }))] }, `${key}-${i}`))), jsx(SaveButton, { className: "btn-sm w-full", children: t("general.filter") })] }) }));
 };
 
 export { Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDate, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Select, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };

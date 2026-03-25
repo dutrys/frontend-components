@@ -638,12 +638,12 @@ declare const FilterDate: ({ filter, fieldsetClassName, label, mode, defaultValu
     label: string;
     defaultValue?: Date | null;
 }) => react_jsx_runtime.JSX.Element;
-declare const FilterDateRange: ({ filter, fieldsetClassName, from, to, options, }: {
+declare const FilterDateRange: ({ filter, fieldsetClassName, from, to, required, }: {
     fieldsetClassName?: string;
     filter: string | [string, string];
     from: string;
     to: string;
-    options?: NumericFormatProps$1;
+    required?: boolean;
 }) => react_jsx_runtime.JSX.Element;
 declare const FilterText: ({ filter, label, fieldsetClassName, isLike, }: {
     fieldsetClassName?: string;
@@ -699,7 +699,8 @@ declare enum FilterType {
     BOOLEAN = "boolean",
     PAGINATION = "pagination",
     DATE_RANGE = "date-range",
-    NUMBER_RANGE = "number-range"
+    NUMBER_RANGE = "number-range",
+    OPTIONS = "options"
 }
 type FilterTextColumn = {
     type: FilterType.TEXT | FilterType.DATE_RANGE | FilterType.BOOLEAN;
@@ -709,6 +710,10 @@ type FilterNumberRangeColumn = {
     type: FilterType.NUMBER_RANGE;
     label: string;
     options?: NumericFormatProps$1;
+};
+type FilterOptionsColumn = {
+    type: FilterType.OPTIONS;
+    options?: Record<string, string>;
 };
 type FilterPaginationColumn<T extends {
     data: {
@@ -728,7 +733,7 @@ type FilterColumn<T extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}> = FilterTextColumn | FilterNumberRangeColumn | FilterPaginationColumn<T>;
+}> = FilterOptionsColumn | FilterTextColumn | FilterNumberRangeColumn | FilterPaginationColumn<T>;
 declare const FilterButton: ({ className, filter, onSubmitParams, onParseParams, }: {
     onParseParams?: (params: Record<string, unknown>) => Record<string, unknown>;
     onSubmitParams?: (params: Record<string, unknown>) => Record<string, unknown>;

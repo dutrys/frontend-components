@@ -26,6 +26,7 @@ export enum FilterType {
   PAGINATION = "pagination",
   DATE_RANGE = "date-range",
   NUMBER_RANGE = "number-range",
+  OPTIONS = "options",
 }
 
 const getDefaultValues = (
@@ -46,6 +47,8 @@ const getDefaultValues = (
       if (val) {
         filterIsActive = true;
       }
+    } else if (type === FilterType.OPTIONS) {
+      defaultValues[key.substring("filter.".length)] = value;
     } else if (type === FilterType.BOOLEAN) {
       if (value === "1" || value === "true") {
         defaultValues[key.substring("filter.".length)] = true;
@@ -111,6 +114,8 @@ const getDefaultValues = (
 
 type FilterTextColumn = { type: FilterType.TEXT | FilterType.DATE_RANGE | FilterType.BOOLEAN; label: string };
 type FilterNumberRangeColumn = { type: FilterType.NUMBER_RANGE; label: string; options?: NumericFormatProps };
+type FilterOptionsColumn = { type: FilterType.OPTIONS; options?: Record<string, string> };
+
 export type FilterPaginationColumn<T extends { data: { id: number }[]; meta: ResponseMeta }> = {
   type: FilterType.PAGINATION;
   label: string;
@@ -120,6 +125,7 @@ export type FilterPaginationColumn<T extends { data: { id: number }[]; meta: Res
   groupBy?: (model: T["data"][number]) => string;
 };
 type FilterColumn<T extends { data: { id: number }[]; meta: ResponseMeta }> =
+  | FilterOptionsColumn
   | FilterTextColumn
   | FilterNumberRangeColumn
   | FilterPaginationColumn<T>;
@@ -292,17 +298,31 @@ export const FilterButton = ({
             {v.type === FilterType.BOOLEAN && (
               <div className="join w-full">
                 <button
-                  className={cx("btn grow btn-sm join-item", { "btn-success": watched[key] === true })}
                   type="button"
+                  className={cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === true })}
                   onClick={() => (watched[key] === true ? setValue(key, undefined) : setValue(key, true))}
                 >
-                  {v.label}
+                  {v.label.toUpperCase()}
                 </button>
                 <button
                   onClick={() => (watched[key] === false ? setValue(key, undefined) : setValue(key, false))}
-                  className={cx("btn grow btn-sm join-item", { "btn-error": watched[key] === false })}
+                  className={cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === false })}
                   type="button"
-                >{`${t("general.no")} ${v.label.toLowerCase()}`}</button>
+                >{`${t("general.no").toUpperCase()} ${v.label.toUpperCase()}`}</button>
+              </div>
+            )}
+            {v.type === FilterType.OPTIONS && (
+              <div className={cx("join w-full", { "join-vertical": Object.entries(v.options ?? {}).length > 2 })}>
+                {Object.entries(v.options ?? {}).map(([value, label]) => (
+                  <button
+                    key={value}
+                    className={cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === value })}
+                    type="button"
+                    onClick={() => setValue(key, value)}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
             )}
           </div>

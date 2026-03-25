@@ -5,7 +5,8 @@ export declare enum FilterType {
     BOOLEAN = "boolean",
     PAGINATION = "pagination",
     DATE_RANGE = "date-range",
-    NUMBER_RANGE = "number-range"
+    NUMBER_RANGE = "number-range",
+    OPTIONS = "options"
 }
 type FilterTextColumn = {
     type: FilterType.TEXT | FilterType.DATE_RANGE | FilterType.BOOLEAN;
@@ -15,6 +16,10 @@ type FilterNumberRangeColumn = {
     type: FilterType.NUMBER_RANGE;
     label: string;
     options?: NumericFormatProps;
+};
+type FilterOptionsColumn = {
+    type: FilterType.OPTIONS;
+    options?: Record<string, string>;
 };
 export type FilterPaginationColumn<T extends {
     data: {
@@ -34,7 +39,7 @@ type FilterColumn<T extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}> = FilterTextColumn | FilterNumberRangeColumn | FilterPaginationColumn<T>;
+}> = FilterOptionsColumn | FilterTextColumn | FilterNumberRangeColumn | FilterPaginationColumn<T>;
 export declare const FilterButton: ({ className, filter, onSubmitParams, onParseParams, }: {
     onParseParams?: (params: Record<string, unknown>) => Record<string, unknown>;
     onSubmitParams?: (params: Record<string, unknown>) => Record<string, unknown>;

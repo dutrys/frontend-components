@@ -16,12 +16,12 @@ export declare const FilterDate: ({ filter, fieldsetClassName, label, mode, defa
     label: string;
     defaultValue?: Date | null;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const FilterDateRange: ({ filter, fieldsetClassName, from, to, options, }: {
+export declare const FilterDateRange: ({ filter, fieldsetClassName, from, to, required, }: {
     fieldsetClassName?: string;
     filter: string | [string, string];
     from: string;
     to: string;
-    options?: NumericFormatProps;
+    required?: boolean;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const FilterText: ({ filter, label, fieldsetClassName, isLike, }: {
     fieldsetClassName?: string;

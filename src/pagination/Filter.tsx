@@ -4,7 +4,7 @@ import cx from "classnames";
 import React, { useMemo, useRef, useState } from "react";
 import styles from "./Filter.module.css";
 import { NumericFormat, NumericFormatProps } from "react-number-format";
-import { endOfDay, format, parse, parseJSON, startOfDay } from "date-fns";
+import { endOfDay, format, isValid, parse, parseJSON, startOfDay } from "date-fns";
 import Link from "next/link";
 import { ChevronDoubleDownIcon } from "@heroicons/react/24/outline";
 import { PaginateQuery, ResponseMeta, setPartialParams } from "../utils/paginate";
@@ -169,13 +169,13 @@ export const FilterDateRange = ({
   fieldsetClassName,
   from,
   to,
-  options,
+  required,
 }: {
   fieldsetClassName?: string;
   filter: string | [string, string];
   from: string;
   to: string;
-  options?: NumericFormatProps;
+  required?: boolean;
 }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -193,14 +193,14 @@ export const FilterDateRange = ({
     }
   } else {
     const stringValue = searchParams.get(`filter.${filter}`) ?? "";
-    if (/^\$btw:/.test(stringValue)) {
-      const splitted = stringValue.replace(/^\$btw:/, "").split(",");
-      defaultFromValue = parse(splitted[0], "yyyy-MM-dd", new Date());
-      defaultToValue = parse(splitted[1], "yyyy-MM-dd", new Date());
-    } else if (/^\$gte:/.test(stringValue)) {
-      defaultFromValue = parse(stringValue.replace(/^\$gte?:/, ""), "yyyy-MM-dd", new Date());
-    } else if (/^\$lte:/.test(stringValue)) {
-      defaultToValue = parse(stringValue.replace(/^\$lte?:/, ""), "yyyy-MM-dd", new Date());
+    const btw = stringValue.match(/^\$btw:(.*),(.*)$/);
+    if (btw && btw[1] && btw[2]) {
+      const from = (parseDateTime(btw[1], null) as Date | null) ?? null;
+      const to = (parseDateTime(btw[2], null) as Date | null) ?? null;
+      if (from && to) {
+        defaultFromValue = from;
+        defaultToValue = to;
+      }
     }
   }
 
@@ -254,7 +254,6 @@ export const FilterDateRange = ({
       <label className="floating-label grow">
         <DateInput
           placeholder={from}
-          {...options}
           value={fromValue}
           size="xs"
           className="join-item"
@@ -264,6 +263,7 @@ export const FilterDateRange = ({
               submit();
             }
           }}
+          required={required}
           onFocus={handleFocus}
           onBlur={handleBlur}
         />
@@ -272,7 +272,6 @@ export const FilterDateRange = ({
       <label className="floating-label grow">
         <DateInput
           placeholder={to}
-          {...options}
           value={toValue}
           size="xs"
           className="join-item"
@@ -282,6 +281,7 @@ export const FilterDateRange = ({
               submit();
             }
           }}
+          required={required}
           onFocus={handleFocus}
           onBlur={handleBlur}
         />
