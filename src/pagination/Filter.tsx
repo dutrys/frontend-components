@@ -219,11 +219,13 @@ export const FilterDateRange = ({
         <DateRangeInput
           onChange={(d) => {
             setValues([d?.from ?? null, d?.to ?? null]);
-            submit([d?.from ?? null, d?.to ?? null]);
+            if (d?.from && d?.to) {
+              submit([d.from, d.to]);
+            }
           }}
           displayHelpers
           placeholder={label}
-          value={fromValue && toValue ? { from: fromValue, to: toValue } : null}
+          value={{ from: fromValue ?? undefined, to: toValue ?? undefined }}
           size="xs"
           required={required}
         />

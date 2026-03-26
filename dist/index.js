@@ -916,16 +916,36 @@ const DateRangeInput = ({ onChange, value, className, toggleClassName, required,
     const t = useTranslations();
     const params = useParams();
     const [isOpen, setIsOpen] = useState(false);
-    return (jsx(FocusTrap, { className: "grow", features: isOpen ? FocusTrapFeatures.FocusLock : FocusTrapFeatures.None, children: jsx(Popover, { showOnClick: true, showOnFocus: true, showOnHover: false, onShow: (open) => setIsOpen(open), title: (ref, popoverProps) => (jsxs("div", { ref: ref, ...rest, ...popoverProps, className: cx("input input-bordered", {
+    const [dateString, setDateString] = useState(value?.from && value?.to ? `${formatDate(value.from)} - ${formatDate(value.to)}` : "");
+    return (jsx(FocusTrap, { className: "grow", features: isOpen ? FocusTrapFeatures.FocusLock : FocusTrapFeatures.None, onBlur: () => { }, children: jsx(Popover, { showOnClick: true, showOnFocus: true, showOnHover: false, onShow: (open) => setIsOpen(open), title: (ref, popoverProps, open) => (jsxs("div", { ref: ref, ...rest, ...popoverProps, className: cx("input input-bordered", {
                     "input-xs pl-3 pr-1 gap-0.5": size === "xs",
                     "input-sm pl-3 pr-2 gap-1": size === "sm",
                     ["w-full"]: !className?.includes("w-"),
-                }, className), children: [jsx("input", { value: value ? `${formatDate(value.from)} - ${formatDate(value.to)}` : "", className: "grow", required: required, disabled: disabled, placeholder: placeholder, onChange: (e) => { } }), required || !value ? (hideCalendarIcon ? null : (jsx("div", { className: cx(toggleClassName, "cursor-pointer"), children: jsx(CalendarIcon, { className: "size-4" }) }))) : (jsx("button", { type: "button", disabled: !required && !value, className: cx("cursor-pointer", toggleClassName), onClick: (e) => {
+                }, className), children: [jsx("input", { value: dateString, className: "grow", required: required, disabled: disabled, placeholder: placeholder, onChange: (e) => {
+                            setDateString(e.target.value);
+                        }, onBlur: (e) => {
+                            if (open) {
+                                return;
+                            }
+                            const strings = e.target.value.split(" - ");
+                            if (strings.length === 2) {
+                                const from = parse(strings[0], "yyyy-MM-dd", new Date());
+                                const to = parse(strings[1], "yyyy-MM-dd", new Date());
+                                if (isValid(from) && isValid(to)) {
+                                    onChange({ from, to });
+                                    setDateString(`${formatDate(from)} - ${formatDate(to)}`);
+                                    return;
+                                }
+                            }
+                        } }), required || !value ? (hideCalendarIcon ? null : (jsx("div", { className: cx(toggleClassName, "cursor-pointer"), children: jsx(CalendarIcon, { className: "size-4" }) }))) : (jsx("button", { type: "button", disabled: !required && !value, className: cx("cursor-pointer", toggleClassName), onClick: (e) => {
                             e.stopPropagation();
                             e.preventDefault();
                             onChange(null);
-                        }, children: jsx(XMarkIcon, { className: "size-4" }) }))] })), children: (close) => (jsxs("div", { className: "flex", children: [jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$3.dayPicker}`, captionLayout: "label", mode: "range", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, disabled: matcher, weekStartsOn: 1, numberOfMonths: 2, selected: value ?? undefined, defaultMonth: value?.from ?? undefined, modifiers: modifiers, onSelect: (range) => {
+                        }, children: jsx(XMarkIcon, { className: "size-4" }) }))] })), children: (close) => (jsxs("div", { className: "flex", children: [jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$3.dayPicker}`, captionLayout: "label", mode: "range", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, resetOnSelect: true, disabled: matcher, weekStartsOn: 1, numberOfMonths: 2, selected: value ?? undefined, defaultMonth: value?.from ?? undefined, modifiers: modifiers, onSelect: (range) => {
                             onChange(range ?? null);
+                            // if (range?.from && range?.to) {
+                            //   setDateString(`${formatDate(range.from)} - ${formatDate(range.to)}`);
+                            // }
                         } }), displayHelpers && (jsxs("div", { className: "menu menu-xs text-white pt-14", "data-theme": "dim", style: { background: "unset" }, children: [jsx("li", { children: jsx("button", { onClick: () => {
                                         onChange({ from: subDays(new Date(), 30), to: new Date() });
                                         close();
@@ -1859,8 +1879,10 @@ const FilterDateRange = ({ filter, fieldsetClassName, label, required, }) => {
     const [[fromValue, toValue], setValues] = useState([defaultFromValue, defaultToValue]);
     return (jsx("div", { className: cx(fieldsetClassName, styles.fieldDate), children: jsxs("label", { className: "floating-label grow", children: [jsx(DateRangeInput, { onChange: (d) => {
                         setValues([d?.from ?? null, d?.to ?? null]);
-                        submit([d?.from ?? null, d?.to ?? null]);
-                    }, displayHelpers: true, placeholder: label, value: fromValue && toValue ? { from: fromValue, to: toValue } : null, size: "xs", required: required }), jsx("span", { className: "label-text-alt", children: label })] }) }));
+                        if (d?.from && d?.to) {
+                            submit([d.from, d.to]);
+                        }
+                    }, displayHelpers: true, placeholder: label, value: { from: fromValue ?? undefined, to: toValue ?? undefined }, size: "xs", required: required }), jsx("span", { className: "label-text-alt", children: label })] }) }));
 };
 const FilterText = ({ filter, label, fieldsetClassName, isLike, }) => {
     const searchParams = useSearchParams();

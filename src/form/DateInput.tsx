@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ComponentProps, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   endOfMonth,
   endOfWeek,
@@ -191,14 +191,21 @@ export const DateRangeInput = ({
   const t = useTranslations();
   const params = useParams();
   const [isOpen, setIsOpen] = useState(false);
+  const [dateString, setDateString] = useState(
+    value?.from && value?.to ? `${formatDate(value.from)} - ${formatDate(value.to)}` : "",
+  );
   return (
-    <FocusTrap className="grow" features={isOpen ? FocusTrapFeatures.FocusLock : FocusTrapFeatures.None}>
+    <FocusTrap
+      className="grow"
+      features={isOpen ? FocusTrapFeatures.FocusLock : FocusTrapFeatures.None}
+      onBlur={() => {}}
+    >
       <Popover
         showOnClick
         showOnFocus
         showOnHover={false}
         onShow={(open) => setIsOpen(open)}
-        title={(ref, popoverProps) => (
+        title={(ref, popoverProps, open) => (
           <div
             ref={ref}
             {...rest}
@@ -214,12 +221,30 @@ export const DateRangeInput = ({
             )}
           >
             <input
-              value={value ? `${formatDate(value.from)} - ${formatDate(value.to)}` : ""}
+              value={dateString}
               className="grow"
               required={required}
               disabled={disabled}
               placeholder={placeholder}
-              onChange={(e) => {}}
+              onChange={(e) => {
+                setDateString(e.target.value);
+              }}
+              onBlur={(e) => {
+                if (open) {
+                  return;
+                }
+                const strings = e.target.value.split(" - ");
+                if (strings.length === 2) {
+                  const from = parse(strings[0], "yyyy-MM-dd", new Date());
+                  const to = parse(strings[1], "yyyy-MM-dd", new Date());
+
+                  if (isValid(from) && isValid(to)) {
+                    onChange({ from, to });
+                    setDateString(`${formatDate(from)} - ${formatDate(to)}`);
+                    return;
+                  }
+                }
+              }}
             />
 
             {required || !value ? (
@@ -253,6 +278,7 @@ export const DateRangeInput = ({
               mode="range"
               locale={params.locale === "lt" ? lt : enGB}
               showOutsideDays
+              resetOnSelect
               disabled={matcher}
               weekStartsOn={1}
               numberOfMonths={2}
@@ -261,6 +287,9 @@ export const DateRangeInput = ({
               modifiers={modifiers}
               onSelect={(range) => {
                 onChange(range ?? null);
+                // if (range?.from && range?.to) {
+                //   setDateString(`${formatDate(range.from)} - ${formatDate(range.to)}`);
+                // }
               }}
             />
             {displayHelpers && (
