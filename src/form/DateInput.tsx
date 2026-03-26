@@ -286,10 +286,11 @@ export const DateRangeInput = ({
               defaultMonth={value?.from ?? undefined}
               modifiers={modifiers}
               onSelect={(range) => {
+                if (range?.from && range?.to) {
+                  setDateString(`${formatDate(range.from)} - ${formatDate(range.to)}`);
+                  close();
+                }
                 onChange(range ?? null);
-                // if (range?.from && range?.to) {
-                //   setDateString(`${formatDate(range.from)} - ${formatDate(range.to)}`);
-                // }
               }}
             />
             {displayHelpers && (

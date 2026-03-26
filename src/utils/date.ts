@@ -10,12 +10,7 @@ export const timeInUtcStringToDate = (stopFromArrivalTime: string): Date | null 
 };
 
 export const parseDateTime = (date: string, defaultValue?: unknown): Date | unknown => {
-  let parsed = parseJSON(date);
-  if (isValid(parsed)) {
-    return parsed;
-  }
-
-  parsed = parse(date, "yyyy-MM-dd HH:mm:ss", new Date());
+  let parsed = parse(date, "yyyy-MM-dd HH:mm:ss", new Date());
   if (isValid(parsed)) {
     return parsed;
   }
@@ -29,9 +24,15 @@ export const parseDateTime = (date: string, defaultValue?: unknown): Date | unkn
     return parsed;
   }
 
+  parsed = parseJSON(date);
+  if (isValid(parsed)) {
+    return parsed;
+  }
+
   if (typeof defaultValue === "undefined") {
     throw new Error(`Invalid date: ${date}`);
   }
+
   return defaultValue;
 };
 
@@ -95,6 +96,13 @@ export const getBtwDates = (btw: string | string[]): null | [Date, Date] => {
       try {
         const from = parseDateTime(match[1]) as Date;
         const to = parseDateTime(match[2]) as Date;
+
+        console.log("------", match[2], format(to, "yyyy-MM-dd HH:mm:ss"));
+        console.log(
+          "????????????????????????????",
+          format(parse("2020-01-01 23:59:59", "yyyy-MM-dd HH:mm:ss", new Date()), "yyyy-MM-dd HH:mm:ss"),
+        );
+
         return [from, to];
       } catch {
         /* ignore */

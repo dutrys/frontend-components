@@ -942,10 +942,11 @@ const DateRangeInput = ({ onChange, value, className, toggleClassName, required,
                             e.preventDefault();
                             onChange(null);
                         }, children: jsx(XMarkIcon, { className: "size-4" }) }))] })), children: (close) => (jsxs("div", { className: "flex", children: [jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$3.dayPicker}`, captionLayout: "label", mode: "range", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, resetOnSelect: true, disabled: matcher, weekStartsOn: 1, numberOfMonths: 2, selected: value ?? undefined, defaultMonth: value?.from ?? undefined, modifiers: modifiers, onSelect: (range) => {
+                            if (range?.from && range?.to) {
+                                setDateString(`${formatDate(range.from)} - ${formatDate(range.to)}`);
+                                close();
+                            }
                             onChange(range ?? null);
-                            // if (range?.from && range?.to) {
-                            //   setDateString(`${formatDate(range.from)} - ${formatDate(range.to)}`);
-                            // }
                         } }), displayHelpers && (jsxs("div", { className: "menu menu-xs text-white pt-14", "data-theme": "dim", style: { background: "unset" }, children: [jsx("li", { children: jsx("button", { onClick: () => {
                                         onChange({ from: subDays(new Date(), 30), to: new Date() });
                                         close();
@@ -1120,11 +1121,7 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
 };
 
 const parseDateTime = (date, defaultValue) => {
-    let parsed = parseJSON(date);
-    if (isValid(parsed)) {
-        return parsed;
-    }
-    parsed = parse(date, "yyyy-MM-dd HH:mm:ss", new Date());
+    let parsed = parse(date, "yyyy-MM-dd HH:mm:ss", new Date());
     if (isValid(parsed)) {
         return parsed;
     }
@@ -1133,6 +1130,10 @@ const parseDateTime = (date, defaultValue) => {
         return parsed;
     }
     parsed = parse(date, "yyyy-MM-dd", new Date());
+    if (isValid(parsed)) {
+        return parsed;
+    }
+    parsed = parseJSON(date);
     if (isValid(parsed)) {
         return parsed;
     }
@@ -1169,6 +1170,8 @@ const getBtwDates = (btw) => {
             try {
                 const from = parseDateTime(match[1]);
                 const to = parseDateTime(match[2]);
+                console.log("------", match[2], format(to, "yyyy-MM-dd HH:mm:ss"));
+                console.log("????????????????????????????", format(parse("2020-01-01 23:59:59", "yyyy-MM-dd HH:mm:ss", new Date()), "yyyy-MM-dd HH:mm:ss"));
                 return [from, to];
             }
             catch {

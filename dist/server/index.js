@@ -1,12 +1,8 @@
-import { parseJSON, isValid, parse } from 'date-fns';
+import { parse, isValid, parseJSON, format } from 'date-fns';
 import 'date-fns-tz';
 
 const parseDateTime = (date, defaultValue) => {
-    let parsed = parseJSON(date);
-    if (isValid(parsed)) {
-        return parsed;
-    }
-    parsed = parse(date, "yyyy-MM-dd HH:mm:ss", new Date());
+    let parsed = parse(date, "yyyy-MM-dd HH:mm:ss", new Date());
     if (isValid(parsed)) {
         return parsed;
     }
@@ -15,6 +11,10 @@ const parseDateTime = (date, defaultValue) => {
         return parsed;
     }
     parsed = parse(date, "yyyy-MM-dd", new Date());
+    if (isValid(parsed)) {
+        return parsed;
+    }
+    parsed = parseJSON(date);
     if (isValid(parsed)) {
         return parsed;
     }
@@ -33,6 +33,8 @@ const getBtwDates = (btw) => {
             try {
                 const from = parseDateTime(match[1]);
                 const to = parseDateTime(match[2]);
+                console.log("------", match[2], format(to, "yyyy-MM-dd HH:mm:ss"));
+                console.log("????????????????????????????", format(parse("2020-01-01 23:59:59", "yyyy-MM-dd HH:mm:ss", new Date()), "yyyy-MM-dd HH:mm:ss"));
                 return [from, to];
             }
             catch {
