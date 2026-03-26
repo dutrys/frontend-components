@@ -1170,8 +1170,6 @@ const getBtwDates = (btw) => {
             try {
                 const from = parseDateTime(match[1]);
                 const to = parseDateTime(match[2]);
-                console.log("------", match[2], format(to, "yyyy-MM-dd HH:mm:ss"));
-                console.log("????????????????????????????", format(parse("2020-01-01 23:59:59", "yyyy-MM-dd HH:mm:ss", new Date()), "yyyy-MM-dd HH:mm:ss"));
                 return [from, to];
             }
             catch {
