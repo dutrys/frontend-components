@@ -25,7 +25,7 @@ export type ServerError = {
     errors: Record<string, string[]>;
 };
 export declare const isServerError: (error: any) => error is ServerError;
-export declare const useFormSubmit: <T extends FieldValues, R = unknown>(doSubmitCallback: (data: T) => Promise<ServerError | R>, formOptions?: UseFormProps<T> & {
+export declare const useFormSubmit: <T extends FieldValues, R = unknown>(formOptions?: UseFormProps<T> & {
     translateErrors?: string;
     returnBack?: boolean;
     reportProgress?: boolean;
@@ -40,7 +40,7 @@ export declare const useFormSubmit: <T extends FieldValues, R = unknown>(doSubmi
         setNeedsConfirm: (success: boolean) => void;
         showDialog: () => void;
     } | undefined;
-    handleSubmit: () => (e?: React.BaseSyntheticEvent) => Promise<void>;
+    handleSubmit: (doSubmitCallback: (data: T) => Promise<ServerError | R>) => (e?: React.BaseSyntheticEvent) => Promise<void>;
     watch: import("react-hook-form").UseFormWatch<T>;
     getValues: import("react-hook-form").UseFormGetValues<T>;
     getFieldState: import("react-hook-form").UseFormGetFieldState<T>;

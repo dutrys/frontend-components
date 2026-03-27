@@ -263,7 +263,7 @@ type ServerError = {
     errors: Record<string, string[]>;
 };
 declare const isServerError: (error: any) => error is ServerError;
-declare const useFormSubmit: <T extends FieldValues, R = unknown>(doSubmitCallback: (data: T) => Promise<ServerError | R>, formOptions?: UseFormProps<T> & {
+declare const useFormSubmit: <T extends FieldValues, R = unknown>(formOptions?: UseFormProps<T> & {
     translateErrors?: string;
     returnBack?: boolean;
     reportProgress?: boolean;
@@ -278,7 +278,7 @@ declare const useFormSubmit: <T extends FieldValues, R = unknown>(doSubmitCallba
         setNeedsConfirm: (success: boolean) => void;
         showDialog: () => void;
     } | undefined;
-    handleSubmit: () => (e?: React__default.BaseSyntheticEvent) => Promise<void>;
+    handleSubmit: (doSubmitCallback: (data: T) => Promise<ServerError | R>) => (e?: React__default.BaseSyntheticEvent) => Promise<void>;
     watch: react_hook_form.UseFormWatch<T>;
     getValues: react_hook_form.UseFormGetValues<T>;
     getFieldState: react_hook_form.UseFormGetFieldState<T>;
@@ -480,7 +480,7 @@ declare const DateRangeField: <TFieldValues extends FieldValues = FieldValues, T
 declare const SelectPaginatedFromApiFormField: <T extends {
     data: unknown[];
     meta: ResponseMeta;
-}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ optionValue, ...props }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "onChange" | "multiple" | "defaultValue" | "type" | "value" | "children"> & IInputProps<TName> & {
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ optionValue, control, ...props }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "onChange" | "multiple" | "defaultValue" | "type" | "value" | "children"> & IInputProps<TName> & {
     control: Control<TFieldValues>;
     onChange?: (model: T["data"][number] | null) => void;
 } & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => react_jsx_runtime.JSX.Element;

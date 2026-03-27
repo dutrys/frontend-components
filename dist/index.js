@@ -493,12 +493,12 @@ const formatError = (errors) => {
     return formattedErrors;
 };
 const isServerError = (error) => typeof error === "object" && typeof error.errors === "object";
-const useFormSubmit = (doSubmitCallback, formOptions = {}) => {
+const useFormSubmit = (formOptions = {}) => {
     const t = useTranslations();
     const router = useRouter$1();
     const { returnBack, reportProgress, onError, onSuccess, loadingText, savedText, ...options } = formOptions;
     const formProps = useForm(options);
-    const handleSubmit = () => formProps.handleSubmit((values) => {
+    const handleSubmit = (doSubmitCallback) => formProps.handleSubmit((values) => {
         const promise = new Promise((res, rej) => {
             if (formOptions.confirm && !isConfirmed.current) {
                 setNeedsConfirm(true);
@@ -1342,7 +1342,7 @@ const DateFormField = ({ control, useDate, ...props }) => (jsx(Controller, { dis
             }
         } })) }));
 const DateRangeField = ({ fieldSetClassName, label, error, desc, ...props }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(DateRangeInput, { ...props, className: cx({ "input-error": error }, props.className), placeholder: props.required ? `${label}*` : label }), jsxs("span", { children: [label, props.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
-const SelectPaginatedFromApiFormField = ({ optionValue = (model) => model.id, ...props }) => (jsx(Controller, { control: props.control, name: props.name, disabled: props.disabled, rules: { required: props.required === true }, render: ({ field }) => (jsx(SelectPaginatedFromApiField, { ...props, disabled: field.disabled, value: field.value, onChange: (model) => {
+const SelectPaginatedFromApiFormField = ({ optionValue = (model) => model.id, control, ...props }) => (jsx(Controller, { control: control, name: props.name, disabled: props.disabled, rules: { required: props.required === true }, render: ({ field }) => (jsx(SelectPaginatedFromApiField, { ...props, disabled: field.disabled, value: field.value, onChange: (model) => {
             field.onChange(model ? optionValue(model) : null);
             props.onChange?.(model || null);
         } })) }));

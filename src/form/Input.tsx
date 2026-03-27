@@ -545,6 +545,7 @@ export const SelectPaginatedFromApiFormField = <
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
   optionValue = (model) => (model as any).id,
+  control,
   ...props
 }: Omit<
   React.SelectHTMLAttributes<HTMLSelectElement>,
@@ -555,7 +556,7 @@ export const SelectPaginatedFromApiFormField = <
     onChange?: (model: T["data"][number] | null) => void;
   } & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => (
   <Controller
-    control={props.control}
+    control={control}
     name={props.name}
     disabled={props.disabled}
     rules={{ required: props.required === true }}

@@ -80,7 +80,7 @@ export declare const DateRangeField: <TFieldValues extends FieldValues = FieldVa
 export declare const SelectPaginatedFromApiFormField: <T extends {
     data: unknown[];
     meta: ResponseMeta;
-}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ optionValue, ...props }: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "size" | "onChange" | "multiple" | "defaultValue" | "type" | "value" | "children"> & IInputProps<TName> & {
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ optionValue, control, ...props }: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "size" | "onChange" | "multiple" | "defaultValue" | "type" | "value" | "children"> & IInputProps<TName> & {
     control: Control<TFieldValues>;
     onChange?: (model: T["data"][number] | null) => void;
 } & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => import("react/jsx-runtime").JSX.Element;

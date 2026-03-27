@@ -135,7 +135,6 @@ export const isServerError = (error: any): error is ServerError =>
   typeof error === "object" && typeof error.errors === "object";
 
 export const useFormSubmit = <T extends FieldValues, R = unknown>(
-  doSubmitCallback: (data: T) => Promise<ServerError | R>,
   formOptions: UseFormProps<T> & {
     translateErrors?: string;
     returnBack?: boolean;
@@ -152,7 +151,7 @@ export const useFormSubmit = <T extends FieldValues, R = unknown>(
   const { returnBack, reportProgress, onError, onSuccess, loadingText, savedText, ...options } = formOptions;
   const formProps = useForm<T>(options);
 
-  const handleSubmit = () =>
+  const handleSubmit = (doSubmitCallback: (data: T) => Promise<ServerError | R>) =>
     formProps.handleSubmit(
       (values) => {
         const promise = new Promise((res, rej) => {
