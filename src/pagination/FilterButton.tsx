@@ -324,7 +324,7 @@ export const FilterButton = ({
                     key={value}
                     className={cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === value })}
                     type="button"
-                    onClick={() => setValue(key, value)}
+                    onClick={() => (watched[key] === value ? setValue(key, undefined) : setValue(key, value))}
                   >
                     {label}
                   </button>
