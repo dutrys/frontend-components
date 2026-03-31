@@ -5,6 +5,48 @@ import { FieldErrors, FieldPath, FieldValues, useForm, UseFormProps, UseFormSetE
 import { captureException } from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 
+export const AlertErrors = ({
+  forceKey,
+  errors,
+  translateId,
+  className = "alert alert-error",
+}: {
+  forceKey?: boolean;
+  errors: FieldErrors;
+  translateId?: string;
+  className?: string;
+}) => {
+  const errorsArr = Object.entries(mapToDot(errors));
+  const t = useTranslations();
+  if (errorsArr.length === 0) {
+    return null;
+  }
+
+  if (translateId || forceKey) {
+    errorsArr.forEach(([key, val], index) => {
+      if (translateId && t.has(`${translateId}.${key}`)) {
+        errorsArr[index][1] = val.map((s) => `${t(`${translateId}.${key}`)}: ${s}`);
+      } else if (forceKey) {
+        errorsArr[index][1] = val.map((s) => `${key}: ${s}`);
+      }
+    });
+  }
+
+  return (
+    <div className={className}>
+      {errorsArr.length === 1 ? (
+        <div>{errorsArr[0][1]}</div>
+      ) : (
+        <ul className="menu menu-xs">
+          {errorsArr.map(([key, val]) => (
+            <li key={key}>{val}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
 export const GeneralErrorsInToast = <T extends Record<string, unknown>>({
   errors,
   translateId,
@@ -65,15 +107,14 @@ export const mapToDot = <T extends Record<string, any>>(errors: FieldErrors<T>) 
   return r;
 };
 
+/**
+ * @deprecated - use <AlertErrors/> instead
+ */
 export const GeneralErrors = <T extends FieldValues>(props: {
   except?: (keyof T)[];
   translateId?: string;
   errors: FieldErrors<T>;
-  errorClassName?: string;
-  messageClassName?: string;
-  listClassName?: string;
-  as?: React.ElementType;
-  asClassName?: string;
+  className?: string;
 }) => <GeneralErrorsInToast {...props} errors={mapToDot(props.errors)} />;
 
 export const InputErrors = ({
@@ -197,8 +238,7 @@ export const useFormSubmit = <T extends FieldValues, R = unknown>(
                     <>
                       {t("general.validateError")}:{" "}
                       <GeneralErrors
-                        errorClassName="text-gray-500"
-                        messageClassName="text-gray-500"
+                        className="text-gray-500"
                         translateId={options.translateErrors}
                         errors={formProps.formState.errors}
                       />

@@ -1,5 +1,11 @@
 import React from "react";
 import { FieldErrors, FieldValues, UseFormProps, UseFormSetError } from "react-hook-form";
+export declare const AlertErrors: ({ forceKey, errors, translateId, className, }: {
+    forceKey?: boolean;
+    errors: FieldErrors;
+    translateId?: string;
+    className?: string;
+}) => import("react/jsx-runtime").JSX.Element | null;
 export declare const GeneralErrorsInToast: <T extends Record<string, unknown>>({ errors, translateId, except, className, }: {
     except?: (keyof T)[];
     translateId?: string;
@@ -7,15 +13,14 @@ export declare const GeneralErrorsInToast: <T extends Record<string, unknown>>({
     className?: string;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const mapToDot: <T extends Record<string, any>>(errors: FieldErrors<T>) => Record<string, string[]>;
+/**
+ * @deprecated - use <AlertErrors/> instead
+ */
 export declare const GeneralErrors: <T extends FieldValues>(props: {
     except?: (keyof T)[];
     translateId?: string;
     errors: FieldErrors<T>;
-    errorClassName?: string;
-    messageClassName?: string;
-    listClassName?: string;
-    as?: React.ElementType;
-    asClassName?: string;
+    className?: string;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const InputErrors: ({ errors, className, }: {
     className?: string;
