@@ -1751,27 +1751,31 @@ const ArchiveButtonWithDialog = ({ title, archive, children, formatErrors, onSuc
 var styles$1 = {"sidebar":"Tooltip-module_sidebar__4Rs5S"};
 
 const TOOLTIP_SIDEBAR_ID = "sidebar";
-const Item = ({ item, active, children, disableTooltip, forceHover, expanded, }) => (jsx("li", { children: jsxs(Link, { href: item.href || "/", prefetch: false, onClick: item.onClick
+const Item = ({ item, active, children, disableTooltip, forceHover, expanded, onClick, }) => (jsx("li", { children: jsxs(Link, { href: item.href || "/", prefetch: false, onClick: item.onClick
             ? (e) => {
                 e.preventDefault();
+                onClick?.(e);
                 item.onClick();
             }
-            : undefined, "data-tooltip-id": expanded ? undefined : TOOLTIP_SIDEBAR_ID, "data-tooltip-content": expanded ? undefined : disableTooltip ? undefined : item.name, "aria-description": disableTooltip ? undefined : item.name, className: cx("hover:bg-white/10 text-white/80 hover:text-white", {
+            : onClick, "data-tooltip-id": expanded ? undefined : TOOLTIP_SIDEBAR_ID, "data-tooltip-content": expanded ? undefined : disableTooltip ? undefined : item.name, "aria-description": disableTooltip ? undefined : item.name, className: cx("hover:bg-white/10 text-white/80 hover:text-white", {
             "bg-white/20": active,
             "justify-center items-center": !expanded,
             "bg-white/10 text-white": forceHover,
         }), children: [jsx(item.icon, { className: cx("mx-auto", { "size-5": expanded, "size-7": !expanded }) }), expanded && item.name, children] }) }));
-const SidebarMenu = ({ menu, active, expanded, }) => (jsx("ul", { className: cx("menu w-full"), children: menu.map((item, i) => {
+const SidebarMenu = ({ menu, active, expanded, onClick, }) => (jsx("ul", { className: cx("menu w-full"), children: menu.map((item, i) => {
         if ((typeof item.items === "function" || (Array.isArray(item.items) && item.items.length > 0)) &&
             item.items &&
             !expanded) {
-            return (jsx(Popover, { backgroundColor: "bg-nav-popover/95", placement: "right-start", arrowSize: { width: 10, height: 5 }, title: (ref, props, isOpen) => (jsx("div", { ref: ref, ...props, children: jsx(Item, { disableTooltip: true, item: item, active: active(item) || (Array.isArray(item.items) && item.items.some((i) => active(i))), forceHover: isOpen }) })), children: (close) => (jsx("div", { "data-theme": "dim", style: { background: "unset" }, children: Array.isArray(item.items) ? (jsx("ul", { className: "menu p-1", children: item.items?.map((sub, i) => (jsx("li", { children: jsxs(Link, { href: sub.href, onClick: close, className: "text-white", children: [jsx(sub.icon, { className: "size-5" }), sub.name] }) }, i))) })) : (item.items()) })) }, `${item.name}-${i}`));
+            return (jsx(Popover, { backgroundColor: "bg-nav-popover/95", placement: "right-start", arrowSize: { width: 10, height: 5 }, title: (ref, props, isOpen) => (jsx("div", { ref: ref, ...props, children: jsx(Item, { disableTooltip: true, item: item, onClick: onClick, active: active(item) || (Array.isArray(item.items) && item.items.some((i) => active(i))), forceHover: isOpen }) })), children: (close) => (jsx("div", { "data-theme": "dim", style: { background: "unset" }, children: Array.isArray(item.items) ? (jsx("ul", { className: "menu p-1", children: item.items?.map((sub, i) => (jsx("li", { children: jsxs(Link, { href: sub.href, onClick: (e) => {
+                                    close();
+                                    onClick?.(e);
+                                }, className: "text-white", children: [jsx(sub.icon, { className: "size-5" }), sub.name] }) }, i))) })) : (item.items()) })) }, `${item.name}-${i}`));
         }
         if (expanded && Array.isArray(item.items) && item.items.length > 0) {
             const isActive = item.items.some((s) => active(s));
-            return (jsx("li", { children: jsxs("details", { className: cx({ "rounded-box bg-gradient-to-b from-white/20 to-white/5": isActive }), open: isActive, children: [jsxs("summary", { className: "hover:bg-white/10 text-white/80 hover:text-white", children: [jsx(item.icon, { className: "mx-auto size-5" }), item.name] }), jsx("ul", { children: item.items.map((sub, i) => (jsx(Item, { expanded: expanded, item: sub, active: active(sub) }, `${i}-${sub.name}`))) })] }) }, `${item.name}-${i}`));
+            return (jsx("li", { children: jsxs("details", { className: cx({ "rounded-box bg-gradient-to-b from-white/20 to-white/5": isActive }), open: isActive, children: [jsxs("summary", { className: "hover:bg-white/10 text-white/80 hover:text-white", children: [jsx(item.icon, { className: "mx-auto size-5" }), item.name] }), jsx("ul", { children: item.items.map((sub, i) => (jsx(Item, { onClick: onClick, expanded: expanded, item: sub, active: active(sub) }, `${i}-${sub.name}`))) })] }) }, `${item.name}-${i}`));
         }
-        return jsx(Item, { expanded: expanded, item: item, active: active(item) }, `${item.name}-${i}`);
+        return jsx(Item, { onClick: onClick, expanded: expanded, item: item, active: active(item) }, `${item.name}-${i}`);
     }) }));
 const SidebarLayout = ({ sidebarExpanded, onExpandChanged, sideChildren, children, menuIcon, icon, className, }) => {
     const [showSidebar, setShowSidebar] = useState(false);
@@ -1784,7 +1788,7 @@ const SidebarLayout = ({ sidebarExpanded, onExpandChanged, sideChildren, childre
         }), children: [showSidebar && (jsx("div", { className: "sm:hidden absolute left-0 top-0 bg-black/50 w-full h-full", style: { zIndex: 1000 }, onClick: () => setShowSidebar(!expanded) })), jsxs("div", { className: "sm:hidden absolute h-16 flex items-center", style: { zIndex: 1000 }, children: [icon && jsx("span", { onChange: () => setShowSidebar(!showSidebar), children: icon }), jsxs("label", { className: "px-2 sm:hidden text-black ml-2 mr-2 swap swap-rotate", children: [jsx("input", { type: "checkbox", checked: showSidebar, onChange: () => setShowSidebar(!showSidebar) }), jsx("svg", { className: "swap-off fill-current", xmlns: "http://www.w3.org/2000/svg", width: "24", height: "24", viewBox: "0 0 512 512", children: jsx("path", { d: "M64,384H448V341.33H64Zm0-106.67H448V234.67H64ZM64,128v42.67H448V128Z" }) }), jsx("svg", { className: "swap-on fill-current", xmlns: "http://www.w3.org/2000/svg", width: "24", height: "24", viewBox: "0 0 512 512", children: jsx("polygon", { points: "400 145.49 366.51 112 256 222.51 145.49 112 112 145.49 222.51 256 112 366.51 145.49 400 256 289.49 366.51 400 400 366.51 289.49 256 400 145.49" }) })] })] }), jsxs("div", { style: { zIndex: 1001 }, className: cx("print:hidden fixed sm:static left-0 top-0 h-full sm:inline-flex transition-[translate] duration-500 ease-in-out", { "-translate-x-60 sm:translate-x-0": !showSidebar }), children: [jsx("div", { className: cx("relative z-50 shrink-0 column-1 py-2 pl-2 h-full justify-center transition-[width] duration-500 ease-in-out overflow-hidden", { "w-60": menuExpanded, "w-24": !menuExpanded }), children: jsxs("div", { className: "rounded-box flex flex-col h-full overflow-auto pt-14 bg-navigation group", children: [jsx("div", { className: "absolute w-full h-18 left-0 top-2 z-1000", children: jsx("div", { className: "rounded-box h-18 ml-2 pl-4 pt-5 bg-gradient-to-b from-[50%] from-navigation to-transparent", children: menuIcon(menuExpanded) }) }), jsx("button", { onClick: () => {
                                         setMenuExpanded(!menuExpanded);
                                         onExpandChanged(!menuExpanded);
-                                    }, className: cx("hidden sm:flex absolute top-8 right-0 z-1001 justify-center btn btn-xs btn-circle border-white/40 hover:border-white text-white/70 hover:text-white bg-navigation transition-[translate,opacity] duration-200 ease-in-out group-hover:opacity-100", { "-translate-x-4": expanded, "opacity-0 right-0": !expanded }), children: menuExpanded ? (jsx(ChevronDoubleLeftIcon, { className: "size-4" })) : (jsx(ChevronDoubleRightIcon, { className: "size-4" })) }), sideChildren(menuExpanded)] }) }), jsx(Tooltip, { id: TOOLTIP_SIDEBAR_ID, place: "right", className: styles$1.sidebar })] }), jsx("div", { className: "grow shirk", children: children })] }));
+                                    }, className: cx("hidden sm:flex absolute top-8 right-0 z-1001 justify-center btn btn-xs btn-circle border-white/40 hover:border-white text-white/70 hover:text-white bg-navigation transition-[translate,opacity] duration-200 ease-in-out group-hover:opacity-100", { "-translate-x-4": expanded, "opacity-0 right-0": !expanded }), children: menuExpanded ? (jsx(ChevronDoubleLeftIcon, { className: "size-4" })) : (jsx(ChevronDoubleRightIcon, { className: "size-4" })) }), sideChildren(menuExpanded, () => setShowSidebar(false))] }) }), jsx(Tooltip, { id: TOOLTIP_SIDEBAR_ID, place: "right", className: styles$1.sidebar })] }), jsx("div", { className: "grow shirk", children: children })] }));
 };
 
 var styles = {"field":"Filter-module_field__vtsXb","fieldDate":"Filter-module_fieldDate__tuqgJ"};

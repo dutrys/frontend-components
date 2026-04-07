@@ -29,7 +29,9 @@ const Item = ({
   disableTooltip,
   forceHover,
   expanded,
+  onClick,
 }: {
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   expanded?: boolean;
   disableTooltip?: boolean;
   forceHover?: boolean;
@@ -45,9 +47,10 @@ const Item = ({
         item.onClick
           ? (e) => {
               e.preventDefault();
+              onClick?.(e);
               item.onClick!();
             }
-          : undefined
+          : onClick
       }
       data-tooltip-id={expanded ? undefined : TOOLTIP_SIDEBAR_ID}
       data-tooltip-content={expanded ? undefined : disableTooltip ? undefined : item.name}
@@ -69,10 +72,12 @@ export const SidebarMenu = ({
   menu,
   active,
   expanded,
+  onClick,
 }: {
   expanded?: boolean;
   active: (item: MenuItemWithSubmenu) => boolean;
   menu: MenuItemWithSubmenu[];
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }) => (
   <ul className={cx("menu w-full")}>
     {menu.map((item, i) => {
@@ -92,6 +97,7 @@ export const SidebarMenu = ({
                 <Item
                   disableTooltip
                   item={item}
+                  onClick={onClick}
                   active={active(item) || (Array.isArray(item.items) && item.items!.some((i) => active(i)))}
                   forceHover={isOpen}
                 />
@@ -104,7 +110,14 @@ export const SidebarMenu = ({
                   <ul className="menu p-1">
                     {item.items?.map((sub, i) => (
                       <li key={i}>
-                        <Link href={sub.href} onClick={close} className="text-white">
+                        <Link
+                          href={sub.href}
+                          onClick={(e) => {
+                            close();
+                            onClick?.(e);
+                          }}
+                          className="text-white"
+                        >
                           <sub.icon className="size-5" />
                           {sub.name}
                         </Link>
@@ -134,7 +147,13 @@ export const SidebarMenu = ({
               </summary>
               <ul>
                 {item.items.map((sub, i) => (
-                  <Item expanded={expanded} key={`${i}-${sub.name}`} item={sub} active={active(sub)} />
+                  <Item
+                    onClick={onClick}
+                    expanded={expanded}
+                    key={`${i}-${sub.name}`}
+                    item={sub}
+                    active={active(sub)}
+                  />
                 ))}
               </ul>
             </details>
@@ -142,7 +161,7 @@ export const SidebarMenu = ({
         );
       }
 
-      return <Item key={`${item.name}-${i}`} expanded={expanded} item={item} active={active(item)} />;
+      return <Item onClick={onClick} key={`${item.name}-${i}`} expanded={expanded} item={item} active={active(item)} />;
     })}
   </ul>
 );
@@ -158,7 +177,7 @@ export const SidebarLayout = ({
 }: {
   onExpandChanged: (expanded: boolean) => void;
   sidebarExpanded?: boolean;
-  sideChildren: (expanded: boolean) => React.ReactNode;
+  sideChildren: (expanded: boolean, close: () => void) => React.ReactNode;
   menuIcon: (expanded: boolean) => React.ReactNode;
   children: React.ReactNode;
   icon?: React.ReactNode;
@@ -244,7 +263,7 @@ export const SidebarLayout = ({
                 <ChevronDoubleRightIcon className="size-4" />
               )}
             </button>
-            {sideChildren(menuExpanded)}
+            {sideChildren(menuExpanded, () => setShowSidebar(false))}
           </div>
         </div>
         <Tooltip id={TOOLTIP_SIDEBAR_ID} place="right" className={styles.sidebar} />

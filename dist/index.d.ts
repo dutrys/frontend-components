@@ -605,15 +605,16 @@ type MenuItemWithSubmenu<T = string> = Omit<MenuItem<T>, "href"> & {
     onClick?: () => void;
     items?: MenuItem<T>[] | (() => React__default.ReactNode);
 };
-declare const SidebarMenu: ({ menu, active, expanded, }: {
+declare const SidebarMenu: ({ menu, active, expanded, onClick, }: {
     expanded?: boolean;
     active: (item: MenuItemWithSubmenu) => boolean;
     menu: MenuItemWithSubmenu[];
+    onClick?: (e: React__default.MouseEvent<HTMLAnchorElement>) => void;
 }) => react_jsx_runtime.JSX.Element;
 declare const SidebarLayout: ({ sidebarExpanded, onExpandChanged, sideChildren, children, menuIcon, icon, className, }: {
     onExpandChanged: (expanded: boolean) => void;
     sidebarExpanded?: boolean;
-    sideChildren: (expanded: boolean) => React__default.ReactNode;
+    sideChildren: (expanded: boolean, close: () => void) => React__default.ReactNode;
     menuIcon: (expanded: boolean) => React__default.ReactNode;
     children: React__default.ReactNode;
     icon?: React__default.ReactNode;

@@ -13,15 +13,16 @@ export type MenuItemWithSubmenu<T = string> = Omit<MenuItem<T>, "href"> & {
     onClick?: () => void;
     items?: MenuItem<T>[] | (() => React.ReactNode);
 };
-export declare const SidebarMenu: ({ menu, active, expanded, }: {
+export declare const SidebarMenu: ({ menu, active, expanded, onClick, }: {
     expanded?: boolean;
     active: (item: MenuItemWithSubmenu) => boolean;
     menu: MenuItemWithSubmenu[];
+    onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const SidebarLayout: ({ sidebarExpanded, onExpandChanged, sideChildren, children, menuIcon, icon, className, }: {
     onExpandChanged: (expanded: boolean) => void;
     sidebarExpanded?: boolean;
-    sideChildren: (expanded: boolean) => React.ReactNode;
+    sideChildren: (expanded: boolean, close: () => void) => React.ReactNode;
     menuIcon: (expanded: boolean) => React.ReactNode;
     children: React.ReactNode;
     icon?: React.ReactNode;
