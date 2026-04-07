@@ -389,7 +389,7 @@ type SelectPaginatedFromApiProps<TModel extends {
 declare const SelectPaginatedFromApi: <TModel extends {
     meta: ResponseMeta;
     data: unknown[];
-}>({ onChange, name, value, searchFromChars, queryKey, queryFn, optionLabel, optionValue, ...rest }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "defaultValue" | "type" | "value" | "children"> & SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
+}>({ onChange, name, value, searchFromChars, queryKey, queryFn, optionLabel, optionValue, ...rest }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "defaultValue" | "type" | "value" | "children" | "onChange"> & SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
 
 type TimePickerProps = {
     required?: boolean;

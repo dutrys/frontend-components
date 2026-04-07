@@ -28,7 +28,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
   ...rest
 }: Omit<
   React.SelectHTMLAttributes<HTMLSelectElement>,
-  "size" | "multiple" | "defaultValue" | "type" | "value" | "children"
+  "size" | "multiple" | "defaultValue" | "type" | "value" | "children" | "onChange"
 > &
   SelectPaginatedFromApiProps<TModel>) => {
   const [query, setQuery] = useState("");
