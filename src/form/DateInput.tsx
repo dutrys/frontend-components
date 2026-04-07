@@ -298,7 +298,10 @@ export const DateRangeInput = ({
                 <li>
                   <button
                     onClick={() => {
-                      onChange({ from: subDays(new Date(), 30), to: new Date() });
+                      const from = subDays(new Date(), 30);
+                      const to = new Date();
+                      onChange({ from, to });
+                      setDateString(`${formatDate(from)} - ${formatDate(to)}`);
                       close();
                     }}
                   >
@@ -308,7 +311,10 @@ export const DateRangeInput = ({
                 <li>
                   <button
                     onClick={() => {
-                      onChange({ from: startOfMonth(new Date()), to: new Date() });
+                      const from = startOfMonth(new Date());
+                      const to = new Date();
+                      onChange({ from, to });
+                      setDateString(`${formatDate(from)} - ${formatDate(to)}`);
                       close();
                     }}
                   >
@@ -318,10 +324,10 @@ export const DateRangeInput = ({
                 <li>
                   <button
                     onClick={() => {
-                      onChange({
-                        from: startOfMonth(subMonths(new Date(), 1)),
-                        to: endOfMonth(subMonths(new Date(), 1)),
-                      });
+                      const from = startOfMonth(subMonths(new Date(), 1));
+                      const to = endOfMonth(subMonths(new Date(), 1));
+                      onChange({ from, to });
+                      setDateString(`${formatDate(from)} - ${formatDate(to)}`);
                       close();
                     }}
                   >
@@ -331,7 +337,10 @@ export const DateRangeInput = ({
                 <li>
                   <button
                     onClick={() => {
-                      onChange({ from: startOfWeek(new Date(), { weekStartsOn: 1 }), to: new Date() });
+                      const from = startOfWeek(new Date(), { weekStartsOn: 1 });
+                      const to = new Date();
+                      onChange({ from, to });
+                      setDateString(`${formatDate(from)} - ${formatDate(to)}`);
                       close();
                     }}
                   >
@@ -341,10 +350,10 @@ export const DateRangeInput = ({
                 <li>
                   <button
                     onClick={() => {
-                      onChange({
-                        from: startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }),
-                        to: endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }),
-                      });
+                      const from = startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 });
+                      const to = endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 });
+                      setDateString(`${formatDate(from)} - ${formatDate(to)}`);
+                      onChange({ from, to });
                       close();
                     }}
                   >

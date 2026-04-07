@@ -18,7 +18,7 @@ import { captureException } from '@sentry/nextjs';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 import { createPortal } from 'react-dom';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { format, isSameDay, isSameHour, parse, isValid, subDays, startOfMonth, endOfMonth, subMonths, startOfWeek, endOfWeek, subWeeks, parseJSON, differenceInSeconds, formatDistance, differenceInMinutes, differenceInDays, startOfDay, endOfDay } from 'date-fns';
+import { format, isSameDay, isSameHour, parse, isValid, subDays, startOfMonth, subMonths, endOfMonth, startOfWeek, subWeeks, endOfWeek, parseJSON, differenceInSeconds, formatDistance, differenceInMinutes, differenceInDays, startOfDay, endOfDay } from 'date-fns';
 import { DayPicker } from 'react-day-picker';
 import { lt, enGB } from 'react-day-picker/locale';
 import { FocusTrap, FocusTrapFeatures, Portal, Combobox, ComboboxInput, ComboboxButton, Transition, ComboboxOptions, ComboboxOption } from '@headlessui/react';
@@ -969,25 +969,34 @@ const DateRangeInput = ({ onChange, value, className, toggleClassName, required,
                             }
                             onChange(range ?? null);
                         } }), displayHelpers && (jsxs("div", { className: "menu menu-xs text-white pt-14", "data-theme": "dim", style: { background: "unset" }, children: [jsx("li", { children: jsx("button", { onClick: () => {
-                                        onChange({ from: subDays(new Date(), 30), to: new Date() });
+                                        const from = subDays(new Date(), 30);
+                                        const to = new Date();
+                                        onChange({ from, to });
+                                        setDateString(`${formatDate(from)} - ${formatDate(to)}`);
                                         close();
                                     }, children: t("dateHelper.last30Days") }) }), jsx("li", { children: jsx("button", { onClick: () => {
-                                        onChange({ from: startOfMonth(new Date()), to: new Date() });
+                                        const from = startOfMonth(new Date());
+                                        const to = new Date();
+                                        onChange({ from, to });
+                                        setDateString(`${formatDate(from)} - ${formatDate(to)}`);
                                         close();
                                     }, children: t("dateHelper.thisMonth") }) }), jsx("li", { children: jsx("button", { onClick: () => {
-                                        onChange({
-                                            from: startOfMonth(subMonths(new Date(), 1)),
-                                            to: endOfMonth(subMonths(new Date(), 1)),
-                                        });
+                                        const from = startOfMonth(subMonths(new Date(), 1));
+                                        const to = endOfMonth(subMonths(new Date(), 1));
+                                        onChange({ from, to });
+                                        setDateString(`${formatDate(from)} - ${formatDate(to)}`);
                                         close();
                                     }, children: t("dateHelper.lastMonth") }) }), jsx("li", { children: jsx("button", { onClick: () => {
-                                        onChange({ from: startOfWeek(new Date(), { weekStartsOn: 1 }), to: new Date() });
+                                        const from = startOfWeek(new Date(), { weekStartsOn: 1 });
+                                        const to = new Date();
+                                        onChange({ from, to });
+                                        setDateString(`${formatDate(from)} - ${formatDate(to)}`);
                                         close();
                                     }, children: t("dateHelper.thisWeek") }) }), jsx("li", { children: jsx("button", { onClick: () => {
-                                        onChange({
-                                            from: startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }),
-                                            to: endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 }),
-                                        });
+                                        const from = startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 });
+                                        const to = endOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 });
+                                        setDateString(`${formatDate(from)} - ${formatDate(to)}`);
+                                        onChange({ from, to });
                                         close();
                                     }, children: t("dateHelper.lastWeek") }) })] }))] })) }) }));
 };
