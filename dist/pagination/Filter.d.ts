@@ -60,14 +60,12 @@ export declare const FilterOptionsExpandable: ({ filter, label, options, isVisib
         value: string;
     }[];
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const FilterOptions: ({ filter, options, isVisible, equals, }: {
-    equals?: boolean;
+export declare const FilterOptions: ({ options, isVisible, }: {
     isVisible: boolean;
     fieldsetClassName?: string;
-    filter: string;
     options: {
         label: string;
-        value: string;
+        value: Record<string, string[]>;
     }[];
 }) => import("react/jsx-runtime").JSX.Element | import("react/jsx-runtime").JSX.Element[];
 export declare const FilterDateFromTo: ({ filter, fieldsetClassName, from, to, required, }: {

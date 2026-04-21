@@ -1980,33 +1980,23 @@ const FilterOptionsExpandable = ({ filter, label, options, isVisible, }) => {
     }
     return (jsx("li", { children: jsxs("details", { children: [jsxs("summary", { className: cx({ "font-bold": values.length > 0 }), children: [label, values.length > 0 && ` (${values.length})`] }), jsx("ul", { children: options.map((option) => (jsx("li", { children: jsx(Link$1, { className: cx({ "bg-base-300/50 font-bold hover:bg-base-300": values.includes(option.value) }), href: setPartialParams({ page: "", [`filter.${filter}`]: getOptionValue(option.value, values) }, searchParams), children: option.label }) }, option.value))) })] }) }));
 };
-const FilterOptions = ({ filter, options, isVisible, equals, }) => {
+const FilterOptions = ({ options, isVisible, }) => {
     const searchParams = useSearchParams();
-    const value = useMemo(() => {
-        const defaultValue = [];
-        if (/^\$in:/.test(searchParams.get(`filter.${filter}`) || "")) {
-            searchParams
-                .get(`filter.${filter}`)
-                ?.replace(/\$in:/, "")
-                .split(",")
-                .forEach((v) => {
-                if (options.some((o) => o.value === v)) {
-                    defaultValue.push(v);
+    const isActive = (option) => {
+        for (const [key, value] of Object.entries(option.value)) {
+            const all = [...searchParams.getAll(key), ...searchParams.getAll(`${key}[]`)];
+            for (const v of value) {
+                if (!all.includes(v)) {
+                    return false;
                 }
-            });
-        }
-        else {
-            const value = searchParams.get(`filter.${filter}`) || "";
-            if (options.some((o) => o.value === value)) {
-                defaultValue.push(value);
             }
         }
-        return defaultValue;
-    }, [searchParams, filter, options]);
+        return true;
+    };
     if (isVisible) {
-        return (jsx("div", { className: "join", children: options.map((option) => (jsx(Link$1, { href: setPartialParams({ page: "", [`filter.${filter}`]: getOptionValue(option.value, value, { equals }) }, searchParams), className: cx("btn btn-xs uppercase join-item", { "btn-neutral": value.includes(option.value) }), children: option.label }, option.value))) }));
+        return (jsx("div", { className: "join", children: options.map((option) => (jsx(Link$1, { href: setPartialParams({ page: "", ...option.value }, searchParams), className: cx("btn btn-xs uppercase join-item", { "btn-neutral": isActive(option) }), children: option.label }, option.label))) }));
     }
-    return options.map((option) => (jsx("li", { children: jsx(Link$1, { className: cx({ "bg-base-300/50 font-bold hover:bg-base-300": value.includes(option.value) }), href: setPartialParams({ [`filter.${filter}`]: getOptionValue(option.value, value, { equals }) }, searchParams), children: option.label }) }, option.value)));
+    return options.map((option) => (jsx("li", { children: jsx(Link$1, { className: cx({ "bg-base-300/50 font-bold hover:bg-base-300": isActive(option) }), href: setPartialParams({ page: "", ...option.value }, searchParams), children: option.label }) }, option.label)));
 };
 const getOptionValue = (value, values, { equals } = {}) => {
     let optionValue = "";

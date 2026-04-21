@@ -465,51 +465,36 @@ export const FilterOptionsExpandable = ({
 };
 
 export const FilterOptions = ({
-  filter,
   options,
   isVisible,
-  equals,
 }: {
-  equals?: boolean;
   isVisible: boolean;
   fieldsetClassName?: string;
-  filter: string;
-  options: { label: string; value: string }[];
+  options: { label: string; value: Record<string, string[]> }[];
 }) => {
   const searchParams = useSearchParams();
 
-  const value = useMemo(() => {
-    const defaultValue: string[] = [];
-    if (/^\$in:/.test(searchParams.get(`filter.${filter}`) || "")) {
-      searchParams
-        .get(`filter.${filter}`)
-        ?.replace(/\$in:/, "")
-        .split(",")
-        .forEach((v) => {
-          if (options.some((o) => o.value === v)) {
-            defaultValue.push(v);
-          }
-        });
-    } else {
-      const value = searchParams.get(`filter.${filter}`) || "";
-      if (options.some((o) => o.value === value)) {
-        defaultValue.push(value);
+  const isActive = (option: { label: string; value: Record<string, string[]> }) => {
+    for (const [key, value] of Object.entries(option.value)) {
+      const all = [...searchParams.getAll(key), ...searchParams.getAll(`${key}[]`)];
+
+      for (const v of value) {
+        if (!all.includes(v)) {
+          return false;
+        }
       }
     }
-    return defaultValue;
-  }, [searchParams, filter, options]);
+    return true;
+  };
 
   if (isVisible) {
     return (
       <div className="join">
         {options.map((option) => (
           <Link
-            key={option.value}
-            href={setPartialParams(
-              { page: "", [`filter.${filter}`]: getOptionValue(option.value, value, { equals }) },
-              searchParams,
-            )}
-            className={cx("btn btn-xs uppercase join-item", { "btn-neutral": value.includes(option.value) })}
+            key={option.label}
+            href={setPartialParams({ page: "", ...option.value }, searchParams)}
+            className={cx("btn btn-xs uppercase join-item", { "btn-neutral": isActive(option) })}
           >
             {option.label}
           </Link>
@@ -519,10 +504,10 @@ export const FilterOptions = ({
   }
 
   return options.map((option) => (
-    <li key={option.value}>
+    <li key={option.label}>
       <Link
-        className={cx({ "bg-base-300/50 font-bold hover:bg-base-300": value.includes(option.value) })}
-        href={setPartialParams({ [`filter.${filter}`]: getOptionValue(option.value, value, { equals }) }, searchParams)}
+        className={cx({ "bg-base-300/50 font-bold hover:bg-base-300": isActive(option) })}
+        href={setPartialParams({ page: "", ...option.value }, searchParams)}
       >
         {option.label}
       </Link>
