@@ -487,18 +487,32 @@ export const FilterOptions = ({
     return true;
   };
 
+  const isActiveArr = useMemo(() => options.map((o) => isActive(o)), [searchParams, options]);
+
   if (isVisible) {
     return (
       <div className="join">
-        {options.map((option) => (
-          <Link
-            key={option.label}
-            href={setPartialParams({ page: "", ...option.value }, searchParams)}
-            className={cx("btn btn-xs uppercase join-item", { "btn-neutral": isActive(option) })}
-          >
-            {option.label}
-          </Link>
-        ))}
+        {options.map((option, i) => {
+          let href: string;
+          if (isActiveArr[i]) {
+            const v: Record<string, []> = {};
+            Object.keys(option.value).map((key) => {
+              v[key] = [];
+            });
+            href = setPartialParams({ page: "", ...v }, searchParams);
+          } else {
+            href = setPartialParams({ page: "", ...option.value }, searchParams);
+          }
+          return (
+            <Link
+              key={option.label}
+              href={href}
+              className={cx("btn btn-xs uppercase join-item", { "btn-neutral": isActive(option) })}
+            >
+              {option.label}
+            </Link>
+          );
+        })}
       </div>
     );
   }

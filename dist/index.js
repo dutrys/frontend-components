@@ -1993,8 +1993,22 @@ const FilterOptions = ({ options, isVisible, }) => {
         }
         return true;
     };
+    const isActiveArr = useMemo(() => options.map((o) => isActive(o)), [searchParams, options]);
     if (isVisible) {
-        return (jsx("div", { className: "join", children: options.map((option) => (jsx(Link$1, { href: setPartialParams({ page: "", ...option.value }, searchParams), className: cx("btn btn-xs uppercase join-item", { "btn-neutral": isActive(option) }), children: option.label }, option.label))) }));
+        return (jsx("div", { className: "join", children: options.map((option, i) => {
+                let href;
+                if (isActiveArr[i]) {
+                    const v = {};
+                    Object.keys(option.value).map((key) => {
+                        v[key] = [];
+                    });
+                    href = setPartialParams({ page: "", ...v }, searchParams);
+                }
+                else {
+                    href = setPartialParams({ page: "", ...option.value }, searchParams);
+                }
+                return (jsx(Link$1, { href: href, className: cx("btn btn-xs uppercase join-item", { "btn-neutral": isActive(option) }), children: option.label }, option.label));
+            }) }));
     }
     return options.map((option) => (jsx("li", { children: jsx(Link$1, { className: cx({ "bg-base-300/50 font-bold hover:bg-base-300": isActive(option) }), href: setPartialParams({ page: "", ...option.value }, searchParams), children: option.label }) }, option.label)));
 };
