@@ -396,7 +396,8 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                                   searchParams,
                                 )}
                               >
-                                {column.title}&nbsp;{order === "DESC" ? "▲" : "▼"}
+                                {column.title}
+                                <span className="text-[0.5rem]">{order === "DESC" ? "▲" : "▼"}</span>
                               </Link>
                             </Component>
                           );

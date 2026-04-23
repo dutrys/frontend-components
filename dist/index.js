@@ -1578,7 +1578,7 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                                         sortBy: column.name === sortBy
                                                                             ? `${column.name.toString()}:${order}`
                                                                             : `${column.name.toString()}:${order === "ASC" ? "DESC" : "ASC"}`,
-                                                                    }, searchParams), children: [column.title, "\u00A0", order === "DESC" ? "▲" : "▼"] }) }, column.name.toString()));
+                                                                    }, searchParams), children: [column.title, jsx("span", { className: "text-[0.5rem]", children: order === "DESC" ? "▲" : "▼" })] }) }, column.name.toString()));
                                                         }
                                                         return (jsx(Component, { className: `${styles$4.thead} text-xs`, children: column.title }, column.title.toString()));
                                                     })] }) }), jsx("tbody", { children: pagination.data.map((model, o) => (jsxs("tr", { "data-testid": `table-row-${o}`, onClick: rowClickHref
