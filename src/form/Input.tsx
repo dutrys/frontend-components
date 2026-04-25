@@ -25,6 +25,7 @@ import { useTranslations } from "next-intl";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import { LoadingComponent } from "../Loading";
 import { SelectFromApi, SelectFromApiProps } from "./SelectFromApi";
+import { Matcher } from "react-day-picker";
 
 export interface IInputProps<TName extends FieldPath<FieldValues>> {
   id?: string;
@@ -651,8 +652,9 @@ export const DateTimeFormField = <
   ...props
 }: IInputProps<TName> & {
   control: Control<TFieldValues>;
+  matcher?: Matcher;
   useDate?: boolean;
-} & DateTimePickerProps) => (
+} & Omit<DateTimePickerProps, "value" | "onChange">) => (
   <div className={fieldSetClassName}>
     <label className="floating-label">
       <Controller

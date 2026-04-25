@@ -1,5 +1,5 @@
 import { MoreActionType } from "./MoreAction";
-import React from "react";
+import React, { type ReactNode } from "react";
 import { PaginationSettings, StorageInterface } from "./StorageInterface";
 import { ResponseMeta } from "../utils/paginate";
 export type ActionColumn<TModel> = {
@@ -29,7 +29,7 @@ export type DateColumn<TModel> = {
 };
 export type FunctionColumn<TModel> = {
     name: string;
-    body: (data: TModel) => string | number | React.ReactNode;
+    body: (data: TModel) => string | number | ReactNode;
     title: string;
     pin?: true;
     className?: string;
@@ -43,26 +43,27 @@ export declare const PaginatedTable: <TModel extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, }: {
-    titleAbove?: React.ReactNode;
-    caption?: React.ReactNode;
+}>({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, toolbarClassName, }: {
+    toolbarClassName?: string;
+    titleAbove?: ReactNode;
+    caption?: ReactNode;
     defaultDisplayAs?: "list" | "grid";
-    renderGridItem?: (model: TModel["data"][number]) => React.ReactNode;
+    renderGridItem?: (model: TModel["data"][number]) => ReactNode;
     bulkActions?: {
-        children: React.ReactNode;
+        children: ReactNode;
         onSelect: (models: number[]) => Promise<boolean | void>;
     }[];
     sortEnum: Record<string, string>;
-    extraHeading?: React.ReactNode;
+    extraHeading?: ReactNode;
     isSearchable?: boolean;
-    title?: React.ReactNode;
+    title?: ReactNode;
     addNew?: string;
     rowClickHref?: (model: TModel["data"][number]) => string;
     displayFilters?: {
         name: string;
         filters: string[];
     }[];
-    searchableShortcuts?: (((isVisible: boolean) => React.ReactNode) | React.ReactNode)[];
+    searchableShortcuts?: (((isVisible: boolean) => ReactNode) | ReactNode)[];
     columns: Array<ColumnType<TModel["data"][number]>>;
     pagination: TModel;
     addNewText?: string;
@@ -76,7 +77,7 @@ export declare const PAGINATED_IGNORE_ROW_CLICK = "action-cell";
 export declare const TableLink: ({ href, children, className, isLink, ...rest }: {
     className?: string;
     href: string;
-    children: React.ReactNode;
+    children: ReactNode;
     isLink?: boolean;
 }) => string | number | bigint | boolean | import("react/jsx-runtime").JSX.Element | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined;
 export declare const FilterLink: ({ children, className, params, href, }: {

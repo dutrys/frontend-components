@@ -1,19 +1,17 @@
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next-nprogress-bar";
 import {
-  ChevronDownIcon,
-  ChevronUpIcon,
   FunnelIcon,
   MagnifyingGlassIcon,
   PlusIcon,
   QueueListIcon,
   RectangleStackIcon,
 } from "@heroicons/react/24/outline";
-import { ChevronLeftIcon, ChevronRightIcon, FunnelIcon as FunnelIconSolid } from "@heroicons/react/24/solid";
+import { FunnelIcon as FunnelIconSolid } from "@heroicons/react/24/solid";
 import { MoreActions, MoreActionType } from "./MoreAction";
 import { NoCountPagination, Pagination } from "./Pagination";
 import { useTranslations } from "next-intl";
-import React, { useMemo, useState } from "react";
+import React, { type ReactNode, useMemo, useState } from "react";
 import styles from "./PaginatedTable.module.css";
 import cx from "classnames";
 import { addLocale, Link } from "./Link";
@@ -59,7 +57,7 @@ export type DateColumn<TModel> = {
 };
 export type FunctionColumn<TModel> = {
   name: string;
-  body: (data: TModel) => string | number | React.ReactNode;
+  body: (data: TModel) => string | number | ReactNode;
   title: string;
   pin?: true;
   className?: string;
@@ -133,26 +131,28 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   renderGridItem,
   rowClickHref,
   defaultDisplayAs = "list",
+  toolbarClassName,
 }: {
-  titleAbove?: React.ReactNode;
-  caption?: React.ReactNode;
+  toolbarClassName?: string;
+  titleAbove?: ReactNode;
+  caption?: ReactNode;
   defaultDisplayAs?: "list" | "grid";
-  renderGridItem?: (model: TModel["data"][number]) => React.ReactNode;
+  renderGridItem?: (model: TModel["data"][number]) => ReactNode;
   bulkActions?: {
-    children: React.ReactNode;
+    children: ReactNode;
     onSelect: (models: number[]) => Promise<boolean | void>;
   }[];
   sortEnum: Record<string, string>;
-  extraHeading?: React.ReactNode;
+  extraHeading?: ReactNode;
   isSearchable?: boolean;
-  title?: React.ReactNode;
+  title?: ReactNode;
   addNew?: string;
   rowClickHref?: (model: TModel["data"][number]) => string;
   displayFilters?: {
     name: string;
     filters: string[];
   }[];
-  searchableShortcuts?: (((isVisible: boolean) => React.ReactNode) | React.ReactNode)[];
+  searchableShortcuts?: (((isVisible: boolean) => ReactNode) | ReactNode)[];
   columns: Array<ColumnType<TModel["data"][number]>>;
   pagination: TModel;
   addNewText?: string;
@@ -210,8 +210,8 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
 
   const elements: (
     | { link: Record<string, string>; text: string }[]
-    | ((isVisible: boolean) => React.ReactNode)
-    | React.ReactNode
+    | ((isVisible: boolean) => ReactNode)
+    | ReactNode
   )[] = [];
 
   if (bulkActions && bulkActions?.length > 0) {
@@ -246,7 +246,12 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
         data-test-sort={(pagination.meta.sortBy || []).flat().join("-")}
         onMouseLeave={() => setHover(null)}
       >
-        <div className="absolute z-501 top-16 flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-screen sm:max-w-[calc(100vw-var(--sidebar-width))]">
+        <div
+          className={cx(
+            "absolute z-501 top-16 flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-screen sm:max-w-[calc(100vw-var(--sidebar-width))]",
+            toolbarClassName,
+          )}
+        >
           <h1
             className={`h-16 flex items-center pl-4 my-0 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`}
           >
@@ -335,7 +340,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
           <>
             <div className="overflow-x-auto max-h-screen w-screen sm:w-[calc(100vw-var(--sidebar-width))]">
               {displayAs === "grid" && renderGridItem ? (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m-4 2xl:grid-cols-4">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m-4 2xl:grid-cols-4 pt-28 pb-16">
                   {pagination.data.map((d) => renderGridItem(d))}
                 </div>
               ) : (
@@ -617,7 +622,7 @@ export const TableLink = ({
 }: {
   className?: string;
   href: string;
-  children: React.ReactNode;
+  children: ReactNode;
   isLink?: boolean;
 }) => {
   if (!isLink) {
@@ -663,7 +668,7 @@ export const FilterLink = ({
 
   return (
     <>
-      {href ? <TableLink href={href}>{children}</TableLink> : children}{" "}
+      {href ? <TableLink href={href}>{children}</TableLink> : children}&nbsp;
       <TableLink
         data-tooltip-id={TOOLTIP_GLOBAL_ID}
         data-tooltip-content={isFiltering ? t("general.filter") : t("general.clearFilter")}

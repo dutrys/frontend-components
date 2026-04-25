@@ -7,6 +7,7 @@ import { TimePickerProps } from "./TimePicker";
 import { NumericFormatProps } from "react-number-format/types/types";
 import React, { ChangeEvent } from "react";
 import { SelectFromApiProps } from "./SelectFromApi";
+import { Matcher } from "react-day-picker";
 export interface IInputProps<TName extends FieldPath<FieldValues>> {
     id?: string;
     label: string;
@@ -91,8 +92,9 @@ export declare const SelectFromApiFormField: <T = unknown, TFieldValues extends 
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const DateTimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, disabled, error, className, fieldSetClassName, useDate, ...props }: IInputProps<TName> & {
     control: Control<TFieldValues>;
+    matcher?: Matcher;
     useDate?: boolean;
-} & DateTimePickerProps) => import("react/jsx-runtime").JSX.Element;
+} & Omit<DateTimePickerProps, "value" | "onChange">) => import("react/jsx-runtime").JSX.Element;
 export declare const TimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, control, className, ...props }: Omit<TimePickerProps, "onChange" | "value"> & IInputProps<TName> & {
     control: Control<TFieldValues>;
 }) => import("react/jsx-runtime").JSX.Element;

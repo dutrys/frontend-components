@@ -1,6 +1,6 @@
 import * as react_jsx_runtime from 'react/jsx-runtime';
 import * as React from 'react';
-import React__default, { ChangeEvent } from 'react';
+import React__default, { ReactNode, ChangeEvent } from 'react';
 import { Placement } from '@floating-ui/utils';
 import { ReadonlyURLSearchParams } from 'next/navigation';
 import * as react_hook_form from 'react-hook-form';
@@ -156,7 +156,7 @@ type DateColumn<TModel> = {
 };
 type FunctionColumn<TModel> = {
     name: string;
-    body: (data: TModel) => string | number | React__default.ReactNode;
+    body: (data: TModel) => string | number | ReactNode;
     title: string;
     pin?: true;
     className?: string;
@@ -170,26 +170,27 @@ declare const PaginatedTable: <TModel extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, }: {
-    titleAbove?: React__default.ReactNode;
-    caption?: React__default.ReactNode;
+}>({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, toolbarClassName, }: {
+    toolbarClassName?: string;
+    titleAbove?: ReactNode;
+    caption?: ReactNode;
     defaultDisplayAs?: "list" | "grid";
-    renderGridItem?: (model: TModel["data"][number]) => React__default.ReactNode;
+    renderGridItem?: (model: TModel["data"][number]) => ReactNode;
     bulkActions?: {
-        children: React__default.ReactNode;
+        children: ReactNode;
         onSelect: (models: number[]) => Promise<boolean | void>;
     }[];
     sortEnum: Record<string, string>;
-    extraHeading?: React__default.ReactNode;
+    extraHeading?: ReactNode;
     isSearchable?: boolean;
-    title?: React__default.ReactNode;
+    title?: ReactNode;
     addNew?: string;
     rowClickHref?: (model: TModel["data"][number]) => string;
     displayFilters?: {
         name: string;
         filters: string[];
     }[];
-    searchableShortcuts?: (((isVisible: boolean) => React__default.ReactNode) | React__default.ReactNode)[];
+    searchableShortcuts?: (((isVisible: boolean) => ReactNode) | ReactNode)[];
     columns: Array<ColumnType<TModel["data"][number]>>;
     pagination: TModel;
     addNewText?: string;
@@ -203,7 +204,7 @@ declare const PAGINATED_IGNORE_ROW_CLICK = "action-cell";
 declare const TableLink: ({ href, children, className, isLink, ...rest }: {
     className?: string;
     href: string;
-    children: React__default.ReactNode;
+    children: ReactNode;
     isLink?: boolean;
 }) => string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React__default.ReactNode> | Promise<string | number | bigint | boolean | React__default.ReactPortal | React__default.ReactElement<unknown, string | React__default.JSXElementConstructor<any>> | Iterable<React__default.ReactNode> | null | undefined> | null | undefined;
 declare const FilterLink: ({ children, className, params, href, }: {
@@ -496,8 +497,9 @@ declare const SelectFromApiFormField: <T = unknown, TFieldValues extends FieldVa
 }) => react_jsx_runtime.JSX.Element;
 declare const DateTimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, disabled, error, className, fieldSetClassName, useDate, ...props }: IInputProps<TName> & {
     control: Control<TFieldValues>;
+    matcher?: Matcher;
     useDate?: boolean;
-} & DateTimePickerProps) => react_jsx_runtime.JSX.Element;
+} & Omit<DateTimePickerProps, "value" | "onChange">) => react_jsx_runtime.JSX.Element;
 declare const TimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, control, className, ...props }: Omit<TimePickerProps, "onChange" | "value"> & IInputProps<TName> & {
     control: Control<TFieldValues>;
 }) => react_jsx_runtime.JSX.Element;
