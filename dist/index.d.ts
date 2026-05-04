@@ -329,7 +329,7 @@ type DateInputProps = Omit<React.ComponentPropsWithoutRef<"input">, "size" | "va
     toggleClassName?: string;
     placeholder?: string;
     onChange: (date: Date | null) => unknown;
-    matcher?: Matcher;
+    matcher?: Matcher[] | Matcher;
     modifiers?: Record<string, Matcher | Matcher[] | undefined> | undefined;
 };
 declare const DateInput: ({ onChange, value, className, toggleClassName, required, disabled, size, placeholder, matcher, modifiers, ...rest }: DateInputProps) => react_jsx_runtime.JSX.Element;
@@ -497,7 +497,7 @@ declare const SelectFromApiFormField: <T = unknown, TFieldValues extends FieldVa
 }) => react_jsx_runtime.JSX.Element;
 declare const DateTimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, disabled, error, className, fieldSetClassName, useDate, ...props }: IInputProps<TName> & {
     control: Control<TFieldValues>;
-    matcher?: Matcher;
+    matcher?: Matcher[] | Matcher;
     useDate?: boolean;
 } & Omit<DateTimePickerProps, "value" | "onChange">) => react_jsx_runtime.JSX.Element;
 declare const TimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, control, className, ...props }: Omit<TimePickerProps, "onChange" | "value"> & IInputProps<TName> & {

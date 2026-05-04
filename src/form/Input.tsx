@@ -652,7 +652,7 @@ export const DateTimeFormField = <
   ...props
 }: IInputProps<TName> & {
   control: Control<TFieldValues>;
-  matcher?: Matcher;
+  matcher?: Matcher[] | Matcher;
   useDate?: boolean;
 } & Omit<DateTimePickerProps, "value" | "onChange">) => (
   <div className={fieldSetClassName}>

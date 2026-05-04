@@ -10,7 +10,7 @@ export type DateInputProps = Omit<React.ComponentPropsWithoutRef<"input">, "size
     toggleClassName?: string;
     placeholder?: string;
     onChange: (date: Date | null) => unknown;
-    matcher?: Matcher;
+    matcher?: Matcher[] | Matcher;
     modifiers?: Record<string, Matcher | Matcher[] | undefined> | undefined;
 };
 export declare const DateInput: ({ onChange, value, className, toggleClassName, required, disabled, size, placeholder, matcher, modifiers, ...rest }: DateInputProps) => import("react/jsx-runtime").JSX.Element;

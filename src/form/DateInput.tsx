@@ -43,7 +43,7 @@ export type DateInputProps = Omit<
   toggleClassName?: string;
   placeholder?: string;
   onChange: (date: Date | null) => unknown;
-  matcher?: Matcher;
+  matcher?: Matcher[] | Matcher;
   modifiers?: Record<string, Matcher | Matcher[] | undefined> | undefined;
 };
 

@@ -92,7 +92,7 @@ export declare const SelectFromApiFormField: <T = unknown, TFieldValues extends 
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const DateTimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, control, name, disabled, error, className, fieldSetClassName, useDate, ...props }: IInputProps<TName> & {
     control: Control<TFieldValues>;
-    matcher?: Matcher;
+    matcher?: Matcher[] | Matcher;
     useDate?: boolean;
 } & Omit<DateTimePickerProps, "value" | "onChange">) => import("react/jsx-runtime").JSX.Element;
 export declare const TimeFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, control, className, ...props }: Omit<TimePickerProps, "onChange" | "value"> & IInputProps<TName> & {
