@@ -1060,7 +1060,7 @@ const SelectOption = ({ value, size, children, className, ...rest }) => (jsx(Com
                     "text-teal-600": !focus,
                 }), children: jsx(CheckIcon, { className: "h-5 w-5", "aria-hidden": "true" }) }))] })) }));
 
-const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, ...rest }) => {
+const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, onInitialChange, ...rest }) => {
     const [query, setQuery] = useState("");
     const [valueModel, setValueModel] = useState(typeof value === "object" ? value : null);
     const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
@@ -1102,6 +1102,7 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
                 ?.find((v) => optionValue(v) === value);
             if (valueM) {
                 setValueModel(valueM);
+                onInitialChange?.(valueM);
                 return;
             }
             queryFn({ "filter.id": [`${value}`] }).then((pager) => {
@@ -1113,6 +1114,7 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
                     if (a) {
                         console.error(`Found model ${optionLabel(a)}, but pagination filtering does not work in your backend api`);
                         setValueModel(a);
+                        onInitialChange?.(a);
                     }
                     else {
                         console.error(`No model found for ${value}, but pagination filtering does not work in your backend api`, pager);
@@ -1120,6 +1122,7 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
                     return;
                 }
                 setValueModel(pager.data[0]);
+                onInitialChange?.(pager.data[0]);
             });
         }
     }, [setValueModel, value]);

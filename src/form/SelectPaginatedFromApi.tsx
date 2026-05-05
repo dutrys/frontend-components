@@ -14,6 +14,7 @@ export type SelectPaginatedFromApiProps<TModel extends { meta: ResponseMeta; dat
   value: TModel["data"][0] | string | number | null;
   optionValue?: (model: TModel["data"][0]) => string | number;
   searchFromChars?: number;
+  onInitialChange?: (model: TModel["data"][0]) => void;
 } & Omit<SelectProps<TModel["data"][0]>, "value" | "options">;
 
 export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data: unknown[] }>({
@@ -25,6 +26,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
   queryFn,
   optionLabel = (model) => (model as any).name,
   optionValue = (model) => (model as any).id,
+  onInitialChange,
   ...rest
 }: Omit<
   React.SelectHTMLAttributes<HTMLSelectElement>,
@@ -73,6 +75,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
         ?.find((v) => optionValue(v) === value);
       if (valueM) {
         setValueModel(valueM);
+        onInitialChange?.(valueM);
         return;
       }
       queryFn({ "filter.id": [`${value}`] }).then((pager) => {
@@ -84,6 +87,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
           if (a) {
             console.error(`Found model ${optionLabel(a)}, but pagination filtering does not work in your backend api`);
             setValueModel(a);
+            onInitialChange?.(a);
           } else {
             console.error(
               `No model found for ${value}, but pagination filtering does not work in your backend api`,
@@ -93,6 +97,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
           return;
         }
         setValueModel(pager.data[0]);
+        onInitialChange?.(pager.data[0]);
       });
     }
   }, [setValueModel, value]);
