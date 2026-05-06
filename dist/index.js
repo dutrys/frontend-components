@@ -1011,7 +1011,7 @@ const PortalSSR = (props) => {
     }
     return props.children;
 };
-const Select = ({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel = (m) => m.name, value, size: size$1, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth = 100, maxHeight = 500, afterInput, hideNoItemsOption, autoFocus, ...rest }) => {
+const Select = ({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel = (m) => m.name, value, size: size$1, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth = 100, maxHeight = 500, afterInput, hideNoItemsOption, autoFocus, outerClassName, ...rest }) => {
     const t = useTranslations();
     const { refs, floatingStyles } = useFloating({
         placement: "bottom-start",
@@ -1028,7 +1028,7 @@ const Select = ({ onChange, disabled, required, inputRef, options, name, portalE
         whileElementsMounted: autoUpdate,
     });
     let currentGroupBy = undefined;
-    return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: value, onChange: onChange, ...rest, children: ({ open }) => (jsxs("div", { children: [jsxs("div", { className: cx("relative input input-bordered pr-1", className, {
+    return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: value, onChange: onChange, ...rest, children: ({ open }) => (jsxs("div", { className: outerClassName, children: [jsxs("div", { className: cx("relative input input-bordered pr-1", className, {
                         "w-full": !className?.includes("w-"),
                         "input-sm gap-1": size$1 === "sm",
                         "input-xs gap-0.5": size$1 === "xs",

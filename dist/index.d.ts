@@ -367,8 +367,9 @@ type SelectProps<T> = {
     onQueryChange?: (query: string) => void;
     afterInput?: React__default.ReactNode;
     hideNoItemsOption?: boolean;
+    outerClassName?: string;
 };
-declare const Select: <T = unknown>({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel, value, size, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth, maxHeight, afterInput, hideNoItemsOption, autoFocus, ...rest }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "onChange" | "defaultValue" | "type" | "value" | "children"> & SelectProps<T>) => react_jsx_runtime.JSX.Element;
+declare const Select: <T = unknown>({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel, value, size, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth, maxHeight, afterInput, hideNoItemsOption, autoFocus, outerClassName, ...rest }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "onChange" | "defaultValue" | "type" | "value" | "children"> & SelectProps<T>) => react_jsx_runtime.JSX.Element;
 declare const SelectOption: ({ value, size, children, className, ...rest }: {
     children: React__default.ReactNode;
     value: unknown;

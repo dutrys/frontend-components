@@ -47,6 +47,7 @@ export type SelectProps<T> = {
   onQueryChange?: (query: string) => void;
   afterInput?: React.ReactNode;
   hideNoItemsOption?: boolean;
+  outerClassName?: string;
 };
 
 export const Select = <T = unknown,>({
@@ -73,6 +74,7 @@ export const Select = <T = unknown,>({
   afterInput,
   hideNoItemsOption,
   autoFocus,
+  outerClassName,
   ...rest
 }: Omit<
   React.SelectHTMLAttributes<HTMLSelectElement>,
@@ -97,10 +99,11 @@ export const Select = <T = unknown,>({
   });
 
   let currentGroupBy: string | undefined = undefined;
+
   return (
     <Combobox<T | null> immediate data-testid="select" disabled={disabled} value={value} onChange={onChange} {...rest}>
       {({ open }) => (
-        <div>
+        <div className={outerClassName}>
           <div
             className={cx("relative input input-bordered pr-1", className, {
               "w-full": !className?.includes("w-"),
