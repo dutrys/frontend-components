@@ -116,18 +116,6 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
     }
   }, [fetchNextPage, inView]);
 
-  useEffect(() => {
-    if (!isLoading) {
-      const selected = (data?.pages || [])
-        .map((d) => d?.data || [])
-        .flat()
-        .find((b: TModel["data"][0]) => optionValue(b) === value);
-      if (selected) {
-        onChange(selected);
-      }
-    }
-  }, [isLoading]);
-
   return (
     <Select<TModel["data"][0]>
       {...rest}

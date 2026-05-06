@@ -1136,17 +1136,6 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
             void fetchNextPage();
         }
     }, [fetchNextPage, inView]);
-    useEffect(() => {
-        if (!isLoading) {
-            const selected = (data?.pages || [])
-                .map((d) => d?.data || [])
-                .flat()
-                .find((b) => optionValue(b) === value);
-            if (selected) {
-                onChange(selected);
-            }
-        }
-    }, [isLoading]);
     return (jsx(Select, { ...rest, disabled: rest.disabled, onChange: (v) => {
             setValueModel(v);
             onChange(v);
