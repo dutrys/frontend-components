@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useFloating, size as floatingSize, autoUpdate } from "@floating-ui/react";
+import { useFloating, size as floatingSize, autoUpdate, flip } from "@floating-ui/react";
 import {
   Combobox,
   ComboboxButton,
@@ -86,6 +86,7 @@ export const Select = <T = unknown,>({
   const { refs, floatingStyles } = useFloating({
     placement: "bottom-start",
     middleware: [
+      flip(),
       floatingSize({
         apply({ rects, elements, availableHeight }) {
           Object.assign(elements.floating.style, {

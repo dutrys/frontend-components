@@ -1016,6 +1016,7 @@ const Select = ({ onChange, disabled, required, inputRef, options, name, portalE
     const { refs, floatingStyles } = useFloating({
         placement: "bottom-start",
         middleware: [
+            flip(),
             size({
                 apply({ rects, elements, availableHeight }) {
                     Object.assign(elements.floating.style, {
@@ -1095,6 +1096,10 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
             }
             return;
         }
+        else if (typeof value === "object") {
+            setValueModel(value);
+            onInitialChange?.(value);
+        }
         else if (!valueModel || value !== optionValue(valueModel)) {
             const valueM = data?.pages
                 ?.map((p) => p.data)
@@ -1117,7 +1122,7 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
                         onInitialChange?.(a);
                     }
                     else {
-                        console.error(`No model found for ${value}, but pagination filtering does not work in your backend api`, pager);
+                        console.error(`No model found for ${JSON.stringify(value)}, but pagination filtering does not work in your backend api`, pager);
                     }
                     return;
                 }

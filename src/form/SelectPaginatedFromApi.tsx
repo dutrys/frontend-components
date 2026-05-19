@@ -68,6 +68,9 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
         setValueModel(null);
       }
       return;
+    } else if (typeof value === "object") {
+      setValueModel(value);
+      onInitialChange?.(value);
     } else if (!valueModel || value !== optionValue(valueModel)) {
       const valueM = data?.pages
         ?.map((p) => p.data)
@@ -90,7 +93,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
             onInitialChange?.(a);
           } else {
             console.error(
-              `No model found for ${value}, but pagination filtering does not work in your backend api`,
+              `No model found for ${JSON.stringify(value)}, but pagination filtering does not work in your backend api`,
               pager,
             );
           }
