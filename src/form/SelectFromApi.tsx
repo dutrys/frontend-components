@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Select, SelectProps } from "./Select";
 import { LoadingComponent } from "../Loading";
+import { useTranslations } from "next-intl";
+import { useInView } from "react-intersection-observer";
 
 export type SelectFromApiProps<TModel = unknown> = {
   queryFn: () => Promise<TModel[]>;
@@ -13,6 +15,8 @@ export type SelectFromApiProps<TModel = unknown> = {
   filter?: (model: TModel, query: string) => boolean;
 } & Omit<SelectProps<TModel>, "onChange" | "optionLabel" | "value" | "options">;
 
+const ITEMS_PER_PAGE = 50;
+
 export const SelectFromApi = <TModel = unknown,>({
   name,
   value,
@@ -23,6 +27,7 @@ export const SelectFromApi = <TModel = unknown,>({
   filter,
   ...rest
 }: SelectFromApiProps<TModel>) => {
+  const t = useTranslations();
   const [query, setQuery] = useState("");
   const { isLoading, data, refetch } = useQuery<TModel[]>({
     enabled: !rest.disabled,
@@ -37,17 +42,34 @@ export const SelectFromApi = <TModel = unknown,>({
     refetchOnReconnect: false,
   });
 
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const hasNextPage = currentPage * ITEMS_PER_PAGE < (data?.length ?? 0);
+  const fetchNextPage = useCallback(() => {
+    if (hasNextPage) {
+      setCurrentPage((p) => p + 1);
+    }
+  }, [hasNextPage]);
+
+  const { ref, inView } = useInView({ threshold: 0.5 });
+
   useEffect(() => {
     void refetch();
   }, [refetch, query]);
 
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      setCurrentPage((p) => p + 1);
+    }
+  }, [inView, hasNextPage]);
+
+  const options = filter && data ? data.filter((model) => filter(model, query)) : (data ?? []);
   return (
     <Select<TModel>
       {...rest}
       disabled={rest.disabled}
       onChange={rest.onChange}
       optionLabel={optionLabel}
-      options={filter && data ? data.filter((model) => filter(model, query)) : (data ?? [])}
+      options={options.slice(0, currentPage * ITEMS_PER_PAGE)}
       onQueryChange={setQuery}
       afterInput={isLoading ? <LoadingComponent loadingClassName="size-4 text-primary" /> : undefined}
       hideNoItemsOption={isLoading}
@@ -59,7 +81,17 @@ export const SelectFromApi = <TModel = unknown,>({
       afterOptions={
         <>
           {rest.afterOptions}
-          {isLoading && <LoadingComponent className="my-2" />}
+          {isLoading ? (
+            <LoadingComponent className="my-2" />
+          ) : (
+            hasNextPage && (
+              <div className="text-center">
+                <button ref={ref} className="btn btn-ghost btn-xs my-1 btn-wide" onClick={() => fetchNextPage()}>
+                  {t("infiniteScroll.loadMore")}
+                </button>
+              </div>
+            )
+          )}
         </>
       }
     />

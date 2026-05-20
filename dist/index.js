@@ -1232,7 +1232,9 @@ const TimePicker = ({ className, value, onChange, placeholder, required, disable
 
 var styles$2 = {"desc":"Input-module_desc__3D3hV"};
 
+const ITEMS_PER_PAGE = 50;
 const SelectFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, filter, ...rest }) => {
+    const t = useTranslations();
     const [query, setQuery] = useState("");
     const { isLoading, data, refetch } = useQuery({
         enabled: !rest.disabled,
@@ -1246,12 +1248,26 @@ const SelectFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model) =
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
     });
+    const [currentPage, setCurrentPage] = useState(1);
+    const hasNextPage = currentPage * ITEMS_PER_PAGE < (data?.length ?? 0);
+    const fetchNextPage = useCallback(() => {
+        if (hasNextPage) {
+            setCurrentPage((p) => p + 1);
+        }
+    }, [hasNextPage]);
+    const { ref, inView } = useInView({ threshold: 0.5 });
     useEffect(() => {
         void refetch();
     }, [refetch, query]);
-    return (jsx(Select, { ...rest, disabled: rest.disabled, onChange: rest.onChange, optionLabel: optionLabel, options: filter && data ? data.filter((model) => filter(model, query)) : (data ?? []), onQueryChange: setQuery, afterInput: isLoading ? jsx(LoadingComponent, { loadingClassName: "size-4 text-primary" }) : undefined, hideNoItemsOption: isLoading, value: typeof value === "number" || typeof value === "string"
+    useEffect(() => {
+        if (inView && hasNextPage) {
+            setCurrentPage((p) => p + 1);
+        }
+    }, [inView, hasNextPage]);
+    const options = filter && data ? data.filter((model) => filter(model, query)) : (data ?? []);
+    return (jsx(Select, { ...rest, disabled: rest.disabled, onChange: rest.onChange, optionLabel: optionLabel, options: options.slice(0, currentPage * ITEMS_PER_PAGE), onQueryChange: setQuery, afterInput: isLoading ? jsx(LoadingComponent, { loadingClassName: "size-4 text-primary" }) : undefined, hideNoItemsOption: isLoading, value: typeof value === "number" || typeof value === "string"
             ? ((data || []).find((b) => optionValue(b) === value) ?? null)
-            : (value ?? null), afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isLoading && jsx(LoadingComponent, { className: "my-2" })] }) }));
+            : (value ?? null), afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isLoading ? (jsx(LoadingComponent, { className: "my-2" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }));
 };
 
 const TextFormField = ({ register, options, name, ref, ...rest }) => {
