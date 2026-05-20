@@ -5,7 +5,7 @@ import { SelectPaginatedFromApiProps } from "./SelectPaginatedFromApi";
 import { ResponseMeta } from "../utils/paginate";
 import { TimePickerProps } from "./TimePicker";
 import { NumericFormatProps } from "react-number-format/types/types";
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, RefObject } from "react";
 import { SelectFromApiProps } from "./SelectFromApi";
 import { Matcher } from "react-day-picker";
 export interface IInputProps<TName extends FieldPath<FieldValues>> {
@@ -37,7 +37,7 @@ export declare const TextField: <TFieldValues extends FieldValues = FieldValues,
     append?: React.ReactNode;
     prepend?: React.ReactNode;
     type?: string;
-    ref?: (input: HTMLInputElement | null) => void;
+    ref?: ((input: HTMLInputElement | null) => void) | RefObject<HTMLInputElement>;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const SelectFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ id, disabled, fieldSetClassName, label, register, required, name, error, desc, options, size, className, children, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
     children: React.ReactNode;

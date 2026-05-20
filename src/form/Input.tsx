@@ -20,7 +20,7 @@ import { TimePicker, TimePickerProps } from "./TimePicker";
 import styles from "./Input.module.css";
 import { NumericFormat } from "react-number-format";
 import { NumericFormatProps } from "react-number-format/types/types";
-import React, { ChangeEvent, useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, RefObject, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import { LoadingComponent } from "../Loading";
@@ -109,7 +109,7 @@ export const TextField = <
     append?: React.ReactNode;
     prepend?: React.ReactNode;
     type?: string;
-    ref?: (input: HTMLInputElement | null) => void;
+    ref?: ((input: HTMLInputElement | null) => void) | RefObject<HTMLInputElement>;
   }) => (
   <div className={fieldSetClassName}>
     <label className="floating-label">

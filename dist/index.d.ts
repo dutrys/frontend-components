@@ -1,6 +1,6 @@
 import * as react_jsx_runtime from 'react/jsx-runtime';
 import * as React from 'react';
-import React__default, { ReactNode, ChangeEvent } from 'react';
+import React__default, { ReactNode, ChangeEvent, RefObject } from 'react';
 import { Placement } from '@floating-ui/utils';
 import { ReadonlyURLSearchParams } from 'next/navigation';
 import * as react_hook_form from 'react-hook-form';
@@ -444,7 +444,7 @@ declare const TextField: <TFieldValues extends FieldValues = FieldValues, TName 
     append?: React__default.ReactNode;
     prepend?: React__default.ReactNode;
     type?: string;
-    ref?: (input: HTMLInputElement | null) => void;
+    ref?: ((input: HTMLInputElement | null) => void) | RefObject<HTMLInputElement>;
 }) => react_jsx_runtime.JSX.Element;
 declare const SelectFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ id, disabled, fieldSetClassName, label, register, required, name, error, desc, options, size, className, children, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
     children: React__default.ReactNode;
