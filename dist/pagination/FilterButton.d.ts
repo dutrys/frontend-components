@@ -32,6 +32,7 @@ export type FilterPaginationColumn<T extends {
     queryKey: ReadonlyArray<unknown>;
     queryFn: (query: PaginateQuery<unknown>) => Promise<T>;
     optionLabel: (model: T["data"][number]) => string;
+    idField?: string;
     groupBy?: (model: T["data"][number]) => string;
 };
 type FilterColumn<T extends {

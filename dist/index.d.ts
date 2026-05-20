@@ -291,14 +291,16 @@ declare const useFormSubmit: <T extends FieldValues, R = unknown>(formOptions?: 
     setError: UseFormSetError<T>;
     clearErrors: react_hook_form.UseFormClearErrors<T>;
     setValue: react_hook_form.UseFormSetValue<T>;
+    setValues: react_hook_form.UseFormSetValues<T>;
     trigger: react_hook_form.UseFormTrigger<T>;
     formState: react_hook_form.FormState<T>;
     resetField: react_hook_form.UseFormResetField<T>;
     reset: react_hook_form.UseFormReset<T>;
     unregister: react_hook_form.UseFormUnregister<T>;
-    control: react_hook_form.Control<T, any>;
+    control: react_hook_form.Control<T, any, T>;
     register: react_hook_form.UseFormRegister<T>;
     setFocus: react_hook_form.UseFormSetFocus<T>;
+    subscribe: react_hook_form.UseFormSubscribe<T>;
 };
 declare const ConfirmSave: ({ onConfirm }: {
     onConfirm: (success: boolean) => void;
@@ -742,6 +744,7 @@ type FilterPaginationColumn<T extends {
     queryKey: ReadonlyArray<unknown>;
     queryFn: (query: PaginateQuery<unknown>) => Promise<T>;
     optionLabel: (model: T["data"][number]) => string;
+    idField?: string;
     groupBy?: (model: T["data"][number]) => string;
 };
 type FilterColumn<T extends {

@@ -15,7 +15,7 @@ import { useTranslations } from 'next-intl';
 import { ChevronLeftIcon, ChevronRightIcon, FunnelIcon as FunnelIcon$1 } from '@heroicons/react/24/solid';
 import { Reorder, useMotionValue, useDragControls, animate, motion } from 'framer-motion';
 import { captureException } from '@sentry/nextjs';
-import { useForm, Controller, useWatch } from 'react-hook-form';
+import { useForm, Controller, useWatch, Watch } from 'react-hook-form';
 import { createPortal } from 'react-dom';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { format, isSameDay, isSameHour, parse, isValid, subDays, startOfMonth, subMonths, endOfMonth, startOfWeek, subWeeks, endOfWeek, parseJSON, differenceInSeconds, formatDistance, differenceInMinutes, differenceInDays, startOfDay, endOfDay } from 'date-fns';
@@ -2128,6 +2128,16 @@ const getDefaultValues = (searchParams, filter) => {
         const value = Array.isArray(v) ? v[0] : v;
         const type = filter[key.substring("filter.".length)]?.type;
         if (type === FilterType.PAGINATION) {
+            if (value.startsWith("$in:")) {
+                const vals = value.substring("$in:".length).split(",")
+                    .map((v) => parseInt(v, 10))
+                    .filter((v) => !isNaN(v));
+                defaultValues[key.substring("filter.".length)] = vals;
+                if (vals.length > 0) {
+                    filterIsActive = true;
+                }
+                continue;
+            }
             const val = parseInt(value, 10) || null;
             defaultValues[key.substring("filter.".length)] = val;
             if (val) {
@@ -2218,9 +2228,26 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
     const t = useTranslations();
     const searchParams = useSearchParams();
     const { filterIsActive, defaultValues } = getDefaultValues(searchParams, filter);
-    const { handleSubmit, register, setValue, control } = useForm({
+    const { handleSubmit, register, setValue, control, getValues } = useForm({
         defaultValues: async () => (onParseParams ? onParseParams(defaultValues) : defaultValues),
     });
+    const paginationValues = useRef({});
+    useEffect(() => {
+        for (const [key, f] of Object.entries(filter)) {
+            if (f.type === FilterType.PAGINATION) {
+                const ids = (Array.isArray(defaultValues[key]) ? defaultValues[key] : [defaultValues[key]]).filter((itemId) => itemId && !paginationValues.current[key]?.[itemId]);
+                if (ids.length > 0) {
+                    f.queryFn({ [`filter.${f.idField ?? "id"}`]: [`$in:${ids.join(",")}`] }).then((res) => {
+                        paginationValues.current[key] = paginationValues.current[key] ?? {};
+                        for (const item of res.data) {
+                            const id = item[f.idField ?? "id"];
+                            paginationValues.current[key][id.toString()] = f.optionLabel(item);
+                        }
+                    });
+                }
+            }
+        }
+    }, []);
     const watched = useWatch({ control });
     return (jsx(Popover, { placement: "bottom-end", popoverClassName: "w-55 sm:w-70 rounded-box!", showOnClick: true, showOnHover: false, borderColor: "border-gray-300", backgroundColor: "bg-gray-200", title: (ref, props) => (jsx("button", { ref: ref, ...props, className: cx("btn btn-xs", { "btn-accent": filterIsActive }, className), children: filterIsActive ? jsx(FunnelIcon$1, { className: "size-4" }) : jsx(FunnelIcon, { className: "size-4" }) })), children: jsxs("form", { className: "px-2 py-3 space-y-2", onSubmit: handleSubmit((v) => {
                 const params = { page: "" };
@@ -2273,7 +2300,12 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                         }
                     }
                     else if (filter[key].type === FilterType.PAGINATION) {
-                        params[`filter.${key}`] = val?.toString() ?? "";
+                        if (Array.isArray(val)) {
+                            params[`filter.${key}`] = `$in:${val.join(",")}`;
+                        }
+                        else {
+                            params[`filter.${key}`] = val?.toString() ?? "";
+                        }
                     }
                     else {
                         if (!val || val === "") {
@@ -2292,7 +2324,33 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                                         ? { after: watched[key][1] }
                                         : undefined, size: "sm" }), jsx(DateFormField, { useDate: true, className: "join-item", control: control, label: t("general.toWithArgs", { value: v.label.toLowerCase() }), name: `${key}.1`, matcher: Array.isArray(watched[key]) && watched[key][0] instanceof Date
                                         ? { before: watched[key][0] }
-                                        : undefined, size: "sm" })] })), v.type === FilterType.PAGINATION && (jsx(SelectPaginatedFromApiFormField, { queryFn: v.queryFn, queryKey: v.queryKey, optionLabel: v.optionLabel, groupBy: v.groupBy, portalEnabled: true, control: control, label: v.label, name: key, size: "sm" })), v.type === FilterType.BOOLEAN && (jsxs("div", { className: "join w-full", children: [jsx("button", { type: "button", className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === true }), onClick: () => (watched[key] === true ? setValue(key, undefined) : setValue(key, true)), children: v.label.toUpperCase() }), jsx("button", { onClick: () => (watched[key] === false ? setValue(key, undefined) : setValue(key, false)), className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === false }), type: "button", children: `${t("general.no").toUpperCase()} ${v.label.toUpperCase()}` })] })), v.type === FilterType.OPTIONS && (jsx("div", { className: cx("join w-full", { "join-vertical": Object.entries(v.options ?? {}).length > 2 }), children: Object.entries(v.options ?? {}).map(([value, label]) => (jsx("button", { className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === value }), type: "button", onClick: () => (watched[key] === value ? setValue(key, undefined) : setValue(key, value)), children: label }, value))) }))] }, `${key}-${i}`))), jsx(SaveButton, { className: "btn-sm w-full", children: t("general.filter") })] }) }));
+                                        : undefined, size: "sm" })] })), v.type === FilterType.PAGINATION && (jsx(Watch, { control: control, name: key, render: (keyVal) => (jsxs(Fragment, { children: [jsx(SelectPaginatedFromApiField, { value: null, queryFn: v.queryFn, queryKey: v.queryKey, optionLabel: v.optionLabel, optionValue: v.idField ? (c) => c[v.idField] : undefined, groupBy: v.groupBy, portalEnabled: true, label: v.label, name: key, size: "sm", onChange: (val) => {
+                                            if (typeof keyVal === "undefined" || keyVal === null) {
+                                                keyVal = [];
+                                            }
+                                            const id = val[v.idField ?? "id"];
+                                            paginationValues.current[key] = paginationValues.current[key] ?? {};
+                                            if (!paginationValues.current[key][id.toString()]) {
+                                                paginationValues.current[key][id.toString()] = v.optionLabel(val);
+                                            }
+                                            if (Array.isArray(keyVal)) {
+                                                const b = [...keyVal, id];
+                                                setValue(key, b);
+                                                return;
+                                            }
+                                            setValue(key, id);
+                                        } }), Array.isArray(keyVal) &&
+                                        keyVal.length > 0 &&
+                                        keyVal.map((val, i) => (jsxs("span", { className: "badge badge-xs", children: [paginationValues.current[key]?.[val] ?? val, jsx("button", { type: "button", onClick: () => {
+                                                        if (Array.isArray(keyVal)) {
+                                                            const b = [...keyVal];
+                                                            b.splice(i, 1);
+                                                            setValue(key, b);
+                                                        }
+                                                        else {
+                                                            setValue(key, undefined);
+                                                        }
+                                                    }, children: jsx(XMarkIcon, { className: "size-3" }) })] }, JSON.stringify(val) + "_" + i)))] })) })), v.type === FilterType.BOOLEAN && (jsxs("div", { className: "join w-full", children: [jsx("button", { type: "button", className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === true }), onClick: () => (watched[key] === true ? setValue(key, undefined) : setValue(key, true)), children: v.label.toUpperCase() }), jsx("button", { onClick: () => (watched[key] === false ? setValue(key, undefined) : setValue(key, false)), className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === false }), type: "button", children: `${t("general.no").toUpperCase()} ${v.label.toUpperCase()}` })] })), v.type === FilterType.OPTIONS && (jsx("div", { className: cx("join w-full", { "join-vertical": Object.entries(v.options ?? {}).length > 2 }), children: Object.entries(v.options ?? {}).map(([value, label]) => (jsx("button", { className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === value }), type: "button", onClick: () => (watched[key] === value ? setValue(key, undefined) : setValue(key, value)), children: label }, value))) }))] }, `${key}-${i}`))), jsx(SaveButton, { className: "btn-sm w-full", children: t("general.filter") })] }) }));
 };
 
 export { AlertErrors, Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Select, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };

@@ -52,14 +52,16 @@ export declare const useFormSubmit: <T extends FieldValues, R = unknown>(formOpt
     setError: UseFormSetError<T>;
     clearErrors: import("react-hook-form").UseFormClearErrors<T>;
     setValue: import("react-hook-form").UseFormSetValue<T>;
+    setValues: import("react-hook-form").UseFormSetValues<T>;
     trigger: import("react-hook-form").UseFormTrigger<T>;
     formState: import("react-hook-form").FormState<T>;
     resetField: import("react-hook-form").UseFormResetField<T>;
     reset: import("react-hook-form").UseFormReset<T>;
     unregister: import("react-hook-form").UseFormUnregister<T>;
-    control: import("react-hook-form").Control<T, any>;
+    control: import("react-hook-form").Control<T, any, T>;
     register: import("react-hook-form").UseFormRegister<T>;
     setFocus: import("react-hook-form").UseFormSetFocus<T>;
+    subscribe: import("react-hook-form").UseFormSubscribe<T>;
 };
 export declare const ConfirmSave: ({ onConfirm }: {
     onConfirm: (success: boolean) => void;

@@ -1,8 +1,8 @@
-import React from "react";
-import { FunnelIcon } from "@heroicons/react/24/outline";
+import React, { useEffect, useRef } from "react";
+import { FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { FunnelIcon as FunnelSolidIcon } from "@heroicons/react/24/solid";
 import cx from "classnames";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch, Watch } from "react-hook-form";
 import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { useTranslations } from "next-intl";
@@ -16,6 +16,7 @@ import {
   DateFormField,
   NumberFormField,
   SaveButton,
+  SelectPaginatedFromApiField,
   SelectPaginatedFromApiFormField,
   TextFormField,
 } from "../form/Input";
@@ -43,6 +44,17 @@ const getDefaultValues = (
     const value = Array.isArray(v) ? v[0] : v;
     const type = filter[key.substring("filter.".length)]?.type;
     if (type === FilterType.PAGINATION) {
+      if (value.startsWith("$in:")) {
+        const vals: number[] = (value.substring("$in:".length).split(",") as string[])
+          .map((v) => parseInt(v, 10))
+          .filter((v) => !isNaN(v));
+        defaultValues[key.substring("filter.".length)] = vals;
+        if (vals.length > 0) {
+          filterIsActive = true;
+        }
+        continue;
+      }
+
       const val = parseInt(value, 10) || null;
       defaultValues[key.substring("filter.".length)] = val;
       if (val) {
@@ -128,6 +140,7 @@ export type FilterPaginationColumn<T extends { data: { id: number }[]; meta: Res
   queryKey: ReadonlyArray<unknown>;
   queryFn: (query: PaginateQuery<unknown>) => Promise<T>;
   optionLabel: (model: T["data"][number]) => string;
+  idField?: string;
   groupBy?: (model: T["data"][number]) => string;
 };
 type FilterColumn<T extends { data: { id: number }[]; meta: ResponseMeta }> =
@@ -152,9 +165,31 @@ export const FilterButton = ({
   const searchParams = useSearchParams();
   const { filterIsActive, defaultValues } = getDefaultValues(searchParams, filter);
 
-  const { handleSubmit, register, setValue, control } = useForm<Record<string, unknown>>({
+  const { handleSubmit, register, setValue, control, getValues } = useForm<Record<string, unknown>>({
     defaultValues: async () => (onParseParams ? onParseParams(defaultValues) : defaultValues),
   });
+
+  const paginationValues = useRef<Record<string, Record<string, string>>>({});
+
+  useEffect(() => {
+    for (const [key, f] of Object.entries(filter)) {
+      if (f.type === FilterType.PAGINATION) {
+        const ids: (number | string)[] = (
+          Array.isArray(defaultValues[key]) ? defaultValues[key] : [defaultValues[key]]
+        ).filter((itemId) => itemId && !paginationValues.current[key]?.[itemId]);
+
+        if (ids.length > 0) {
+          f.queryFn({ [`filter.${f.idField ?? "id"}`]: [`$in:${ids.join(",")}`] }).then((res) => {
+            paginationValues.current[key] = paginationValues.current[key] ?? {};
+            for (const item of res.data) {
+              const id = item[f.idField ?? "id"];
+              paginationValues.current[key][id.toString()] = f.optionLabel(item);
+            }
+          });
+        }
+      }
+    }
+  }, []);
 
   const watched = useWatch({ control });
 
@@ -217,7 +252,11 @@ export const FilterButton = ({
                   }
                 }
               } else if (filter[key].type === FilterType.PAGINATION) {
-                params[`filter.${key}`] = val?.toString() ?? "";
+                if (Array.isArray(val)) {
+                  params[`filter.${key}`] = `$in:${val.join(",")}`;
+                } else {
+                  params[`filter.${key}`] = val?.toString() ?? "";
+                }
               } else {
                 if (!val || val === "") {
                   params[`filter.${key}`] = "";
@@ -289,16 +328,65 @@ export const FilterButton = ({
               </div>
             )}
             {v.type === FilterType.PAGINATION && (
-              <SelectPaginatedFromApiFormField
-                queryFn={v.queryFn}
-                queryKey={v.queryKey}
-                optionLabel={v.optionLabel}
-                groupBy={v.groupBy}
-                portalEnabled
+              <Watch
                 control={control}
-                label={v.label}
                 name={key}
-                size="sm"
+                render={(keyVal) => (
+                  <>
+                    <SelectPaginatedFromApiField
+                      value={null}
+                      queryFn={v.queryFn}
+                      queryKey={v.queryKey}
+                      optionLabel={v.optionLabel}
+                      optionValue={v.idField ? (c) => c[v.idField!] : undefined}
+                      groupBy={v.groupBy}
+                      portalEnabled
+                      label={v.label}
+                      name={key}
+                      size="sm"
+                      onChange={(val) => {
+                        if (typeof keyVal === "undefined" || keyVal === null) {
+                          keyVal = [];
+                        }
+
+                        const id: number | string = val[v.idField ?? "id"];
+                        paginationValues.current[key] = paginationValues.current[key] ?? {};
+                        if (!paginationValues.current[key][id.toString()]) {
+                          paginationValues.current[key][id.toString()] = v.optionLabel(val);
+                        }
+                        if (Array.isArray(keyVal)) {
+                          const b = [...keyVal, id];
+                          setValue(key, b);
+                          return;
+                        }
+
+                        setValue(key, id);
+                      }}
+                    />
+                    {Array.isArray(keyVal) &&
+                      keyVal.length > 0 &&
+                      keyVal.map((val, i) => (
+                        <span className="badge badge-xs" key={JSON.stringify(val) + "_" + i}>
+                          {paginationValues.current[key]?.[val] ?? val}
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (Array.isArray(keyVal)) {
+                                const b = [...keyVal];
+                                b.splice(i, 1);
+                                setValue(key, b);
+                              } else {
+                                setValue(key, undefined);
+                              }
+                            }}
+                          >
+                            <XMarkIcon className="size-3" />
+                          </button>
+                        </span>
+                      ))}
+                  </>
+                )}
               />
             )}
             {v.type === FilterType.BOOLEAN && (
