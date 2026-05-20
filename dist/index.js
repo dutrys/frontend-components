@@ -1249,7 +1249,8 @@ const SelectFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model) =
         refetchOnReconnect: false,
     });
     const [currentPage, setCurrentPage] = useState(1);
-    const hasNextPage = currentPage * ITEMS_PER_PAGE < (data?.length ?? 0);
+    const options = filter && data ? data.filter((model) => filter(model, query)) : (data ?? []);
+    const hasNextPage = currentPage * ITEMS_PER_PAGE < options.length;
     const fetchNextPage = useCallback(() => {
         if (hasNextPage) {
             setCurrentPage((p) => p + 1);
@@ -1264,7 +1265,6 @@ const SelectFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model) =
             setCurrentPage((p) => p + 1);
         }
     }, [inView, hasNextPage]);
-    const options = filter && data ? data.filter((model) => filter(model, query)) : (data ?? []);
     return (jsx(Select, { ...rest, disabled: rest.disabled, onChange: rest.onChange, optionLabel: optionLabel, options: options.slice(0, currentPage * ITEMS_PER_PAGE), onQueryChange: setQuery, afterInput: isLoading ? jsx(LoadingComponent, { loadingClassName: "size-4 text-primary" }) : undefined, hideNoItemsOption: isLoading, value: typeof value === "number" || typeof value === "string"
             ? ((data || []).find((b) => optionValue(b) === value) ?? null)
             : (value ?? null), afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isLoading ? (jsx(LoadingComponent, { className: "my-2" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }));

@@ -43,7 +43,8 @@ export const SelectFromApi = <TModel = unknown,>({
   });
 
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const hasNextPage = currentPage * ITEMS_PER_PAGE < (data?.length ?? 0);
+  const options = filter && data ? data.filter((model) => filter(model, query)) : (data ?? []);
+  const hasNextPage = currentPage * ITEMS_PER_PAGE < options.length;
   const fetchNextPage = useCallback(() => {
     if (hasNextPage) {
       setCurrentPage((p) => p + 1);
@@ -62,7 +63,6 @@ export const SelectFromApi = <TModel = unknown,>({
     }
   }, [inView, hasNextPage]);
 
-  const options = filter && data ? data.filter((model) => filter(model, query)) : (data ?? []);
   return (
     <Select<TModel>
       {...rest}
