@@ -253,7 +253,11 @@ export const FilterButton = ({
                 }
               } else if (filter[key].type === FilterType.PAGINATION) {
                 if (Array.isArray(val)) {
-                  params[`filter.${key}`] = `$in:${val.join(",")}`;
+                  if (val.length === 0) {
+                    params[`filter.${key}`] = "";
+                  } else {
+                    params[`filter.${key}`] = `$in:${val.join(",")}`;
+                  }
                 } else {
                   params[`filter.${key}`] = val?.toString() ?? "";
                 }

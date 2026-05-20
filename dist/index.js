@@ -2301,7 +2301,12 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                     }
                     else if (filter[key].type === FilterType.PAGINATION) {
                         if (Array.isArray(val)) {
-                            params[`filter.${key}`] = `$in:${val.join(",")}`;
+                            if (val.length === 0) {
+                                params[`filter.${key}`] = "";
+                            }
+                            else {
+                                params[`filter.${key}`] = `$in:${val.join(",")}`;
+                            }
                         }
                         else {
                             params[`filter.${key}`] = val?.toString() ?? "";
