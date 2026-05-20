@@ -109,7 +109,7 @@ export const TextField = <
     append?: React.ReactNode;
     prepend?: React.ReactNode;
     type?: string;
-    ref?: ((input: HTMLInputElement | null) => void) | RefObject<HTMLInputElement>;
+    ref?: ((input: HTMLInputElement | null) => void) | RefObject<HTMLInputElement | null>;
   }) => (
   <div className={fieldSetClassName}>
     <label className="floating-label">

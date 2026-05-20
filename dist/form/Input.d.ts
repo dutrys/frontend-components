@@ -37,7 +37,7 @@ export declare const TextField: <TFieldValues extends FieldValues = FieldValues,
     append?: React.ReactNode;
     prepend?: React.ReactNode;
     type?: string;
-    ref?: ((input: HTMLInputElement | null) => void) | RefObject<HTMLInputElement>;
+    ref?: ((input: HTMLInputElement | null) => void) | RefObject<HTMLInputElement | null>;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const SelectFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ id, disabled, fieldSetClassName, label, register, required, name, error, desc, options, size, className, children, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
     children: React.ReactNode;

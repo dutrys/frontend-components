@@ -444,7 +444,7 @@ declare const TextField: <TFieldValues extends FieldValues = FieldValues, TName 
     append?: React__default.ReactNode;
     prepend?: React__default.ReactNode;
     type?: string;
-    ref?: ((input: HTMLInputElement | null) => void) | RefObject<HTMLInputElement>;
+    ref?: ((input: HTMLInputElement | null) => void) | RefObject<HTMLInputElement | null>;
 }) => react_jsx_runtime.JSX.Element;
 declare const SelectFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ id, disabled, fieldSetClassName, label, register, required, name, error, desc, options, size, className, children, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
     children: React__default.ReactNode;
