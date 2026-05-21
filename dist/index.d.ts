@@ -427,7 +427,7 @@ interface IInputProps<TName extends FieldPath<FieldValues>> {
     fieldSetClassName?: string;
     disabled?: boolean;
     desc?: React__default.ReactNode;
-    size?: "xs" | "sm";
+    size?: "xs" | "sm" | "lg";
 }
 interface IInputRegisterOnlyProps<TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>> {
     options?: Omit<RegisterOptions<TFieldValues, TName>, "required" | "disabled">;

@@ -18,7 +18,6 @@
     "allowSyntheticDefaultImports": true,
     "incremental": true,
     "sourceMap": true,
-    "baseUrl": ".",
     "plugins": [
       {
         "name": "next"

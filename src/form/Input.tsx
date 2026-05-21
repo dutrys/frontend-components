@@ -37,7 +37,7 @@ export interface IInputProps<TName extends FieldPath<FieldValues>> {
   fieldSetClassName?: string;
   disabled?: boolean;
   desc?: React.ReactNode;
-  size?: "xs" | "sm";
+  size?: "xs" | "sm" | "lg";
 }
 
 interface IInputRegisterOnlyProps<
