@@ -525,7 +525,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                           }
 
                           const translatedValue = column.translate
-                            ? t(`${column.translate}.${model[column.name]}`)
+                            ? t(`${column.translate}.${model[column.name]}` as any)
                             : (model[column.name] as string);
                           if (column.type === "code") {
                             return (
