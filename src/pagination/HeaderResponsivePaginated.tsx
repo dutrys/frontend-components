@@ -60,7 +60,7 @@ export const HeaderResponsivePaginated = ({
                       />
                       <li className="menu-disabled"></li>
                       <li className="menu-disabled">
-                        <span>{t("pagination.filters")}</span>
+                        <span>{t("pagination.filters" as any)}</span>
                       </li>
                     </>
                   );

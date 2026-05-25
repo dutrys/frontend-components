@@ -31,7 +31,7 @@
     "classnames": "*",
     "date-fns": "*",
     "date-fns-tz": "*",
-    "framer-motion": "*",
+    "framer-motion": "^12.40.0",
     "next-intl": "*",
     "next-nprogress-bar": "^3.0.0",
     "react": "^19.0.0",

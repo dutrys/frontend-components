@@ -733,9 +733,9 @@ const ColumnItem = ({ item, onChange, }) => {
     const boxShadow = useRaisedShadow(y);
     const dragControls = useDragControls();
     const t = useTranslations();
-    return (jsxs(Reorder.Item, { value: item, onChange: onChange, style: { boxShadow, y }, dragListener: false, dragControls: dragControls, className: "flex justify-between items-center pl-2 bg-base-100 rounded-xl border border-border shadow-sm", children: [jsx("div", { className: "grow-0", children: jsxs("label", { children: [jsx("input", { type: "checkbox", checked: item.enabled, onChange: onChange, className: "checkbox checkbox-xs mr-2" }), isActionColumn(item.column) ? t("pagination.configuration.actionColumn") : item.column.title] }) }), jsx(ReorderHandle, { dragControls: dragControls })] }));
+    return (jsx("li", { children: jsxs(Reorder.Item, { as: "input", value: item, onChange: onChange, style: { boxShadow, y }, dragListener: false, dragControls: dragControls, className: "flex justify-between items-center pl-2 bg-base-100 rounded-xl border border-border shadow-sm", children: [jsx("div", { className: "grow-0", children: jsxs("label", { children: [jsx("input", { type: "checkbox", checked: item.enabled, onChange: onChange, className: "checkbox checkbox-xs mr-2" }), isActionColumn(item.column) ? t("pagination.configuration.actionColumn") : item.column.title] }) }), jsx(ReorderHandle, { dragControls: dragControls })] }) }));
 };
-const OrderColumns = ({ name, items, setOrder, }) => (jsx(Reorder.Group, { axis: "y", values: items, onReorder: setOrder, className: "space-y-2 w-full max-w-2xl mx-auto", children: items.map((column, i) => (jsx(ColumnItem, { onChange: (e) => {
+const OrderColumns = ({ name, items, setOrder, }) => (jsx(Reorder.Group, { as: "ul", axis: "y", values: items, onReorder: setOrder, className: "space-y-2 w-full max-w-2xl mx-auto", children: items.map((column, i) => (jsx(ColumnItem, { onChange: (e) => {
             const itemCopy = [...items];
             const col = itemCopy.find((c) => c === column);
             if (col) {

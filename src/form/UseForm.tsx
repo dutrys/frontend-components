@@ -24,8 +24,8 @@ export const AlertErrors = ({
 
   if (translateId || forceKey) {
     errorsArr.forEach(([key, val], index) => {
-      if (translateId && t.has(`${translateId}.${key}`)) {
-        errorsArr[index][1] = val.map((s) => `${t(`${translateId}.${key}`)}: ${s}`);
+      if (translateId && t.has(`${translateId}.${key}` as any)) {
+        errorsArr[index][1] = val.map((s) => `${t(`${translateId}.${key}` as any)}: ${s}`);
       } else if (forceKey) {
         errorsArr[index][1] = val.map((s) => `${key}: ${s}`);
       }
@@ -69,8 +69,8 @@ export const GeneralErrorsInToast = <T extends Record<string, unknown>>({
             <React.Fragment key={key}>
               {error.map((error) => (
                 <li key={error}>
-                  {translateId && t.has(`${translateId}.${key}`) && (
-                    <span className={className || "text-red-800"}>{t(`${translateId}.${key}`)}: </span>
+                  {translateId && t.has(`${translateId}.${key}` as any) && (
+                    <span className={className || "text-red-800"}>{t(`${translateId}.${key}` as any)}: </span>
                   )}
                   <span className={className || "text-red-500"}>{error}</span>
                 </li>

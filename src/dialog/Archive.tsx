@@ -14,7 +14,7 @@ const Error = ({ key, error, translationId }: { key: string; error: string; tran
   const t = useTranslations();
   return (
     <span>
-      {translationId && t.has(`${translationId}.${key}`) && `${t(`${translationId}.${key}`)}: `}
+      {translationId && t.has(`${translationId}.${key}` as any) && `${t(`${translationId}.${key}` as any)}: `}
       {error}
     </span>
   );
@@ -98,20 +98,20 @@ export const Archive = <T,>({
     });
 
     void toast.promise(promise, {
-      loading: t("general.deleting"),
-      success: t("general.deleted"),
+      loading: t("general.deleting" as any),
+      success: t("general.deleted" as any),
       error: (response) => {
         if (response) {
           return <GeneralErrorsInToast errors={response.errors} translateId={translateId} className="text-gray-500" />;
         }
-        return t("general.error");
+        return t("general.error" as any);
       },
     });
   };
 
   return (
     <ParallelDialog dialogButtons={dialogButtons} onClosed={onClose} title={title}>
-      <Hotkeys id="archive" hotKeys={[{ key: "Enter", description: t("archive.yes"), callback: doArchive }]} />
+      <Hotkeys id="archive" hotKeys={[{ key: "Enter", description: t("archive.yes" as any), callback: doArchive }]} />
       {errors && (
         <div className="alert alert-error mb-4">
           {formatErrors ? formatErrors(errors) : <FormatErrors translationId={translateId} errors={errors.errors} />}
@@ -129,14 +129,14 @@ export const Archive = <T,>({
             disabled={isLoading}
             data-testid="button-archive"
           >
-            {yes ?? t("archive.yes")}
+            {yes ?? t("archive.yes" as any)}
           </button>{" "}
           <button
             className="btn uppercase"
             onClick={() => (onClose ? onClose() : router.back())}
             data-testid="button-cancel"
           >
-            {no ?? t("archive.no")}
+            {no ?? t("archive.no" as any)}
           </button>
         </div>
       </div>

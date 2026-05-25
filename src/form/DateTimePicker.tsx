@@ -162,7 +162,7 @@ export const DateTimePicker = ({
                 }}
               />
               <div>
-                <div className="text-white text-center pt-5 pb-4 text-xs">{t("datePicker.time")}:</div>
+                <div className="text-white text-center pt-5 pb-4 text-xs">{t("datePicker.time" as any)}:</div>
                 <div className="flex">
                   <ul className="h-53 mx-1 overflow-y-scroll" ref={hoursRef}>
                     {new Array(24).fill(0).map((_, hour) => (
@@ -218,7 +218,7 @@ export const DateTimePicker = ({
                   close();
                 }}
               >
-                {t("datePicker.ok")}
+                {t("datePicker.ok" as any)}
               </button>
             </div>
           </>

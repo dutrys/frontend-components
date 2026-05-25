@@ -333,22 +333,25 @@ const ColumnItem = ({
   const t = useTranslations();
 
   return (
-    <Reorder.Item
-      value={item}
-      onChange={onChange}
-      style={{ boxShadow, y }}
-      dragListener={false}
-      dragControls={dragControls}
-      className="flex justify-between items-center pl-2 bg-base-100 rounded-xl border border-border shadow-sm"
-    >
-      <div className="grow-0">
-        <label>
-          <input type="checkbox" checked={item.enabled} onChange={onChange} className="checkbox checkbox-xs mr-2" />
-          {isActionColumn(item.column) ? t("pagination.configuration.actionColumn") : item.column.title}
-        </label>
-      </div>
-      <ReorderHandle dragControls={dragControls} />
-    </Reorder.Item>
+    <li>
+      <Reorder.Item
+        as="input"
+        value={item}
+        onChange={onChange}
+        style={{ boxShadow, y }}
+        dragListener={false}
+        dragControls={dragControls}
+        className="flex justify-between items-center pl-2 bg-base-100 rounded-xl border border-border shadow-sm"
+      >
+        <div className="grow-0">
+          <label>
+            <input type="checkbox" checked={item.enabled} onChange={onChange} className="checkbox checkbox-xs mr-2" />
+            {isActionColumn(item.column) ? t("pagination.configuration.actionColumn") : item.column.title}
+          </label>
+        </div>
+        <ReorderHandle dragControls={dragControls} />
+      </Reorder.Item>
+    </li>
   );
 };
 
@@ -361,7 +364,7 @@ export const OrderColumns = ({
   items: { column: ColumnType<any>; enabled: boolean; name: string }[];
   setOrder: (columns: { column: ColumnType<any>; enabled: boolean; name: string }[]) => void;
 }) => (
-  <Reorder.Group axis="y" values={items} onReorder={setOrder} className="space-y-2 w-full max-w-2xl mx-auto">
+  <Reorder.Group as="ul" axis="y" values={items} onReorder={setOrder} className="space-y-2 w-full max-w-2xl mx-auto">
     {items.map((column, i) => (
       <ColumnItem
         onChange={(e) => {

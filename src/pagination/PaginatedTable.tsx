@@ -201,7 +201,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
       key: "n",
       metaKey: true,
       ctrlKey: true,
-      description: t("pagination.addNew"),
+      description: t("pagination.addNew" as any),
       callback: () => {
         router.push(addLocale(addNew.replace(/^\/(en|lt)\//, "/"), params.locale as string));
       },
