@@ -41,7 +41,10 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
     enabled: !rest.disabled,
     queryKey: [
       ...queryKey,
-      { disabled: rest.disabled, fetchSelected: value && typeof valueModel },
+      JSON.stringify({
+        disabled: rest.disabled,
+        fetchSelected: value && typeof value === "object" ? optionValue(value) : undefined,
+      }),
       query.length < searchFromChars ? "" : query,
     ],
     initialPageParam: 1,
@@ -61,6 +64,12 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
+
+  useEffect(() => {
+    if (!value) {
+      setQuery("");
+    }
+  }, [value]);
 
   useEffect(() => {
     if (!value) {

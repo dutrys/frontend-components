@@ -1070,7 +1070,10 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
         enabled: !rest.disabled,
         queryKey: [
             ...queryKey,
-            { disabled: rest.disabled, fetchSelected: value && typeof valueModel },
+            JSON.stringify({
+                disabled: rest.disabled,
+                fetchSelected: value && typeof value === "object" ? optionValue(value) : undefined,
+            }),
             query.length < searchFromChars ? "" : query,
         ],
         initialPageParam: 1,
@@ -1089,6 +1092,11 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
     });
+    useEffect(() => {
+        if (!value) {
+            setQuery("");
+        }
+    }, [value]);
     useEffect(() => {
         if (!value) {
             if (valueModel) {
