@@ -95,11 +95,13 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
           captureException(`Expected 1 model, but pagination filtering does not work in your backend api`, {
             extra: { pager },
           });
-          const a = pager.data.find((v) => optionValue(v)?.toString() !== `${value}`);
-          if (a) {
-            console.error(`Found model ${optionLabel(a)}, but pagination filtering does not work in your backend api`);
-            setValueModel(a);
-            onInitialChange?.(a);
+          const item = pager.data.find((v) => optionValue(v)?.toString() === `${value}`);
+          if (item) {
+            console.error(
+              `Found model #${optionValue(item)}. ${optionLabel(item)}, but pagination filtering does not work in your backend api`,
+            );
+            setValueModel(item);
+            onInitialChange?.(item);
           } else {
             console.error(
               `No model found for ${JSON.stringify(value)}, but pagination filtering does not work in your backend api`,
