@@ -424,6 +424,10 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                         onClick={
                           rowClickHref
                             ? (event) => {
+                                const selection = window.getSelection();
+                                if (selection && selection.toString().length > 0) {
+                                  return;
+                                }
                                 const target = event.nativeEvent.target as HTMLElement;
                                 if (
                                   target.closest("a") ||

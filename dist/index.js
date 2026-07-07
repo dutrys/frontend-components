@@ -1604,6 +1604,10 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                         return (jsx(Component, { className: `${styles$4.thead} text-xs`, children: column.title }, column.title.toString()));
                                                     })] }) }), jsx("tbody", { children: pagination.data.map((model, o) => (jsxs("tr", { "data-testid": `table-row-${o}`, onClick: rowClickHref
                                                     ? (event) => {
+                                                        const selection = window.getSelection();
+                                                        if (selection && selection.toString().length > 0) {
+                                                            return;
+                                                        }
                                                         const target = event.nativeEvent.target;
                                                         if (target.closest("a") ||
                                                             target.closest(".action-cell") ||
