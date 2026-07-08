@@ -90,7 +90,7 @@ type ResponseMeta = {
     totalItems: number;
     currentPage: number;
     totalPages: number;
-    sortBy: string[][];
+    sortBy?: string[][];
 };
 declare const getPreviousPageParam: <T extends {
     meta: ResponseMeta;

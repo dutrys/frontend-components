@@ -12,7 +12,7 @@ export type ResponseMeta = {
     totalItems: number;
     currentPage: number;
     totalPages: number;
-    sortBy: string[][];
+    sortBy?: string[][];
 };
 export declare const getPreviousPageParam: <T extends {
     meta: ResponseMeta;
