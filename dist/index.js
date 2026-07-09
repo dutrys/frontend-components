@@ -2019,23 +2019,22 @@ const FilterOptions = ({ options, isVisible, }) => {
         return true;
     };
     const isActiveArr = useMemo(() => options.map((o) => isActive(o)), [searchParams, options]);
+    const getHref = (i, option) => {
+        if (isActiveArr[i]) {
+            const v = {};
+            Object.keys(option.value).map((key) => {
+                v[key] = [];
+            });
+            return setPartialParams({ page: "", ...v }, searchParams);
+        }
+        else {
+            return setPartialParams({ page: "", ...option.value }, searchParams);
+        }
+    };
     if (isVisible) {
-        return (jsx("div", { className: "join", children: options.map((option, i) => {
-                let href;
-                if (isActiveArr[i]) {
-                    const v = {};
-                    Object.keys(option.value).map((key) => {
-                        v[key] = [];
-                    });
-                    href = setPartialParams({ page: "", ...v }, searchParams);
-                }
-                else {
-                    href = setPartialParams({ page: "", ...option.value }, searchParams);
-                }
-                return (jsx(Link$1, { href: href, className: cx("btn btn-xs uppercase join-item", { "btn-neutral": isActive(option) }), children: option.label }, option.label));
-            }) }));
+        return (jsx("div", { className: "join", children: options.map((option, i) => (jsx(Link$1, { href: getHref(i, option), className: cx("btn btn-xs uppercase join-item", { "btn-neutral": isActive(option) }), children: option.label }, option.label))) }));
     }
-    return options.map((option) => (jsx("li", { children: jsx(Link$1, { className: cx({ "bg-base-300/50 font-bold hover:bg-base-300": isActive(option) }), href: setPartialParams({ page: "", ...option.value }, searchParams), children: option.label }) }, option.label)));
+    return options.map((option, i) => (jsx("li", { children: jsx(Link$1, { className: cx({ "bg-base-300/50 font-bold hover:bg-base-300": isActive(option) }), href: getHref(i, option), children: option.label }) }, option.label)));
 };
 const getOptionValue = (value, values, { equals } = {}) => {
     let optionValue = "";

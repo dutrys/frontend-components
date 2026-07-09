@@ -489,39 +489,40 @@ export const FilterOptions = ({
 
   const isActiveArr = useMemo(() => options.map((o) => isActive(o)), [searchParams, options]);
 
+  const getHref = (i: number, option: { label: string; value: Record<string, string[]> }) => {
+    let href: string;
+    if (isActiveArr[i]) {
+      const v: Record<string, []> = {};
+      Object.keys(option.value).map((key) => {
+        v[key] = [];
+      });
+      return setPartialParams({ page: "", ...v }, searchParams);
+    } else {
+      return setPartialParams({ page: "", ...option.value }, searchParams);
+    }
+  };
+
   if (isVisible) {
     return (
       <div className="join">
-        {options.map((option, i) => {
-          let href: string;
-          if (isActiveArr[i]) {
-            const v: Record<string, []> = {};
-            Object.keys(option.value).map((key) => {
-              v[key] = [];
-            });
-            href = setPartialParams({ page: "", ...v }, searchParams);
-          } else {
-            href = setPartialParams({ page: "", ...option.value }, searchParams);
-          }
-          return (
-            <Link
-              key={option.label}
-              href={href}
-              className={cx("btn btn-xs uppercase join-item", { "btn-neutral": isActive(option) })}
-            >
-              {option.label}
-            </Link>
-          );
-        })}
+        {options.map((option, i) => (
+          <Link
+            key={option.label}
+            href={getHref(i, option)}
+            className={cx("btn btn-xs uppercase join-item", { "btn-neutral": isActive(option) })}
+          >
+            {option.label}
+          </Link>
+        ))}
       </div>
     );
   }
 
-  return options.map((option) => (
+  return options.map((option, i) => (
     <li key={option.label}>
       <Link
         className={cx({ "bg-base-300/50 font-bold hover:bg-base-300": isActive(option) })}
-        href={setPartialParams({ page: "", ...option.value }, searchParams)}
+        href={getHref(i, option)}
       >
         {option.label}
       </Link>
