@@ -962,6 +962,7 @@ const DateRangeInput = ({ onChange, value, className, toggleClassName, required,
                             e.stopPropagation();
                             e.preventDefault();
                             onChange(null);
+                            setDateString("");
                         }, children: jsx(XMarkIcon, { className: "size-4" }) }))] })), children: (close) => (jsxs("div", { className: "flex", children: [jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$3.dayPicker}`, captionLayout: "label", mode: "range", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, resetOnSelect: true, disabled: matcher, weekStartsOn: 1, numberOfMonths: 2, selected: value ?? undefined, defaultMonth: value?.from ?? undefined, modifiers: modifiers, onSelect: (range) => {
                             if (range?.from && range?.to) {
                                 setDateString(`${formatDate(range.from)} - ${formatDate(range.to)}`);
@@ -1392,7 +1393,7 @@ const DateFormField = ({ control, useDate, ...props }) => (jsx(Controller, { dis
                 field.onChange(value ? format(value, "yyyy-MM-dd") : null);
             }
         } })) }));
-const DateRangeField = ({ fieldSetClassName, label, error, desc, ...props }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(DateRangeInput, { ...props, className: cx({ "input-error": error }, props.className), placeholder: props.required ? `${label}*` : label }), jsxs("span", { children: [label, props.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+const DateRangeField = ({ fieldSetClassName, label, error, desc, ...props }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(DateRangeInput, { ...props, className: cx({ "input-error": error }, props.className), placeholder: props.required ? `${label}*` : label }), jsxs("span", { children: [label, "\u00A7", props.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 const SelectPaginatedFromApiFormField = ({ optionValue = (model) => model.id, control, ...props }) => (jsx(Controller, { control: control, name: props.name, disabled: props.disabled, rules: { required: props.required === true }, render: ({ field }) => (jsx(SelectPaginatedFromApiField, { ...props, disabled: field.disabled, value: field.value, onChange: (model) => {
             field.onChange(model ? optionValue(model) : null);
             props.onChange?.(model || null);

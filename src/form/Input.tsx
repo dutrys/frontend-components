@@ -527,8 +527,7 @@ export const DateRangeField = <
         placeholder={props.required ? `${label}*` : label}
       />
       <span>
-        {label}
-        {props.required ? <Required /> : null}
+        {label}§{props.required ? <Required /> : null}
       </span>
     </label>
     {desc && (

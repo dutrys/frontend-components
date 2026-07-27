@@ -262,6 +262,7 @@ export const DateRangeInput = ({
                   e.stopPropagation();
                   e.preventDefault();
                   onChange(null);
+                  setDateString("");
                 }}
               >
                 <XMarkIcon className="size-4" />
