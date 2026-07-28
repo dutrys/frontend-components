@@ -25,7 +25,7 @@ export const PortalSSR = (props: { enabled?: boolean; children: React.ReactNode 
 };
 
 export type SelectProps<T> = {
-  size?: "sm" | "xs";
+  size?: "sm" | "xs" | "lg";
   name?: string;
   inputRef?: any;
   placeholder?: string;
@@ -108,6 +108,7 @@ export const Select = <T = unknown,>({
           <div
             className={cx("relative input input-bordered pr-1", className, {
               "w-full": !className?.includes("w-"),
+              "input-lg gap-1.5": size === "lg",
               "input-sm gap-1": size === "sm",
               "input-xs gap-0.5": size === "xs",
             })}
@@ -212,7 +213,7 @@ export const SelectOption = ({
   children: React.ReactNode;
   value: unknown;
   className?: string;
-  size?: "xs" | "sm";
+  size?: "xs" | "sm" | "lg";
 }) => (
   <ComboboxOption
     {...rest}
@@ -234,6 +235,7 @@ export const SelectOption = ({
             "pr-3 font-bold": selected,
             "font-normal": !selected,
             "text-sm": !size,
+            "text-base": "lg" === size,
             "text-xs": "xs" === size || "sm" === size,
           })}
         >

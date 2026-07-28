@@ -118,6 +118,7 @@ export const TextField = <
           className={cx("input input-bordered w-full", className, {
             "input-xs": size === "xs",
             "input-sm": size === "sm",
+            "input-lg": size === "lg",
             "input-error": error,
           })}
         >
@@ -185,6 +186,7 @@ export const SelectFormField = <
         className={cx("select select-bordered w-full", className, {
           "select-xs": size === "xs",
           "select-sm": size === "sm",
+          "select-lg": size === "lg",
           "select-error": error,
         })}
         {...rest}
@@ -230,6 +232,7 @@ export const TextareaFormField = <
           className={cx("textarea textarea-bordered w-full", props.className, {
             "textarea-xs": props.size === "xs",
             "textarea-sm": props.size === "sm",
+            "textarea-lg": props.size === "lg",
             "textarea-error": props.error,
           })}
           ref={(el) => {
@@ -849,7 +852,7 @@ export const SaveButton = ({
   ...props
 }: {
   type?: "submit" | "button";
-  size?: "sm";
+  size?: "sm" | "lg";
   color?: "btn-primary" | "btn-secondary" | "btn-warning" | "btn-error" | "btn-success" | "btn-neutral" | "btn-info";
   onClick?: () => unknown;
   className?: string;
@@ -861,10 +864,14 @@ export const SaveButton = ({
   const t = useTranslations();
   const Icon = icon || CheckIcon;
 
+  const iconClassName = cx({ "size-4": !size || size === "sm", "size-6": size === "lg" });
   return (
     <button
       type={type}
-      className={`btn ${color} ${size === "sm" ? "btn-sm" : ""} ${className}`}
+      className={cx(`btn`, color, className, {
+        "btn-sm": size === "sm",
+        "btn-lg": size === "lg",
+      })}
       color="primary"
       disabled={isLoading || disabled}
       data-testid={type === "submit" ? "submit" : undefined}
@@ -878,7 +885,7 @@ export const SaveButton = ({
       {...props}
     >
       {children ?? t("general.saveButton")}
-      {isLoading ? <LoadingComponent className="size-4" /> : <Icon className="size-4" />}
+      {isLoading ? <LoadingComponent className={iconClassName} /> : <Icon className={iconClassName} />}
     </button>
   );
 };

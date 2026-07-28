@@ -347,7 +347,7 @@ declare const PortalSSR: (props: {
     children: React__default.ReactNode;
 }) => string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React__default.ReactNode> | Promise<string | number | bigint | boolean | React__default.ReactPortal | React__default.ReactElement<unknown, string | React__default.JSXElementConstructor<any>> | Iterable<React__default.ReactNode> | null | undefined> | null | undefined;
 type SelectProps<T> = {
-    size?: "sm" | "xs";
+    size?: "sm" | "xs" | "lg";
     name?: string;
     inputRef?: any;
     placeholder?: string;
@@ -376,7 +376,7 @@ declare const SelectOption: ({ value, size, children, className, ...rest }: {
     children: React__default.ReactNode;
     value: unknown;
     className?: string;
-    size?: "xs" | "sm";
+    size?: "xs" | "sm" | "lg";
 }) => react_jsx_runtime.JSX.Element;
 
 type SelectPaginatedFromApiProps<TModel extends {
@@ -523,7 +523,7 @@ declare const SelectPaginatedFromApiField: <T extends {
 declare const Required: () => react_jsx_runtime.JSX.Element;
 declare const SaveButton: ({ isLoading, icon, disabled, className, onClick, size, color, children, type, ...props }: {
     type?: "submit" | "button";
-    size?: "sm";
+    size?: "sm" | "lg";
     color?: "btn-primary" | "btn-secondary" | "btn-warning" | "btn-error" | "btn-success" | "btn-neutral" | "btn-info";
     onClick?: () => unknown;
     className?: string;

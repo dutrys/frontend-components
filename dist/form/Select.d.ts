@@ -4,7 +4,7 @@ export declare const PortalSSR: (props: {
     children: React.ReactNode;
 }) => string | number | bigint | boolean | import("react/jsx-runtime").JSX.Element | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined;
 export type SelectProps<T> = {
-    size?: "sm" | "xs";
+    size?: "sm" | "xs" | "lg";
     name?: string;
     inputRef?: any;
     placeholder?: string;
@@ -33,6 +33,6 @@ export declare const SelectOption: ({ value, size, children, className, ...rest 
     children: React.ReactNode;
     value: unknown;
     className?: string;
-    size?: "xs" | "sm";
+    size?: "xs" | "sm" | "lg";
 }) => import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=Select.d.ts.map

@@ -114,7 +114,7 @@ export declare const SelectPaginatedFromApiField: <T extends {
 export declare const Required: () => import("react/jsx-runtime").JSX.Element;
 export declare const SaveButton: ({ isLoading, icon, disabled, className, onClick, size, color, children, type, ...props }: {
     type?: "submit" | "button";
-    size?: "sm";
+    size?: "sm" | "lg";
     color?: "btn-primary" | "btn-secondary" | "btn-warning" | "btn-error" | "btn-success" | "btn-neutral" | "btn-info";
     onClick?: () => unknown;
     className?: string;

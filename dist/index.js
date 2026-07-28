@@ -1032,6 +1032,7 @@ const Select = ({ onChange, disabled, required, inputRef, options, name, portalE
     let currentGroupBy = undefined;
     return (jsx(Combobox, { immediate: true, "data-testid": "select", disabled: disabled, value: value, onChange: onChange, ...rest, children: ({ open }) => (jsxs("div", { className: outerClassName, children: [jsxs("div", { className: cx("relative input input-bordered pr-1", className, {
                         "w-full": !className?.includes("w-"),
+                        "input-lg gap-1.5": size$1 === "lg",
                         "input-sm gap-1": size$1 === "sm",
                         "input-xs gap-0.5": size$1 === "xs",
                     }), ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, autoFocus: autoFocus, displayValue: (model) => (model ? optionLabel(model) : ""), onChange: onQueryChange && ((event) => onQueryChange(event.target.value)) }), header, !required && value ? (jsx("button", { className: "z-1 cursor-pointer", type: "button", onClick: () => onChange(null), children: jsx(XMarkIcon, { className: "size-4" }) })) : (!open && afterInput), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "", onClick: (e) => {
@@ -1056,6 +1057,7 @@ const SelectOption = ({ value, size, children, className, ...rest }) => (jsx(Com
                     "pr-3 font-bold": selected,
                     "font-normal": !selected,
                     "text-sm": !size,
+                    "text-base": "lg" === size,
                     "text-xs": "xs" === size || "sm" === size,
                 }), children: children }), selected && (jsx("span", { className: cx("absolute inset-y-0 right-1 flex items-center pl-3", {
                     "text-white": focus,
@@ -1295,6 +1297,7 @@ const TextFormField = ({ register, options, name, ref, ...rest }) => {
 const TextField = ({ error, className, type = "text", label, size, desc, fieldSetClassName, append, prepend, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [append || prepend ? (jsxs("div", { className: cx("input input-bordered w-full", className, {
                         "input-xs": size === "xs",
                         "input-sm": size === "sm",
+                        "input-lg": size === "lg",
                         "input-error": error,
                     }), children: [prepend, jsx("input", { type: type, placeholder: rest.required ? `${label}*` : label, ...rest }), append] })) : (jsx("input", { type: type, placeholder: rest.required ? `${label}*` : label, className: cx("input input-bordered w-full", className, {
                         "input-xs": size === "xs",
@@ -1308,6 +1311,7 @@ const SelectFormField = ({ id, disabled, fieldSetClassName, label, register, req
                     }), className: cx("select select-bordered w-full", className, {
                         "select-xs": size === "xs",
                         "select-sm": size === "sm",
+                        "select-lg": size === "lg",
                         "select-error": error,
                     }), ...rest, children: children }), jsxs("span", { children: [label, required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 const TextareaFormField = (props) => {
@@ -1320,6 +1324,7 @@ const TextareaFormField = (props) => {
     return (jsxs("div", { className: props.fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx("textarea", { id: props.id, placeholder: props.required ? `${props.label}*` : props.label, ...r, className: cx("textarea textarea-bordered w-full", props.className, {
                             "textarea-xs": props.size === "xs",
                             "textarea-sm": props.size === "sm",
+                            "textarea-lg": props.size === "lg",
                             "textarea-error": props.error,
                         }), ref: (el) => {
                             r.ref(el);
@@ -1427,13 +1432,17 @@ const Required = () => jsx("span", { className: "text-error align-bottom", child
 const SaveButton = ({ isLoading, icon, disabled, className = "btn-block", onClick, size, color = "btn-primary", children, type = "submit", ...props }) => {
     const t = useTranslations();
     const Icon = icon || CheckIcon$1;
-    return (jsxs("button", { type: type, className: `btn ${color} ${size === "sm" ? "btn-sm" : ""} ${className}`, color: "primary", disabled: isLoading || disabled, "data-testid": type === "submit" ? "submit" : undefined, onClick: (e) => {
+    const iconClassName = cx({ "size-4": !size || size === "sm", "size-6": size === "lg" });
+    return (jsxs("button", { type: type, className: cx(`btn`, color, className, {
+            "btn-sm": size === "sm",
+            "btn-lg": size === "lg",
+        }), color: "primary", disabled: isLoading || disabled, "data-testid": type === "submit" ? "submit" : undefined, onClick: (e) => {
             if (onClick) {
                 e.stopPropagation();
                 e.preventDefault();
                 onClick();
             }
-        }, ...props, children: [children ?? t("general.saveButton"), isLoading ? jsx(LoadingComponent, { className: "size-4" }) : jsx(Icon, { className: "size-4" })] }));
+        }, ...props, children: [children ?? t("general.saveButton"), isLoading ? jsx(LoadingComponent, { className: iconClassName }) : jsx(Icon, { className: iconClassName })] }));
 };
 
 const DateTime = ({ date, format: format$1 = "yyyy-MM-dd HH:mm:ss" }) => {
