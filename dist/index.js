@@ -1302,6 +1302,7 @@ const TextField = ({ error, className, type = "text", label, size, desc, fieldSe
                     }), children: [prepend, jsx("input", { type: type, placeholder: rest.required ? `${label}*` : label, ...rest }), append] })) : (jsx("input", { type: type, placeholder: rest.required ? `${label}*` : label, className: cx("input input-bordered w-full", className, {
                         "input-xs": size === "xs",
                         "input-sm": size === "sm",
+                        "input-lg": size === "lg",
                         "input-error": error,
                     }), ...rest })), jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 const SelectFormField = ({ id, disabled, fieldSetClassName, label, register, required, name, error, desc, options, size, className, children, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx("select", { id: id, ...register(name, {

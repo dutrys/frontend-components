@@ -26,6 +26,7 @@ import { CheckIcon } from "@heroicons/react/20/solid";
 import { LoadingComponent } from "../Loading";
 import { SelectFromApi, SelectFromApiProps } from "./SelectFromApi";
 import { Matcher } from "react-day-picker";
+import log from "eslint-plugin-react/lib/util/log";
 
 export interface IInputProps<TName extends FieldPath<FieldValues>> {
   id?: string;
@@ -133,6 +134,7 @@ export const TextField = <
           className={cx("input input-bordered w-full", className, {
             "input-xs": size === "xs",
             "input-sm": size === "sm",
+            "input-lg": size === "lg",
             "input-error": error,
           })}
           {...rest}
