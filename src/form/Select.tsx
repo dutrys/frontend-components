@@ -74,7 +74,7 @@ export const Select = <T = unknown,>({
   afterInput,
   hideNoItemsOption,
   autoFocus,
-  outerClassName,
+  outerClassName = "w-full",
   ...rest
 }: Omit<
   React.SelectHTMLAttributes<HTMLSelectElement>,

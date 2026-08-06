@@ -1012,7 +1012,7 @@ const PortalSSR = (props) => {
     }
     return props.children;
 };
-const Select = ({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel = (m) => m.name, value, size: size$1, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth = 100, maxHeight = 500, afterInput, hideNoItemsOption, autoFocus, outerClassName, ...rest }) => {
+const Select = ({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel = (m) => m.name, value, size: size$1, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth = 100, maxHeight = 500, afterInput, hideNoItemsOption, autoFocus, outerClassName = "w-full", ...rest }) => {
     const t = useTranslations();
     const { refs, floatingStyles } = useFloating({
         placement: "bottom-start",
