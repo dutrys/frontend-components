@@ -26,7 +26,6 @@ import { CheckIcon } from "@heroicons/react/20/solid";
 import { LoadingComponent } from "../Loading";
 import { SelectFromApi, SelectFromApiProps } from "./SelectFromApi";
 import { Matcher } from "react-day-picker";
-import log from "eslint-plugin-react/lib/util/log";
 
 export interface IInputProps<TName extends FieldPath<FieldValues>> {
   id?: string;
@@ -485,12 +484,14 @@ export const DateFormField = <
 >({
   control,
   useDate,
+  onChange,
   ...props
 }: Omit<IInputProps<TName>, "size"> &
   Omit<DateInputProps, "onChange" | "value"> & {
     control: Control<TFieldValues>;
     // @deprecated
     useDate?: boolean;
+    onChange?: (date: Date | string | null) => unknown;
   }) => (
   <Controller
     disabled={props.disabled}
@@ -508,6 +509,7 @@ export const DateFormField = <
           } else {
             field.onChange(value ? format(value as Date, "yyyy-MM-dd") : null);
           }
+          onChange?.(value);
         }}
       />
     )}

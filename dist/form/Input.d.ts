@@ -73,9 +73,10 @@ export declare const CheckboxField: <TFieldValues extends FieldValues = FieldVal
 } & CheckboxFieldProps<TName, TFieldValues>) => import("react/jsx-runtime").JSX.Element;
 export declare const CheckboxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ name, disabled, options, register, ...props }: Omit<CheckboxFieldProps<TName, TFieldValues>, "checked" | "onChange"> & IInputRegisterOnlyProps<TFieldValues, TName>) => import("react/jsx-runtime").JSX.Element;
 export declare const DateField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, error, desc, ...props }: Omit<IInputProps<TName>, "size"> & DateInputProps) => import("react/jsx-runtime").JSX.Element;
-export declare const DateFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, useDate, ...props }: Omit<IInputProps<TName>, "size"> & Omit<DateInputProps, "onChange" | "value"> & {
+export declare const DateFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, useDate, onChange, ...props }: Omit<IInputProps<TName>, "size"> & Omit<DateInputProps, "onChange" | "value"> & {
     control: Control<TFieldValues>;
     useDate?: boolean;
+    onChange?: (date: Date | string | null) => unknown;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const DateRangeField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, error, desc, ...props }: Omit<IInputProps<TName>, "size"> & DateRangeInputProps) => import("react/jsx-runtime").JSX.Element;
 export declare const SelectPaginatedFromApiFormField: <T extends {
