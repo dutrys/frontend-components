@@ -154,36 +154,31 @@ export const TextField = <
   </div>
 );
 
-export const SelectFormField = <
+export const SelectField = <
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
 >({
-  id,
-  disabled,
-  fieldSetClassName,
-  label,
-  register,
-  required,
-  name,
   error,
-  desc,
-  options,
-  size,
   className,
+  label,
+  size,
+  desc,
+  fieldSetClassName,
+  append,
+  prepend,
   children,
   ...rest
-}: IInputRegisterProps<TFieldValues, TName> & {
-  children: React.ReactNode;
-}) => (
+}: Omit<React.InputHTMLAttributes<HTMLSelectElement>, "size"> &
+  IInputProps<TName> & {
+    onChange: (e: ChangeEvent<HTMLSelectElement>) => unknown;
+    append?: React.ReactNode;
+    prepend?: React.ReactNode;
+    type?: string;
+    ref?: ((input: HTMLSelectElement | null) => void) | RefObject<HTMLSelectElement | null>;
+  }) => (
   <div className={fieldSetClassName}>
     <label className="floating-label">
       <select
-        id={id}
-        {...register(name, {
-          required: required,
-          disabled: disabled,
-          ...((options as RegisterOptions<TFieldValues, TName>) || {}),
-        })}
         className={cx("select select-bordered w-full", className, {
           "select-xs": size === "xs",
           "select-sm": size === "sm",
@@ -196,7 +191,7 @@ export const SelectFormField = <
       </select>
       <span>
         {label}
-        {required ? <Required /> : null}
+        {rest.required ? <Required /> : null}
       </span>
     </label>
     {desc && (
@@ -207,6 +202,40 @@ export const SelectFormField = <
     {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
   </div>
 );
+
+export const SelectFormField = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+>({
+  id,
+  fieldSetClassName,
+  register,
+  name,
+  options,
+  ref,
+  ...rest
+}: IInputRegisterProps<TFieldValues, TName> & {
+  children: React.ReactNode;
+  ref?: (input: HTMLSelectElement | null) => void;
+}) => {
+  const r = register(name, {
+    required: rest.required,
+    disabled: rest.disabled,
+    ...((options as RegisterOptions<TFieldValues, TName>) || {}),
+  });
+  return (
+    <SelectField
+      {...rest}
+      {...r}
+      ref={(reference) => {
+        r.ref(reference);
+        if (ref) {
+          ref(reference);
+        }
+      }}
+    />
+  );
+};
 
 export const TextareaFormField = <
   TFieldValues extends FieldValues = FieldValues,

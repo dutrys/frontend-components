@@ -1305,16 +1305,25 @@ const TextField = ({ error, className, type = "text", label, size, desc, fieldSe
                         "input-lg": size === "lg",
                         "input-error": error,
                     }), ...rest })), jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
-const SelectFormField = ({ id, disabled, fieldSetClassName, label, register, required, name, error, desc, options, size, className, children, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx("select", { id: id, ...register(name, {
-                        required: required,
-                        disabled: disabled,
-                        ...(options || {}),
-                    }), className: cx("select select-bordered w-full", className, {
+const SelectField = ({ error, className, label, size, desc, fieldSetClassName, append, prepend, children, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx("select", { className: cx("select select-bordered w-full", className, {
                         "select-xs": size === "xs",
                         "select-sm": size === "sm",
                         "select-lg": size === "lg",
                         "select-error": error,
-                    }), ...rest, children: children }), jsxs("span", { children: [label, required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+                    }), ...rest, children: children }), jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+const SelectFormField = ({ id, fieldSetClassName, register, name, options, ref, ...rest }) => {
+    const r = register(name, {
+        required: rest.required,
+        disabled: rest.disabled,
+        ...(options || {}),
+    });
+    return (jsx(SelectField, { ...rest, ...r, ref: (reference) => {
+            r.ref(reference);
+            if (ref) {
+                ref(reference);
+            }
+        } }));
+};
 const TextareaFormField = (props) => {
     const r = props.register(props.name, {
         required: props.required,
@@ -2397,5 +2406,5 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                                                     }, children: jsx(XMarkIcon, { className: "size-3" }) })] }, JSON.stringify(val) + "_" + i)))] })) })), v.type === FilterType.BOOLEAN && (jsxs("div", { className: "join w-full", children: [jsx("button", { type: "button", className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === true }), onClick: () => (watched[key] === true ? setValue(key, undefined) : setValue(key, true)), children: v.label.toUpperCase() }), jsx("button", { onClick: () => (watched[key] === false ? setValue(key, undefined) : setValue(key, false)), className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === false }), type: "button", children: `${t("general.no").toUpperCase()} ${v.label.toUpperCase()}` })] })), v.type === FilterType.OPTIONS && (jsx("div", { className: cx("join w-full", { "join-vertical": Object.entries(v.options ?? {}).length > 2 }), children: Object.entries(v.options ?? {}).map(([value, label]) => (jsx("button", { className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === value }), type: "button", onClick: () => (watched[key] === value ? setValue(key, undefined) : setValue(key, value)), children: label }, value))) }))] }, `${key}-${i}`))), jsx(SaveButton, { className: "btn-sm w-full", children: t("general.filter") })] }) }));
 };
 
-export { AlertErrors, Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Select, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
+export { AlertErrors, Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Select, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
 //# sourceMappingURL=index.js.map

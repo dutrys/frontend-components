@@ -39,8 +39,16 @@ export declare const TextField: <TFieldValues extends FieldValues = FieldValues,
     type?: string;
     ref?: ((input: HTMLInputElement | null) => void) | RefObject<HTMLInputElement | null>;
 }) => import("react/jsx-runtime").JSX.Element;
-export declare const SelectFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ id, disabled, fieldSetClassName, label, register, required, name, error, desc, options, size, className, children, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
+export declare const SelectField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ error, className, label, size, desc, fieldSetClassName, append, prepend, children, ...rest }: Omit<React.InputHTMLAttributes<HTMLSelectElement>, "size"> & IInputProps<TName> & {
+    onChange: (e: ChangeEvent<HTMLSelectElement>) => unknown;
+    append?: React.ReactNode;
+    prepend?: React.ReactNode;
+    type?: string;
+    ref?: ((input: HTMLSelectElement | null) => void) | RefObject<HTMLSelectElement | null>;
+}) => import("react/jsx-runtime").JSX.Element;
+export declare const SelectFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ id, fieldSetClassName, register, name, options, ref, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
     children: React.ReactNode;
+    ref?: (input: HTMLSelectElement | null) => void;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const TextareaFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName> & {
     maxLength?: number;
