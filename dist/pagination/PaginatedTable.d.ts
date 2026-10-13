@@ -43,8 +43,12 @@ export declare const PaginatedTable: <TModel extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, toolbarClassName, }: {
+}>({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, toolbarClassName, group, }: {
     toolbarClassName?: string;
+    group?: {
+        by: (a: TModel["data"][number]) => string;
+        render: (firstOfAGroup: TModel["data"][number]) => React.ReactNode;
+    };
     titleAbove?: ReactNode;
     caption?: ReactNode;
     defaultDisplayAs?: "list" | "grid";

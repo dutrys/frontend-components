@@ -1537,7 +1537,7 @@ const SearchField = () => {
                 router.push(addLocale((path + setPartialParams({ search, page: "1" }, searchParams)).replace(/^\/(en|lt)\//, "/"), params.locale));
             }, children: jsxs("div", { className: "join w-full pr-2", children: [jsx("input", { type: "text", value: search, onChange: (e) => setSearch(e.target.value), name: "search", className: "join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500", placeholder: t("pagination.searchPlaceholder") }), jsx("button", { className: "join-item btn btn-neutral btn-xs uppercase", type: "submit", children: jsx(MagnifyingGlassIcon, { className: "w-4 h-4" }) })] }) }) }));
 };
-const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs = "list", toolbarClassName, }) => {
+const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs = "list", toolbarClassName, group, }) => {
     const router = useRouter();
     const params = useParams();
     const searchParams = useSearchParams();
@@ -1589,6 +1589,7 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
     }
     elements.push(...searchableShortcuts);
     const [hover, setHover] = useState(null);
+    let groupKey = "";
     return (jsxs(Fragment, { children: [titleAbove && (jsx(Title, { truncate: typeof titleAbove === "string", outerHeight: "h-28", children: titleAbove })), jsxs("div", { "data-testid": "paginate-table", className: "relative h-screen", "data-test-sort": (pagination.meta.sortBy || []).flat().join("-"), onMouseLeave: () => setHover(null), children: [jsxs("div", { className: cx("absolute z-501 top-16 flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-screen sm:max-w-[calc(100vw-var(--sidebar-width))]", toolbarClassName), children: [jsx("h1", { className: `h-16 flex items-center pl-4 my-0 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (elements.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsivePaginated, { bulkActions: bulkActions ? { actions: bulkActions, setSelected, selected } : undefined, elements: elements })), extraHeading, addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: addNewText || t("pagination.addNew") })] })), renderGridItem && (jsxs("div", { className: "join mr-2", children: [jsx("button", { className: cx("btn btn-xs join-item", { "btn-active": displayAs === "grid" }), onClick: () => {
                                             setDisplayAs("grid");
                                             if (displayConfig) {
@@ -1623,65 +1624,73 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                                     }, searchParams), children: [column.title, jsx("span", { className: "text-[0.5rem]", children: order === "DESC" ? "▲" : "▼" })] }) }, column.name.toString()));
                                                         }
                                                         return (jsx(Component, { className: `${styles$4.thead} text-xs`, children: column.title }, column.title.toString()));
-                                                    })] }) }), jsx("tbody", { children: pagination.data.map((model, o) => (jsxs("tr", { "data-testid": `table-row-${o}`, onClick: rowClickHref
-                                                    ? (event) => {
-                                                        const selection = window.getSelection();
-                                                        if (selection && selection.toString().length > 0) {
-                                                            return;
-                                                        }
-                                                        const target = event.nativeEvent.target;
-                                                        if (target.closest("a") ||
-                                                            target.closest(".action-cell") ||
-                                                            target.closest("button") ||
-                                                            target.closest("input")) {
-                                                            return;
-                                                        }
-                                                        let url = addLocale(rowClickHref(model), params.locale);
-                                                        if (!url.includes("?")) {
-                                                            url += "?" + searchParams.toString();
-                                                        }
-                                                        if (event.ctrlKey || event.metaKey || event.button === 1) {
-                                                            window.open(url, "_blank");
-                                                        }
-                                                        else {
-                                                            router.push(url);
-                                                        }
-                                                    }
-                                                    : undefined, className: cx({
-                                                    [styles$4.selectedRow]: selected.includes(model.id),
-                                                    [styles$4.rowHref]: rowClickHref,
-                                                    [styles$4.rowHover]: hover === model.id,
-                                                }), onMouseEnter: () => setHover(model.id), children: [bulkActions && (jsx("th", { className: "action-cell", children: jsx("input", { type: "checkbox", className: "checkbox checkbox-xs", onChange: (e) => {
-                                                                if (e.target.checked) {
-                                                                    setSelected((prev) => [...prev, model.id]);
+                                                    })] }) }), jsx("tbody", { children: pagination.data.map((model, o) => {
+                                                let renderGroup = null;
+                                                const by = group ? group.by(pagination.data[o]) : "";
+                                                if (group && by !== groupKey) {
+                                                    groupKey = by;
+                                                    renderGroup = group.render(pagination.data[o]);
+                                                }
+                                                return (jsxs(Fragment$1, { children: [renderGroup, jsxs("tr", { "data-testid": `table-row-${o}`, onClick: rowClickHref
+                                                                ? (event) => {
+                                                                    const selection = window.getSelection();
+                                                                    if (selection && selection.toString().length > 0) {
+                                                                        return;
+                                                                    }
+                                                                    const target = event.nativeEvent.target;
+                                                                    if (target.closest("a") ||
+                                                                        target.closest(".action-cell") ||
+                                                                        target.closest("button") ||
+                                                                        target.closest("input")) {
+                                                                        return;
+                                                                    }
+                                                                    let url = addLocale(rowClickHref(model), params.locale);
+                                                                    if (!url.includes("?")) {
+                                                                        url += "?" + searchParams.toString();
+                                                                    }
+                                                                    if (event.ctrlKey || event.metaKey || event.button === 1) {
+                                                                        window.open(url, "_blank");
+                                                                    }
+                                                                    else {
+                                                                        router.push(url);
+                                                                    }
                                                                 }
-                                                                else {
-                                                                    setSelected((prev) => prev.filter((id) => id !== model.id));
-                                                                }
-                                                            }, checked: selected.includes(model.id) }) })), columnsConfigs[configName].map((item, i) => {
-                                                        const column = columns.find((c) => isActionColumn(c) ? "action" === item.name : c.name === item.name);
-                                                        if (!column || !item.enabled) {
-                                                            return null;
-                                                        }
-                                                        if (isActionColumn(column)) {
-                                                            return (jsx("th", { className: cx("action-cell", styles$4.colAction, column.className ?? "whitespace-nowrap text-right"), children: jsx("div", { className: styles$4.actionCellContent, children: jsx("div", { className: styles$4.moreActionsContainer, children: jsx(MoreActions, { itemClassName: "btn-neutral", rootClassName: "bg-neutral/60 p-1 rounded-field border border-base-300 shadow-lg", actions: column.actions(model) }) }) }) }, `actions-td-${i}`));
-                                                        }
-                                                        const Component = column.pin ? "th" : "td";
-                                                        if (isFunctionColumn(column)) {
-                                                            return (jsx(Component, { className: column.className, children: column.body(model) }, `actions-td-${i}`));
-                                                        }
-                                                        if (column.type === "date") {
-                                                            return (jsx(Component, { className: column.className ?? "text-nowrap", children: model[column.name] &&
-                                                                    (column.format ? (jsx(DateTime, { date: model[column.name], format: column.format })) : (jsx(HumanDate, { date: model[column.name] }))) }, `${model.id}-${column.name.toString()}`));
-                                                        }
-                                                        const translatedValue = column.translate
-                                                            ? t(`${column.translate}.${model[column.name]}`)
-                                                            : model[column.name];
-                                                        if (column.type === "code") {
-                                                            return (jsx(Component, { className: column.className, children: model[column.name] && (jsx("div", { className: "badge badge-sm", children: jsx("code", { children: translatedValue }) })) }, column.name.toString()));
-                                                        }
-                                                        return (jsx(Component, { className: column.className, children: column.truncate ? (jsx(TruncateText, { text: translatedValue, length: column.truncate })) : (translatedValue) }, column.name.toString()));
-                                                    })] }, o))) })] })) }), jsx("div", { className: "absolute box-content left-0 bottom-0 w-full h-16 z-1 border-t border-t-base-content/5", children: jsx("div", { className: "bg-base-100", children: jsxs("div", { className: "flex justify-center items-center", children: [!pagination.meta.withoutCount && (jsx("div", { className: `shrink-1 w-60 text-xs pl-4 ${pagination.meta.totalPages > 1 ? "hidden md:block" : ""}`, children: t("pagination.showing", {
+                                                                : undefined, className: cx({
+                                                                [styles$4.selectedRow]: selected.includes(model.id),
+                                                                [styles$4.rowHref]: rowClickHref,
+                                                                [styles$4.rowHover]: hover === model.id,
+                                                            }), onMouseEnter: () => setHover(model.id), children: [bulkActions && (jsx("th", { className: "action-cell", children: jsx("input", { type: "checkbox", className: "checkbox checkbox-xs", onChange: (e) => {
+                                                                            if (e.target.checked) {
+                                                                                setSelected((prev) => [...prev, model.id]);
+                                                                            }
+                                                                            else {
+                                                                                setSelected((prev) => prev.filter((id) => id !== model.id));
+                                                                            }
+                                                                        }, checked: selected.includes(model.id) }) })), columnsConfigs[configName].map((item, i) => {
+                                                                    const column = columns.find((c) => isActionColumn(c) ? "action" === item.name : c.name === item.name);
+                                                                    if (!column || !item.enabled) {
+                                                                        return null;
+                                                                    }
+                                                                    if (isActionColumn(column)) {
+                                                                        return (jsx("th", { className: cx("action-cell", styles$4.colAction, column.className ?? "whitespace-nowrap text-right"), children: jsx("div", { className: styles$4.actionCellContent, children: jsx("div", { className: styles$4.moreActionsContainer, children: jsx(MoreActions, { itemClassName: "btn-neutral", rootClassName: "bg-neutral/60 p-1 rounded-field border border-base-300 shadow-lg", actions: column.actions(model) }) }) }) }, `actions-td-${i}`));
+                                                                    }
+                                                                    const Component = column.pin ? "th" : "td";
+                                                                    if (isFunctionColumn(column)) {
+                                                                        return (jsx(Component, { className: column.className, children: column.body(model) }, `actions-td-${i}`));
+                                                                    }
+                                                                    if (column.type === "date") {
+                                                                        return (jsx(Component, { className: column.className ?? "text-nowrap", children: model[column.name] &&
+                                                                                (column.format ? (jsx(DateTime, { date: model[column.name], format: column.format })) : (jsx(HumanDate, { date: model[column.name] }))) }, `${model.id}-${column.name.toString()}`));
+                                                                    }
+                                                                    const translatedValue = column.translate
+                                                                        ? t(`${column.translate}.${model[column.name]}`)
+                                                                        : model[column.name];
+                                                                    if (column.type === "code") {
+                                                                        return (jsx(Component, { className: column.className, children: model[column.name] && (jsx("div", { className: "badge badge-sm", children: jsx("code", { children: translatedValue }) })) }, column.name.toString()));
+                                                                    }
+                                                                    return (jsx(Component, { className: column.className, children: column.truncate ? (jsx(TruncateText, { text: translatedValue, length: column.truncate })) : (translatedValue) }, column.name.toString()));
+                                                                })] })] }, o));
+                                            }) })] })) }), jsx("div", { className: "absolute box-content left-0 bottom-0 w-full h-16 z-1 border-t border-t-base-content/5", children: jsx("div", { className: "bg-base-100", children: jsxs("div", { className: "flex justify-center items-center", children: [!pagination.meta.withoutCount && (jsx("div", { className: `shrink-1 w-60 text-xs pl-4 ${pagination.meta.totalPages > 1 ? "hidden md:block" : ""}`, children: t("pagination.showing", {
                                                     from: (pagination.meta.currentPage - 1) * pagination.meta.itemsPerPage + 1,
                                                     to: Math.min(pagination.meta.currentPage * pagination.meta.itemsPerPage, pagination.meta.totalItems),
                                                     total: pagination.meta.totalItems,

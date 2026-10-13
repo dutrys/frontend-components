@@ -11,7 +11,7 @@ import { FunnelIcon as FunnelIconSolid } from "@heroicons/react/24/solid";
 import { MoreActions, MoreActionType } from "./MoreAction";
 import { NoCountPagination, Pagination } from "./Pagination";
 import { useTranslations } from "next-intl";
-import React, { type ReactNode, useMemo, useState } from "react";
+import React, { Fragment, type ReactNode, useMemo, useState } from "react";
 import styles from "./PaginatedTable.module.css";
 import cx from "classnames";
 import { addLocale, Link } from "./Link";
@@ -132,8 +132,13 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   rowClickHref,
   defaultDisplayAs = "list",
   toolbarClassName,
+  group,
 }: {
   toolbarClassName?: string;
+  group?: {
+    by: (a: TModel["data"][number]) => string;
+    render: (firstOfAGroup: TModel["data"][number]) => React.ReactNode;
+  };
   titleAbove?: ReactNode;
   caption?: ReactNode;
   defaultDisplayAs?: "list" | "grid";
@@ -232,6 +237,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   elements.push(...searchableShortcuts);
 
   const [hover, setHover] = useState<number | null>(null);
+  let groupKey = "";
 
   return (
     <>
@@ -417,143 +423,153 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                     </tr>
                   </thead>
                   <tbody>
-                    {pagination.data.map((model: TModel["data"][number], o: number) => (
-                      <tr
-                        key={o}
-                        data-testid={`table-row-${o}`}
-                        onClick={
-                          rowClickHref
-                            ? (event) => {
-                                const selection = window.getSelection();
-                                if (selection && selection.toString().length > 0) {
-                                  return;
-                                }
-                                const target = event.nativeEvent.target as HTMLElement;
-                                if (
-                                  target.closest("a") ||
-                                  target.closest(".action-cell") ||
-                                  target.closest("button") ||
-                                  target.closest("input")
-                                ) {
-                                  return;
-                                }
+                    {pagination.data.map((model: TModel["data"][number], o: number) => {
+                      let renderGroup: ReactNode | null = null;
+                      const by = group ? group.by(pagination.data[o]) : "";
+                      if (group && by !== groupKey) {
+                        groupKey = by;
+                        renderGroup = group.render(pagination.data[o]);
+                      }
+                      return (
+                        <Fragment key={o}>
+                          {renderGroup}
+                          <tr
+                            data-testid={`table-row-${o}`}
+                            onClick={
+                              rowClickHref
+                                ? (event) => {
+                                    const selection = window.getSelection();
+                                    if (selection && selection.toString().length > 0) {
+                                      return;
+                                    }
+                                    const target = event.nativeEvent.target as HTMLElement;
+                                    if (
+                                      target.closest("a") ||
+                                      target.closest(".action-cell") ||
+                                      target.closest("button") ||
+                                      target.closest("input")
+                                    ) {
+                                      return;
+                                    }
 
-                                let url = addLocale(rowClickHref(model), params.locale as string);
-                                if (!url.includes("?")) {
-                                  url += "?" + searchParams.toString();
-                                }
+                                    let url = addLocale(rowClickHref(model), params.locale as string);
+                                    if (!url.includes("?")) {
+                                      url += "?" + searchParams.toString();
+                                    }
 
-                                if (event.ctrlKey || event.metaKey || event.button === 1) {
-                                  window.open(url, "_blank");
-                                } else {
-                                  router.push(url);
-                                }
-                              }
-                            : undefined
-                        }
-                        className={cx({
-                          [styles.selectedRow]: selected.includes(model.id),
-                          [styles.rowHref]: rowClickHref,
-                          [styles.rowHover]: hover === model.id,
-                        })}
-                        onMouseEnter={() => setHover(model.id)}
-                      >
-                        {bulkActions && (
-                          <th className="action-cell">
-                            <input
-                              type="checkbox"
-                              className="checkbox checkbox-xs"
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelected((prev) => [...prev, model.id]);
-                                } else {
-                                  setSelected((prev) => prev.filter((id) => id !== model.id));
-                                }
-                              }}
-                              checked={selected.includes(model.id)}
-                            />
-                          </th>
-                        )}
-                        {columnsConfigs[configName].map((item, i) => {
-                          const column = columns.find((c) =>
-                            isActionColumn(c) ? "action" === item.name : (c.name as string) === item.name,
-                          );
-                          if (!column || !item.enabled) {
-                            return null;
-                          }
-                          if (isActionColumn(column)) {
-                            return (
-                              <th
-                                key={`actions-td-${i}`}
-                                className={cx(
-                                  "action-cell",
-                                  styles.colAction,
-                                  column.className ?? "whitespace-nowrap text-right",
-                                )}
-                              >
-                                <div className={styles.actionCellContent}>
-                                  <div className={styles.moreActionsContainer}>
-                                    <MoreActions
-                                      itemClassName="btn-neutral"
-                                      rootClassName="bg-neutral/60 p-1 rounded-field border border-base-300 shadow-lg"
-                                      actions={column.actions(model)}
-                                    />
-                                  </div>
-                                </div>
+                                    if (event.ctrlKey || event.metaKey || event.button === 1) {
+                                      window.open(url, "_blank");
+                                    } else {
+                                      router.push(url);
+                                    }
+                                  }
+                                : undefined
+                            }
+                            className={cx({
+                              [styles.selectedRow]: selected.includes(model.id),
+                              [styles.rowHref]: rowClickHref,
+                              [styles.rowHover]: hover === model.id,
+                            })}
+                            onMouseEnter={() => setHover(model.id)}
+                          >
+                            {bulkActions && (
+                              <th className="action-cell">
+                                <input
+                                  type="checkbox"
+                                  className="checkbox checkbox-xs"
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelected((prev) => [...prev, model.id]);
+                                    } else {
+                                      setSelected((prev) => prev.filter((id) => id !== model.id));
+                                    }
+                                  }}
+                                  checked={selected.includes(model.id)}
+                                />
                               </th>
-                            );
-                          }
+                            )}
+                            {columnsConfigs[configName].map((item, i) => {
+                              const column = columns.find((c) =>
+                                isActionColumn(c) ? "action" === item.name : (c.name as string) === item.name,
+                              );
+                              if (!column || !item.enabled) {
+                                return null;
+                              }
+                              if (isActionColumn(column)) {
+                                return (
+                                  <th
+                                    key={`actions-td-${i}`}
+                                    className={cx(
+                                      "action-cell",
+                                      styles.colAction,
+                                      column.className ?? "whitespace-nowrap text-right",
+                                    )}
+                                  >
+                                    <div className={styles.actionCellContent}>
+                                      <div className={styles.moreActionsContainer}>
+                                        <MoreActions
+                                          itemClassName="btn-neutral"
+                                          rootClassName="bg-neutral/60 p-1 rounded-field border border-base-300 shadow-lg"
+                                          actions={column.actions(model)}
+                                        />
+                                      </div>
+                                    </div>
+                                  </th>
+                                );
+                              }
 
-                          const Component: React.ElementType = column.pin ? "th" : "td";
-                          if (isFunctionColumn(column)) {
-                            return (
-                              <Component key={`actions-td-${i}`} className={column.className}>
-                                {column.body(model)}
-                              </Component>
-                            );
-                          }
-                          if (column.type === "date") {
-                            return (
-                              <Component
-                                key={`${model.id}-${column.name.toString()}`}
-                                className={column.className ?? "text-nowrap"}
-                              >
-                                {model[column.name] &&
-                                  (column.format ? (
-                                    <DateTime date={model[column.name] as string} format={column.format} />
+                              const Component: React.ElementType = column.pin ? "th" : "td";
+                              if (isFunctionColumn(column)) {
+                                return (
+                                  <Component key={`actions-td-${i}`} className={column.className}>
+                                    {column.body(model)}
+                                  </Component>
+                                );
+                              }
+                              if (column.type === "date") {
+                                return (
+                                  <Component
+                                    key={`${model.id}-${column.name.toString()}`}
+                                    className={column.className ?? "text-nowrap"}
+                                  >
+                                    {model[column.name] &&
+                                      (column.format ? (
+                                        <DateTime date={model[column.name] as string} format={column.format} />
+                                      ) : (
+                                        <HumanDate date={model[column.name] as string} />
+                                      ))}
+                                  </Component>
+                                );
+                              }
+
+                              const translatedValue = column.translate
+                                ? t(`${column.translate}.${model[column.name]}` as any)
+                                : (model[column.name] as string);
+                              if (column.type === "code") {
+                                return (
+                                  <Component key={column.name.toString()} className={column.className}>
+                                    {model[column.name] && (
+                                      <div className="badge badge-sm">
+                                        <code>{translatedValue}</code>
+                                      </div>
+                                    )}
+                                  </Component>
+                                );
+                              }
+                              return (
+                                <Component key={column.name.toString()} className={column.className}>
+                                  {column.truncate ? (
+                                    <TruncateText text={translatedValue} length={column.truncate} />
                                   ) : (
-                                    <HumanDate date={model[column.name] as string} />
-                                  ))}
-                              </Component>
-                            );
-                          }
-
-                          const translatedValue = column.translate
-                            ? t(`${column.translate}.${model[column.name]}` as any)
-                            : (model[column.name] as string);
-                          if (column.type === "code") {
-                            return (
-                              <Component key={column.name.toString()} className={column.className}>
-                                {model[column.name] && (
-                                  <div className="badge badge-sm">
-                                    <code>{translatedValue}</code>
-                                  </div>
-                                )}
-                              </Component>
-                            );
-                          }
-                          return (
-                            <Component key={column.name.toString()} className={column.className}>
-                              {column.truncate ? (
-                                <TruncateText text={translatedValue} length={column.truncate} />
-                              ) : (
-                                translatedValue
-                              )}
-                            </Component>
-                          );
-                        })}
-                      </tr>
-                    ))}
+                                    translatedValue
+                                  )}
+                                </Component>
+                              );
+                            })}
+                          </tr>
+                        </Fragment>
+                      );
+                    })}
                   </tbody>
                 </table>
               )}
