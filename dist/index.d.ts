@@ -3,8 +3,7 @@ import * as React from 'react';
 import React__default, { ReactNode, ChangeEvent, RefObject } from 'react';
 import { Placement } from '@floating-ui/utils';
 import { ReadonlyURLSearchParams } from 'next/navigation';
-import * as react_hook_form from 'react-hook-form';
-import { FieldErrors, FieldValues, UseFormProps, UseFormSetError, FieldPath, FieldError, Merge, RegisterOptions, UseFormRegister, Control } from 'react-hook-form';
+import { FieldErrors, FieldValues, UseFormProps, UseFormReturn, UseFormSetError, FieldPath, FieldError, Merge, RegisterOptions, UseFormRegister, Control } from 'react-hook-form';
 import { Matcher, DateRange } from 'react-day-picker';
 import { NumericFormatProps } from 'react-number-format/types/types';
 import { NumericFormatProps as NumericFormatProps$1 } from 'react-number-format';
@@ -174,7 +173,7 @@ declare const PaginatedTable: <TModel extends {
     toolbarClassName?: string;
     group?: {
         by: (a: TModel["data"][number]) => string;
-        render: (firstOfAGroup: TModel["data"][number]) => React__default.ReactNode;
+        render: (firstOfAGroup: TModel["data"], columnLength: number) => React__default.ReactNode;
     };
     titleAbove?: ReactNode;
     caption?: ReactNode;
@@ -282,29 +281,13 @@ declare const useFormSubmit: <T extends FieldValues, R = unknown>(formOptions?: 
     loadingText?: string;
     savedText?: string;
     confirm?: boolean;
-}) => {
-    confirm: {
+}) => Omit<UseFormReturn<T>, "handleSubmit"> & {
+    confirm?: {
         needsConfirm: boolean;
-        setNeedsConfirm: (success: boolean) => void;
+        setNeedsConfirm: (needsConfirm: boolean) => void;
         showDialog: () => void;
-    } | undefined;
-    handleSubmit: (doSubmitCallback: (data: T) => Promise<ServerError | R>) => (e?: React__default.BaseSyntheticEvent) => Promise<void>;
-    watch: react_hook_form.UseFormWatch<T>;
-    getValues: react_hook_form.UseFormGetValues<T>;
-    getFieldState: react_hook_form.UseFormGetFieldState<T>;
-    setError: UseFormSetError<T>;
-    clearErrors: react_hook_form.UseFormClearErrors<T>;
-    setValue: react_hook_form.UseFormSetValue<T>;
-    setValues: react_hook_form.UseFormSetValues<T>;
-    trigger: react_hook_form.UseFormTrigger<T>;
-    formState: react_hook_form.FormState<T>;
-    resetField: react_hook_form.UseFormResetField<T>;
-    reset: react_hook_form.UseFormReset<T>;
-    unregister: react_hook_form.UseFormUnregister<T>;
-    control: react_hook_form.Control<T, any, T>;
-    register: react_hook_form.UseFormRegister<T>;
-    setFocus: react_hook_form.UseFormSetFocus<T>;
-    subscribe: react_hook_form.UseFormSubscribe<T>;
+    };
+    handleSubmit: (doSubmitCallback: (data: T) => Promise<ServerError | R>) => (e?: React__default.BaseSyntheticEvent) => Promise<unknown>;
 };
 declare const ConfirmSave: ({ onConfirm }: {
     onConfirm: (success: boolean) => void;

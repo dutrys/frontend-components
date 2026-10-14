@@ -47,7 +47,7 @@ export declare const PaginatedTable: <TModel extends {
     toolbarClassName?: string;
     group?: {
         by: (a: TModel["data"][number]) => string;
-        render: (firstOfAGroup: TModel["data"][number]) => React.ReactNode;
+        render: (firstOfAGroup: TModel["data"], columnLength: number) => React.ReactNode;
     };
     titleAbove?: ReactNode;
     caption?: ReactNode;

@@ -1589,7 +1589,20 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
     }
     elements.push(...searchableShortcuts);
     const [hover, setHover] = useState(null);
-    let groupKey = "";
+    const groupedData = useMemo(() => {
+        const ggg = {};
+        if (group) {
+            pagination.data.forEach((item) => {
+                const g = group.by(item);
+                ggg[g] = ggg[g] ?? [];
+                ggg[g].push(item);
+            });
+        }
+        else {
+            ggg[""] = pagination.data;
+        }
+        return ggg;
+    }, [group, pagination]);
     return (jsxs(Fragment, { children: [titleAbove && (jsx(Title, { truncate: typeof titleAbove === "string", outerHeight: "h-28", children: titleAbove })), jsxs("div", { "data-testid": "paginate-table", className: "relative h-screen", "data-test-sort": (pagination.meta.sortBy || []).flat().join("-"), onMouseLeave: () => setHover(null), children: [jsxs("div", { className: cx("absolute z-501 top-16 flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-screen sm:max-w-[calc(100vw-var(--sidebar-width))]", toolbarClassName), children: [jsx("h1", { className: `h-16 flex items-center pl-4 my-0 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (elements.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsivePaginated, { bulkActions: bulkActions ? { actions: bulkActions, setSelected, selected } : undefined, elements: elements })), extraHeading, addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: addNewText || t("pagination.addNew") })] })), renderGridItem && (jsxs("div", { className: "join mr-2", children: [jsx("button", { className: cx("btn btn-xs join-item", { "btn-active": displayAs === "grid" }), onClick: () => {
                                             setDisplayAs("grid");
                                             if (displayConfig) {
@@ -1624,14 +1637,12 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                                     }, searchParams), children: [column.title, jsx("span", { className: "text-[0.5rem]", children: order === "DESC" ? "▲" : "▼" })] }) }, column.name.toString()));
                                                         }
                                                         return (jsx(Component, { className: `${styles$4.thead} text-xs`, children: column.title }, column.title.toString()));
-                                                    })] }) }), jsx("tbody", { children: pagination.data.map((model, o) => {
-                                                let renderGroup = null;
-                                                const by = group ? group.by(pagination.data[o]) : "";
-                                                if (group && by !== groupKey) {
-                                                    groupKey = by;
-                                                    renderGroup = group.render(pagination.data[o]);
-                                                }
-                                                return (jsxs(Fragment$1, { children: [renderGroup, jsxs("tr", { "data-testid": `table-row-${o}`, onClick: rowClickHref
+                                                    })] }) }), Object.entries(groupedData).map(([key, entries]) => {
+                                            let g = null;
+                                            if (group && key !== "") {
+                                                g = (jsx("thead", { children: group.render(entries, columnsConfigs[configName].filter((s) => s && s.enabled).length) }));
+                                            }
+                                            return (jsxs(Fragment$1, { children: [g, jsx("tbody", { children: entries.map((model, o) => (jsxs("tr", { "data-testid": `table-row-${o}`, onClick: rowClickHref
                                                                 ? (event) => {
                                                                     const selection = window.getSelection();
                                                                     if (selection && selection.toString().length > 0) {
@@ -1689,8 +1700,8 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                                         return (jsx(Component, { className: column.className, children: model[column.name] && (jsx("div", { className: "badge badge-sm", children: jsx("code", { children: translatedValue }) })) }, column.name.toString()));
                                                                     }
                                                                     return (jsx(Component, { className: column.className, children: column.truncate ? (jsx(TruncateText, { text: translatedValue, length: column.truncate })) : (translatedValue) }, column.name.toString()));
-                                                                })] })] }, o));
-                                            }) })] })) }), jsx("div", { className: "absolute box-content left-0 bottom-0 w-full h-16 z-1 border-t border-t-base-content/5", children: jsx("div", { className: "bg-base-100", children: jsxs("div", { className: "flex justify-center items-center", children: [!pagination.meta.withoutCount && (jsx("div", { className: `shrink-1 w-60 text-xs pl-4 ${pagination.meta.totalPages > 1 ? "hidden md:block" : ""}`, children: t("pagination.showing", {
+                                                                })] }, key + "-" + o))) })] }, key));
+                                        })] })) }), jsx("div", { className: "absolute box-content left-0 bottom-0 w-full h-16 z-1 border-t border-t-base-content/5", children: jsx("div", { className: "bg-base-100", children: jsxs("div", { className: "flex justify-center items-center", children: [!pagination.meta.withoutCount && (jsx("div", { className: `shrink-1 w-60 text-xs pl-4 ${pagination.meta.totalPages > 1 ? "hidden md:block" : ""}`, children: t("pagination.showing", {
                                                     from: (pagination.meta.currentPage - 1) * pagination.meta.itemsPerPage + 1,
                                                     to: Math.min(pagination.meta.currentPage * pagination.meta.itemsPerPage, pagination.meta.totalItems),
                                                     total: pagination.meta.totalItems,

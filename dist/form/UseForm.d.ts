@@ -1,5 +1,5 @@
 import React from "react";
-import { FieldErrors, FieldValues, UseFormProps, UseFormSetError } from "react-hook-form";
+import { FieldErrors, FieldValues, UseFormProps, UseFormReturn, UseFormSetError } from "react-hook-form";
 export declare const AlertErrors: ({ forceKey, errors, translateId, className, }: {
     forceKey?: boolean;
     errors: FieldErrors;
@@ -39,29 +39,13 @@ export declare const useFormSubmit: <T extends FieldValues, R = unknown>(formOpt
     loadingText?: string;
     savedText?: string;
     confirm?: boolean;
-}) => {
-    confirm: {
+}) => Omit<UseFormReturn<T>, "handleSubmit"> & {
+    confirm?: {
         needsConfirm: boolean;
-        setNeedsConfirm: (success: boolean) => void;
+        setNeedsConfirm: (needsConfirm: boolean) => void;
         showDialog: () => void;
-    } | undefined;
-    handleSubmit: (doSubmitCallback: (data: T) => Promise<ServerError | R>) => (e?: React.BaseSyntheticEvent) => Promise<void>;
-    watch: import("react-hook-form").UseFormWatch<T>;
-    getValues: import("react-hook-form").UseFormGetValues<T>;
-    getFieldState: import("react-hook-form").UseFormGetFieldState<T>;
-    setError: UseFormSetError<T>;
-    clearErrors: import("react-hook-form").UseFormClearErrors<T>;
-    setValue: import("react-hook-form").UseFormSetValue<T>;
-    setValues: import("react-hook-form").UseFormSetValues<T>;
-    trigger: import("react-hook-form").UseFormTrigger<T>;
-    formState: import("react-hook-form").FormState<T>;
-    resetField: import("react-hook-form").UseFormResetField<T>;
-    reset: import("react-hook-form").UseFormReset<T>;
-    unregister: import("react-hook-form").UseFormUnregister<T>;
-    control: import("react-hook-form").Control<T, any, T>;
-    register: import("react-hook-form").UseFormRegister<T>;
-    setFocus: import("react-hook-form").UseFormSetFocus<T>;
-    subscribe: import("react-hook-form").UseFormSubscribe<T>;
+    };
+    handleSubmit: (doSubmitCallback: (data: T) => Promise<ServerError | R>) => (e?: React.BaseSyntheticEvent) => Promise<unknown>;
 };
 export declare const ConfirmSave: ({ onConfirm }: {
     onConfirm: (success: boolean) => void;

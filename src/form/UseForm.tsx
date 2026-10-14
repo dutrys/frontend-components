@@ -1,7 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslations } from "next-intl";
-import { FieldErrors, FieldPath, FieldValues, useForm, UseFormProps, UseFormSetError } from "react-hook-form";
+import {
+  FieldErrors,
+  FieldPath,
+  FieldValues,
+  useForm,
+  UseFormProps,
+  UseFormReturn,
+  UseFormSetError,
+} from "react-hook-form";
 import { captureException } from "@sentry/nextjs";
 import { useRouter } from "next/navigation";
 
@@ -186,7 +194,16 @@ export const useFormSubmit = <T extends FieldValues, R = unknown>(
     savedText?: string;
     confirm?: boolean;
   } = {},
-) => {
+): Omit<UseFormReturn<T>, "handleSubmit"> & {
+  confirm?: {
+    needsConfirm: boolean;
+    setNeedsConfirm: (needsConfirm: boolean) => void;
+    showDialog: () => void;
+  };
+  handleSubmit: (
+    doSubmitCallback: (data: T) => Promise<ServerError | R>,
+  ) => (e?: React.BaseSyntheticEvent) => Promise<unknown>;
+} => {
   const t = useTranslations();
   const router = useRouter();
   const { returnBack, reportProgress, onError, onSuccess, loadingText, savedText, ...options } = formOptions;
