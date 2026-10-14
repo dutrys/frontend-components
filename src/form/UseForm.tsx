@@ -209,8 +209,17 @@ export const useFormSubmit = <T extends FieldValues, R = unknown>(
   const { returnBack, reportProgress, onError, onSuccess, loadingText, savedText, ...options } = formOptions;
   const formProps = useForm<T>(options);
 
-  const handleSubmit = (doSubmitCallback: (data: T) => Promise<ServerError | R>) =>
-    formProps.handleSubmit(
+  const serverErrorKeys = useRef<string[]>([]);
+
+  const handleSubmit = (doSubmitCallback: (data: T) => Promise<ServerError | R>) => (e?: React.BaseSyntheticEvent) => {
+    // Server errors set on paths without a registered field are never re-validated by react-hook-form,
+    // so they would block every following submit. Clear them before client-side validation runs.
+    if (serverErrorKeys.current.length > 0) {
+      formProps.clearErrors(serverErrorKeys.current as FieldPath<T>[]);
+      serverErrorKeys.current = [];
+    }
+
+    return formProps.handleSubmit(
       (values) => {
         const promise = new Promise((res, rej) => {
           if (formOptions.confirm && !isConfirmed.current) {
@@ -225,6 +234,7 @@ export const useFormSubmit = <T extends FieldValues, R = unknown>(
                 if (typeof onError === "function") {
                   onError(data);
                 }
+                serverErrorKeys.current = Object.keys(data.errors);
                 addServerErrors(data.errors, formProps.setError);
                 rej(data);
                 return;
@@ -274,7 +284,8 @@ export const useFormSubmit = <T extends FieldValues, R = unknown>(
       (r) => {
         console.log("INVALID FORM:", r);
       },
-    );
+    )(e);
+  };
 
   const isConfirmed = useRef(false);
   const [needsConfirm, setNeedsConfirm] = useState(false);

@@ -519,53 +519,63 @@ const useFormSubmit = (formOptions = {}) => {
     const router = useRouter$1();
     const { returnBack, reportProgress, onError, onSuccess, loadingText, savedText, ...options } = formOptions;
     const formProps = useForm(options);
-    const handleSubmit = (doSubmitCallback) => formProps.handleSubmit((values) => {
-        const promise = new Promise((res, rej) => {
-            if (formOptions.confirm && !isConfirmed.current) {
-                setNeedsConfirm(true);
-                return rej("Form confirmation is required");
-            }
-            setNeedsConfirm(false);
-            isConfirmed.current = false;
-            doSubmitCallback(values)
-                .then((data) => {
-                if (isServerError(data)) {
-                    if (typeof onError === "function") {
-                        onError(data);
-                    }
-                    addServerErrors(data.errors, formProps.setError);
-                    rej(data);
-                    return;
-                }
-                if (typeof onSuccess === "function") {
-                    onSuccess(data);
-                }
-                res(data);
-                if (returnBack !== false) {
-                    router.back();
-                }
-            })
-                .catch((e) => {
-                captureException(e, { extra: { formValues: values } });
-                rej(e);
-            });
-        });
-        if (reportProgress !== false) {
-            void toast.promise(promise, {
-                loading: loadingText || t("general.saving"),
-                success: savedText || t("general.saved"),
-                error: (data) => {
-                    if (isServerError(data)) {
-                        return (jsxs(Fragment, { children: [t("general.validateError"), ":", " ", jsx(GeneralErrors, { className: "text-gray-500", translateId: options.translateErrors, errors: formProps.formState.errors })] }));
-                    }
-                    return t("general.error");
-                },
-            }, { id: "form-submit" });
+    const serverErrorKeys = useRef([]);
+    const handleSubmit = (doSubmitCallback) => (e) => {
+        // Server errors set on paths without a registered field are never re-validated by react-hook-form,
+        // so they would block every following submit. Clear them before client-side validation runs.
+        if (serverErrorKeys.current.length > 0) {
+            formProps.clearErrors(serverErrorKeys.current);
+            serverErrorKeys.current = [];
         }
-        return promise;
-    }, (r) => {
-        console.log("INVALID FORM:", r);
-    });
+        return formProps.handleSubmit((values) => {
+            const promise = new Promise((res, rej) => {
+                if (formOptions.confirm && !isConfirmed.current) {
+                    setNeedsConfirm(true);
+                    return rej("Form confirmation is required");
+                }
+                setNeedsConfirm(false);
+                isConfirmed.current = false;
+                doSubmitCallback(values)
+                    .then((data) => {
+                    if (isServerError(data)) {
+                        if (typeof onError === "function") {
+                            onError(data);
+                        }
+                        serverErrorKeys.current = Object.keys(data.errors);
+                        addServerErrors(data.errors, formProps.setError);
+                        rej(data);
+                        return;
+                    }
+                    if (typeof onSuccess === "function") {
+                        onSuccess(data);
+                    }
+                    res(data);
+                    if (returnBack !== false) {
+                        router.back();
+                    }
+                })
+                    .catch((e) => {
+                    captureException(e, { extra: { formValues: values } });
+                    rej(e);
+                });
+            });
+            if (reportProgress !== false) {
+                void toast.promise(promise, {
+                    loading: loadingText || t("general.saving"),
+                    success: savedText || t("general.saved"),
+                    error: (data) => {
+                        if (isServerError(data)) {
+                            return (jsxs(Fragment, { children: [t("general.validateError"), ":", " ", jsx(GeneralErrors, { className: "text-gray-500", translateId: options.translateErrors, errors: formProps.formState.errors })] }));
+                        }
+                        return t("general.error");
+                    },
+                }, { id: "form-submit" });
+            }
+            return promise;
+        }, (r) => {
+            console.log("INVALID FORM:", r);
+        })(e);
+    };
     const isConfirmed = useRef(false);
     const [needsConfirm, setNeedsConfirm] = useState(false);
     return {
