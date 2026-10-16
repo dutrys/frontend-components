@@ -275,6 +275,7 @@ export const TextareaFormField = <
             if (props.maxLength) {
               setLength(e.target?.value?.length ?? 0);
             }
+            return r.onChange(e);
           }}
         />
         {props.maxLength && (
