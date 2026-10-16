@@ -11,7 +11,7 @@ import { FunnelIcon as FunnelIconSolid } from "@heroicons/react/24/solid";
 import { MoreActions, MoreActionType } from "./MoreAction";
 import { NoCountPagination, Pagination } from "./Pagination";
 import { useTranslations } from "next-intl";
-import React, { Fragment, type ReactNode, useMemo, useState } from "react";
+import React, { Fragment, type ReactNode, useMemo, useRef, useState } from "react";
 import styles from "./PaginatedTable.module.css";
 import cx from "classnames";
 import { addLocale, Link } from "./Link";
@@ -251,6 +251,21 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
     }
     return ggg;
   }, [group, pagination]);
+
+  const lastToggledId = useRef<number | null>(null);
+  const toggleSelected = (id: number, checked: boolean, withShift: boolean) => {
+    const ids = Object.values(groupedData)
+      .flat()
+      .map((model) => model.id);
+    const from = lastToggledId.current === null ? -1 : ids.indexOf(lastToggledId.current);
+    const to = ids.indexOf(id);
+    const range = withShift && from !== -1 && to !== -1 ? ids.slice(Math.min(from, to), Math.max(from, to) + 1) : [id];
+
+    setSelected((prev) =>
+      checked ? [...prev, ...range.filter((r) => !prev.includes(r))] : prev.filter((r) => !range.includes(r)),
+    );
+    lastToggledId.current = id;
+  };
 
   return (
     <>
@@ -495,12 +510,18 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                                   <input
                                     type="checkbox"
                                     className="checkbox checkbox-xs"
-                                    onChange={(e) => {
-                                      if (e.target.checked) {
-                                        setSelected((prev) => [...prev, model.id]);
-                                      } else {
-                                        setSelected((prev) => prev.filter((id) => id !== model.id));
+                                    onMouseDown={(e) => {
+                                      // prevent text selection on shift+click
+                                      if (e.shiftKey) {
+                                        e.preventDefault();
                                       }
+                                    }}
+                                    onChange={(e) => {
+                                      toggleSelected(
+                                        model.id,
+                                        e.target.checked,
+                                        (e.nativeEvent as MouseEvent).shiftKey ?? false,
+                                      );
                                     }}
                                     checked={selected.includes(model.id)}
                                   />

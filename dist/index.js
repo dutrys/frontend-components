@@ -1614,6 +1614,17 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
         }
         return ggg;
     }, [group, pagination]);
+    const lastToggledId = useRef(null);
+    const toggleSelected = (id, checked, withShift) => {
+        const ids = Object.values(groupedData)
+            .flat()
+            .map((model) => model.id);
+        const from = lastToggledId.current === null ? -1 : ids.indexOf(lastToggledId.current);
+        const to = ids.indexOf(id);
+        const range = withShift && from !== -1 && to !== -1 ? ids.slice(Math.min(from, to), Math.max(from, to) + 1) : [id];
+        setSelected((prev) => checked ? [...prev, ...range.filter((r) => !prev.includes(r))] : prev.filter((r) => !range.includes(r)));
+        lastToggledId.current = id;
+    };
     return (jsxs(Fragment, { children: [titleAbove && (jsx(Title, { truncate: typeof titleAbove === "string", outerHeight: "h-28", children: titleAbove })), jsxs("div", { "data-testid": "paginate-table", className: "relative h-screen", "data-test-sort": (pagination.meta.sortBy || []).flat().join("-"), onMouseLeave: () => setHover(null), children: [jsxs("div", { className: cx("absolute z-501 top-16 flex items-center flex-end w-full border-b border-b-base-content/5 h-12 max-w-screen sm:max-w-[calc(100vw-var(--sidebar-width))]", toolbarClassName), children: [jsx("h1", { className: `h-16 flex items-center pl-4 my-0 pr-2 font-bold mr-auto ${searchableShortcuts.length > 0 ? "" : "grow"}`, children: title }), jsx(Hotkeys, { id: "paginatedTable", hotKeys: hotKeys }), (elements.length > 0 || (bulkActions && bulkActions?.length > 0)) && (jsx(HeaderResponsivePaginated, { bulkActions: bulkActions ? { actions: bulkActions, setSelected, selected } : undefined, elements: elements })), extraHeading, addNew && (jsxs(Link, { className: "btn uppercase btn-accent gap-2 justify-end  btn-xs mr-2", href: addLocale(addNew, params.locale), "data-testid": "add-new", children: [jsx(PlusIcon, { className: "w-4 h-4" }), " ", jsx("span", { className: "hidden sm:inline", children: addNewText || t("pagination.addNew") })] })), renderGridItem && (jsxs("div", { className: "join mr-2", children: [jsx("button", { className: cx("btn btn-xs join-item", { "btn-active": displayAs === "grid" }), onClick: () => {
                                             setDisplayAs("grid");
                                             if (displayConfig) {
@@ -1681,13 +1692,13 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                                 [styles$4.selectedRow]: selected.includes(model.id),
                                                                 [styles$4.rowHref]: rowClickHref,
                                                                 [styles$4.rowHover]: hover === model.id,
-                                                            }), onMouseEnter: () => setHover(model.id), children: [bulkActions && (jsx("th", { className: "action-cell", children: jsx("input", { type: "checkbox", className: "checkbox checkbox-xs", onChange: (e) => {
-                                                                            if (e.target.checked) {
-                                                                                setSelected((prev) => [...prev, model.id]);
+                                                            }), onMouseEnter: () => setHover(model.id), children: [bulkActions && (jsx("th", { className: "action-cell", children: jsx("input", { type: "checkbox", className: "checkbox checkbox-xs", onMouseDown: (e) => {
+                                                                            // prevent text selection on shift+click
+                                                                            if (e.shiftKey) {
+                                                                                e.preventDefault();
                                                                             }
-                                                                            else {
-                                                                                setSelected((prev) => prev.filter((id) => id !== model.id));
-                                                                            }
+                                                                        }, onChange: (e) => {
+                                                                            toggleSelected(model.id, e.target.checked, e.nativeEvent.shiftKey ?? false);
                                                                         }, checked: selected.includes(model.id) }) })), columnsConfigs[configName].map((item, i) => {
                                                                     const column = columns.find((c) => isActionColumn(c) ? "action" === item.name : c.name === item.name);
                                                                     if (!column || !item.enabled) {
