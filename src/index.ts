@@ -26,3 +26,4 @@ export * from "./SidebarMenu";
 export * from "./Title";
 export * from "./pagination/Filter";
 export * from "./pagination/FilterButton";
+export * from "./pagination/Search";

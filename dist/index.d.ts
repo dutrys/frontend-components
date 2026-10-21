@@ -97,6 +97,10 @@ declare const getPreviousPageParam: <T extends {
 declare const getNextPageParam: <T extends {
     meta: ResponseMeta;
 }>(page?: T) => number | undefined;
+/** Reads a filter from the url, both as `filter.key[]` (written by Search, FilterButton) and `filter.key` */
+declare const getFilterParam: (searchParams: {
+    get: (key: string) => string | null;
+} | null, filter: string) => string | null;
 declare const setPartialParams: (partialParams: Record<string, number | string | string[]>, searchParams: ReadonlyURLSearchParams | null) => string;
 declare const isParamActive: (link: Record<string, string | string[]>, searchParams: ReadonlyURLSearchParams) => boolean;
 
@@ -127,6 +131,35 @@ declare class LocalStorage<T> implements StorageInterface<T> {
     getConfig(title: string, columns: ColumnType<T>[]): Promise<PaginationSettings>;
     setConfig(title: string, configs: PaginationSettings): Promise<void>;
 }
+
+type FilterOperator = "$eq" | "$gt" | "$gte" | "$in" | "$null" | "$lt" | "$lte" | "$btw" | "$ilike" | "$sw" | "$contains" | "$not" | "$and" | "$or";
+type FilterOperators = Record<string, FilterOperator[]>;
+declare const baseOperators: readonly ["$eq", "$in", "$ilike", "$null"];
+type BaseOperator = (typeof baseOperators)[number];
+type SearchOperator = BaseOperator | `$not:${BaseOperator}`;
+type SearchFilter = {
+    key: string;
+    operator: SearchOperator;
+    value: string;
+};
+declare const parseSearchFilters: (filterOperators: FilterOperators, searchParams: URLSearchParams | {
+    get: (key: string) => string | null;
+}) => SearchFilter[];
+/**
+ * Converts filters to query params. Filters which were removed are cleared, but only when the current
+ * query param is one Search can represent, so filters set elsewhere (e.g. by Filter on a field without
+ * the operator in `filterOperators`) are left intact.
+ */
+declare const searchFiltersToParams: (filterOperators: FilterOperators, filters: SearchFilter[], searchParams: URLSearchParams | {
+    get: (key: string) => string | null;
+}) => Record<string, string | string[]>;
+declare const Search: ({ filterOperators, search, setSearch, filters, setFilters, }: {
+    filterOperators: FilterOperators;
+    search: string;
+    setSearch: (search: string) => void;
+    filters: SearchFilter[];
+    setFilters: (filters: SearchFilter[]) => void;
+}) => react_jsx_runtime.JSX.Element;
 
 type ActionColumn<TModel> = {
     type: "actions";
@@ -169,7 +202,8 @@ declare const PaginatedTable: <TModel extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, toolbarClassName, group, }: {
+}>({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, toolbarClassName, group, filterOperators, }: {
+    filterOperators?: FilterOperators;
     toolbarClassName?: string;
     group?: {
         by: (a: TModel["data"][number]) => string;
@@ -756,4 +790,4 @@ declare const FilterButton: ({ className, filter, onSubmitParams, onParseParams,
     className?: string;
 }) => react_jsx_runtime.JSX.Element;
 
-export { type ActionColumn, AlertErrors, Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, type ColumnType, ConfirmSave, type DateColumn, DateField, DateFormField, DateInput, type DateInputProps, DateRangeField, DateRangeInput, type DateRangeInputProps, DateTime, DateTimeFormField, DateTimePicker, type DateTimePickerProps, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, type FilterPaginationColumn, FilterSelectOptions, FilterText, FilterType, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MenuItem, type MenuItemWithSubmenu, type MoreActionType, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, type PaginateQuery, PaginatedTable, Pagination, type PaginationSettings, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, type ResponseMeta, SaveButton, ScreenSize, Select, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, type SelectFromApiProps, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, type SelectPaginatedFromApiProps, type SelectProps, type ServerError, SidebarLayout, SidebarMenu, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, type TimePickerProps, Title, Toaster, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
+export { type ActionColumn, AlertErrors, Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, type ColumnType, ConfirmSave, type DateColumn, DateField, DateFormField, DateInput, type DateInputProps, DateRangeField, DateRangeInput, type DateRangeInputProps, DateTime, DateTimeFormField, DateTimePicker, type DateTimePickerProps, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, FilterLink, FilterNumberRange, type FilterOperator, type FilterOperators, FilterOptions, FilterOptionsExpandable, FilterPagination, type FilterPaginationColumn, FilterSelectOptions, FilterText, FilterType, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MenuItem, type MenuItemWithSubmenu, type MoreActionType, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, type PaginateQuery, PaginatedTable, Pagination, type PaginationSettings, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, type ResponseMeta, SaveButton, ScreenSize, Search, type SearchFilter, type SearchOperator, Select, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, type SelectFromApiProps, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, type SelectPaginatedFromApiProps, type SelectProps, type ServerError, SidebarLayout, SidebarMenu, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, type TimePickerProps, Title, Toaster, addServerErrors, getFilterParam, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, parseSearchFilters, searchFiltersToParams, setPartialParams, useFormSubmit, useScreenSize };

@@ -23,6 +23,12 @@ export const getPreviousPageParam = <T extends { meta: ResponseMeta }>(page?: T)
 export const getNextPageParam = <T extends { meta: ResponseMeta }>(page?: T): number | undefined =>
   !page?.meta || page?.meta?.currentPage >= page.meta?.totalPages ? undefined : page.meta.currentPage + 1;
 
+/** Reads a filter from the url, both as `filter.key[]` (written by Search, FilterButton) and `filter.key` */
+export const getFilterParam = (
+  searchParams: { get: (key: string) => string | null } | null,
+  filter: string,
+): string | null => searchParams?.get(`filter.${filter}[]`) ?? searchParams?.get(`filter.${filter}`) ?? null;
+
 export const setPartialParams = (
   partialParams: Record<string, number | string | string[]>,
   searchParams: ReadonlyURLSearchParams | null,
@@ -59,7 +65,7 @@ export const isParamActive = (
       if (!link[key].every((item) => searchParams.getAll(`${key}[]`).includes(item))) {
         return false;
       }
-    } else if (link[key] !== searchParams.get(key)) {
+    } else if (link[key] !== (searchParams.get(key) ?? searchParams.get(`${key}[]`))) {
       return false;
     }
   }

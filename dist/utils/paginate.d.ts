@@ -20,6 +20,10 @@ export declare const getPreviousPageParam: <T extends {
 export declare const getNextPageParam: <T extends {
     meta: ResponseMeta;
 }>(page?: T) => number | undefined;
+/** Reads a filter from the url, both as `filter.key[]` (written by Search, FilterButton) and `filter.key` */
+export declare const getFilterParam: (searchParams: {
+    get: (key: string) => string | null;
+} | null, filter: string) => string | null;
 export declare const setPartialParams: (partialParams: Record<string, number | string | string[]>, searchParams: ReadonlyURLSearchParams | null) => string;
 export declare const isParamActive: (link: Record<string, string | string[]>, searchParams: ReadonlyURLSearchParams) => boolean;
 //# sourceMappingURL=paginate.d.ts.map

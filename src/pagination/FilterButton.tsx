@@ -165,13 +165,24 @@ export const FilterButton = ({
   const searchParams = useSearchParams();
   const { filterIsActive, defaultValues } = getDefaultValues(searchParams, filter);
 
-  const { handleSubmit, register, setValue, control, getValues } = useForm<Record<string, unknown>>({
+  const { handleSubmit, register, setValue, control, getValues, reset } = useForm<Record<string, unknown>>({
     defaultValues: async () => (onParseParams ? onParseParams(defaultValues) : defaultValues),
   });
 
   const paginationValues = useRef<Record<string, Record<string, string>>>({});
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
+    // on mount the form is filled by async defaultValues; afterwards follow url changes (back/forward, Search,
+    // links), clearing filters which are no longer in the url
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+    } else {
+      const values: Record<string, unknown> = Object.fromEntries(Object.keys(filter).map((key) => [key, undefined]));
+      Object.assign(values, defaultValues);
+      reset(onParseParams ? onParseParams(values) : values);
+    }
+
     for (const [key, f] of Object.entries(filter)) {
       if (f.type === FilterType.PAGINATION) {
         const ids: (number | string)[] = (
@@ -189,7 +200,7 @@ export const FilterButton = ({
         }
       }
     }
-  }, []);
+  }, [searchParams]);
 
   const watched = useWatch({ control });
 
@@ -267,6 +278,13 @@ export const FilterButton = ({
                 } else {
                   params[`filter.${key}`] = val.toString();
                 }
+              }
+            }
+
+            // setPartialParams writes arrays as `filter.key[]=...`
+            for (const [key, val] of Object.entries(params)) {
+              if (key.startsWith("filter.") && typeof val === "string" && val !== "") {
+                params[key] = [val];
               }
             }
 

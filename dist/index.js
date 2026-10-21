@@ -1,7 +1,7 @@
 'use client';
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
 import * as React from 'react';
-import React__default, { useState, useRef, useEffect, useMemo, createContext, useContext, Fragment as Fragment$1, useCallback } from 'react';
+import React__default, { useState, useRef, useEffect, useMemo, createContext, useContext, Fragment as Fragment$1, useCallback, useId } from 'react';
 import { useFloating, offset, flip, shift, arrow, autoUpdate, useFocus, useHover, safePolygon, useClick, useDismiss, useInteractions, FloatingPortal, FloatingArrow, size } from '@floating-ui/react';
 import cx from 'classnames';
 import Link$1 from 'next/link';
@@ -9,7 +9,7 @@ import { useParams, useSearchParams, useRouter as useRouter$1, usePathname } fro
 import { EllipsisVerticalIcon, ArrowsUpDownIcon } from '@heroicons/react/16/solid';
 import { useRouter } from 'next-nprogress-bar';
 import toast, { useToasterStore, Toaster as Toaster$1, resolveValue } from 'react-hot-toast';
-import { ExclamationTriangleIcon, CheckCircleIcon, ExclamationCircleIcon, ChevronDownIcon, EllipsisHorizontalIcon, CheckIcon, Cog6ToothIcon, AdjustmentsHorizontalIcon, XMarkIcon, ClockIcon, CalendarIcon, ChevronUpDownIcon, PlusIcon, RectangleStackIcon, QueueListIcon, FunnelIcon, MagnifyingGlassIcon, ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronDoubleDownIcon } from '@heroicons/react/24/outline';
+import { ExclamationTriangleIcon, CheckCircleIcon, ExclamationCircleIcon, ChevronDownIcon, EllipsisHorizontalIcon, CheckIcon, Cog6ToothIcon, AdjustmentsHorizontalIcon, XMarkIcon, ClockIcon, CalendarIcon, ChevronUpDownIcon, FunnelIcon, PlusIcon, RectangleStackIcon, QueueListIcon, MagnifyingGlassIcon, ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronDoubleDownIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from 'react-tooltip';
 import { useTranslations } from 'next-intl';
 import { ChevronLeftIcon, ChevronRightIcon, FunnelIcon as FunnelIcon$1 } from '@heroicons/react/24/solid';
@@ -268,6 +268,8 @@ const HeaderResponsive = ({ renderVisible, renderDropdown, heightClassName, elem
 
 const getPreviousPageParam = (page) => !page?.meta || page?.meta?.currentPage === 1 ? undefined : page.meta.currentPage - 1;
 const getNextPageParam = (page) => !page?.meta || page?.meta?.currentPage >= page.meta?.totalPages ? undefined : page.meta.currentPage + 1;
+/** Reads a filter from the url, both as `filter.key[]` (written by Search, FilterButton) and `filter.key` */
+const getFilterParam = (searchParams, filter) => searchParams?.get(`filter.${filter}[]`) ?? searchParams?.get(`filter.${filter}`) ?? null;
 const setPartialParams = (partialParams, searchParams) => {
     const params = new URLSearchParams(Array.from(searchParams?.entries() || []));
     Object.keys(partialParams).forEach((key) => {
@@ -300,7 +302,7 @@ const isParamActive = (link, searchParams) => {
                 return false;
             }
         }
-        else if (link[key] !== searchParams.get(key)) {
+        else if (link[key] !== (searchParams.get(key) ?? searchParams.get(`${key}[]`))) {
             return false;
         }
     }
@@ -1533,22 +1535,233 @@ const HumanDate = ({ date, from = new Date(), includeSeconds = false, tooltipId 
 
 const Title = ({ children, outerHeight, truncate, noOverlap, paddingLeft = "pl-4", noBackground, }) => (jsxs(Fragment, { children: [!noBackground && (jsx("div", { className: cx("absolute bg-base-100/50 backdrop-blur-xs z-500 w-full left-0 top-0", { "h-16": !outerHeight }, outerHeight) })), jsx("div", { className: cx("h-16 hidden sm:flex absolute z-501 flex items-center font-bold ml-[var(--top-left-bar)] w-[calc(100vw-var(--sidebar-width)-var(--top-right-bar)-var(--top-left-bar))]", { truncate }, paddingLeft), children: children }), noOverlap && jsx("div", { className: cx({ "h-16": !outerHeight }, outerHeight) })] }));
 
+const baseOperators = ["$eq", "$in", "$ilike", "$null"];
+const operatorLabels = {
+    $eq: "=",
+    "$not:$eq": "!=",
+    $in: "IN",
+    "$not:$in": "NOT IN",
+    $ilike: "~=",
+    "$not:$ilike": "!~=",
+    $null: "IS NULL",
+    "$not:$null": "IS NOT NULL",
+};
+/** Operators which do not take a value, e.g. `filter.id=$null` */
+const isValueless = (operator) => operator === "$null" || operator === "$not:$null";
+/** Operators which take a comma separated list, e.g. `filter.id=$in:1,2,3` */
+const isList = (operator) => operator === "$in" || operator === "$not:$in";
+const availableOperators = (operators) => {
+    const result = [];
+    for (const operator of baseOperators) {
+        if (operators.includes(operator)) {
+            result.push(operator);
+            if (operators.includes("$not")) {
+                result.push(`$not:${operator}`);
+            }
+        }
+    }
+    return result;
+};
+const parseFilterValue = (raw) => {
+    // `$not:` variants first, so `$not:$eq:1` does not get matched as something else
+    const operators = Object.keys(operatorLabels).sort((a, b) => b.length - a.length);
+    for (const operator of operators) {
+        if (isValueless(operator) ? raw === operator : raw.startsWith(`${operator}:`)) {
+            return { operator, value: isValueless(operator) ? "" : raw.slice(operator.length + 1) };
+        }
+    }
+    if (!raw.startsWith("$")) {
+        return { operator: "$eq", value: raw };
+    }
+    return null;
+};
+const parseSearchFilters = (filterOperators, searchParams) => {
+    const filters = [];
+    for (const key of Object.keys(filterOperators)) {
+        const raw = searchParams.get(`filter.${key}[]`) ?? searchParams.get(`filter.${key}`);
+        const parsed = raw ? parseFilterValue(raw) : null;
+        if (parsed && availableOperators(filterOperators[key]).includes(parsed.operator)) {
+            filters.push({ key, ...parsed });
+        }
+    }
+    return filters;
+};
+/**
+ * Converts filters to query params. Filters which were removed are cleared, but only when the current
+ * query param is one Search can represent, so filters set elsewhere (e.g. by Filter on a field without
+ * the operator in `filterOperators`) are left intact.
+ */
+const searchFiltersToParams = (filterOperators, filters, searchParams) => {
+    // arrays are written by setPartialParams as `filter.key[]=...`
+    const params = {};
+    for (const key of parseSearchFilters(filterOperators, searchParams).map((f) => f.key)) {
+        params[`filter.${key}`] = "";
+    }
+    for (const filter of filters) {
+        if (isValueless(filter.operator)) {
+            params[`filter.${filter.key}`] = [filter.operator];
+        }
+        else {
+            const value = isList(filter.operator)
+                ? filter.value
+                    .split(",")
+                    .map((v) => v.trim())
+                    .filter((v) => v !== "")
+                    .join(",")
+                : filter.value;
+            if (value !== "") {
+                params[`filter.${filter.key}`] = [`${filter.operator}:${value}`];
+            }
+        }
+    }
+    return params;
+};
+const Search = ({ filterOperators, search, setSearch, filters, setFilters, }) => {
+    const t = useTranslations();
+    const inputRef = useRef(null);
+    const [highlighted, setHighlighted] = useState(0);
+    const [isFocused, setIsFocused] = useState(false);
+    /** Filters are shown in a box over the content below, otherwise they are collapsed into a single icon */
+    const [expanded, setExpanded] = useState(false);
+    const collapsed = !expanded && filters.length > 0;
+    const currentWord = search.split(" ").pop() ?? "";
+    const suggestions = useMemo(() => {
+        const word = currentWord.toLowerCase();
+        if (word === "") {
+            return [];
+        }
+        return Object.entries(filterOperators)
+            .filter(([key, operators]) => availableOperators(operators).length > 0 &&
+            !filters.some((f) => f.key === key) &&
+            key.toLowerCase().startsWith(word))
+            .map(([key]) => key);
+    }, [currentWord, filterOperators, filters]);
+    const isOpen = isFocused && suggestions.length > 0;
+    const addFilter = (key) => {
+        const existing = filters.some((f) => f.key === key);
+        if (!existing) {
+            setFilters([...filters, { key, operator: availableOperators(filterOperators[key])[0], value: "" }]);
+        }
+        setExpanded(true);
+        setSearch(search.slice(0, search.length - currentWord.length).trimEnd());
+        setHighlighted(0);
+    };
+    const updateFilter = (index, filter) => setFilters(filters.map((f, i) => (i === index ? { ...f, ...filter } : f)));
+    const removeFilter = (index) => {
+        setFilters(filters.filter((_, i) => i !== index));
+        inputRef.current?.focus();
+    };
+    const onChange = (value) => {
+        const word = value.split(" ").pop() ?? "";
+        if (word.endsWith(":")) {
+            const typed = word.slice(0, -1).toLowerCase();
+            const key = Object.keys(filterOperators).find((k) => k.toLowerCase() === typed && availableOperators(filterOperators[k]).length > 0);
+            if (key) {
+                if (!filters.some((f) => f.key === key)) {
+                    setFilters([...filters, { key, operator: availableOperators(filterOperators[key])[0], value: "" }]);
+                }
+                setExpanded(true);
+                setSearch(value.slice(0, value.length - word.length).trimEnd());
+                return;
+            }
+        }
+        setSearch(value);
+        setHighlighted(0);
+    };
+    const onKeyDown = (e) => {
+        if (isOpen) {
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setHighlighted((highlighted + 1) % suggestions.length);
+                return;
+            }
+            if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setHighlighted((highlighted - 1 + suggestions.length) % suggestions.length);
+                return;
+            }
+            if (e.key === "Enter" || e.key === "Tab") {
+                e.preventDefault();
+                addFilter(suggestions[Math.min(highlighted, suggestions.length - 1)]);
+                return;
+            }
+            if (e.key === "Escape") {
+                e.preventDefault();
+                setIsFocused(false);
+                return;
+            }
+        }
+        if (e.key === "Backspace" && search === "" && expanded && filters.length > 0) {
+            e.preventDefault();
+            removeFilter(filters.length - 1);
+        }
+    };
+    return (jsx("div", { className: "relative w-full min-w-0 h-6", children: jsxs("div", { className: cx({ "absolute right-0 top-0 z-40 min-w-full w-96 max-w-[calc(100vw-4rem)]": expanded }), onBlur: (e) => {
+                if (!e.currentTarget.contains(e.relatedTarget)) {
+                    setExpanded(false);
+                }
+            }, children: [jsxs("div", { className: cx("join-item input input-xs flex w-full gap-1 px-0.5 focus-within:outline-0 focus-within:border-gray-500", expanded ? "h-auto min-h-6 flex-wrap py-0.5 shadow-lg" : "overflow-hidden"), onMouseDown: (e) => {
+                        // clicking on filter names or empty space would blur the input and collapse the box
+                        if (!e.target.closest("input, select, button")) {
+                            e.preventDefault();
+                        }
+                    }, onClick: (e) => {
+                        if (e.target === e.currentTarget) {
+                            inputRef.current?.focus();
+                        }
+                    }, children: [collapsed ? (jsxs("button", { type: "button", className: "inline-flex shrink-0 items-center gap-1 h-4.5 px-1.5 rounded-selector bg-base-200 text-xs font-semibold leading-none cursor-pointer hover:bg-base-300", title: filters.map((f) => f.key).join(", "), onClick: () => {
+                                setExpanded(true);
+                                inputRef.current?.focus();
+                            }, "data-testid": "search-filters-collapsed", children: [jsx(FunnelIcon, { className: "size-3" }), filters.length] })) : (filters.map((filter, i) => (jsx(SearchFilterChip, { filter: filter, operators: availableOperators(filterOperators[filter.key] ?? []), onChange: (f) => updateFilter(i, f), onRemove: () => removeFilter(i) }, filter.key)))), jsx("input", { ref: inputRef, type: "text", name: "search", autoComplete: "off", value: search, onChange: (e) => onChange(e.target.value), onKeyDown: onKeyDown, onFocus: () => setIsFocused(true), onBlur: () => setIsFocused(false), className: "grow min-w-16 px-1", placeholder: filters.length === 0 ? t("pagination.searchPlaceholder") : undefined })] }), isOpen && (jsx("ul", { className: "menu menu-xs absolute left-0 top-full mt-1 w-full bg-base-100 rounded-box shadow-lg border border-base-300 z-50", "data-testid": "search-suggestions", children: suggestions.map((key, i) => (jsx("li", { children: jsx("button", { type: "button", className: cx({ "menu-active": i === highlighted }), onMouseDown: (e) => {
+                                // keep focus in the input so blur does not close the list before click
+                                e.preventDefault();
+                                addFilter(key);
+                            }, onMouseEnter: () => setHighlighted(i), children: jsx("span", { className: "font-semibold", children: key }) }) }, key))) }))] }) }));
+};
+const SearchFilterChip = ({ filter, operators, onChange, onRemove, }) => {
+    const t = useTranslations();
+    // popover is rendered in the top layer, so it is not clipped by the search box overflow
+    const id = `search-operator-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+    const popoverRef = useRef(null);
+    return (jsxs("span", { className: "inline-flex shrink-0 items-center gap-0.5 h-4.5 pl-1.5 pr-0.5 rounded-selector bg-base-200 text-xs leading-none", "data-testid": `search-filter-${filter.key}`, children: [jsx("span", { className: "font-semibold", children: filter.key }), jsx("button", { type: "button", popoverTarget: id, className: "px-0.5 font-mono text-base-content/60 cursor-pointer hover:text-base-content", style: { anchorName: `--${id}` }, title: t(`pagination.operators.${filter.operator}`), children: operatorLabels[filter.operator] }), jsx("ul", { ref: popoverRef, id: id, popover: "auto", className: "dropdown menu menu-xs open:grid! grid-cols-[auto_1fr] w-max mt-1 p-1 rounded-box bg-base-100 shadow-lg border border-base-300", style: { positionAnchor: `--${id}` }, children: operators.map((operator) => (jsx("li", { className: "col-span-2 grid! grid-cols-subgrid", children: jsxs("button", { type: "button", className: cx("col-span-2 grid-cols-subgrid", { "menu-active": operator === filter.operator }), onClick: () => {
+                            onChange({ operator });
+                            popoverRef.current?.hidePopover();
+                        }, children: [jsx("span", { className: "font-mono", children: operatorLabels[operator] }), t(`pagination.operators.${operator}`)] }) }, operator))) }), !isValueless(filter.operator) && (jsx("input", { type: "text", autoFocus: filter.value === "", value: filter.value, onChange: (e) => onChange({ value: e.target.value }), onKeyDown: (e) => {
+                    if (e.key === "Backspace" && filter.value === "") {
+                        e.preventDefault();
+                        onRemove();
+                    }
+                }, size: Math.max(filter.value.length, 4), placeholder: isList(filter.operator) ? "1,2,3" : undefined, className: "h-3.5 min-w-0 rounded-selector bg-base-100 px-1.5 outline-0" })), jsx("button", { type: "button", className: "btn btn-ghost btn-circle size-4 min-h-0 text-base-content/50 hover:text-error", onClick: onRemove, children: jsx(XMarkIcon, { className: "size-3" }) })] }));
+};
+
 const limits = [10, 20, 50, 100];
 const isActionColumn = (column) => typeof column === "object" && column.type === "actions";
 const isFunctionColumn = (column) => typeof column === "object" && typeof column.body === "function";
-const SearchField = () => {
+const SearchField = ({ filterOperators }) => {
     const t = useTranslations();
     const params = useParams();
     const searchParams = useSearchParams();
     const router = useRouter();
     const path = usePathname();
     const [search, setSearch] = useState(searchParams.get("search") || "");
+    const [filters, setFilters] = useState(() => filterOperators ? parseSearchFilters(filterOperators, searchParams) : []);
+    // keep in sync when the url changes elsewhere (back/forward, links, Filter); filterOperators is
+    // left out of deps, as it is usually an inline object and would reset unsubmitted input on each render
+    useEffect(() => {
+        setSearch(searchParams.get("search") || "");
+        setFilters(filterOperators ? parseSearchFilters(filterOperators, searchParams) : []);
+    }, [searchParams]);
     return (jsx("div", { className: "w-32 sm:w-52 shrink-0 grow-0", children: jsx("form", { onSubmit: (e) => {
                 e.preventDefault();
-                router.push(addLocale((path + setPartialParams({ search, page: "1" }, searchParams)).replace(/^\/(en|lt)\//, "/"), params.locale));
-            }, children: jsxs("div", { className: "join w-full pr-2", children: [jsx("input", { type: "text", value: search, onChange: (e) => setSearch(e.target.value), name: "search", className: "join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500", placeholder: t("pagination.searchPlaceholder") }), jsx("button", { className: "join-item btn btn-neutral btn-xs uppercase", type: "submit", children: jsx(MagnifyingGlassIcon, { className: "w-4 h-4" }) })] }) }) }));
+                router.push(addLocale((path +
+                    setPartialParams({
+                        search: search.trim(),
+                        page: "",
+                        ...(filterOperators ? searchFiltersToParams(filterOperators, filters, searchParams) : {}),
+                    }, searchParams)).replace(/^\/(en|lt)\//, "/"), params.locale));
+            }, children: jsxs("div", { className: "join w-full pr-2", children: [filterOperators ? (jsx(Search, { filterOperators: filterOperators, search: search, setSearch: setSearch, filters: filters, setFilters: setFilters })) : (jsx("input", { type: "text", value: search, onChange: (e) => setSearch(e.target.value), name: "search", className: "join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500", placeholder: t("pagination.searchPlaceholder") })), jsx("button", { className: "join-item btn btn-neutral btn-xs uppercase", type: "submit", children: jsx(MagnifyingGlassIcon, { className: "w-4 h-4" }) })] }) }) }));
 };
-const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs = "list", toolbarClassName, group, }) => {
+const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs = "list", toolbarClassName, group, filterOperators, }) => {
     const router = useRouter();
     const params = useParams();
     const searchParams = useSearchParams();
@@ -1590,10 +1803,10 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
         elements.push([{ link: { bulk: "bulk" }, text: "" }]);
     }
     for (const d of displayFilters || []) {
-        if (d.filters.some((filter) => searchParams.get(`filter.${filter}`) !== null)) {
+        if (d.filters.some((filter) => getFilterParam(searchParams, filter) !== null)) {
             const filterToDisplay = {};
             d.filters.forEach((filter) => {
-                filterToDisplay[`filter.${filter}`] = searchParams.get(`filter.${filter}`) || "";
+                filterToDisplay[`filter.${filter}`] = getFilterParam(searchParams, filter) || "";
             });
             elements.push([{ text: d.name, link: filterToDisplay }]);
         }
@@ -1635,7 +1848,7 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                             if (displayConfig) {
                                                 void store?.setConfig(displayConfig.name, { displayAs: "list" });
                                             }
-                                        }, children: jsx(QueueListIcon, { className: "size-4" }) })] })), isSearchable && jsx(SearchField, {}), displayConfig && (jsx("div", { className: "pr-2", children: jsx(PaginationConfiguration, { disabled: displayAs !== "list", store: store, name: displayConfig.name, configName: configName, columns: columns, configs: { ...paginationConfigs, columns: columnsConfigs }, setConfigName: (name) => setConfigName(name), refresh: () => void refetchPaginationConfigs() }) }))] }), (pagination.meta.withoutCount ? pagination.data.length === 0 : pagination.meta.totalItems === 0) ? (jsxs(Fragment, { children: [caption, jsxs("div", { className: "text-center pt-40", children: [jsxs("span", { className: "text-base-content/", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", addNewText || t("pagination.tryCreatingOne")] }) }))] })] })) : (jsxs(Fragment, { children: [jsx("div", { className: "overflow-x-auto max-h-screen w-screen sm:w-[calc(100vw-var(--sidebar-width))]", children: displayAs === "grid" && renderGridItem ? (jsx("div", { className: "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m-4 2xl:grid-cols-4 pt-28 pb-16", children: pagination.data.map((d) => renderGridItem(d)) })) : (jsxs("table", { className: `${styles$4.table} pb-16 table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [jsx("caption", { className: "mt-28", children: caption ?? "" }), jsx("thead", { children: jsxs("tr", { className: "top-28", children: [bulkActions && (jsx("th", { children: jsx(IndeterminateCheckbox, { className: "checkbox checkbox-xs", onChange: (e) => {
+                                        }, children: jsx(QueueListIcon, { className: "size-4" }) })] })), isSearchable && jsx(SearchField, { filterOperators: filterOperators }), displayConfig && (jsx("div", { className: "pr-2", children: jsx(PaginationConfiguration, { disabled: displayAs !== "list", store: store, name: displayConfig.name, configName: configName, columns: columns, configs: { ...paginationConfigs, columns: columnsConfigs }, setConfigName: (name) => setConfigName(name), refresh: () => void refetchPaginationConfigs() }) }))] }), (pagination.meta.withoutCount ? pagination.data.length === 0 : pagination.meta.totalItems === 0) ? (jsxs(Fragment, { children: [caption, jsxs("div", { className: "text-center pt-40", children: [jsxs("span", { className: "text-base-content/", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", addNewText || t("pagination.tryCreatingOne")] }) }))] })] })) : (jsxs(Fragment, { children: [jsx("div", { className: "overflow-x-auto max-h-screen w-screen sm:w-[calc(100vw-var(--sidebar-width))]", children: displayAs === "grid" && renderGridItem ? (jsx("div", { className: "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m-4 2xl:grid-cols-4 pt-28 pb-16", children: pagination.data.map((d) => renderGridItem(d)) })) : (jsxs("table", { className: `${styles$4.table} pb-16 table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [jsx("caption", { className: "mt-28", children: caption ?? "" }), jsx("thead", { children: jsxs("tr", { className: "top-28", children: [bulkActions && (jsx("th", { children: jsx(IndeterminateCheckbox, { className: "checkbox checkbox-xs", onChange: (e) => {
                                                                 setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);
                                                             }, indeterminate: selected.length > 0 && selected.length < pagination.data.length, checked: pagination.data.every((model) => selected.includes(model.id)) }) })), columnsConfigs[configName].map((item, i) => {
                                                         const column = columns.find((c) => isActionColumn(c) ? "action" === item.name : c.name === item.name);
@@ -1893,7 +2106,7 @@ var styles = {"field":"Filter-module_field__vtsXb","fieldDate":"Filter-module_fi
 const FilterNumberRange = ({ filter, fieldsetClassName, from, to, options, onConvertValueSubmit = (v) => v ?? "", onCovertFromValue = (v) => v ?? 0, }) => {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const stringValue = searchParams.get(`filter.${filter}`) ?? "";
+    const stringValue = getFilterParam(searchParams, filter) ?? "";
     let defaultFromValue = 0;
     let defaultToValue = 0;
     if (/^\$btw:/.test(stringValue)) {
@@ -1948,7 +2161,7 @@ const parseDateFromUri = (val) => {
 const FilterDate = ({ filter, fieldsetClassName, label, mode, defaultValue = null, }) => {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const dateString = parseDateFromUri(searchParams.get(`filter.${filter}`) ?? "");
+    const dateString = parseDateFromUri(getFilterParam(searchParams, filter) ?? "");
     const defaultDate = (dateString ? parseDateTime(dateString, null) : null) ?? defaultValue;
     const submit = (date) => {
         const params = { page: "" };
@@ -1971,17 +2184,17 @@ const FilterDateRange = ({ filter, fieldsetClassName, label, required, }) => {
     let defaultFromValue = null;
     let defaultToValue = null;
     if (Array.isArray(filter)) {
-        const stringToValue = searchParams.get(`filter.${filter[0]}`) ?? "";
+        const stringToValue = getFilterParam(searchParams, filter[0]) ?? "";
         if (/^\$gte:/.test(stringToValue)) {
             defaultFromValue = parse(stringToValue.replace(/^\$gte?:/, ""), "yyyy-MM-dd", new Date());
         }
-        const stringFromValue = searchParams.get(`filter.${filter[1]}`) ?? "";
+        const stringFromValue = getFilterParam(searchParams, filter[1]) ?? "";
         if (/^\$lte:/.test(stringFromValue)) {
             defaultToValue = parse(stringFromValue.replace(/^\$lte?:/, ""), "yyyy-MM-dd", new Date());
         }
     }
     else {
-        const stringValue = searchParams.get(`filter.${filter}`) ?? searchParams.get(`filter.${filter}[]`) ?? "";
+        const stringValue = getFilterParam(searchParams, filter) ?? "";
         const btw = getBtwDates(stringValue);
         if (btw) {
             defaultFromValue = btw[0];
@@ -2009,7 +2222,7 @@ const FilterDateRange = ({ filter, fieldsetClassName, label, required, }) => {
 };
 const FilterText = ({ filter, label, fieldsetClassName, isLike, }) => {
     const searchParams = useSearchParams();
-    const defaultValue = (searchParams.get(`filter.${filter}`) || "").replace(/^\$(ilike|eq|in):/, "") || "";
+    const defaultValue = (getFilterParam(searchParams, filter) || "").replace(/^\$(ilike|eq|in):/, "") || "";
     const router = useRouter();
     const submit = (val) => router.replace(setPartialParams({ [`filter.${filter}`]: val === "" ? "" : `${isLike ? "$ilike:" : "$eq:"}${val}`, page: "" }, searchParams));
     return (jsxs("label", { className: cx("floating-label", styles.field, fieldsetClassName), children: [jsx("span", { children: label }), jsx("input", { type: "text", className: "input input-xs", placeholder: label, defaultValue: typeof defaultValue === "string" ? defaultValue : "", onKeyUp: (e) => {
@@ -2021,7 +2234,8 @@ const FilterText = ({ filter, label, fieldsetClassName, isLike, }) => {
 const FilterPagination = ({ filter, label, queryFn, queryKey, optionLabel, optionValue = (m) => m.id, groupBy, fieldsetClassName, }) => {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const value = searchParams.has(`filter.${filter}`) ? (parseInt(searchParams.get(`filter.${filter}`)) ?? null) : null;
+    const param = getFilterParam(searchParams, filter);
+    const value = param !== null ? (parseInt(param) ?? null) : null;
     return (jsx(SelectPaginatedFromApiField, { label: label, fieldSetClassName: cx(styles.field, fieldsetClassName), name: filter, size: "xs", className: value ? "select-neutral" : undefined, value: value, optionValue: optionValue, portalEnabled: true, minWidth: 200, required: false, queryFn: queryFn, queryKey: queryKey, optionLabel: optionLabel, groupBy: groupBy, onChange: (m) => {
             const value = m ? `${optionValue(m)}` : "";
             if (searchParams.get(filter) === value) {
@@ -2032,7 +2246,7 @@ const FilterPagination = ({ filter, label, queryFn, queryKey, optionLabel, optio
 };
 const FilterSelectOptions = ({ filter, label, options, fieldsetClassName, }) => {
     const searchParams = useSearchParams();
-    const defaultValue = searchParams.get(`filter.${filter}`) || "";
+    const defaultValue = getFilterParam(searchParams, filter) || "";
     const router = useRouter();
     const [value, setValue] = useState(defaultValue ?? null);
     return (jsxs("label", { className: cx("floating-label", styles.field, fieldsetClassName), children: [jsx("span", { children: label }), jsx(Select, { placeholder: label, name: filter, size: "xs", value: options.find((o) => o.value === value) || null, optionLabel: (option) => option.label, required: false, options: options, onChange: (m) => {
@@ -2044,9 +2258,8 @@ const FilterOptionsExpandable = ({ filter, label, options, isVisible, }) => {
     const searchParams = useSearchParams();
     const values = useMemo(() => {
         const value = [];
-        if (/^\$in:/.test(searchParams.get(`filter.${filter}`) || "")) {
-            searchParams
-                .get(`filter.${filter}`)
+        if (/^\$in:/.test(getFilterParam(searchParams, filter) || "")) {
+            getFilterParam(searchParams, filter)
                 ?.replace(/\$in:/, "")
                 .split(",")
                 .forEach((v) => {
@@ -2056,7 +2269,7 @@ const FilterOptionsExpandable = ({ filter, label, options, isVisible, }) => {
             });
         }
         else {
-            const valuesString = searchParams.get(`filter.${filter}`) || "";
+            const valuesString = getFilterParam(searchParams, filter) || "";
             if (options.some((o) => o.value === valuesString)) {
                 value.push(valuesString);
             }
@@ -2128,17 +2341,17 @@ const FilterDateFromTo = ({ filter, fieldsetClassName, from, to, required, }) =>
     let defaultFromValue = null;
     let defaultToValue = null;
     if (Array.isArray(filter)) {
-        const stringToValue = searchParams.get(`filter.${filter[0]}`) ?? "";
+        const stringToValue = getFilterParam(searchParams, filter[0]) ?? "";
         if (/^\$gte:/.test(stringToValue)) {
             defaultFromValue = parse(stringToValue.replace(/^\$gte?:/, ""), "yyyy-MM-dd", new Date());
         }
-        const stringFromValue = searchParams.get(`filter.${filter[1]}`) ?? "";
+        const stringFromValue = getFilterParam(searchParams, filter[1]) ?? "";
         if (/^\$lte:/.test(stringFromValue)) {
             defaultToValue = parse(stringFromValue.replace(/^\$lte?:/, ""), "yyyy-MM-dd", new Date());
         }
     }
     else {
-        const stringValue = searchParams.get(`filter.${filter}`) ?? searchParams.get(`filter.${filter}[]`) ?? "";
+        const stringValue = getFilterParam(searchParams, filter) ?? "";
         const btw = getBtwDates(stringValue);
         if (btw) {
             defaultFromValue = btw[0];
@@ -2318,11 +2531,22 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
     const t = useTranslations();
     const searchParams = useSearchParams();
     const { filterIsActive, defaultValues } = getDefaultValues(searchParams, filter);
-    const { handleSubmit, register, setValue, control, getValues } = useForm({
+    const { handleSubmit, register, setValue, control, getValues, reset } = useForm({
         defaultValues: async () => (onParseParams ? onParseParams(defaultValues) : defaultValues),
     });
     const paginationValues = useRef({});
+    const isFirstRender = useRef(true);
     useEffect(() => {
+        // on mount the form is filled by async defaultValues; afterwards follow url changes (back/forward, Search,
+        // links), clearing filters which are no longer in the url
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+        }
+        else {
+            const values = Object.fromEntries(Object.keys(filter).map((key) => [key, undefined]));
+            Object.assign(values, defaultValues);
+            reset(onParseParams ? onParseParams(values) : values);
+        }
         for (const [key, f] of Object.entries(filter)) {
             if (f.type === FilterType.PAGINATION) {
                 const ids = (Array.isArray(defaultValues[key]) ? defaultValues[key] : [defaultValues[key]]).filter((itemId) => itemId && !paginationValues.current[key]?.[itemId]);
@@ -2337,7 +2561,7 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                 }
             }
         }
-    }, []);
+    }, [searchParams]);
     const watched = useWatch({ control });
     return (jsx(Popover, { placement: "bottom-end", popoverClassName: "w-55 sm:w-70 rounded-box!", showOnClick: true, showOnHover: false, borderColor: "border-gray-300", backgroundColor: "bg-gray-200", title: (ref, props) => (jsx("button", { ref: ref, ...props, className: cx("btn btn-xs", { "btn-accent": filterIsActive }, className), children: filterIsActive ? jsx(FunnelIcon$1, { className: "size-4" }) : jsx(FunnelIcon, { className: "size-4" }) })), children: jsxs("form", { className: "px-2 py-3 space-y-2", onSubmit: handleSubmit((v) => {
                 const params = { page: "" };
@@ -2411,6 +2635,12 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                         }
                     }
                 }
+                // setPartialParams writes arrays as `filter.key[]=...`
+                for (const [key, val] of Object.entries(params)) {
+                    if (key.startsWith("filter.") && typeof val === "string" && val !== "") {
+                        params[key] = [val];
+                    }
+                }
                 router.replace(setPartialParams(params, searchParams));
             }, (e) => {
                 toast.error(t("general.error"));
@@ -2448,5 +2678,5 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                                                     }, children: jsx(XMarkIcon, { className: "size-3" }) })] }, JSON.stringify(val) + "_" + i)))] })) })), v.type === FilterType.BOOLEAN && (jsxs("div", { className: "join w-full", children: [jsx("button", { type: "button", className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === true }), onClick: () => (watched[key] === true ? setValue(key, undefined) : setValue(key, true)), children: v.label.toUpperCase() }), jsx("button", { onClick: () => (watched[key] === false ? setValue(key, undefined) : setValue(key, false)), className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === false }), type: "button", children: `${t("general.no").toUpperCase()} ${v.label.toUpperCase()}` })] })), v.type === FilterType.OPTIONS && (jsx("div", { className: cx("join w-full", { "join-vertical": Object.entries(v.options ?? {}).length > 2 }), children: Object.entries(v.options ?? {}).map(([value, label]) => (jsx("button", { className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === value }), type: "button", onClick: () => (watched[key] === value ? setValue(key, undefined) : setValue(key, value)), children: label }, value))) }))] }, `${key}-${i}`))), jsx(SaveButton, { className: "btn-sm w-full", children: t("general.filter") })] }) }));
 };
 
-export { AlertErrors, Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Select, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, setPartialParams, useFormSubmit, useScreenSize };
+export { AlertErrors, Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Search, Select, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getFilterParam, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, parseSearchFilters, searchFiltersToParams, setPartialParams, useFormSubmit, useScreenSize };
 //# sourceMappingURL=index.js.map

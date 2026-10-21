@@ -7,7 +7,7 @@ import { NumericFormat, NumericFormatProps } from "react-number-format";
 import { endOfDay, format, parse, startOfDay } from "date-fns";
 import Link from "next/link";
 import { ChevronDoubleDownIcon } from "@heroicons/react/24/outline";
-import { PaginateQuery, ResponseMeta, setPartialParams } from "../utils/paginate";
+import { getFilterParam, PaginateQuery, ResponseMeta, setPartialParams } from "../utils/paginate";
 import { SelectPaginatedFromApiField } from "../form/Input";
 import { Select } from "../form/Select";
 import { Popover } from "../dialog/Popover";
@@ -34,7 +34,7 @@ export const FilterNumberRange = ({
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const stringValue = searchParams.get(`filter.${filter}`) ?? "";
+  const stringValue = getFilterParam(searchParams, filter) ?? "";
   let defaultFromValue = 0;
   let defaultToValue = 0;
   if (/^\$btw:/.test(stringValue)) {
@@ -130,7 +130,7 @@ export const FilterDate = ({
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const dateString = parseDateFromUri(searchParams.get(`filter.${filter}`) ?? "");
+  const dateString = parseDateFromUri(getFilterParam(searchParams, filter) ?? "");
   const defaultDate: Date | null =
     (dateString ? (parseDateTime(dateString, null) as Date | null) : null) ?? defaultValue;
 
@@ -181,16 +181,16 @@ export const FilterDateRange = ({
   let defaultFromValue: Date | null = null;
   let defaultToValue: Date | null = null;
   if (Array.isArray(filter)) {
-    const stringToValue = searchParams.get(`filter.${filter[0]}`) ?? "";
+    const stringToValue = getFilterParam(searchParams, filter[0]) ?? "";
     if (/^\$gte:/.test(stringToValue)) {
       defaultFromValue = parse(stringToValue.replace(/^\$gte?:/, ""), "yyyy-MM-dd", new Date());
     }
-    const stringFromValue = searchParams.get(`filter.${filter[1]}`) ?? "";
+    const stringFromValue = getFilterParam(searchParams, filter[1]) ?? "";
     if (/^\$lte:/.test(stringFromValue)) {
       defaultToValue = parse(stringFromValue.replace(/^\$lte?:/, ""), "yyyy-MM-dd", new Date());
     }
   } else {
-    const stringValue = searchParams.get(`filter.${filter}`) ?? searchParams.get(`filter.${filter}[]`) ?? "";
+    const stringValue = getFilterParam(searchParams, filter) ?? "";
     const btw = getBtwDates(stringValue);
     if (btw) {
       defaultFromValue = btw[0];
@@ -247,7 +247,7 @@ export const FilterText = ({
   isLike?: boolean;
 }) => {
   const searchParams = useSearchParams();
-  const defaultValue = (searchParams.get(`filter.${filter}`) || "").replace(/^\$(ilike|eq|in):/, "") || "";
+  const defaultValue = (getFilterParam(searchParams, filter) || "").replace(/^\$(ilike|eq|in):/, "") || "";
   const router = useRouter();
 
   const submit = (val: string) =>
@@ -299,7 +299,8 @@ export const FilterPagination = <T extends { data: unknown[]; meta: ResponseMeta
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const value = searchParams.has(`filter.${filter}`) ? (parseInt(searchParams.get(`filter.${filter}`)!) ?? null) : null;
+  const param = getFilterParam(searchParams, filter);
+  const value = param !== null ? (parseInt(param) ?? null) : null;
   return (
     <SelectPaginatedFromApiField<T>
       label={label}
@@ -339,7 +340,7 @@ export const FilterSelectOptions = ({
   options: { label: string; value: string }[];
 }) => {
   const searchParams = useSearchParams();
-  const defaultValue = searchParams.get(`filter.${filter}`) || "";
+  const defaultValue = getFilterParam(searchParams, filter) || "";
   const router = useRouter();
   const [value, setValue] = useState<string | null>(defaultValue ?? null);
 
@@ -380,9 +381,8 @@ export const FilterOptionsExpandable = ({
   const searchParams = useSearchParams();
   const values = useMemo(() => {
     const value: string[] = [];
-    if (/^\$in:/.test(searchParams.get(`filter.${filter}`) || "")) {
-      searchParams
-        .get(`filter.${filter}`)
+    if (/^\$in:/.test(getFilterParam(searchParams, filter) || "")) {
+      getFilterParam(searchParams, filter)
         ?.replace(/\$in:/, "")
         .split(",")
         .forEach((v) => {
@@ -391,7 +391,7 @@ export const FilterOptionsExpandable = ({
           }
         });
     } else {
-      const valuesString = searchParams.get(`filter.${filter}`) || "";
+      const valuesString = getFilterParam(searchParams, filter) || "";
       if (options.some((o) => o.value === valuesString)) {
         value.push(valuesString);
       }
@@ -571,16 +571,16 @@ export const FilterDateFromTo = ({
   let defaultFromValue: Date | null = null;
   let defaultToValue: Date | null = null;
   if (Array.isArray(filter)) {
-    const stringToValue = searchParams.get(`filter.${filter[0]}`) ?? "";
+    const stringToValue = getFilterParam(searchParams, filter[0]) ?? "";
     if (/^\$gte:/.test(stringToValue)) {
       defaultFromValue = parse(stringToValue.replace(/^\$gte?:/, ""), "yyyy-MM-dd", new Date());
     }
-    const stringFromValue = searchParams.get(`filter.${filter[1]}`) ?? "";
+    const stringFromValue = getFilterParam(searchParams, filter[1]) ?? "";
     if (/^\$lte:/.test(stringFromValue)) {
       defaultToValue = parse(stringFromValue.replace(/^\$lte?:/, ""), "yyyy-MM-dd", new Date());
     }
   } else {
-    const stringValue = searchParams.get(`filter.${filter}`) ?? searchParams.get(`filter.${filter}[]`) ?? "";
+    const stringValue = getFilterParam(searchParams, filter) ?? "";
     const btw = getBtwDates(stringValue);
     if (btw) {
       defaultFromValue = btw[0];

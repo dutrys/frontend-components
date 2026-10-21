@@ -2,6 +2,7 @@ import { MoreActionType } from "./MoreAction";
 import React, { type ReactNode } from "react";
 import { PaginationSettings, StorageInterface } from "./StorageInterface";
 import { ResponseMeta } from "../utils/paginate";
+import { FilterOperators } from "./Search";
 export type ActionColumn<TModel> = {
     type: "actions";
     actions: (model: TModel) => MoreActionType[];
@@ -43,7 +44,8 @@ export declare const PaginatedTable: <TModel extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, toolbarClassName, group, }: {
+}>({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, toolbarClassName, group, filterOperators, }: {
+    filterOperators?: FilterOperators;
     toolbarClassName?: string;
     group?: {
         by: (a: TModel["data"][number]) => string;

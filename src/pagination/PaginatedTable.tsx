@@ -11,7 +11,7 @@ import { FunnelIcon as FunnelIconSolid } from "@heroicons/react/24/solid";
 import { MoreActions, MoreActionType } from "./MoreAction";
 import { NoCountPagination, Pagination } from "./Pagination";
 import { useTranslations } from "next-intl";
-import React, { Fragment, type ReactNode, useMemo, useRef, useState } from "react";
+import React, { Fragment, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./PaginatedTable.module.css";
 import cx from "classnames";
 import { addLocale, Link } from "./Link";
@@ -20,12 +20,13 @@ import { HeaderResponsivePaginated } from "./HeaderResponsivePaginated";
 import { PaginationConfiguration } from "./Configuration";
 import { LocalStorage, PaginationSettings, StorageInterface } from "./StorageInterface";
 import { useQuery } from "@tanstack/react-query";
-import { ResponseMeta, setPartialParams } from "../utils/paginate";
+import { getFilterParam, ResponseMeta, setPartialParams } from "../utils/paginate";
 import { IndeterminateCheckbox } from "../form/Input";
 import { DateTime } from "../utils/DateTime";
 import { HumanDate } from "../utils/HumanDate";
 import { TOOLTIP_GLOBAL_ID } from "../utils/Toaster";
 import { Title } from "../Title";
+import { FilterOperators, parseSearchFilters, Search, SearchFilter, searchFiltersToParams } from "./Search";
 
 const limits = [10, 20, 50, 100];
 
@@ -75,13 +76,22 @@ export const isActionColumn = <TModel = any,>(column: ColumnType<TModel>): colum
 export const isFunctionColumn = <TModel = any,>(column: ColumnType<TModel>): column is FunctionColumn<TModel> =>
   typeof column === "object" && typeof (column as any).body === "function";
 
-const SearchField = () => {
+const SearchField = ({ filterOperators }: { filterOperators?: FilterOperators }) => {
   const t = useTranslations();
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
   const path = usePathname();
   const [search, setSearch] = useState(searchParams.get("search") || "");
+  const [filters, setFilters] = useState<SearchFilter[]>(() =>
+    filterOperators ? parseSearchFilters(filterOperators, searchParams) : [],
+  );
+  // keep in sync when the url changes elsewhere (back/forward, links, Filter); filterOperators is
+  // left out of deps, as it is usually an inline object and would reset unsubmitted input on each render
+  useEffect(() => {
+    setSearch(searchParams.get("search") || "");
+    setFilters(filterOperators ? parseSearchFilters(filterOperators, searchParams) : []);
+  }, [searchParams]);
   return (
     <div className="w-32 sm:w-52 shrink-0 grow-0">
       <form
@@ -89,21 +99,41 @@ const SearchField = () => {
           e.preventDefault();
           router.push(
             addLocale(
-              (path + setPartialParams({ search, page: "1" }, searchParams)).replace(/^\/(en|lt)\//, "/"),
+              (
+                path +
+                setPartialParams(
+                  {
+                    search: search.trim(),
+                    page: "",
+                    ...(filterOperators ? searchFiltersToParams(filterOperators, filters, searchParams) : {}),
+                  },
+                  searchParams,
+                )
+              ).replace(/^\/(en|lt)\//, "/"),
               params.locale as string,
             ),
           );
         }}
       >
         <div className="join w-full pr-2">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            name="search"
-            className="join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500"
-            placeholder={t("pagination.searchPlaceholder")}
-          />
+          {filterOperators ? (
+            <Search
+              filterOperators={filterOperators}
+              search={search}
+              setSearch={setSearch}
+              filters={filters}
+              setFilters={setFilters}
+            />
+          ) : (
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              name="search"
+              className="join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500"
+              placeholder={t("pagination.searchPlaceholder")}
+            />
+          )}
           <button className="join-item btn btn-neutral btn-xs uppercase" type="submit">
             <MagnifyingGlassIcon className="w-4 h-4" />
           </button>
@@ -133,7 +163,9 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   defaultDisplayAs = "list",
   toolbarClassName,
   group,
+  filterOperators,
 }: {
+  filterOperators?: FilterOperators;
   toolbarClassName?: string;
   group?: {
     by: (a: TModel["data"][number]) => string;
@@ -224,10 +256,10 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   }
 
   for (const d of displayFilters || []) {
-    if (d.filters.some((filter) => searchParams.get(`filter.${filter}`) !== null)) {
+    if (d.filters.some((filter) => getFilterParam(searchParams, filter) !== null)) {
       const filterToDisplay: Record<string, string> = {};
       d.filters.forEach((filter) => {
-        filterToDisplay[`filter.${filter}`] = searchParams.get(`filter.${filter}`) || "";
+        filterToDisplay[`filter.${filter}`] = getFilterParam(searchParams, filter) || "";
       });
 
       elements.push([{ text: d.name, link: filterToDisplay }]);
@@ -336,7 +368,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
               </button>
             </div>
           )}
-          {isSearchable && <SearchField />}
+          {isSearchable && <SearchField filterOperators={filterOperators} />}
 
           {displayConfig && (
             <div className="pr-2">
