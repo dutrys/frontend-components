@@ -2,6 +2,9 @@ import React, { useId, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import cx from "classnames";
+import { useQuery } from "@tanstack/react-query";
+import { SelectPaginatedFromApi, SelectPaginatedFromApiProps } from "../form/SelectPaginatedFromApi";
+import { ResponseMeta } from "../utils/paginate";
 
 export type FilterOperator =
   | "$eq"
@@ -20,6 +23,43 @@ export type FilterOperator =
   | "$or";
 
 export type FilterOperators = Record<string, FilterOperator[]>;
+
+/**
+ * Values of a filter picked from a paginated api instead of typed, e.g. `calendarTemplateId`.
+ * Props of SelectPaginatedFromApi which Search does not control itself.
+ */
+export type SearchFilterOptions<T extends { meta: ResponseMeta; data: unknown[] }> = Pick<
+  SelectPaginatedFromApiProps<T>,
+  "queryKey" | "queryFn"
+> &
+  Partial<
+    Pick<
+      SelectPaginatedFromApiProps<T>,
+      | "optionLabel"
+      | "optionValue"
+      | "groupBy"
+      | "searchFromChars"
+      | "staleTime"
+      | "placeholder"
+      | "empty"
+      | "header"
+      | "beforeOptions"
+      | "afterOptions"
+      | "hideNoItemsOption"
+      | "minWidth"
+      | "maxHeight"
+      | "portalEnabled"
+    >
+  >;
+
+/** Filter which can be added in Search */
+export type FilterField = {
+  operators: FilterOperator[];
+  /** Values picked from a paginated api instead of typed, e.g. `() => ({ queryKey, queryFn })` */
+  pagination?: () => SearchFilterOptions<any>;
+};
+
+export type FilterFields = Record<string, FilterField>;
 
 const baseOperators = ["$eq", "$in", "$ilike", "$null"] as const;
 type BaseOperator = (typeof baseOperators)[number];
@@ -77,14 +117,14 @@ const parseFilterValue = (raw: string): Omit<SearchFilter, "key"> | null => {
 };
 
 export const parseSearchFilters = (
-  filterOperators: FilterOperators,
+  filterFields: FilterFields,
   searchParams: URLSearchParams | { get: (key: string) => string | null },
 ): SearchFilter[] => {
   const filters: SearchFilter[] = [];
-  for (const key of Object.keys(filterOperators)) {
+  for (const key of Object.keys(filterFields)) {
     const raw = searchParams.get(`filter.${key}[]`) ?? searchParams.get(`filter.${key}`);
     const parsed = raw ? parseFilterValue(raw) : null;
-    if (parsed && availableOperators(filterOperators[key]).includes(parsed.operator)) {
+    if (parsed && availableOperators(filterFields[key].operators).includes(parsed.operator)) {
       filters.push({ key, ...parsed });
     }
   }
@@ -94,16 +134,16 @@ export const parseSearchFilters = (
 /**
  * Converts filters to query params. Filters which were removed are cleared, but only when the current
  * query param is one Search can represent, so filters set elsewhere (e.g. by Filter on a field without
- * the operator in `filterOperators`) are left intact.
+ * the operator in `filterFields`) are left intact.
  */
 export const searchFiltersToParams = (
-  filterOperators: FilterOperators,
+  filterFields: FilterFields,
   filters: SearchFilter[],
   searchParams: URLSearchParams | { get: (key: string) => string | null },
 ): Record<string, string | string[]> => {
   // arrays are written by setPartialParams as `filter.key[]=...`
   const params: Record<string, string | string[]> = {};
-  for (const key of parseSearchFilters(filterOperators, searchParams).map((f) => f.key)) {
+  for (const key of parseSearchFilters(filterFields, searchParams).map((f) => f.key)) {
     params[`filter.${key}`] = "";
   }
   for (const filter of filters) {
@@ -126,13 +166,13 @@ export const searchFiltersToParams = (
 };
 
 export const Search = ({
-  filterOperators,
+  filterFields,
   search,
   setSearch,
   filters,
   setFilters,
 }: {
-  filterOperators: FilterOperators;
+  filterFields: FilterFields;
   search: string;
   setSearch: (search: string) => void;
   filters: SearchFilter[];
@@ -153,22 +193,22 @@ export const Search = ({
     if (word === "") {
       return [];
     }
-    return Object.entries(filterOperators)
+    return Object.entries(filterFields)
       .filter(
-        ([key, operators]) =>
+        ([key, { operators }]) =>
           availableOperators(operators).length > 0 &&
           !filters.some((f) => f.key === key) &&
           key.toLowerCase().startsWith(word),
       )
       .map(([key]) => key);
-  }, [currentWord, filterOperators, filters]);
+  }, [currentWord, filterFields, filters]);
 
   const isOpen = isFocused && suggestions.length > 0;
 
   const addFilter = (key: string) => {
     const existing = filters.some((f) => f.key === key);
     if (!existing) {
-      setFilters([...filters, { key, operator: availableOperators(filterOperators[key])[0], value: "" }]);
+      setFilters([...filters, { key, operator: availableOperators(filterFields[key].operators)[0], value: "" }]);
     }
     setExpanded(true);
     setSearch(search.slice(0, search.length - currentWord.length).trimEnd());
@@ -187,12 +227,12 @@ export const Search = ({
     const word = value.split(" ").pop() ?? "";
     if (word.endsWith(":")) {
       const typed = word.slice(0, -1).toLowerCase();
-      const key = Object.keys(filterOperators).find(
-        (k) => k.toLowerCase() === typed && availableOperators(filterOperators[k]).length > 0,
+      const key = Object.keys(filterFields).find(
+        (k) => k.toLowerCase() === typed && availableOperators(filterFields[k].operators).length > 0,
       );
       if (key) {
         if (!filters.some((f) => f.key === key)) {
-          setFilters([...filters, { key, operator: availableOperators(filterOperators[key])[0], value: "" }]);
+          setFilters([...filters, { key, operator: availableOperators(filterFields[key].operators)[0], value: "" }]);
         }
         setExpanded(true);
         setSearch(value.slice(0, value.length - word.length).trimEnd());
@@ -278,7 +318,8 @@ export const Search = ({
               <SearchFilterChip
                 key={filter.key}
                 filter={filter}
-                operators={availableOperators(filterOperators[filter.key] ?? [])}
+                operators={availableOperators(filterFields[filter.key]?.operators ?? [])}
+                options={filterFields[filter.key]?.pagination?.()}
                 onChange={(f) => updateFilter(i, f)}
                 onRemove={() => removeFilter(i)}
               />
@@ -326,14 +367,16 @@ export const Search = ({
   );
 };
 
-const SearchFilterChip = ({
+const SearchFilterChip = <T extends { meta: ResponseMeta; data: unknown[] }>({
   filter,
   operators,
+  options,
   onChange,
   onRemove,
 }: {
   filter: SearchFilter;
   operators: SearchOperator[];
+  options?: SearchFilterOptions<T>;
   onChange: (filter: Partial<SearchFilter>) => void;
   onRemove: () => void;
 }) => {
@@ -343,7 +386,11 @@ const SearchFilterChip = ({
   const popoverRef = useRef<HTMLUListElement>(null);
   return (
     <span
-      className="inline-flex shrink-0 items-center gap-0.5 h-4.5 pl-1.5 pr-0.5 rounded-selector bg-base-200 text-xs leading-none"
+      className={cx(
+        "inline-flex shrink-0 items-center gap-0.5 pl-1.5 pr-0.5 rounded-selector bg-base-200 text-xs leading-none",
+        // many picked values wrap inside the chip instead of overflowing the box
+        options && isList(filter.operator) ? "flex-wrap max-w-full min-h-4.5 py-px" : "h-4.5",
+      )}
       data-testid={`search-filter-${filter.key}`}
     >
       <span className="font-semibold">{filter.key}</span>
@@ -369,7 +416,12 @@ const SearchFilterChip = ({
               type="button"
               className={cx("col-span-2 grid-cols-subgrid", { "menu-active": operator === filter.operator })}
               onClick={() => {
-                onChange({ operator });
+                // a list value does not fit a single value operator, keep only the first one
+                onChange(
+                  isList(filter.operator) && !isList(operator)
+                    ? { operator, value: filter.value.split(",")[0].trim() }
+                    : { operator },
+                );
                 popoverRef.current?.hidePopover();
               }}
             >
@@ -379,7 +431,10 @@ const SearchFilterChip = ({
           </li>
         ))}
       </ul>
-      {!isValueless(filter.operator) && (
+      {!isValueless(filter.operator) && options && (
+        <SearchFilterSelects filter={filter} options={options} onChange={(value) => onChange({ value })} />
+      )}
+      {!isValueless(filter.operator) && !options && (
         <input
           type="text"
           autoFocus={filter.value === ""}
@@ -399,6 +454,122 @@ const SearchFilterChip = ({
       <button
         type="button"
         className="btn btn-ghost btn-circle size-4 min-h-0 text-base-content/50 hover:text-error"
+        onClick={onRemove}
+      >
+        <XMarkIcon className="size-3" />
+      </button>
+    </span>
+  );
+};
+
+/** One select for `$eq`; for `$in` picked values are listed and one select at the end adds another */
+const SearchFilterSelects = <T extends { meta: ResponseMeta; data: unknown[] }>({
+  filter,
+  options,
+  onChange,
+}: {
+  filter: SearchFilter;
+  options: SearchFilterOptions<T>;
+  onChange: (value: string) => void;
+}) => {
+  const optionValue = options.optionValue ?? ((model) => (model as any).id);
+  // picked models are kept, so labels are not refetched by id
+  const [models, setModels] = useState<Record<string, unknown>>({});
+  const select = (value: string | null, onPick: (picked: string) => void, autoFocus: boolean, required: boolean) => (
+    <SelectPaginatedFromApi
+      // chips are mounted again each time the filters are expanded
+      staleTime={5 * 60 * 1000}
+      minWidth={200}
+      {...options}
+      size="xs"
+      required={required}
+      optionValue={optionValue}
+      value={value === null ? null : ((models[value] as any) ?? value)}
+      autoFocus={autoFocus}
+      onChange={(model) => {
+        const picked = model ? `${optionValue(model)}` : "";
+        if (model) {
+          setModels({ ...models, [picked]: model });
+        }
+        onPick(picked);
+      }}
+      outerClassName="shrink-0"
+      className="h-3.5 w-15 min-h-0 rounded-selector border-0 focus-within:outline-0 bg-base-100 px-1.5 text-xs [&_svg]:size-3 [&_input]:w-full [&_input]:min-w-0 [&_input]:truncate"
+    />
+  );
+
+  if (!isList(filter.operator)) {
+    return select(
+      filter.value === "" ? null : filter.value,
+      onChange,
+      filter.value === "",
+      filter.operator === "$not:$eq" || filter.operator === "$eq",
+    );
+  }
+
+  const values = filter.value
+    .split(",")
+    .map((v) => v.trim())
+    .filter((v) => v !== "");
+
+  return (
+    <>
+      {values.map((value) => (
+        <SearchFilterValue
+          key={value}
+          value={value}
+          model={models[value]}
+          options={options}
+          onRemove={() => onChange(values.filter((v) => v !== value).join(","))}
+        />
+      ))}
+      <React.Fragment key={values.length}>
+        {select(
+          null,
+          (picked) => {
+            if (picked && !values.includes(picked)) {
+              onChange([...values, picked].join(","));
+            }
+          },
+          values.length === 0,
+          ["$not:$eq", "$eq"].indexOf(filter.operator) !== -1,
+        )}
+      </React.Fragment>
+    </>
+  );
+};
+
+/** Picked `$in` value with a remove button shown on hover */
+const SearchFilterValue = <T extends { meta: ResponseMeta; data: unknown[] }>({
+  value,
+  model,
+  options,
+  onRemove,
+}: {
+  value: string;
+  model: unknown;
+  options: SearchFilterOptions<T>;
+  onRemove: () => void;
+}) => {
+  const optionLabel = options.optionLabel ?? ((model) => (model as any).name);
+  const optionValue = options.optionValue ?? ((model) => (model as any).id);
+  const { data } = useQuery({
+    // same key as SelectPaginatedFromApi uses for fetching by id, so both share the cache
+    queryKey: [...options.queryKey, "byId", value],
+    queryFn: () => options.queryFn({ "filter.id": [value] }),
+    enabled: !model,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  const found = model ?? data?.data.find((m: unknown) => `${optionValue(m)}` === value);
+
+  return (
+    <span className="group/value relative inline-flex shrink-0 items-center h-3.5 max-w-40 rounded-selector bg-base-100 px-1.5">
+      <span className="truncate">{found ? optionLabel(found, false) : value}</span>
+      <button
+        type="button"
+        className="absolute right-0 inset-y-0 hidden group-hover/value:flex items-center px-0.5 rounded-selector bg-base-100 cursor-pointer text-base-content/50 hover:text-error"
         onClick={onRemove}
       >
         <XMarkIcon className="size-3" />

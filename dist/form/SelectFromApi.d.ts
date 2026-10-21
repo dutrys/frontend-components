@@ -4,7 +4,7 @@ export type SelectFromApiProps<TModel = unknown> = {
     queryKey: ReadonlyArray<any>;
     value: number | string | null;
     onChange: (model: TModel | null) => void;
-    optionLabel?: (model: TModel) => string;
+    optionLabel?: (model: TModel, inOptions: boolean) => string;
     optionValue?: (model: TModel) => string | number;
     filter?: (model: TModel, query: string) => boolean;
 } & Omit<SelectProps<TModel>, "onChange" | "optionLabel" | "value" | "options">;

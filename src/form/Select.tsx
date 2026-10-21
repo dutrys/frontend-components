@@ -42,7 +42,7 @@ export type SelectProps<T> = {
   options: T[];
   minWidth?: number;
   maxHeight?: number;
-  optionLabel?: (model: T) => string;
+  optionLabel?: (model: T, inOptions: boolean) => string;
   groupBy?: (model: T) => string;
   onQueryChange?: (query: string) => void;
   afterInput?: React.ReactNode;
@@ -123,7 +123,7 @@ export const Select = <T = unknown,>({
               autoComplete="off"
               name={name}
               autoFocus={autoFocus}
-              displayValue={(model) => (model ? optionLabel(model) : "")}
+              displayValue={(model) => (model ? optionLabel(model, false) : "")}
               onChange={onQueryChange && ((event) => onQueryChange(event.target.value))}
             />
             {header}
@@ -177,7 +177,7 @@ export const Select = <T = unknown,>({
                         );
                       }
                       return (
-                        <React.Fragment key={`${optionLabel(model)}-${i}`}>
+                        <React.Fragment key={`${optionLabel(model, true)}-${i}`}>
                           {groupNode}
                           <SelectOption
                             data-testid={`select-option-${i}`}
@@ -185,7 +185,7 @@ export const Select = <T = unknown,>({
                             value={model}
                             size={size}
                           >
-                            {optionLabel(model)}
+                            {optionLabel(model, true)}
                           </SelectOption>
                         </React.Fragment>
                       );

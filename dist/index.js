@@ -1047,7 +1047,7 @@ const Select = ({ onChange, disabled, required, inputRef, options, name, portalE
                         "input-lg gap-1.5": size$1 === "lg",
                         "input-sm gap-1": size$1 === "sm",
                         "input-xs gap-0.5": size$1 === "xs",
-                    }), ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, autoFocus: autoFocus, displayValue: (model) => (model ? optionLabel(model) : ""), onChange: onQueryChange && ((event) => onQueryChange(event.target.value)) }), header, !required && value ? (jsx("button", { className: "z-1 cursor-pointer", type: "button", onClick: () => onChange(null), children: jsx(XMarkIcon, { className: "size-4" }) })) : (!open && afterInput), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "", onClick: (e) => {
+                    }), ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, autoFocus: autoFocus, displayValue: (model) => (model ? optionLabel(model, false) : ""), onChange: onQueryChange && ((event) => onQueryChange(event.target.value)) }), header, !required && value ? (jsx("button", { className: "z-1 cursor-pointer", type: "button", onClick: () => onChange(null), children: jsx(XMarkIcon, { className: "size-4" }) })) : (!open && afterInput), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "", onClick: (e) => {
                                 e.target?.parentNode?.parentNode?.querySelector("input")?.select();
                             }, children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(PortalSSR, { enabled: portalEnabled, children: jsx(Transition, { as: Fragment$1, leave: "transition-none", children: jsx("div", { style: floatingStyles, ref: refs.setFloating, className: "z-[2000] bg-base-100 mt-1 w-full border-base-content/10 border overflow-y-auto rounded-box shadow-lg", children: jsxs(ComboboxOptions, { children: [beforeOptions, !required && (jsx(SelectOption, { size: size$1, "data-testid": "select-option-empty", value: null, children: empty || t("selectFromApi.select") }, "empty")), options.length === 0 && !hideNoItemsOption ? (jsx("div", { className: "cursor-default select-none py-2 px-4 text-base-content/60", children: jsx("span", { className: cx({ "text-xs": "xs" === size$1 || "sm" === size$1 }), children: t("selectFromApi.nothingFound") }) })) : (options.map((model, i) => {
                                         const group = groupBy?.(model);
@@ -1056,7 +1056,7 @@ const Select = ({ onChange, disabled, required, inputRef, options, name, portalE
                                             currentGroupBy = group;
                                             groupNode = (jsx("div", { className: "sticky top-0 bg-base-100 font-bold z-10 p-2 text-xs text-base-content/40 border-b border-b-base-200 cursor-default select-none truncate", children: group }));
                                         }
-                                        return (jsxs(React__default.Fragment, { children: [groupNode, jsx(SelectOption, { "data-testid": `select-option-${i}`, className: groupBy ? "pl-4" : undefined, value: model, size: size$1, children: optionLabel(model) })] }, `${optionLabel(model)}-${i}`));
+                                        return (jsxs(React__default.Fragment, { children: [groupNode, jsx(SelectOption, { "data-testid": `select-option-${i}`, className: groupBy ? "pl-4" : undefined, value: model, size: size$1, children: optionLabel(model, true) })] }, `${optionLabel(model, true)}-${i}`));
                                     })), afterOptions] }) }) }) })] })) }));
 };
 const SelectOption = ({ value, size, children, className, ...rest }) => (jsx(ComboboxOption, { ...rest, className: ({ focus }) => cx(`relative cursor-default select-none`, className, {
@@ -1076,10 +1076,10 @@ const SelectOption = ({ value, size, children, className, ...rest }) => (jsx(Com
                     "text-teal-600": !focus,
                 }), children: jsx(CheckIcon, { className: "h-5 w-5", "aria-hidden": "true" }) }))] })) }));
 
-const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, onInitialChange, ...rest }) => {
+const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, onInitialChange, staleTime, ...rest }) => {
     const [query, setQuery] = useState("");
     const [valueModel, setValueModel] = useState(typeof value === "object" ? value : null);
-    const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+    const { isLoading, data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
         getPreviousPageParam,
         getNextPageParam,
         enabled: !rest.disabled,
@@ -1093,6 +1093,7 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
         ],
         initialPageParam: 1,
         retry: rest.disabled && !value ? 0 : undefined,
+        staleTime,
         queryFn: ({ queryKey, pageParam }) => {
             if (rest.disabled) {
                 return Promise.reject();
@@ -1112,6 +1113,21 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
             setQuery("");
         }
     }, [value]);
+    // value given as id: take the model from loaded pages, otherwise fetch it by id once (cached by react-query)
+    const idValue = value !== null && value !== undefined && value !== "" && typeof value !== "object" ? `${value}` : null;
+    const loadedModel = idValue === null
+        ? undefined
+        : valueModel && `${optionValue(valueModel)}` === idValue
+            ? valueModel
+            : data?.pages?.flatMap((p) => p?.data || []).find((v) => `${optionValue(v)}` === idValue);
+    const { data: byId } = useQuery({
+        queryKey: [...queryKey, "byId", idValue],
+        queryFn: () => queryFn({ "filter.id": [idValue] }),
+        enabled: idValue !== null && !loadedModel && !isLoading,
+        staleTime: Infinity,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+    });
     useEffect(() => {
         if (!value) {
             if (valueModel) {
@@ -1119,45 +1135,40 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
             }
             return;
         }
-        else if (typeof value === "object") {
+        if (typeof value === "object") {
             setValueModel(value);
             onInitialChange?.(value);
+            return;
         }
-        else if (!valueModel || value !== optionValue(valueModel)) {
-            const valueM = data?.pages
-                ?.map((p) => p.data)
-                ?.flat()
-                ?.find((v) => optionValue(v) === value);
-            if (valueM) {
-                setValueModel(valueM);
-                onInitialChange?.(valueM);
-                return;
+        if (loadedModel) {
+            if (loadedModel !== valueModel) {
+                setValueModel(loadedModel);
+                onInitialChange?.(loadedModel);
             }
-            queryFn({ "filter.id": [`${value}`] }).then((pager) => {
-                if (pager.data.length !== 1 || (pager.data[0] && optionValue(pager.data[0])?.toString() !== `${value}`)) {
-                    captureException(`Expected 1 model, but pagination filtering does not work in your backend api`, {
-                        extra: { pager },
-                    });
-                    const item = pager.data.find((v) => optionValue(v)?.toString() === `${value}`);
-                    if (item) {
-                        console.error(`Found model #${optionValue(item)}. ${optionLabel(item)}, but pagination filtering does not work in your backend api`);
-                        setValueModel(item);
-                        onInitialChange?.(item);
-                    }
-                    else {
-                        console.error(`No model found for ${JSON.stringify(value)}, but pagination filtering does not work in your backend api`, pager);
-                    }
-                    return;
-                }
-                setValueModel(pager.data[0]);
-                onInitialChange?.(pager.data[0]);
-            });
+            return;
         }
-    }, [setValueModel, value]);
+        if (!byId) {
+            return;
+        }
+        if (byId.data.length !== 1 || (byId.data[0] && `${optionValue(byId.data[0])}` !== idValue)) {
+            captureException(`Expected 1 model, but pagination filtering does not work in your backend api`, {
+                extra: { pager: byId },
+            });
+            const item = byId.data.find((v) => `${optionValue(v)}` === idValue);
+            if (item) {
+                console.error(`Found model #${optionValue(item)}. ${optionLabel(item, true)}, but pagination filtering does not work in your backend api`);
+                setValueModel(item);
+                onInitialChange?.(item);
+            }
+            else {
+                console.error(`No model found for ${JSON.stringify(value)}, but pagination filtering does not work in your backend api`, byId);
+            }
+            return;
+        }
+        setValueModel(byId.data[0]);
+        onInitialChange?.(byId.data[0]);
+    }, [value, loadedModel, byId]);
     const t = useTranslations();
-    useEffect(() => {
-        void refetch();
-    }, [refetch, query]);
     const { ref, inView } = useInView({ threshold: 0.5 });
     useEffect(() => {
         if (inView) {
@@ -1575,12 +1586,12 @@ const parseFilterValue = (raw) => {
     }
     return null;
 };
-const parseSearchFilters = (filterOperators, searchParams) => {
+const parseSearchFilters = (filterFields, searchParams) => {
     const filters = [];
-    for (const key of Object.keys(filterOperators)) {
+    for (const key of Object.keys(filterFields)) {
         const raw = searchParams.get(`filter.${key}[]`) ?? searchParams.get(`filter.${key}`);
         const parsed = raw ? parseFilterValue(raw) : null;
-        if (parsed && availableOperators(filterOperators[key]).includes(parsed.operator)) {
+        if (parsed && availableOperators(filterFields[key].operators).includes(parsed.operator)) {
             filters.push({ key, ...parsed });
         }
     }
@@ -1589,12 +1600,12 @@ const parseSearchFilters = (filterOperators, searchParams) => {
 /**
  * Converts filters to query params. Filters which were removed are cleared, but only when the current
  * query param is one Search can represent, so filters set elsewhere (e.g. by Filter on a field without
- * the operator in `filterOperators`) are left intact.
+ * the operator in `filterFields`) are left intact.
  */
-const searchFiltersToParams = (filterOperators, filters, searchParams) => {
+const searchFiltersToParams = (filterFields, filters, searchParams) => {
     // arrays are written by setPartialParams as `filter.key[]=...`
     const params = {};
-    for (const key of parseSearchFilters(filterOperators, searchParams).map((f) => f.key)) {
+    for (const key of parseSearchFilters(filterFields, searchParams).map((f) => f.key)) {
         params[`filter.${key}`] = "";
     }
     for (const filter of filters) {
@@ -1616,7 +1627,7 @@ const searchFiltersToParams = (filterOperators, filters, searchParams) => {
     }
     return params;
 };
-const Search = ({ filterOperators, search, setSearch, filters, setFilters, }) => {
+const Search = ({ filterFields, search, setSearch, filters, setFilters, }) => {
     const t = useTranslations();
     const inputRef = useRef(null);
     const [highlighted, setHighlighted] = useState(0);
@@ -1630,17 +1641,17 @@ const Search = ({ filterOperators, search, setSearch, filters, setFilters, }) =>
         if (word === "") {
             return [];
         }
-        return Object.entries(filterOperators)
-            .filter(([key, operators]) => availableOperators(operators).length > 0 &&
+        return Object.entries(filterFields)
+            .filter(([key, { operators }]) => availableOperators(operators).length > 0 &&
             !filters.some((f) => f.key === key) &&
             key.toLowerCase().startsWith(word))
             .map(([key]) => key);
-    }, [currentWord, filterOperators, filters]);
+    }, [currentWord, filterFields, filters]);
     const isOpen = isFocused && suggestions.length > 0;
     const addFilter = (key) => {
         const existing = filters.some((f) => f.key === key);
         if (!existing) {
-            setFilters([...filters, { key, operator: availableOperators(filterOperators[key])[0], value: "" }]);
+            setFilters([...filters, { key, operator: availableOperators(filterFields[key].operators)[0], value: "" }]);
         }
         setExpanded(true);
         setSearch(search.slice(0, search.length - currentWord.length).trimEnd());
@@ -1655,10 +1666,10 @@ const Search = ({ filterOperators, search, setSearch, filters, setFilters, }) =>
         const word = value.split(" ").pop() ?? "";
         if (word.endsWith(":")) {
             const typed = word.slice(0, -1).toLowerCase();
-            const key = Object.keys(filterOperators).find((k) => k.toLowerCase() === typed && availableOperators(filterOperators[k]).length > 0);
+            const key = Object.keys(filterFields).find((k) => k.toLowerCase() === typed && availableOperators(filterFields[k].operators).length > 0);
             if (key) {
                 if (!filters.some((f) => f.key === key)) {
-                    setFilters([...filters, { key, operator: availableOperators(filterOperators[key])[0], value: "" }]);
+                    setFilters([...filters, { key, operator: availableOperators(filterFields[key].operators)[0], value: "" }]);
                 }
                 setExpanded(true);
                 setSearch(value.slice(0, value.length - word.length).trimEnd());
@@ -1712,44 +1723,94 @@ const Search = ({ filterOperators, search, setSearch, filters, setFilters, }) =>
                     }, children: [collapsed ? (jsxs("button", { type: "button", className: "inline-flex shrink-0 items-center gap-1 h-4.5 px-1.5 rounded-selector bg-base-200 text-xs font-semibold leading-none cursor-pointer hover:bg-base-300", title: filters.map((f) => f.key).join(", "), onClick: () => {
                                 setExpanded(true);
                                 inputRef.current?.focus();
-                            }, "data-testid": "search-filters-collapsed", children: [jsx(FunnelIcon, { className: "size-3" }), filters.length] })) : (filters.map((filter, i) => (jsx(SearchFilterChip, { filter: filter, operators: availableOperators(filterOperators[filter.key] ?? []), onChange: (f) => updateFilter(i, f), onRemove: () => removeFilter(i) }, filter.key)))), jsx("input", { ref: inputRef, type: "text", name: "search", autoComplete: "off", value: search, onChange: (e) => onChange(e.target.value), onKeyDown: onKeyDown, onFocus: () => setIsFocused(true), onBlur: () => setIsFocused(false), className: "grow min-w-16 px-1", placeholder: filters.length === 0 ? t("pagination.searchPlaceholder") : undefined })] }), isOpen && (jsx("ul", { className: "menu menu-xs absolute left-0 top-full mt-1 w-full bg-base-100 rounded-box shadow-lg border border-base-300 z-50", "data-testid": "search-suggestions", children: suggestions.map((key, i) => (jsx("li", { children: jsx("button", { type: "button", className: cx({ "menu-active": i === highlighted }), onMouseDown: (e) => {
+                            }, "data-testid": "search-filters-collapsed", children: [jsx(FunnelIcon, { className: "size-3" }), filters.length] })) : (filters.map((filter, i) => (jsx(SearchFilterChip, { filter: filter, operators: availableOperators(filterFields[filter.key]?.operators ?? []), options: filterFields[filter.key]?.pagination?.(), onChange: (f) => updateFilter(i, f), onRemove: () => removeFilter(i) }, filter.key)))), jsx("input", { ref: inputRef, type: "text", name: "search", autoComplete: "off", value: search, onChange: (e) => onChange(e.target.value), onKeyDown: onKeyDown, onFocus: () => setIsFocused(true), onBlur: () => setIsFocused(false), className: "grow min-w-16 px-1", placeholder: filters.length === 0 ? t("pagination.searchPlaceholder") : undefined })] }), isOpen && (jsx("ul", { className: "menu menu-xs absolute left-0 top-full mt-1 w-full bg-base-100 rounded-box shadow-lg border border-base-300 z-50", "data-testid": "search-suggestions", children: suggestions.map((key, i) => (jsx("li", { children: jsx("button", { type: "button", className: cx({ "menu-active": i === highlighted }), onMouseDown: (e) => {
                                 // keep focus in the input so blur does not close the list before click
                                 e.preventDefault();
                                 addFilter(key);
                             }, onMouseEnter: () => setHighlighted(i), children: jsx("span", { className: "font-semibold", children: key }) }) }, key))) }))] }) }));
 };
-const SearchFilterChip = ({ filter, operators, onChange, onRemove, }) => {
+const SearchFilterChip = ({ filter, operators, options, onChange, onRemove, }) => {
     const t = useTranslations();
     // popover is rendered in the top layer, so it is not clipped by the search box overflow
     const id = `search-operator-${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
     const popoverRef = useRef(null);
-    return (jsxs("span", { className: "inline-flex shrink-0 items-center gap-0.5 h-4.5 pl-1.5 pr-0.5 rounded-selector bg-base-200 text-xs leading-none", "data-testid": `search-filter-${filter.key}`, children: [jsx("span", { className: "font-semibold", children: filter.key }), jsx("button", { type: "button", popoverTarget: id, className: "px-0.5 font-mono text-base-content/60 cursor-pointer hover:text-base-content", style: { anchorName: `--${id}` }, title: t(`pagination.operators.${filter.operator}`), children: operatorLabels[filter.operator] }), jsx("ul", { ref: popoverRef, id: id, popover: "auto", className: "dropdown menu menu-xs open:grid! grid-cols-[auto_1fr] w-max mt-1 p-1 rounded-box bg-base-100 shadow-lg border border-base-300", style: { positionAnchor: `--${id}` }, children: operators.map((operator) => (jsx("li", { className: "col-span-2 grid! grid-cols-subgrid", children: jsxs("button", { type: "button", className: cx("col-span-2 grid-cols-subgrid", { "menu-active": operator === filter.operator }), onClick: () => {
-                            onChange({ operator });
+    return (jsxs("span", { className: cx("inline-flex shrink-0 items-center gap-0.5 pl-1.5 pr-0.5 rounded-selector bg-base-200 text-xs leading-none", 
+        // many picked values wrap inside the chip instead of overflowing the box
+        options && isList(filter.operator) ? "flex-wrap max-w-full min-h-4.5 py-px" : "h-4.5"), "data-testid": `search-filter-${filter.key}`, children: [jsx("span", { className: "font-semibold", children: filter.key }), jsx("button", { type: "button", popoverTarget: id, className: "px-0.5 font-mono text-base-content/60 cursor-pointer hover:text-base-content", style: { anchorName: `--${id}` }, title: t(`pagination.operators.${filter.operator}`), children: operatorLabels[filter.operator] }), jsx("ul", { ref: popoverRef, id: id, popover: "auto", className: "dropdown menu menu-xs open:grid! grid-cols-[auto_1fr] w-max mt-1 p-1 rounded-box bg-base-100 shadow-lg border border-base-300", style: { positionAnchor: `--${id}` }, children: operators.map((operator) => (jsx("li", { className: "col-span-2 grid! grid-cols-subgrid", children: jsxs("button", { type: "button", className: cx("col-span-2 grid-cols-subgrid", { "menu-active": operator === filter.operator }), onClick: () => {
+                            // a list value does not fit a single value operator, keep only the first one
+                            onChange(isList(filter.operator) && !isList(operator)
+                                ? { operator, value: filter.value.split(",")[0].trim() }
+                                : { operator });
                             popoverRef.current?.hidePopover();
-                        }, children: [jsx("span", { className: "font-mono", children: operatorLabels[operator] }), t(`pagination.operators.${operator}`)] }) }, operator))) }), !isValueless(filter.operator) && (jsx("input", { type: "text", autoFocus: filter.value === "", value: filter.value, onChange: (e) => onChange({ value: e.target.value }), onKeyDown: (e) => {
+                        }, children: [jsx("span", { className: "font-mono", children: operatorLabels[operator] }), t(`pagination.operators.${operator}`)] }) }, operator))) }), !isValueless(filter.operator) && options && (jsx(SearchFilterSelects, { filter: filter, options: options, onChange: (value) => onChange({ value }) })), !isValueless(filter.operator) && !options && (jsx("input", { type: "text", autoFocus: filter.value === "", value: filter.value, onChange: (e) => onChange({ value: e.target.value }), onKeyDown: (e) => {
                     if (e.key === "Backspace" && filter.value === "") {
                         e.preventDefault();
                         onRemove();
                     }
                 }, size: Math.max(filter.value.length, 4), placeholder: isList(filter.operator) ? "1,2,3" : undefined, className: "h-3.5 min-w-0 rounded-selector bg-base-100 px-1.5 outline-0" })), jsx("button", { type: "button", className: "btn btn-ghost btn-circle size-4 min-h-0 text-base-content/50 hover:text-error", onClick: onRemove, children: jsx(XMarkIcon, { className: "size-3" }) })] }));
 };
+/** One select for `$eq`; for `$in` picked values are listed and one select at the end adds another */
+const SearchFilterSelects = ({ filter, options, onChange, }) => {
+    const optionValue = options.optionValue ?? ((model) => model.id);
+    // picked models are kept, so labels are not refetched by id
+    const [models, setModels] = useState({});
+    const select = (value, onPick, autoFocus, required) => (jsx(SelectPaginatedFromApi
+    // chips are mounted again each time the filters are expanded
+    , { 
+        // chips are mounted again each time the filters are expanded
+        staleTime: 5 * 60 * 1000, minWidth: 200, ...options, size: "xs", required: required, optionValue: optionValue, value: value === null ? null : (models[value] ?? value), autoFocus: autoFocus, onChange: (model) => {
+            const picked = model ? `${optionValue(model)}` : "";
+            if (model) {
+                setModels({ ...models, [picked]: model });
+            }
+            onPick(picked);
+        }, outerClassName: "shrink-0", className: "h-3.5 w-15 min-h-0 rounded-selector border-0 focus-within:outline-0 bg-base-100 px-1.5 text-xs [&_svg]:size-3 [&_input]:w-full [&_input]:min-w-0 [&_input]:truncate" }));
+    if (!isList(filter.operator)) {
+        return select(filter.value === "" ? null : filter.value, onChange, filter.value === "", filter.operator === "$not:$eq" || filter.operator === "$eq");
+    }
+    const values = filter.value
+        .split(",")
+        .map((v) => v.trim())
+        .filter((v) => v !== "");
+    return (jsxs(Fragment, { children: [values.map((value) => (jsx(SearchFilterValue, { value: value, model: models[value], options: options, onRemove: () => onChange(values.filter((v) => v !== value).join(",")) }, value))), jsx(React__default.Fragment, { children: select(null, (picked) => {
+                    if (picked && !values.includes(picked)) {
+                        onChange([...values, picked].join(","));
+                    }
+                }, values.length === 0, ["$not:$eq", "$eq"].indexOf(filter.operator) !== -1) }, values.length)] }));
+};
+/** Picked `$in` value with a remove button shown on hover */
+const SearchFilterValue = ({ value, model, options, onRemove, }) => {
+    const optionLabel = options.optionLabel ?? ((model) => model.name);
+    const optionValue = options.optionValue ?? ((model) => model.id);
+    const { data } = useQuery({
+        // same key as SelectPaginatedFromApi uses for fetching by id, so both share the cache
+        queryKey: [...options.queryKey, "byId", value],
+        queryFn: () => options.queryFn({ "filter.id": [value] }),
+        enabled: !model,
+        staleTime: Infinity,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+    });
+    const found = model ?? data?.data.find((m) => `${optionValue(m)}` === value);
+    return (jsxs("span", { className: "group/value relative inline-flex shrink-0 items-center h-3.5 max-w-40 rounded-selector bg-base-100 px-1.5", children: [jsx("span", { className: "truncate", children: found ? optionLabel(found, false) : value }), jsx("button", { type: "button", className: "absolute right-0 inset-y-0 hidden group-hover/value:flex items-center px-0.5 rounded-selector bg-base-100 cursor-pointer text-base-content/50 hover:text-error", onClick: onRemove, children: jsx(XMarkIcon, { className: "size-3" }) })] }));
+};
 
 const limits = [10, 20, 50, 100];
 const isActionColumn = (column) => typeof column === "object" && column.type === "actions";
 const isFunctionColumn = (column) => typeof column === "object" && typeof column.body === "function";
-const SearchField = ({ filterOperators }) => {
+const SearchField = ({ filterFields }) => {
     const t = useTranslations();
     const params = useParams();
     const searchParams = useSearchParams();
     const router = useRouter();
     const path = usePathname();
     const [search, setSearch] = useState(searchParams.get("search") || "");
-    const [filters, setFilters] = useState(() => filterOperators ? parseSearchFilters(filterOperators, searchParams) : []);
-    // keep in sync when the url changes elsewhere (back/forward, links, Filter); filterOperators is
+    const [filters, setFilters] = useState(() => filterFields ? parseSearchFilters(filterFields, searchParams) : []);
+    // keep in sync when the url changes elsewhere (back/forward, links, Filter); filterFields is
     // left out of deps, as it is usually an inline object and would reset unsubmitted input on each render
     useEffect(() => {
         setSearch(searchParams.get("search") || "");
-        setFilters(filterOperators ? parseSearchFilters(filterOperators, searchParams) : []);
+        setFilters(filterFields ? parseSearchFilters(filterFields, searchParams) : []);
     }, [searchParams]);
     return (jsx("div", { className: "w-32 sm:w-52 shrink-0 grow-0", children: jsx("form", { onSubmit: (e) => {
                 e.preventDefault();
@@ -1757,11 +1818,11 @@ const SearchField = ({ filterOperators }) => {
                     setPartialParams({
                         search: search.trim(),
                         page: "",
-                        ...(filterOperators ? searchFiltersToParams(filterOperators, filters, searchParams) : {}),
+                        ...(filterFields ? searchFiltersToParams(filterFields, filters, searchParams) : {}),
                     }, searchParams)).replace(/^\/(en|lt)\//, "/"), params.locale));
-            }, children: jsxs("div", { className: "join w-full pr-2", children: [filterOperators ? (jsx(Search, { filterOperators: filterOperators, search: search, setSearch: setSearch, filters: filters, setFilters: setFilters })) : (jsx("input", { type: "text", value: search, onChange: (e) => setSearch(e.target.value), name: "search", className: "join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500", placeholder: t("pagination.searchPlaceholder") })), jsx("button", { className: "join-item btn btn-neutral btn-xs uppercase", type: "submit", children: jsx(MagnifyingGlassIcon, { className: "w-4 h-4" }) })] }) }) }));
+            }, children: jsxs("div", { className: "join w-full pr-2", children: [filterFields ? (jsx(Search, { filterFields: filterFields, search: search, setSearch: setSearch, filters: filters, setFilters: setFilters })) : (jsx("input", { type: "text", value: search, onChange: (e) => setSearch(e.target.value), name: "search", className: "join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500", placeholder: t("pagination.searchPlaceholder") })), jsx("button", { className: "join-item btn btn-neutral btn-xs uppercase", type: "submit", children: jsx(MagnifyingGlassIcon, { className: "w-4 h-4" }) })] }) }) }));
 };
-const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs = "list", toolbarClassName, group, filterOperators, }) => {
+const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs = "list", toolbarClassName, group, filterFields, }) => {
     const router = useRouter();
     const params = useParams();
     const searchParams = useSearchParams();
@@ -1848,7 +1909,7 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                             if (displayConfig) {
                                                 void store?.setConfig(displayConfig.name, { displayAs: "list" });
                                             }
-                                        }, children: jsx(QueueListIcon, { className: "size-4" }) })] })), isSearchable && jsx(SearchField, { filterOperators: filterOperators }), displayConfig && (jsx("div", { className: "pr-2", children: jsx(PaginationConfiguration, { disabled: displayAs !== "list", store: store, name: displayConfig.name, configName: configName, columns: columns, configs: { ...paginationConfigs, columns: columnsConfigs }, setConfigName: (name) => setConfigName(name), refresh: () => void refetchPaginationConfigs() }) }))] }), (pagination.meta.withoutCount ? pagination.data.length === 0 : pagination.meta.totalItems === 0) ? (jsxs(Fragment, { children: [caption, jsxs("div", { className: "text-center pt-40", children: [jsxs("span", { className: "text-base-content/", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", addNewText || t("pagination.tryCreatingOne")] }) }))] })] })) : (jsxs(Fragment, { children: [jsx("div", { className: "overflow-x-auto max-h-screen w-screen sm:w-[calc(100vw-var(--sidebar-width))]", children: displayAs === "grid" && renderGridItem ? (jsx("div", { className: "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m-4 2xl:grid-cols-4 pt-28 pb-16", children: pagination.data.map((d) => renderGridItem(d)) })) : (jsxs("table", { className: `${styles$4.table} pb-16 table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [jsx("caption", { className: "mt-28", children: caption ?? "" }), jsx("thead", { children: jsxs("tr", { className: "top-28", children: [bulkActions && (jsx("th", { children: jsx(IndeterminateCheckbox, { className: "checkbox checkbox-xs", onChange: (e) => {
+                                        }, children: jsx(QueueListIcon, { className: "size-4" }) })] })), isSearchable && jsx(SearchField, { filterFields: filterFields }), displayConfig && (jsx("div", { className: "pr-2", children: jsx(PaginationConfiguration, { disabled: displayAs !== "list", store: store, name: displayConfig.name, configName: configName, columns: columns, configs: { ...paginationConfigs, columns: columnsConfigs }, setConfigName: (name) => setConfigName(name), refresh: () => void refetchPaginationConfigs() }) }))] }), (pagination.meta.withoutCount ? pagination.data.length === 0 : pagination.meta.totalItems === 0) ? (jsxs(Fragment, { children: [caption, jsxs("div", { className: "text-center pt-40", children: [jsxs("span", { className: "text-base-content/", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", addNewText || t("pagination.tryCreatingOne")] }) }))] })] })) : (jsxs(Fragment, { children: [jsx("div", { className: "overflow-x-auto max-h-screen w-screen sm:w-[calc(100vw-var(--sidebar-width))]", children: displayAs === "grid" && renderGridItem ? (jsx("div", { className: "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m-4 2xl:grid-cols-4 pt-28 pb-16", children: pagination.data.map((d) => renderGridItem(d)) })) : (jsxs("table", { className: `${styles$4.table} pb-16 table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [jsx("caption", { className: "mt-28", children: caption ?? "" }), jsx("thead", { children: jsxs("tr", { className: "top-28", children: [bulkActions && (jsx("th", { children: jsx(IndeterminateCheckbox, { className: "checkbox checkbox-xs", onChange: (e) => {
                                                                 setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);
                                                             }, indeterminate: selected.length > 0 && selected.length < pagination.data.length, checked: pagination.data.every((model) => selected.includes(model.id)) }) })), columnsConfigs[configName].map((item, i) => {
                                                         const column = columns.find((c) => isActionColumn(c) ? "action" === item.name : c.name === item.name);

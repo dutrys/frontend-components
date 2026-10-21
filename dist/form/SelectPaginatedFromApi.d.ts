@@ -12,9 +12,11 @@ export type SelectPaginatedFromApiProps<TModel extends {
     optionValue?: (model: TModel["data"][0]) => string | number;
     searchFromChars?: number;
     onInitialChange?: (model: TModel["data"][0]) => void;
+    /** How long loaded pages are reused before refetching, e.g. when the select is mounted again */
+    staleTime?: number;
 } & Omit<SelectProps<TModel["data"][0]>, "value" | "options">;
 export declare const SelectPaginatedFromApi: <TModel extends {
     meta: ResponseMeta;
     data: unknown[];
-}>({ onChange, name, value, searchFromChars, queryKey, queryFn, optionLabel, optionValue, onInitialChange, ...rest }: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "defaultValue" | "type" | "value" | "children" | "onChange"> & SelectPaginatedFromApiProps<TModel>) => import("react/jsx-runtime").JSX.Element;
+}>({ onChange, name, value, searchFromChars, queryKey, queryFn, optionLabel, optionValue, onInitialChange, staleTime, ...rest }: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "defaultValue" | "type" | "value" | "children" | "onChange"> & SelectPaginatedFromApiProps<TModel>) => import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=SelectPaginatedFromApi.d.ts.map

@@ -26,7 +26,7 @@ import { DateTime } from "../utils/DateTime";
 import { HumanDate } from "../utils/HumanDate";
 import { TOOLTIP_GLOBAL_ID } from "../utils/Toaster";
 import { Title } from "../Title";
-import { FilterOperators, parseSearchFilters, Search, SearchFilter, searchFiltersToParams } from "./Search";
+import { FilterFields, parseSearchFilters, Search, SearchFilter, searchFiltersToParams } from "./Search";
 
 const limits = [10, 20, 50, 100];
 
@@ -76,7 +76,7 @@ export const isActionColumn = <TModel = any,>(column: ColumnType<TModel>): colum
 export const isFunctionColumn = <TModel = any,>(column: ColumnType<TModel>): column is FunctionColumn<TModel> =>
   typeof column === "object" && typeof (column as any).body === "function";
 
-const SearchField = ({ filterOperators }: { filterOperators?: FilterOperators }) => {
+const SearchField = ({ filterFields }: { filterFields?: FilterFields }) => {
   const t = useTranslations();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -84,13 +84,13 @@ const SearchField = ({ filterOperators }: { filterOperators?: FilterOperators })
   const path = usePathname();
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [filters, setFilters] = useState<SearchFilter[]>(() =>
-    filterOperators ? parseSearchFilters(filterOperators, searchParams) : [],
+    filterFields ? parseSearchFilters(filterFields, searchParams) : [],
   );
-  // keep in sync when the url changes elsewhere (back/forward, links, Filter); filterOperators is
+  // keep in sync when the url changes elsewhere (back/forward, links, Filter); filterFields is
   // left out of deps, as it is usually an inline object and would reset unsubmitted input on each render
   useEffect(() => {
     setSearch(searchParams.get("search") || "");
-    setFilters(filterOperators ? parseSearchFilters(filterOperators, searchParams) : []);
+    setFilters(filterFields ? parseSearchFilters(filterFields, searchParams) : []);
   }, [searchParams]);
   return (
     <div className="w-32 sm:w-52 shrink-0 grow-0">
@@ -105,7 +105,7 @@ const SearchField = ({ filterOperators }: { filterOperators?: FilterOperators })
                   {
                     search: search.trim(),
                     page: "",
-                    ...(filterOperators ? searchFiltersToParams(filterOperators, filters, searchParams) : {}),
+                    ...(filterFields ? searchFiltersToParams(filterFields, filters, searchParams) : {}),
                   },
                   searchParams,
                 )
@@ -116,9 +116,9 @@ const SearchField = ({ filterOperators }: { filterOperators?: FilterOperators })
         }}
       >
         <div className="join w-full pr-2">
-          {filterOperators ? (
+          {filterFields ? (
             <Search
-              filterOperators={filterOperators}
+              filterFields={filterFields}
               search={search}
               setSearch={setSearch}
               filters={filters}
@@ -163,9 +163,10 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
   defaultDisplayAs = "list",
   toolbarClassName,
   group,
-  filterOperators,
+  filterFields,
 }: {
-  filterOperators?: FilterOperators;
+  /** Filters which can be added in search, e.g. `{ calendarTemplateId: { operators: ["$eq"], pagination: () => ({ queryKey, queryFn }) } }` */
+  filterFields?: FilterFields;
   toolbarClassName?: string;
   group?: {
     by: (a: TModel["data"][number]) => string;
@@ -368,7 +369,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
               </button>
             </div>
           )}
-          {isSearchable && <SearchField filterOperators={filterOperators} />}
+          {isSearchable && <SearchField filterFields={filterFields} />}
 
           {displayConfig && (
             <div className="pr-2">

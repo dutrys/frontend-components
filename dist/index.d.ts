@@ -132,8 +132,79 @@ declare class LocalStorage<T> implements StorageInterface<T> {
     setConfig(title: string, configs: PaginationSettings): Promise<void>;
 }
 
+declare const PortalSSR: (props: {
+    enabled?: boolean;
+    children: React__default.ReactNode;
+}) => string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React__default.ReactNode> | Promise<string | number | bigint | boolean | React__default.ReactPortal | React__default.ReactElement<unknown, string | React__default.JSXElementConstructor<any>> | Iterable<React__default.ReactNode> | null | undefined> | null | undefined;
+type SelectProps<T> = {
+    size?: "sm" | "xs" | "lg";
+    name?: string;
+    inputRef?: any;
+    placeholder?: string;
+    value: T | null;
+    className?: string;
+    onChange: (model: T | null) => void;
+    disabled?: boolean;
+    required?: boolean;
+    empty?: string;
+    portalEnabled?: boolean;
+    header?: React__default.ReactNode;
+    beforeOptions?: React__default.ReactNode;
+    afterOptions?: React__default.ReactNode;
+    options: T[];
+    minWidth?: number;
+    maxHeight?: number;
+    optionLabel?: (model: T, inOptions: boolean) => string;
+    groupBy?: (model: T) => string;
+    onQueryChange?: (query: string) => void;
+    afterInput?: React__default.ReactNode;
+    hideNoItemsOption?: boolean;
+    outerClassName?: string;
+};
+declare const Select: <T = unknown>({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel, value, size, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth, maxHeight, afterInput, hideNoItemsOption, autoFocus, outerClassName, ...rest }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "onChange" | "defaultValue" | "type" | "value" | "children"> & SelectProps<T>) => react_jsx_runtime.JSX.Element;
+declare const SelectOption: ({ value, size, children, className, ...rest }: {
+    children: React__default.ReactNode;
+    value: unknown;
+    className?: string;
+    size?: "xs" | "sm" | "lg";
+}) => react_jsx_runtime.JSX.Element;
+
+type SelectPaginatedFromApiProps<TModel extends {
+    meta: ResponseMeta;
+    data: unknown[];
+}> = {
+    name?: string;
+    queryFn: (query: Omit<PaginateQuery<any>, "sortBy">) => Promise<TModel>;
+    queryKey: ReadonlyArray<any>;
+    value: TModel["data"][0] | string | number | null;
+    optionValue?: (model: TModel["data"][0]) => string | number;
+    searchFromChars?: number;
+    onInitialChange?: (model: TModel["data"][0]) => void;
+    /** How long loaded pages are reused before refetching, e.g. when the select is mounted again */
+    staleTime?: number;
+} & Omit<SelectProps<TModel["data"][0]>, "value" | "options">;
+declare const SelectPaginatedFromApi: <TModel extends {
+    meta: ResponseMeta;
+    data: unknown[];
+}>({ onChange, name, value, searchFromChars, queryKey, queryFn, optionLabel, optionValue, onInitialChange, staleTime, ...rest }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "defaultValue" | "type" | "value" | "children" | "onChange"> & SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
+
 type FilterOperator = "$eq" | "$gt" | "$gte" | "$in" | "$null" | "$lt" | "$lte" | "$btw" | "$ilike" | "$sw" | "$contains" | "$not" | "$and" | "$or";
 type FilterOperators = Record<string, FilterOperator[]>;
+/**
+ * Values of a filter picked from a paginated api instead of typed, e.g. `calendarTemplateId`.
+ * Props of SelectPaginatedFromApi which Search does not control itself.
+ */
+type SearchFilterOptions<T extends {
+    meta: ResponseMeta;
+    data: unknown[];
+}> = Pick<SelectPaginatedFromApiProps<T>, "queryKey" | "queryFn"> & Partial<Pick<SelectPaginatedFromApiProps<T>, "optionLabel" | "optionValue" | "groupBy" | "searchFromChars" | "staleTime" | "placeholder" | "empty" | "header" | "beforeOptions" | "afterOptions" | "hideNoItemsOption" | "minWidth" | "maxHeight" | "portalEnabled">>;
+/** Filter which can be added in Search */
+type FilterField = {
+    operators: FilterOperator[];
+    /** Values picked from a paginated api instead of typed, e.g. `() => ({ queryKey, queryFn })` */
+    pagination?: () => SearchFilterOptions<any>;
+};
+type FilterFields = Record<string, FilterField>;
 declare const baseOperators: readonly ["$eq", "$in", "$ilike", "$null"];
 type BaseOperator = (typeof baseOperators)[number];
 type SearchOperator = BaseOperator | `$not:${BaseOperator}`;
@@ -142,19 +213,19 @@ type SearchFilter = {
     operator: SearchOperator;
     value: string;
 };
-declare const parseSearchFilters: (filterOperators: FilterOperators, searchParams: URLSearchParams | {
+declare const parseSearchFilters: (filterFields: FilterFields, searchParams: URLSearchParams | {
     get: (key: string) => string | null;
 }) => SearchFilter[];
 /**
  * Converts filters to query params. Filters which were removed are cleared, but only when the current
  * query param is one Search can represent, so filters set elsewhere (e.g. by Filter on a field without
- * the operator in `filterOperators`) are left intact.
+ * the operator in `filterFields`) are left intact.
  */
-declare const searchFiltersToParams: (filterOperators: FilterOperators, filters: SearchFilter[], searchParams: URLSearchParams | {
+declare const searchFiltersToParams: (filterFields: FilterFields, filters: SearchFilter[], searchParams: URLSearchParams | {
     get: (key: string) => string | null;
 }) => Record<string, string | string[]>;
-declare const Search: ({ filterOperators, search, setSearch, filters, setFilters, }: {
-    filterOperators: FilterOperators;
+declare const Search: ({ filterFields, search, setSearch, filters, setFilters, }: {
+    filterFields: FilterFields;
     search: string;
     setSearch: (search: string) => void;
     filters: SearchFilter[];
@@ -202,8 +273,9 @@ declare const PaginatedTable: <TModel extends {
         id: number;
     }[];
     meta: ResponseMeta;
-}>({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, toolbarClassName, group, filterOperators, }: {
-    filterOperators?: FilterOperators;
+}>({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable, searchableShortcuts, addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs, toolbarClassName, group, filterFields, }: {
+    /** Filters which can be added in search, e.g. `{ calendarTemplateId: { operators: ["$eq"], pagination: () => ({ queryKey, queryFn }) } }` */
+    filterFields?: FilterFields;
     toolbarClassName?: string;
     group?: {
         by: (a: TModel["data"][number]) => string;
@@ -363,60 +435,6 @@ type DateRangeInputProps = Omit<DateInputProps, "onChange" | "value"> & {
 };
 declare const DateRangeInput: ({ onChange, value, className, toggleClassName, required, disabled, size, modifiers, placeholder, matcher, hideCalendarIcon, displayHelpers, ...rest }: DateRangeInputProps) => react_jsx_runtime.JSX.Element;
 
-declare const PortalSSR: (props: {
-    enabled?: boolean;
-    children: React__default.ReactNode;
-}) => string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React__default.ReactNode> | Promise<string | number | bigint | boolean | React__default.ReactPortal | React__default.ReactElement<unknown, string | React__default.JSXElementConstructor<any>> | Iterable<React__default.ReactNode> | null | undefined> | null | undefined;
-type SelectProps<T> = {
-    size?: "sm" | "xs" | "lg";
-    name?: string;
-    inputRef?: any;
-    placeholder?: string;
-    value: T | null;
-    className?: string;
-    onChange: (model: T | null) => void;
-    disabled?: boolean;
-    required?: boolean;
-    empty?: string;
-    portalEnabled?: boolean;
-    header?: React__default.ReactNode;
-    beforeOptions?: React__default.ReactNode;
-    afterOptions?: React__default.ReactNode;
-    options: T[];
-    minWidth?: number;
-    maxHeight?: number;
-    optionLabel?: (model: T) => string;
-    groupBy?: (model: T) => string;
-    onQueryChange?: (query: string) => void;
-    afterInput?: React__default.ReactNode;
-    hideNoItemsOption?: boolean;
-    outerClassName?: string;
-};
-declare const Select: <T = unknown>({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel, value, size, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth, maxHeight, afterInput, hideNoItemsOption, autoFocus, outerClassName, ...rest }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "onChange" | "defaultValue" | "type" | "value" | "children"> & SelectProps<T>) => react_jsx_runtime.JSX.Element;
-declare const SelectOption: ({ value, size, children, className, ...rest }: {
-    children: React__default.ReactNode;
-    value: unknown;
-    className?: string;
-    size?: "xs" | "sm" | "lg";
-}) => react_jsx_runtime.JSX.Element;
-
-type SelectPaginatedFromApiProps<TModel extends {
-    meta: ResponseMeta;
-    data: unknown[];
-}> = {
-    name?: string;
-    queryFn: (query: Omit<PaginateQuery<any>, "sortBy">) => Promise<TModel>;
-    queryKey: ReadonlyArray<any>;
-    value: TModel["data"][0] | string | number | null;
-    optionValue?: (model: TModel["data"][0]) => string | number;
-    searchFromChars?: number;
-    onInitialChange?: (model: TModel["data"][0]) => void;
-} & Omit<SelectProps<TModel["data"][0]>, "value" | "options">;
-declare const SelectPaginatedFromApi: <TModel extends {
-    meta: ResponseMeta;
-    data: unknown[];
-}>({ onChange, name, value, searchFromChars, queryKey, queryFn, optionLabel, optionValue, onInitialChange, ...rest }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "defaultValue" | "type" | "value" | "children" | "onChange"> & SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
-
 type TimePickerProps = {
     required?: boolean;
     disabled?: boolean;
@@ -432,7 +450,7 @@ type SelectFromApiProps<TModel = unknown> = {
     queryKey: ReadonlyArray<any>;
     value: number | string | null;
     onChange: (model: TModel | null) => void;
-    optionLabel?: (model: TModel) => string;
+    optionLabel?: (model: TModel, inOptions: boolean) => string;
     optionValue?: (model: TModel) => string | number;
     filter?: (model: TModel, query: string) => boolean;
 } & Omit<SelectProps<TModel>, "onChange" | "optionLabel" | "value" | "options">;
@@ -790,4 +808,4 @@ declare const FilterButton: ({ className, filter, onSubmitParams, onParseParams,
     className?: string;
 }) => react_jsx_runtime.JSX.Element;
 
-export { type ActionColumn, AlertErrors, Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, type ColumnType, ConfirmSave, type DateColumn, DateField, DateFormField, DateInput, type DateInputProps, DateRangeField, DateRangeInput, type DateRangeInputProps, DateTime, DateTimeFormField, DateTimePicker, type DateTimePickerProps, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, FilterLink, FilterNumberRange, type FilterOperator, type FilterOperators, FilterOptions, FilterOptionsExpandable, FilterPagination, type FilterPaginationColumn, FilterSelectOptions, FilterText, FilterType, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MenuItem, type MenuItemWithSubmenu, type MoreActionType, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, type PaginateQuery, PaginatedTable, Pagination, type PaginationSettings, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, type ResponseMeta, SaveButton, ScreenSize, Search, type SearchFilter, type SearchOperator, Select, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, type SelectFromApiProps, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, type SelectPaginatedFromApiProps, type SelectProps, type ServerError, SidebarLayout, SidebarMenu, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, type TimePickerProps, Title, Toaster, addServerErrors, getFilterParam, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, parseSearchFilters, searchFiltersToParams, setPartialParams, useFormSubmit, useScreenSize };
+export { type ActionColumn, AlertErrors, Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, type ColumnType, ConfirmSave, type DateColumn, DateField, DateFormField, DateInput, type DateInputProps, DateRangeField, DateRangeInput, type DateRangeInputProps, DateTime, DateTimeFormField, DateTimePicker, type DateTimePickerProps, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, type FilterField, type FilterFields, FilterLink, FilterNumberRange, type FilterOperator, type FilterOperators, FilterOptions, FilterOptionsExpandable, FilterPagination, type FilterPaginationColumn, FilterSelectOptions, FilterText, FilterType, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MenuItem, type MenuItemWithSubmenu, type MoreActionType, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, type PaginateQuery, PaginatedTable, Pagination, type PaginationSettings, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, type ResponseMeta, SaveButton, ScreenSize, Search, type SearchFilter, type SearchFilterOptions, type SearchOperator, Select, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, type SelectFromApiProps, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, type SelectPaginatedFromApiProps, type SelectProps, type ServerError, SidebarLayout, SidebarMenu, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, type TimePickerProps, Title, Toaster, addServerErrors, getFilterParam, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, parseSearchFilters, searchFiltersToParams, setPartialParams, useFormSubmit, useScreenSize };

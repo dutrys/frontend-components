@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useInView } from "react-intersection-observer";
@@ -15,6 +15,8 @@ export type SelectPaginatedFromApiProps<TModel extends { meta: ResponseMeta; dat
   optionValue?: (model: TModel["data"][0]) => string | number;
   searchFromChars?: number;
   onInitialChange?: (model: TModel["data"][0]) => void;
+  /** How long loaded pages are reused before refetching, e.g. when the select is mounted again */
+  staleTime?: number;
 } & Omit<SelectProps<TModel["data"][0]>, "value" | "options">;
 
 export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data: unknown[] }>({
@@ -27,6 +29,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
   optionLabel = (model) => (model as any).name,
   optionValue = (model) => (model as any).id,
   onInitialChange,
+  staleTime,
   ...rest
 }: Omit<
   React.SelectHTMLAttributes<HTMLSelectElement>,
@@ -35,7 +38,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
   SelectPaginatedFromApiProps<TModel>) => {
   const [query, setQuery] = useState("");
   const [valueModel, setValueModel] = useState<TModel["data"][0] | null>(typeof value === "object" ? value : null);
-  const { isLoading, data, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<TModel>({
+  const { isLoading, data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery<TModel>({
     getPreviousPageParam,
     getNextPageParam,
     enabled: !rest.disabled,
@@ -49,6 +52,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
     ],
     initialPageParam: 1,
     retry: rest.disabled && !value ? 0 : undefined,
+    staleTime,
     queryFn: ({ queryKey, pageParam }) => {
       if (rest.disabled) {
         return Promise.reject();
@@ -71,56 +75,70 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
     }
   }, [value]);
 
+  // value given as id: take the model from loaded pages, otherwise fetch it by id once (cached by react-query)
+  const idValue =
+    value !== null && value !== undefined && value !== "" && typeof value !== "object" ? `${value}` : null;
+  const loadedModel =
+    idValue === null
+      ? undefined
+      : valueModel && `${optionValue(valueModel)}` === idValue
+        ? valueModel
+        : data?.pages?.flatMap((p) => p?.data || []).find((v) => `${optionValue(v)}` === idValue);
+  const { data: byId } = useQuery({
+    queryKey: [...queryKey, "byId", idValue],
+    queryFn: () => queryFn({ "filter.id": [idValue as string] }),
+    enabled: idValue !== null && !loadedModel && !isLoading,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
   useEffect(() => {
     if (!value) {
       if (valueModel) {
         setValueModel(null);
       }
       return;
-    } else if (typeof value === "object") {
+    }
+    if (typeof value === "object") {
       setValueModel(value);
       onInitialChange?.(value);
-    } else if (!valueModel || value !== optionValue(valueModel)) {
-      const valueM = data?.pages
-        ?.map((p) => p.data)
-        ?.flat()
-        ?.find((v) => optionValue(v) === value);
-      if (valueM) {
-        setValueModel(valueM);
-        onInitialChange?.(valueM);
-        return;
-      }
-      queryFn({ "filter.id": [`${value}`] }).then((pager) => {
-        if (pager.data.length !== 1 || (pager.data[0] && optionValue(pager.data[0])?.toString() !== `${value}`)) {
-          captureException(`Expected 1 model, but pagination filtering does not work in your backend api`, {
-            extra: { pager },
-          });
-          const item = pager.data.find((v) => optionValue(v)?.toString() === `${value}`);
-          if (item) {
-            console.error(
-              `Found model #${optionValue(item)}. ${optionLabel(item)}, but pagination filtering does not work in your backend api`,
-            );
-            setValueModel(item);
-            onInitialChange?.(item);
-          } else {
-            console.error(
-              `No model found for ${JSON.stringify(value)}, but pagination filtering does not work in your backend api`,
-              pager,
-            );
-          }
-          return;
-        }
-        setValueModel(pager.data[0]);
-        onInitialChange?.(pager.data[0]);
-      });
+      return;
     }
-  }, [setValueModel, value]);
+    if (loadedModel) {
+      if (loadedModel !== valueModel) {
+        setValueModel(loadedModel);
+        onInitialChange?.(loadedModel);
+      }
+      return;
+    }
+    if (!byId) {
+      return;
+    }
+    if (byId.data.length !== 1 || (byId.data[0] && `${optionValue(byId.data[0])}` !== idValue)) {
+      captureException(`Expected 1 model, but pagination filtering does not work in your backend api`, {
+        extra: { pager: byId },
+      });
+      const item = byId.data.find((v) => `${optionValue(v)}` === idValue);
+      if (item) {
+        console.error(
+          `Found model #${optionValue(item)}. ${optionLabel(item, true)}, but pagination filtering does not work in your backend api`,
+        );
+        setValueModel(item);
+        onInitialChange?.(item);
+      } else {
+        console.error(
+          `No model found for ${JSON.stringify(value)}, but pagination filtering does not work in your backend api`,
+          byId,
+        );
+      }
+      return;
+    }
+    setValueModel(byId.data[0]);
+    onInitialChange?.(byId.data[0]);
+  }, [value, loadedModel, byId]);
 
   const t = useTranslations();
-
-  useEffect(() => {
-    void refetch();
-  }, [refetch, query]);
 
   const { ref, inView } = useInView({ threshold: 0.5 });
 
