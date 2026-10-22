@@ -1546,7 +1546,9 @@ const HumanDate = ({ date, from = new Date(), includeSeconds = false, tooltipId 
 
 const Title = ({ children, outerHeight, truncate, noOverlap, paddingLeft = "pl-4", noBackground, }) => (jsxs(Fragment, { children: [!noBackground && (jsx("div", { className: cx("absolute bg-base-100/50 backdrop-blur-xs z-500 w-full left-0 top-0", { "h-16": !outerHeight }, outerHeight) })), jsx("div", { className: cx("h-16 hidden sm:flex absolute z-501 flex items-center font-bold ml-[var(--top-left-bar)] w-[calc(100vw-var(--sidebar-width)-var(--top-right-bar)-var(--top-left-bar))]", { truncate }, paddingLeft), children: children }), noOverlap && jsx("div", { className: cx({ "h-16": !outerHeight }, outerHeight) })] }));
 
-const baseOperators = ["$eq", "$in", "$ilike", "$null"];
+const baseOperators = ["$eq", "$in", "$ilike", "$null", "$gt", "$gte", "$lt", "$lte", "$btw"];
+/** Operators which can be negated with `$not:` */
+const negatableOperators = ["$eq", "$in", "$ilike", "$null"];
 const operatorLabels = {
     $eq: "=",
     "$not:$eq": "!=",
@@ -1556,17 +1558,24 @@ const operatorLabels = {
     "$not:$ilike": "!~=",
     $null: "IS NULL",
     "$not:$null": "IS NOT NULL",
+    $gt: ">",
+    $gte: ">=",
+    $lt: "<",
+    $lte: "<=",
+    $btw: "BTW",
 };
 /** Operators which do not take a value, e.g. `filter.id=$null` */
 const isValueless = (operator) => operator === "$null" || operator === "$not:$null";
 /** Operators which take a comma separated list, e.g. `filter.id=$in:1,2,3` */
 const isList = (operator) => operator === "$in" || operator === "$not:$in";
+/** Operator which takes two comma separated values, e.g. `filter.id=$btw:1,10` */
+const isRange = (operator) => operator === "$btw";
 const availableOperators = (operators) => {
     const result = [];
     for (const operator of baseOperators) {
         if (operators.includes(operator)) {
             result.push(operator);
-            if (operators.includes("$not")) {
+            if (operators.includes("$not") && negatableOperators.includes(operator)) {
                 result.push(`$not:${operator}`);
             }
         }
@@ -1613,13 +1622,15 @@ const searchFiltersToParams = (filterFields, filters, searchParams) => {
             params[`filter.${filter.key}`] = [filter.operator];
         }
         else {
+            const values = filter.value.split(",").map((v) => v.trim());
             const value = isList(filter.operator)
-                ? filter.value
-                    .split(",")
-                    .map((v) => v.trim())
-                    .filter((v) => v !== "")
-                    .join(",")
-                : filter.value;
+                ? values.filter((v) => v !== "").join(",")
+                : isRange(filter.operator)
+                    ? // both ends are required
+                        values.length === 2 && values.every((v) => v !== "")
+                            ? values.join(",")
+                            : ""
+                    : filter.value;
             if (value !== "") {
                 params[`filter.${filter.key}`] = [`${filter.operator}:${value}`];
             }
@@ -1752,17 +1763,29 @@ const SearchFilterChip = ({ filter, operators, options, onChange, onRemove, }) =
     return (jsxs("span", { className: cx("inline-flex shrink-0 items-center gap-0.5 pl-1.5 pr-0.5 rounded-selector bg-base-200 text-xs leading-none", 
         // many picked values wrap inside the chip instead of overflowing the box
         options && isList(filter.operator) ? "flex-wrap max-w-full min-h-4.5 py-px" : "h-4.5"), "data-testid": `search-filter-${filter.key}`, children: [jsx("span", { className: "font-semibold", children: filter.key }), jsx("button", { type: "button", popoverTarget: id, className: "px-0.5 font-mono text-base-content/60 cursor-pointer hover:text-base-content", style: { anchorName: `--${id}` }, title: t(`pagination.operators.${filter.operator}`), children: operatorLabels[filter.operator] }), jsx("ul", { ref: popoverRef, id: id, popover: "auto", className: "dropdown menu menu-xs open:grid! grid-cols-[auto_1fr] w-max mt-1 p-1 rounded-box bg-base-100 shadow-lg border border-base-300", style: { positionAnchor: `--${id}` }, children: operators.map((operator) => (jsx("li", { className: "col-span-2 grid! grid-cols-subgrid", children: jsxs("button", { type: "button", className: cx("col-span-2 grid-cols-subgrid", { "menu-active": operator === filter.operator }), onClick: () => {
-                            // a list value does not fit a single value operator, keep only the first one
-                            onChange(isList(filter.operator) && !isList(operator)
+                            // a list or range value does not fit a single value operator, keep only the first one
+                            const multiple = (o) => isList(o) || isRange(o);
+                            onChange(multiple(filter.operator) && !multiple(operator)
                                 ? { operator, value: filter.value.split(",")[0].trim() }
-                                : { operator });
+                                : isRange(operator) && !isRange(filter.operator)
+                                    ? { operator, value: filter.value.split(",").slice(0, 2).join(",") }
+                                    : { operator });
                             popoverRef.current?.hidePopover();
-                        }, children: [jsx("span", { className: "font-mono", children: operatorLabels[operator] }), t(`pagination.operators.${operator}`)] }) }, operator))) }), !isValueless(filter.operator) && options && (jsx(SearchFilterSelects, { filter: filter, options: options, onChange: (value) => onChange({ value }) })), !isValueless(filter.operator) && !options && (jsx("input", { type: "text", autoFocus: filter.value === "", value: filter.value, onChange: (e) => onChange({ value: e.target.value }), onKeyDown: (e) => {
-                    if (e.key === "Backspace" && filter.value === "") {
-                        e.preventDefault();
-                        onRemove();
-                    }
-                }, size: Math.max(filter.value.length, 4), placeholder: isList(filter.operator) ? "1,2,3" : undefined, className: "h-3.5 min-w-0 rounded-selector bg-base-100 px-1.5 outline-0" })), jsx("button", { type: "button", className: "btn btn-ghost btn-circle size-4 min-h-0 text-base-content/50 hover:text-error", onClick: onRemove, children: jsx(XMarkIcon, { className: "size-3" }) })] }));
+                        }, children: [jsx("span", { className: "font-mono", children: operatorLabels[operator] }), t(`pagination.operators.${operator}`)] }) }, operator))) }), isRange(filter.operator) && (jsx(SearchFilterRange, { filter: filter, onChange: (value) => onChange({ value }), onRemove: onRemove })), !isValueless(filter.operator) && !isRange(filter.operator) && options && (jsx(SearchFilterSelects, { filter: filter, options: options, onChange: (value) => onChange({ value }) })), !isValueless(filter.operator) && !isRange(filter.operator) && !options && (jsx(SearchFilterInput, { value: filter.value, autoFocus: filter.value === "", onChange: (value) => onChange({ value }), onRemove: onRemove, placeholder: isList(filter.operator) ? "1,2,3" : undefined })), jsx("button", { type: "button", className: "btn btn-ghost btn-circle size-4 min-h-0 text-base-content/50 hover:text-error", onClick: onRemove, children: jsx(XMarkIcon, { className: "size-3" }) })] }));
+};
+const SearchFilterInput = ({ value, autoFocus, onChange, onRemove, placeholder, inputRef, }) => (jsx("input", { ref: inputRef, type: "text", autoFocus: autoFocus, value: value, onChange: (e) => onChange(e.target.value), onKeyDown: (e) => {
+        if (e.key === "Backspace" && value === "") {
+            e.preventDefault();
+            onRemove();
+        }
+    }, size: Math.max(value.length, 4), placeholder: placeholder, className: "h-3.5 min-w-0 rounded-selector bg-base-100 px-1.5 outline-0" }));
+/** Two inputs for `$btw`, the value is kept as `from,to` */
+const SearchFilterRange = ({ filter, onChange, onRemove, }) => {
+    const [from = "", to = ""] = filter.value.split(",");
+    const fromRef = useRef(null);
+    return (jsxs(Fragment, { children: [jsx(SearchFilterInput, { value: from, autoFocus: filter.value === "", onChange: (value) => onChange(`${value.replace(/,/g, "")},${to}`), onRemove: onRemove, placeholder: "1", inputRef: fromRef }), jsx("span", { className: "text-base-content/60", children: "\u2013" }), jsx(SearchFilterInput, { value: to, autoFocus: false, onChange: (value) => onChange(`${from},${value.replace(/,/g, "")}`), 
+                // backspace in an empty "to" goes back to "from" instead of removing the filter
+                onRemove: () => fromRef.current?.focus(), placeholder: "10" })] }));
 };
 /** One select for `$eq`; for `$in` picked values are listed and one select at the end adds another */
 const SearchFilterSelects = ({ filter, options, onChange, }) => {

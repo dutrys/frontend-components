@@ -61,10 +61,14 @@ export type FilterField = {
 
 export type FilterFields = Record<string, FilterField>;
 
-const baseOperators = ["$eq", "$in", "$ilike", "$null"] as const;
+const baseOperators = ["$eq", "$in", "$ilike", "$null", "$gt", "$gte", "$lt", "$lte", "$btw"] as const;
 type BaseOperator = (typeof baseOperators)[number];
 
-export type SearchOperator = BaseOperator | `$not:${BaseOperator}`;
+/** Operators which can be negated with `$not:` */
+const negatableOperators = ["$eq", "$in", "$ilike", "$null"] as const;
+type NegatableOperator = (typeof negatableOperators)[number];
+
+export type SearchOperator = BaseOperator | `$not:${NegatableOperator}`;
 
 export type SearchFilter = {
   key: string;
@@ -81,6 +85,11 @@ const operatorLabels: Record<SearchOperator, string> = {
   "$not:$ilike": "!~=",
   $null: "IS NULL",
   "$not:$null": "IS NOT NULL",
+  $gt: ">",
+  $gte: ">=",
+  $lt: "<",
+  $lte: "<=",
+  $btw: "BTW",
 };
 
 /** Operators which do not take a value, e.g. `filter.id=$null` */
@@ -89,13 +98,16 @@ const isValueless = (operator: SearchOperator) => operator === "$null" || operat
 /** Operators which take a comma separated list, e.g. `filter.id=$in:1,2,3` */
 const isList = (operator: SearchOperator) => operator === "$in" || operator === "$not:$in";
 
+/** Operator which takes two comma separated values, e.g. `filter.id=$btw:1,10` */
+const isRange = (operator: SearchOperator) => operator === "$btw";
+
 const availableOperators = (operators: FilterOperator[]): SearchOperator[] => {
   const result: SearchOperator[] = [];
   for (const operator of baseOperators) {
     if (operators.includes(operator)) {
       result.push(operator);
-      if (operators.includes("$not")) {
-        result.push(`$not:${operator}`);
+      if (operators.includes("$not") && (negatableOperators as readonly string[]).includes(operator)) {
+        result.push(`$not:${operator as NegatableOperator}`);
       }
     }
   }
@@ -150,13 +162,15 @@ export const searchFiltersToParams = (
     if (isValueless(filter.operator)) {
       params[`filter.${filter.key}`] = [filter.operator];
     } else {
+      const values = filter.value.split(",").map((v) => v.trim());
       const value = isList(filter.operator)
-        ? filter.value
-            .split(",")
-            .map((v) => v.trim())
-            .filter((v) => v !== "")
-            .join(",")
-        : filter.value;
+        ? values.filter((v) => v !== "").join(",")
+        : isRange(filter.operator)
+          ? // both ends are required
+            values.length === 2 && values.every((v) => v !== "")
+            ? values.join(",")
+            : ""
+          : filter.value;
       if (value !== "") {
         params[`filter.${filter.key}`] = [`${filter.operator}:${value}`];
       }
@@ -430,11 +444,14 @@ const SearchFilterChip = <T extends { meta: ResponseMeta; data: unknown[] }>({
               type="button"
               className={cx("col-span-2 grid-cols-subgrid", { "menu-active": operator === filter.operator })}
               onClick={() => {
-                // a list value does not fit a single value operator, keep only the first one
+                // a list or range value does not fit a single value operator, keep only the first one
+                const multiple = (o: SearchOperator) => isList(o) || isRange(o);
                 onChange(
-                  isList(filter.operator) && !isList(operator)
+                  multiple(filter.operator) && !multiple(operator)
                     ? { operator, value: filter.value.split(",")[0].trim() }
-                    : { operator },
+                    : isRange(operator) && !isRange(filter.operator)
+                      ? { operator, value: filter.value.split(",").slice(0, 2).join(",") }
+                      : { operator },
                 );
                 popoverRef.current?.hidePopover();
               }}
@@ -445,24 +462,19 @@ const SearchFilterChip = <T extends { meta: ResponseMeta; data: unknown[] }>({
           </li>
         ))}
       </ul>
-      {!isValueless(filter.operator) && options && (
+      {isRange(filter.operator) && (
+        <SearchFilterRange filter={filter} onChange={(value) => onChange({ value })} onRemove={onRemove} />
+      )}
+      {!isValueless(filter.operator) && !isRange(filter.operator) && options && (
         <SearchFilterSelects filter={filter} options={options} onChange={(value) => onChange({ value })} />
       )}
-      {!isValueless(filter.operator) && !options && (
-        <input
-          type="text"
-          autoFocus={filter.value === ""}
+      {!isValueless(filter.operator) && !isRange(filter.operator) && !options && (
+        <SearchFilterInput
           value={filter.value}
-          onChange={(e) => onChange({ value: e.target.value })}
-          onKeyDown={(e) => {
-            if (e.key === "Backspace" && filter.value === "") {
-              e.preventDefault();
-              onRemove();
-            }
-          }}
-          size={Math.max(filter.value.length, 4)}
+          autoFocus={filter.value === ""}
+          onChange={(value) => onChange({ value })}
+          onRemove={onRemove}
           placeholder={isList(filter.operator) ? "1,2,3" : undefined}
-          className="h-3.5 min-w-0 rounded-selector bg-base-100 px-1.5 outline-0"
         />
       )}
       <button
@@ -473,6 +485,75 @@ const SearchFilterChip = <T extends { meta: ResponseMeta; data: unknown[] }>({
         <XMarkIcon className="size-3" />
       </button>
     </span>
+  );
+};
+
+const SearchFilterInput = ({
+  value,
+  autoFocus,
+  onChange,
+  onRemove,
+  placeholder,
+  inputRef,
+}: {
+  value: string;
+  autoFocus: boolean;
+  onChange: (value: string) => void;
+  /** Called on backspace in an empty input */
+  onRemove: () => void;
+  placeholder?: string;
+  inputRef?: React.Ref<HTMLInputElement>;
+}) => (
+  <input
+    ref={inputRef}
+    type="text"
+    autoFocus={autoFocus}
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    onKeyDown={(e) => {
+      if (e.key === "Backspace" && value === "") {
+        e.preventDefault();
+        onRemove();
+      }
+    }}
+    size={Math.max(value.length, 4)}
+    placeholder={placeholder}
+    className="h-3.5 min-w-0 rounded-selector bg-base-100 px-1.5 outline-0"
+  />
+);
+
+/** Two inputs for `$btw`, the value is kept as `from,to` */
+const SearchFilterRange = ({
+  filter,
+  onChange,
+  onRemove,
+}: {
+  filter: SearchFilter;
+  onChange: (value: string) => void;
+  onRemove: () => void;
+}) => {
+  const [from = "", to = ""] = filter.value.split(",");
+  const fromRef = useRef<HTMLInputElement>(null);
+  return (
+    <>
+      <SearchFilterInput
+        value={from}
+        autoFocus={filter.value === ""}
+        onChange={(value) => onChange(`${value.replace(/,/g, "")},${to}`)}
+        onRemove={onRemove}
+        placeholder="1"
+        inputRef={fromRef}
+      />
+      <span className="text-base-content/60">–</span>
+      <SearchFilterInput
+        value={to}
+        autoFocus={false}
+        onChange={(value) => onChange(`${from},${value.replace(/,/g, "")}`)}
+        // backspace in an empty "to" goes back to "from" instead of removing the filter
+        onRemove={() => fromRef.current?.focus()}
+        placeholder="10"
+      />
+    </>
   );
 };
 

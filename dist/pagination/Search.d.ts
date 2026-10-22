@@ -17,9 +17,12 @@ export type FilterField = {
     pagination?: () => SearchFilterOptions<any>;
 };
 export type FilterFields = Record<string, FilterField>;
-declare const baseOperators: readonly ["$eq", "$in", "$ilike", "$null"];
+declare const baseOperators: readonly ["$eq", "$in", "$ilike", "$null", "$gt", "$gte", "$lt", "$lte", "$btw"];
 type BaseOperator = (typeof baseOperators)[number];
-export type SearchOperator = BaseOperator | `$not:${BaseOperator}`;
+/** Operators which can be negated with `$not:` */
+declare const negatableOperators: readonly ["$eq", "$in", "$ilike", "$null"];
+type NegatableOperator = (typeof negatableOperators)[number];
+export type SearchOperator = BaseOperator | `$not:${NegatableOperator}`;
 export type SearchFilter = {
     key: string;
     operator: SearchOperator;
