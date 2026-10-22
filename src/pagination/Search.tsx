@@ -182,6 +182,8 @@ export const Search = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [highlighted, setHighlighted] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
+  /** Suggestions opened with ctrl+space, shown even before anything is typed */
+  const [forced, setForced] = useState(false);
   /** Filters are shown in a box over the content below, otherwise they are collapsed into a single icon */
   const [expanded, setExpanded] = useState(false);
   const collapsed = !expanded && filters.length > 0;
@@ -190,7 +192,7 @@ export const Search = ({
 
   const suggestions = useMemo(() => {
     const word = currentWord.toLowerCase();
-    if (word === "") {
+    if (word === "" && !forced) {
       return [];
     }
     return Object.entries(filterFields)
@@ -201,7 +203,7 @@ export const Search = ({
           key.toLowerCase().startsWith(word),
       )
       .map(([key]) => key);
-  }, [currentWord, filterFields, filters]);
+  }, [currentWord, filterFields, filters, forced]);
 
   const isOpen = isFocused && suggestions.length > 0;
 
@@ -213,6 +215,7 @@ export const Search = ({
     setExpanded(true);
     setSearch(search.slice(0, search.length - currentWord.length).trimEnd());
     setHighlighted(0);
+    setForced(false);
   };
 
   const updateFilter = (index: number, filter: Partial<SearchFilter>) =>
@@ -244,6 +247,12 @@ export const Search = ({
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.ctrlKey && (e.key === " " || e.code === "Space")) {
+      e.preventDefault();
+      setForced(true);
+      setHighlighted(0);
+      return;
+    }
     if (isOpen) {
       if (e.key === "ArrowDown") {
         e.preventDefault();
@@ -263,6 +272,7 @@ export const Search = ({
       if (e.key === "Escape") {
         e.preventDefault();
         setIsFocused(false);
+        setForced(false);
         return;
       }
     }
@@ -334,8 +344,12 @@ export const Search = ({
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={onKeyDown}
             onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            className="grow min-w-16 px-1"
+            onBlur={() => {
+              setIsFocused(false);
+              setForced(false);
+            }}
+            // daisyUI gives inputs in `.input` full width, which as flex basis wraps the input below the filters
+            className="grow basis-16 min-w-16 px-1"
             placeholder={filters.length === 0 ? t("pagination.searchPlaceholder") : undefined}
           />
         </div>

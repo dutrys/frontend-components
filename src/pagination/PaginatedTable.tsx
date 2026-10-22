@@ -115,7 +115,8 @@ const SearchField = ({ filterFields }: { filterFields?: FilterFields }) => {
           );
         }}
       >
-        <div className="join w-full pr-2">
+        {/* block level, as inline-flex aligns to the baseline which drops when expanded Search is absolute */}
+        <div className="join flex w-full pr-2">
           {filterFields ? (
             <Search
               filterFields={filterFields}

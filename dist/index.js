@@ -1632,13 +1632,15 @@ const Search = ({ filterFields, search, setSearch, filters, setFilters, }) => {
     const inputRef = useRef(null);
     const [highlighted, setHighlighted] = useState(0);
     const [isFocused, setIsFocused] = useState(false);
+    /** Suggestions opened with ctrl+space, shown even before anything is typed */
+    const [forced, setForced] = useState(false);
     /** Filters are shown in a box over the content below, otherwise they are collapsed into a single icon */
     const [expanded, setExpanded] = useState(false);
     const collapsed = !expanded && filters.length > 0;
     const currentWord = search.split(" ").pop() ?? "";
     const suggestions = useMemo(() => {
         const word = currentWord.toLowerCase();
-        if (word === "") {
+        if (word === "" && !forced) {
             return [];
         }
         return Object.entries(filterFields)
@@ -1646,7 +1648,7 @@ const Search = ({ filterFields, search, setSearch, filters, setFilters, }) => {
             !filters.some((f) => f.key === key) &&
             key.toLowerCase().startsWith(word))
             .map(([key]) => key);
-    }, [currentWord, filterFields, filters]);
+    }, [currentWord, filterFields, filters, forced]);
     const isOpen = isFocused && suggestions.length > 0;
     const addFilter = (key) => {
         const existing = filters.some((f) => f.key === key);
@@ -1656,6 +1658,7 @@ const Search = ({ filterFields, search, setSearch, filters, setFilters, }) => {
         setExpanded(true);
         setSearch(search.slice(0, search.length - currentWord.length).trimEnd());
         setHighlighted(0);
+        setForced(false);
     };
     const updateFilter = (index, filter) => setFilters(filters.map((f, i) => (i === index ? { ...f, ...filter } : f)));
     const removeFilter = (index) => {
@@ -1680,6 +1683,12 @@ const Search = ({ filterFields, search, setSearch, filters, setFilters, }) => {
         setHighlighted(0);
     };
     const onKeyDown = (e) => {
+        if (e.ctrlKey && (e.key === " " || e.code === "Space")) {
+            e.preventDefault();
+            setForced(true);
+            setHighlighted(0);
+            return;
+        }
         if (isOpen) {
             if (e.key === "ArrowDown") {
                 e.preventDefault();
@@ -1699,6 +1708,7 @@ const Search = ({ filterFields, search, setSearch, filters, setFilters, }) => {
             if (e.key === "Escape") {
                 e.preventDefault();
                 setIsFocused(false);
+                setForced(false);
                 return;
             }
         }
@@ -1723,7 +1733,12 @@ const Search = ({ filterFields, search, setSearch, filters, setFilters, }) => {
                     }, children: [collapsed ? (jsxs("button", { type: "button", className: "inline-flex shrink-0 items-center gap-1 h-4.5 px-1.5 rounded-selector bg-base-200 text-xs font-semibold leading-none cursor-pointer hover:bg-base-300", title: filters.map((f) => f.key).join(", "), onClick: () => {
                                 setExpanded(true);
                                 inputRef.current?.focus();
-                            }, "data-testid": "search-filters-collapsed", children: [jsx(FunnelIcon, { className: "size-3" }), filters.length] })) : (filters.map((filter, i) => (jsx(SearchFilterChip, { filter: filter, operators: availableOperators(filterFields[filter.key]?.operators ?? []), options: filterFields[filter.key]?.pagination?.(), onChange: (f) => updateFilter(i, f), onRemove: () => removeFilter(i) }, filter.key)))), jsx("input", { ref: inputRef, type: "text", name: "search", autoComplete: "off", value: search, onChange: (e) => onChange(e.target.value), onKeyDown: onKeyDown, onFocus: () => setIsFocused(true), onBlur: () => setIsFocused(false), className: "grow min-w-16 px-1", placeholder: filters.length === 0 ? t("pagination.searchPlaceholder") : undefined })] }), isOpen && (jsx("ul", { className: "menu menu-xs absolute left-0 top-full mt-1 w-full bg-base-100 rounded-box shadow-lg border border-base-300 z-50", "data-testid": "search-suggestions", children: suggestions.map((key, i) => (jsx("li", { children: jsx("button", { type: "button", className: cx({ "menu-active": i === highlighted }), onMouseDown: (e) => {
+                            }, "data-testid": "search-filters-collapsed", children: [jsx(FunnelIcon, { className: "size-3" }), filters.length] })) : (filters.map((filter, i) => (jsx(SearchFilterChip, { filter: filter, operators: availableOperators(filterFields[filter.key]?.operators ?? []), options: filterFields[filter.key]?.pagination?.(), onChange: (f) => updateFilter(i, f), onRemove: () => removeFilter(i) }, filter.key)))), jsx("input", { ref: inputRef, type: "text", name: "search", autoComplete: "off", value: search, onChange: (e) => onChange(e.target.value), onKeyDown: onKeyDown, onFocus: () => setIsFocused(true), onBlur: () => {
+                                setIsFocused(false);
+                                setForced(false);
+                            }, 
+                            // daisyUI gives inputs in `.input` full width, which as flex basis wraps the input below the filters
+                            className: "grow basis-16 min-w-16 px-1", placeholder: filters.length === 0 ? t("pagination.searchPlaceholder") : undefined })] }), isOpen && (jsx("ul", { className: "menu menu-xs absolute left-0 top-full mt-1 w-full bg-base-100 rounded-box shadow-lg border border-base-300 z-50", "data-testid": "search-suggestions", children: suggestions.map((key, i) => (jsx("li", { children: jsx("button", { type: "button", className: cx({ "menu-active": i === highlighted }), onMouseDown: (e) => {
                                 // keep focus in the input so blur does not close the list before click
                                 e.preventDefault();
                                 addFilter(key);
@@ -1820,7 +1835,7 @@ const SearchField = ({ filterFields }) => {
                         page: "",
                         ...(filterFields ? searchFiltersToParams(filterFields, filters, searchParams) : {}),
                     }, searchParams)).replace(/^\/(en|lt)\//, "/"), params.locale));
-            }, children: jsxs("div", { className: "join w-full pr-2", children: [filterFields ? (jsx(Search, { filterFields: filterFields, search: search, setSearch: setSearch, filters: filters, setFilters: setFilters })) : (jsx("input", { type: "text", value: search, onChange: (e) => setSearch(e.target.value), name: "search", className: "join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500", placeholder: t("pagination.searchPlaceholder") })), jsx("button", { className: "join-item btn btn-neutral btn-xs uppercase", type: "submit", children: jsx(MagnifyingGlassIcon, { className: "w-4 h-4" }) })] }) }) }));
+            }, children: jsxs("div", { className: "join flex w-full pr-2", children: [filterFields ? (jsx(Search, { filterFields: filterFields, search: search, setSearch: setSearch, filters: filters, setFilters: setFilters })) : (jsx("input", { type: "text", value: search, onChange: (e) => setSearch(e.target.value), name: "search", className: "join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500", placeholder: t("pagination.searchPlaceholder") })), jsx("button", { className: "join-item btn btn-neutral btn-xs uppercase", type: "submit", children: jsx(MagnifyingGlassIcon, { className: "w-4 h-4" }) })] }) }) }));
 };
 const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs = "list", toolbarClassName, group, filterFields, }) => {
     const router = useRouter();
