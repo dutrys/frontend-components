@@ -34,6 +34,28 @@ declare const Popover: ({ title, children, popoverClassName, onShow, open: openP
     placement?: Placement;
 }) => string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined;
 
+type DialogWithBackProps$1 = {
+    onClosed?: () => void;
+    title?: string;
+    className?: string;
+    widthClassName?: string;
+    children: React__default.ReactNode;
+    isOpen?: boolean;
+    setIsOpen?: (isOpen: boolean) => void;
+    dialogButtons?: React__default.ReactNode;
+    returnDefault?: () => unknown;
+    buttons?: ((close: () => void) => React__default.ReactNode) | React__default.ReactNode;
+    index?: number;
+    disableBackdrop?: boolean;
+};
+declare const Backdrop: ({ children, onClick, className, }: {
+    disable?: boolean;
+    children?: React__default.ReactNode;
+    onClick?: () => void;
+    className?: string;
+}) => react_jsx_runtime.JSX.Element;
+declare const SideDialog: ({ dialogButtons, title, index, disableBackdrop, children, onClosed, className, returnDefault, buttons, widthClassName, ...rest }: DialogWithBackProps$1) => react_jsx_runtime.JSX.Element;
+
 type MoreActionType = {
     label: string;
     icon: React__default.ComponentType<{
@@ -339,6 +361,18 @@ declare const HeaderResponsivePaginated: ({ elements, bulkActions, }: {
         selected: number[];
         setSelected: (selected: number[]) => void;
     };
+}) => react_jsx_runtime.JSX.Element;
+
+declare const PaginatedTableClient: <TModel extends {
+    data: {
+        id: number;
+    }[];
+    meta: ResponseMeta;
+}, TSort extends Record<string, string> = Record<string, string>>({ data, isLoading, columns, sortEnum, }: {
+    isLoading: boolean;
+    sortEnum: TSort;
+    data: TModel | undefined;
+    columns: Array<ColumnType<TModel["data"][number]>>;
 }) => react_jsx_runtime.JSX.Element;
 
 declare class ScreenSize {
@@ -811,4 +845,4 @@ declare const FilterButton: ({ className, filter, onSubmitParams, onParseParams,
     className?: string;
 }) => react_jsx_runtime.JSX.Element;
 
-export { type ActionColumn, AlertErrors, Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, type ColumnType, ConfirmSave, type DateColumn, DateField, DateFormField, DateInput, type DateInputProps, DateRangeField, DateRangeInput, type DateRangeInputProps, DateTime, DateTimeFormField, DateTimePicker, type DateTimePickerProps, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, type FilterField, type FilterFields, FilterLink, FilterNumberRange, type FilterOperator, type FilterOperators, FilterOptions, FilterOptionsExpandable, FilterPagination, type FilterPaginationColumn, FilterSelectOptions, FilterText, FilterType, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MenuItem, type MenuItemWithSubmenu, type MoreActionType, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, type PaginateQuery, PaginatedTable, Pagination, type PaginationSettings, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, type ResponseMeta, SaveButton, ScreenSize, Search, type SearchFilter, type SearchFilterOptions, type SearchOperator, Select, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, type SelectFromApiProps, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, type SelectPaginatedFromApiProps, type SelectProps, type ServerError, SidebarLayout, SidebarMenu, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, type TimePickerProps, Title, Toaster, addServerErrors, getFilterParam, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, parseSearchFilters, searchFiltersToParams, setPartialParams, useFormSubmit, useScreenSize };
+export { type ActionColumn, AlertErrors, Archive, ArchiveButtonWithDialog, Backdrop, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, type ColumnType, ConfirmSave, type DateColumn, DateField, DateFormField, DateInput, type DateInputProps, DateRangeField, DateRangeInput, type DateRangeInputProps, DateTime, DateTimeFormField, DateTimePicker, type DateTimePickerProps, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, type FilterField, type FilterFields, FilterLink, FilterNumberRange, type FilterOperator, type FilterOperators, FilterOptions, FilterOptionsExpandable, FilterPagination, type FilterPaginationColumn, FilterSelectOptions, FilterText, FilterType, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MenuItem, type MenuItemWithSubmenu, type MoreActionType, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, type PaginateQuery, PaginatedTable, PaginatedTableClient, Pagination, type PaginationSettings, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, type ResponseMeta, SaveButton, ScreenSize, Search, type SearchFilter, type SearchFilterOptions, type SearchOperator, Select, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, type SelectFromApiProps, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, type SelectPaginatedFromApiProps, type SelectProps, type ServerError, SideDialog, SidebarLayout, SidebarMenu, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, type TimePickerProps, Title, Toaster, addServerErrors, getFilterParam, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, parseSearchFilters, searchFiltersToParams, setPartialParams, useFormSubmit, useScreenSize };

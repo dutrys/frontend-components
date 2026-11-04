@@ -33,6 +33,7 @@
     "date-fns-tz": "*",
     "framer-motion": "^12.40.0",
     "lodash": "^4.18.1",
+    "motion": "^14.9.1",
     "next-intl": "*",
     "next-nprogress-bar": "^3.0.0",
     "react": "^19.0.0",

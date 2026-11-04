@@ -4,16 +4,17 @@ import * as React from 'react';
 import React__default, { useState, useRef, useEffect, useMemo, createContext, useContext, Fragment as Fragment$1, useCallback, useId } from 'react';
 import { useFloating, offset, flip, shift, arrow, autoUpdate, useFocus, useHover, safePolygon, useClick, useDismiss, useInteractions, FloatingPortal, FloatingArrow, size } from '@floating-ui/react';
 import cx from 'classnames';
-import Link$1 from 'next/link';
-import { useParams, useSearchParams, useRouter as useRouter$1, usePathname } from 'next/navigation';
-import { EllipsisVerticalIcon, ArrowsUpDownIcon } from '@heroicons/react/16/solid';
-import { useRouter } from 'next-nprogress-bar';
-import toast, { useToasterStore, Toaster as Toaster$1, resolveValue } from 'react-hot-toast';
-import { ExclamationTriangleIcon, CheckCircleIcon, ExclamationCircleIcon, ChevronDownIcon, EllipsisHorizontalIcon, CheckIcon, Cog6ToothIcon, AdjustmentsHorizontalIcon, XMarkIcon, ClockIcon, CalendarIcon, ChevronUpDownIcon, FunnelIcon, PlusIcon, RectangleStackIcon, QueueListIcon, MagnifyingGlassIcon, ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronDoubleDownIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ExclamationTriangleIcon, CheckCircleIcon, ExclamationCircleIcon, ChevronDownIcon, EllipsisHorizontalIcon, CheckIcon, Cog6ToothIcon, AdjustmentsHorizontalIcon, ClockIcon, CalendarIcon, ChevronUpDownIcon, FunnelIcon, PlusIcon, RectangleStackIcon, QueueListIcon, MagnifyingGlassIcon, ChevronUpIcon, ChevronDoubleLeftIcon, ChevronDoubleRightIcon, ChevronDoubleDownIcon } from '@heroicons/react/24/outline';
 import { Tooltip } from 'react-tooltip';
+import { motion } from 'motion/react';
+import { useParams, useRouter, useSearchParams, usePathname } from 'next/navigation';
+import Link$1 from 'next/link';
+import { EllipsisVerticalIcon, ArrowsUpDownIcon } from '@heroicons/react/16/solid';
+import { useRouter as useRouter$1 } from 'next-nprogress-bar';
+import toast, { useToasterStore, Toaster as Toaster$1, resolveValue } from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
 import { ChevronLeftIcon, ChevronRightIcon, FunnelIcon as FunnelIcon$1 } from '@heroicons/react/24/solid';
-import { Reorder, useMotionValue, useDragControls, animate, motion } from 'framer-motion';
+import { Reorder, useMotionValue, useDragControls, animate, motion as motion$1 } from 'framer-motion';
 import { captureException } from '@sentry/nextjs';
 import { useForm, Controller, useWatch, Watch } from 'react-hook-form';
 import { createPortal } from 'react-dom';
@@ -75,6 +76,52 @@ const addLocale = (link, locale) => {
         return `/${locale || "lt"}${href}`;
     }
     return link;
+};
+
+const TOOLTIP_PARALLEL_ID = "parallel-tooltip";
+const ParallelDialog = ({ dialogButtons, title, children, onClosed, className, returnDefault, ...rest }) => {
+    const router = useRouter();
+    const closeModal = () => {
+        onClosed?.();
+        if (history.length > 2) {
+            router.back();
+            return;
+        }
+        if (returnDefault) {
+            router.replace(addLocale(returnDefault));
+        }
+    };
+    return (jsxs("dialog", { "data-testid": "modal-dialog", open: true, className: "modal modal-bottom modal-middle overflow-y-auto z-1100", ...rest, children: [jsxs("div", { className: cx("modal-box max-h-none overflow-y-visible rounded-field p-4 my-4 relative", className), onKeyDown: (e) => e.key === "Escape" && closeModal(), children: [jsx(Tooltip, { id: TOOLTIP_PARALLEL_ID, place: "top" }), title ? (jsxs("div", { className: "flex gap-2 mb-4", children: [jsx("h3", { className: "grow shrink truncate font-bold text-lg mt-0.5", tabIndex: -1, children: title }), dialogButtons, jsx("button", { type: "button", className: "btn btn-circle btn-sm", onClick: closeModal, children: jsx(XMarkIcon, { className: "size-4" }) })] })) : (jsxs("div", { className: "absolute right-4 top-4 flex gap-2 z-1101", children: [dialogButtons, jsx("a", { href: "#", className: "btn btn-circle btn-sm", onClick: closeModal, children: jsx(XMarkIcon, { className: "size-4" }) })] })), children] }), jsx("form", { method: "dialog", onSubmit: (e) => {
+                    e.preventDefault();
+                    closeModal();
+                }, className: "modal-backdrop", children: jsx("button", { children: "close" }) })] }));
+};
+const ParallelDialogButtons = ({ children }) => jsx("div", { className: "p-4 -mx-4 mt-4 -mb-4 bg-base-200 rounded-b-field flex gap-4 justify-end", children: children });
+
+const Backdrop = ({ children, onClick, className = "z-1099", }) => (jsx("div", { className: `fixed inset-0 bg-black/50 bg-opacity-25 ${className}`, onClick: (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onClick?.();
+    }, children: children }));
+const SideDialog = ({ dialogButtons, title, index = 0, disableBackdrop, children, onClosed, className, returnDefault, buttons, widthClassName = "", ...rest }) => {
+    const closeModal = () => {
+        onClosed?.();
+        if (typeof returnDefault === "function") {
+            returnDefault();
+        }
+        else {
+            if (history.length > 3) {
+                history.back();
+            }
+        }
+    };
+    return (jsxs(Fragment, { children: [!disableBackdrop && (jsx(motion.div, { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, className: "fixed top-0 right-0 h-full w-full z-1002", children: jsx(Backdrop, { className: "z-1001", onClick: closeModal }) }, "backdrop")), jsx(motion.div, { initial: { x: "100%", opacity: 0 }, animate: { x: "0%", opacity: 1 }, exit: { x: "100%", opacity: 0 }, transition: { type: "spring", mass: 0.4, stiffness: 250, damping: 28 }, className: "fixed top-0 right-0 h-full w-full z-1002", onClick: (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeModal();
+                }, children: jsx("dialog", { "data-index": index, onClick: closeModal, "data-testid": "side-dialog", style: { left: "unset", right: 0, zIndex: 1099 + index, paddingLeft: index * Math.max(50 - index, 10) }, className: cx("h-screen bg-transparent pt-16", widthClassName), open: true, ...rest, children: jsxs("div", { onClick: (e) => e.stopPropagation(), className: cx("border-l border-gray-400 drop-shadow-xl relative w-full h-full", className, {
+                            "bg-base-200": !className?.includes("bg-"),
+                        }), onKeyDown: (e) => e.key === "Escape" && closeModal(), children: [jsx(Tooltip, { id: TOOLTIP_PARALLEL_ID, place: "top" }), jsxs("div", { className: "flex flex-col h-full overflow-y-auto", children: [title ? (jsxs("div", { className: "flex gap-2 m-4", children: [jsx("h3", { className: "grow shrink truncate font-bold text-lg mt-0.5", tabIndex: -1, children: title }), dialogButtons, jsx("button", { type: "button", className: "btn btn-neutral btn-circle btn-sm", onClick: closeModal, children: jsx(XMarkIcon, { className: "size-4" }) })] })) : (jsxs("div", { className: "absolute right-4 top-4 flex gap-2 z-1101", children: [dialogButtons, jsx("button", { type: "button", className: "btn btn-neutral btn-circle btn-sm", onClick: closeModal, children: jsx(XMarkIcon, { className: "size-4" }) })] })), children, buttons && (jsx("div", { className: "sticky z-10 bottom-0 px-4 py-4 flex gap-2 justify-center", children: typeof buttons === "function" ? buttons(closeModal) : buttons }))] })] }) }) }, "modal-dialog-" + index)] }));
 };
 
 class ScreenSize {
@@ -167,7 +214,7 @@ const MoreActions = ({ itemClassName = "btn-ghost", rootClassName, actions, }) =
     return (jsxs("div", { className: cx("flex more-actions items-center gap-0.5", rootClassName), children: [buttonActions.map((a) => (jsx(Action, { className: itemClassName, enable: true, action: a, close: () => { } }, a.label))), menuActions.length > 0 && (jsx(Popover, { showOnClick: true, title: (ref, props, open) => (jsx("button", { className: cx("btn btn-xs md:btn-xs", itemClassName, { "btn-active": open }), ref: ref, ...props, children: jsx(EllipsisVerticalIcon, { className: "size-4" }) })), children: (close) => (jsx("div", { "data-theme": "dim", style: { background: "transparent" }, children: jsx("ul", { className: "menu menu-sm p-1 p-0", children: menuActions.map((a, i) => (jsx("li", { className: a.disabled ? "menu-disabled" : undefined, children: jsx(Action, { action: a, close: close }) }, i))) }) })) }))] }));
 };
 const Action = ({ className, action: a, close, enable, }) => {
-    const router = useRouter();
+    const router = useRouter$1();
     const [isLoading, setIsLoading] = useState(false);
     const Icon = isLoading ? LoadingComponent : a.icon;
     const searchParams = useSearchParams();
@@ -205,14 +252,14 @@ const Action = ({ className, action: a, close, enable, }) => {
         }, children: [Icon && jsx(Icon, { className: "size-4" }), !enable && a.label] }));
 };
 
-var styles$5 = {"menu":"BulkActions-module_menu__m9kWg"};
+var styles$6 = {"menu":"BulkActions-module_menu__m9kWg"};
 
 const BulkActions = ({ bulkActions, disabled, }) => {
     const t = useTranslations();
     if (disabled) {
         return (jsxs("button", { disabled: true, className: "btn btn-xs btn-primary uppercase", children: [t("pagination.bulkActions"), " ", jsx(ChevronDownIcon, { className: "size-4" })] }));
     }
-    return (jsx(Popover, { disabled: disabled, showOnClick: true, backgroundColor: "bg-primary", borderColor: "border-primary", title: (ref, props) => (jsxs("button", { disabled: disabled, ref: ref, ...props, className: "btn btn-xs btn-primary uppercase", children: [t("pagination.bulkActions"), " ", jsx(ChevronDownIcon, { className: "size-4" })] })), children: (close) => (jsx("ul", { className: cx("menu menu-sm p-1", styles$5.menu), children: jsx(BulkDropDownActions, { bulkActions: bulkActions.map((b) => ({
+    return (jsx(Popover, { disabled: disabled, showOnClick: true, backgroundColor: "bg-primary", borderColor: "border-primary", title: (ref, props) => (jsxs("button", { disabled: disabled, ref: ref, ...props, className: "btn btn-xs btn-primary uppercase", children: [t("pagination.bulkActions"), " ", jsx(ChevronDownIcon, { className: "size-4" })] })), children: (close) => (jsx("ul", { className: cx("menu menu-sm p-1", styles$6.menu), children: jsx(BulkDropDownActions, { bulkActions: bulkActions.map((b) => ({
                     ...b,
                     onSelect: async () => {
                         close();
@@ -341,7 +388,7 @@ const NoCountPagination = ({ nextPageAvailable }) => {
     return (jsxs("div", { className: "my-4 gap-2", children: [jsxs(Link, { className: cx("btn btn-sm mr-2 w-30", { "btn-disabled": page <= 1 }), href: setPartialParams({ page: page <= 2 ? "" : `${page - 1}` }, searchParams), prefetch: false, children: [jsx(ChevronLeftIcon, { className: "size-4" }), " ", t("pagination.previous")] }), jsxs(Link, { href: setPartialParams(nextPageAvailable ? { page: `${page + 1}` } : {}, searchParams), className: cx("btn btn-sm w-30", { "btn-disabled": !nextPageAvailable }), prefetch: false, children: [t("pagination.next"), " ", jsx(ChevronRightIcon, { className: "size-4" })] })] }));
 };
 
-var styles$4 = {"table":"PaginatedTable-module_table__efs0Y","selectedRow":"PaginatedTable-module_selectedRow__Xi-QH","rowHover":"PaginatedTable-module_rowHover__l-B2Q","thead":"PaginatedTable-module_thead__Jb-pD","rowHref":"PaginatedTable-module_rowHref__bPoWN","colAction":"PaginatedTable-module_colAction__BMb6M","actionCellContent":"PaginatedTable-module_actionCellContent__wc9Um","moreActionsContainer":"PaginatedTable-module_moreActionsContainer__xdZwk"};
+var styles$5 = {"table":"PaginatedTable-module_table__efs0Y","selectedRow":"PaginatedTable-module_selectedRow__Xi-QH","rowHover":"PaginatedTable-module_rowHover__l-B2Q","thead":"PaginatedTable-module_thead__Jb-pD","rowHref":"PaginatedTable-module_rowHref__bPoWN","colAction":"PaginatedTable-module_colAction__BMb6M","actionCellContent":"PaginatedTable-module_actionCellContent__wc9Um","moreActionsContainer":"PaginatedTable-module_moreActionsContainer__xdZwk"};
 
 const HotkeysContext = createContext({
     addHotKey: () => { },
@@ -518,7 +565,7 @@ const formatError = (errors) => {
 const isServerError = (error) => typeof error === "object" && typeof error.errors === "object";
 const useFormSubmit = (formOptions = {}) => {
     const t = useTranslations();
-    const router = useRouter$1();
+    const router = useRouter();
     const { returnBack, reportProgress, onError, onSuccess, loadingText, savedText, ...options } = formOptions;
     const formProps = useForm(options);
     const serverErrorKeys = useRef([]);
@@ -755,7 +802,7 @@ const OrderColumns = ({ name, items, setOrder, }) => (jsx(Reorder.Group, { as: "
                 setOrder(itemCopy);
             }
         }, item: column }, `${name}-${isActionColumn(column.column) ? "action" : column.column.title}`))) }));
-const ReorderHandle = ({ dragControls }) => (jsx(motion.div, { whileTap: { scale: 0.95 }, onPointerDown: (e) => {
+const ReorderHandle = ({ dragControls }) => (jsx(motion$1.div, { whileTap: { scale: 0.95 }, onPointerDown: (e) => {
         e.preventDefault();
         dragControls.start(e);
     }, className: "cursor-grab text-base-content/40 active:cursor-grabbing p-2", children: jsx(ArrowsUpDownIcon, { className: "size-4" }) }));
@@ -792,7 +839,7 @@ class LocalStorage {
     }
 }
 
-var styles$3 = {"dayPicker":"DatePicker-module_dayPicker__VRSSY"};
+var styles$4 = {"dayPicker":"DatePicker-module_dayPicker__VRSSY"};
 
 const DateTimePicker = ({ value, size, onChange, disabled, required, from, to, placeholder, className, toggleClassName, ...rest }) => {
     const [dateString, setDateString] = useState(value ? format(value, "yyyy-MM-dd HH:mm") : "");
@@ -871,7 +918,7 @@ const DateTimePicker = ({ value, size, onChange, disabled, required, from, to, p
                             /* empty */
                         }
                     }
-                }, showOnClick: true, showOnFocus: true, showOnHover: false, children: (close) => (jsxs(Fragment, { children: [jsxs("div", { className: "flex", children: [jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$3.dayPicker}`, captionLayout: "label", mode: "single", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, weekStartsOn: 1, disabled: matcher, selected: valueTemp || undefined, defaultMonth: valueTemp || undefined, onSelect: (day) => {
+                }, showOnClick: true, showOnFocus: true, showOnHover: false, children: (close) => (jsxs(Fragment, { children: [jsxs("div", { className: "flex", children: [jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$4.dayPicker}`, captionLayout: "label", mode: "single", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, weekStartsOn: 1, disabled: matcher, selected: valueTemp || undefined, defaultMonth: valueTemp || undefined, onSelect: (day) => {
                                         day?.setHours((valueTemp || new Date()).getHours(), (valueTemp || new Date()).getMinutes() || 0);
                                         if (from && day && from > day) {
                                             day.setHours(from.getHours(), from.getMinutes());
@@ -940,7 +987,7 @@ const DateInput = ({ onChange, value, className, toggleClassName, required, disa
                             e.stopPropagation();
                             e.preventDefault();
                             onChange(null);
-                        }, children: jsx(XMarkIcon, { className: "size-4" }) }))] })), children: (close) => (jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$3.dayPicker}`, captionLayout: "label", mode: "single", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, disabled: matcher, weekStartsOn: 1, modifiers: modifiers, selected: value || undefined, defaultMonth: value || undefined, onSelect: (day) => {
+                        }, children: jsx(XMarkIcon, { className: "size-4" }) }))] })), children: (close) => (jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$4.dayPicker}`, captionLayout: "label", mode: "single", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, disabled: matcher, weekStartsOn: 1, modifiers: modifiers, selected: value || undefined, defaultMonth: value || undefined, onSelect: (day) => {
                     onChange(day || null);
                     close();
                 } })) }) }));
@@ -975,7 +1022,7 @@ const DateRangeInput = ({ onChange, value, className, toggleClassName, required,
                             e.preventDefault();
                             onChange(null);
                             setDateString("");
-                        }, children: jsx(XMarkIcon, { className: "size-4" }) }))] })), children: (close) => (jsxs("div", { className: "flex", children: [jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$3.dayPicker}`, captionLayout: "label", mode: "range", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, resetOnSelect: true, disabled: matcher, weekStartsOn: 1, numberOfMonths: 2, selected: value ?? undefined, defaultMonth: value?.from ?? undefined, modifiers: modifiers, onSelect: (range) => {
+                        }, children: jsx(XMarkIcon, { className: "size-4" }) }))] })), children: (close) => (jsxs("div", { className: "flex", children: [jsx(DayPicker, { className: `react-day-picker bg-transparent border-none text-white ${styles$4.dayPicker}`, captionLayout: "label", mode: "range", locale: params.locale === "lt" ? lt : enGB, showOutsideDays: true, resetOnSelect: true, disabled: matcher, weekStartsOn: 1, numberOfMonths: 2, selected: value ?? undefined, defaultMonth: value?.from ?? undefined, modifiers: modifiers, onSelect: (range) => {
                             if (range?.from && range?.to) {
                                 setDateString(`${formatDate(range.from)} - ${formatDate(range.to)}`);
                                 close();
@@ -1264,7 +1311,7 @@ const TimePicker = ({ className, value, onChange, placeholder, required, disable
         } }));
 };
 
-var styles$2 = {"desc":"Input-module_desc__3D3hV"};
+var styles$3 = {"desc":"Input-module_desc__3D3hV"};
 
 const ITEMS_PER_PAGE = 50;
 const SelectFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, filter, ...rest }) => {
@@ -1327,13 +1374,13 @@ const TextField = ({ error, className, type = "text", label, size, desc, fieldSe
                         "input-sm": size === "sm",
                         "input-lg": size === "lg",
                         "input-error": error,
-                    }), ...rest })), jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+                    }), ...rest })), jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$3.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 const SelectField = ({ error, className, label, size, desc, fieldSetClassName, append, prepend, children, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx("select", { className: cx("select select-bordered w-full", className, {
                         "select-xs": size === "xs",
                         "select-sm": size === "sm",
                         "select-lg": size === "lg",
                         "select-error": error,
-                    }), ...rest, children: children }), jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+                    }), ...rest, children: children }), jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$3.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 const SelectFormField = ({ id, fieldSetClassName, register, name, options, ref, ...rest }) => {
     const r = register(name, {
         required: rest.required,
@@ -1369,7 +1416,7 @@ const TextareaFormField = (props) => {
                                 setLength(e.target?.value?.length ?? 0);
                             }
                             return r.onChange(e);
-                        } }), props.maxLength && (jsx("div", { className: "badge badge-xs badge-ghost absolute right-1 bottom-1", children: `${length}/${props.maxLength}` })), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+                        } }), props.maxLength && (jsx("div", { className: "badge badge-xs badge-ghost absolute right-1 bottom-1", children: `${length}/${props.maxLength}` })), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$3.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
 const RadioBoxFormField = ({ name, options, label = "", value, onChange, }) => (jsxs("div", { children: [label || "", jsx("div", { className: "flex flex-col pt-2 gap-2", children: Object.entries(options).map(([key, label]) => (jsxs("label", { children: [jsx("input", { type: "radio", checked: value === key, name: name, value: key, onChange: () => onChange(key), className: "radio radio-primary" }, key), " ", typeof label === "string" ? label : null] }, key))) })] }));
 const IndeterminateCheckbox = ({ checked, className = "checkbox checkbox-xs", indeterminate, onChange, disabled, id, ref, }) => {
@@ -1417,13 +1464,13 @@ const CheckboxField = ({ label, fieldSetClassName, checkbox, className, labelCla
                                 }) }), jsx("span", { className: cx("text-gray-500 label-text grow pl-2", labelClassName, {
                                 "text-sm": !size,
                                 "text-xs": size === "sm" || size === "xs",
-                            }), children: label })] }) }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
+                            }), children: label })] }) }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$3.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
 const CheckboxFormField = ({ name, disabled, options, register, ...props }) => (jsx(CheckboxField, { ...props, ...register(name, {
         disabled,
         ...(options || {}),
     }) }));
-const DateField = ({ fieldSetClassName, label, error, desc, ...props }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(DateInput, { ...props, className: cx({ "input-error": error }, props.className), placeholder: props.required ? `${label}*` : label }), jsxs("span", { children: [label, props.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+const DateField = ({ fieldSetClassName, label, error, desc, ...props }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(DateInput, { ...props, className: cx({ "input-error": error }, props.className), placeholder: props.required ? `${label}*` : label }), jsxs("span", { children: [label, props.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$3.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 const DateFormField = ({ control, useDate, onChange, ...props }) => (jsx(Controller, { disabled: props.disabled, control: control, rules: { required: props.required === true }, name: props.name, render: ({ field }) => (jsx(DateField, { ...props, value: field.value, disabled: field.disabled, onChange: (value) => {
             if (useDate) {
                 field.onChange(value);
@@ -1433,7 +1480,7 @@ const DateFormField = ({ control, useDate, onChange, ...props }) => (jsx(Control
             }
             onChange?.(value);
         } })) }));
-const DateRangeField = ({ fieldSetClassName, label, error, desc, ...props }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(DateRangeInput, { ...props, className: cx({ "input-error": error }, props.className), placeholder: props.required ? `${label}*` : label }), jsxs("span", { children: [label, "\u00A7", props.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$2.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+const DateRangeField = ({ fieldSetClassName, label, error, desc, ...props }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(DateRangeInput, { ...props, className: cx({ "input-error": error }, props.className), placeholder: props.required ? `${label}*` : label }), jsxs("span", { children: [label, "\u00A7", props.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$3.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 const SelectPaginatedFromApiFormField = ({ optionValue = (model) => model.id, control, ...props }) => (jsx(Controller, { control: control, name: props.name, disabled: props.disabled, rules: { required: props.required === true }, render: ({ field }) => (jsx(SelectPaginatedFromApiField, { ...props, disabled: field.disabled, value: field.value, onChange: (model) => {
             field.onChange(model ? optionValue(model) : null);
             props.onChange?.(model || null);
@@ -1840,7 +1887,7 @@ const SearchField = ({ filterFields }) => {
     const t = useTranslations();
     const params = useParams();
     const searchParams = useSearchParams();
-    const router = useRouter();
+    const router = useRouter$1();
     const path = usePathname();
     const [search, setSearch] = useState(searchParams.get("search") || "");
     const [filters, setFilters] = useState(() => filterFields ? parseSearchFilters(filterFields, searchParams) : []);
@@ -1861,7 +1908,7 @@ const SearchField = ({ filterFields }) => {
             }, children: jsxs("div", { className: "join flex w-full pr-2", children: [filterFields ? (jsx(Search, { filterFields: filterFields, search: search, setSearch: setSearch, filters: filters, setFilters: setFilters })) : (jsx("input", { type: "text", value: search, onChange: (e) => setSearch(e.target.value), name: "search", className: "join-item input input-bordered input-xs outline-0 focus:ring-0 w-full focus:outline-0 focus:border-gray-500", placeholder: t("pagination.searchPlaceholder") })), jsx("button", { className: "join-item btn btn-neutral btn-xs uppercase", type: "submit", children: jsx(MagnifyingGlassIcon, { className: "w-4 h-4" }) })] }) }) }));
 };
 const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading, columns, caption, isSearchable = false, searchableShortcuts = [], addNew, bulkActions, addNewText, displayFilters, displayConfig, renderGridItem, rowClickHref, defaultDisplayAs = "list", toolbarClassName, group, filterFields, }) => {
-    const router = useRouter();
+    const router = useRouter$1();
     const params = useParams();
     const searchParams = useSearchParams();
     const t = useTranslations();
@@ -1947,7 +1994,7 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                             if (displayConfig) {
                                                 void store?.setConfig(displayConfig.name, { displayAs: "list" });
                                             }
-                                        }, children: jsx(QueueListIcon, { className: "size-4" }) })] })), isSearchable && jsx(SearchField, { filterFields: filterFields }), displayConfig && (jsx("div", { className: "pr-2", children: jsx(PaginationConfiguration, { disabled: displayAs !== "list", store: store, name: displayConfig.name, configName: configName, columns: columns, configs: { ...paginationConfigs, columns: columnsConfigs }, setConfigName: (name) => setConfigName(name), refresh: () => void refetchPaginationConfigs() }) }))] }), (pagination.meta.withoutCount ? pagination.data.length === 0 : pagination.meta.totalItems === 0) ? (jsxs(Fragment, { children: [caption, jsxs("div", { className: "text-center pt-40", children: [jsxs("span", { className: "text-base-content/", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", addNewText || t("pagination.tryCreatingOne")] }) }))] })] })) : (jsxs(Fragment, { children: [jsx("div", { className: "overflow-x-auto max-h-screen w-screen sm:w-[calc(100vw-var(--sidebar-width))]", children: displayAs === "grid" && renderGridItem ? (jsx("div", { className: "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m-4 2xl:grid-cols-4 pt-28 pb-16", children: pagination.data.map((d) => renderGridItem(d)) })) : (jsxs("table", { className: `${styles$4.table} pb-16 table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [jsx("caption", { className: "mt-28", children: caption ?? "" }), jsx("thead", { className: "top-28", children: jsxs("tr", { children: [bulkActions && (jsx("th", { children: jsx(IndeterminateCheckbox, { className: "checkbox checkbox-xs", onChange: (e) => {
+                                        }, children: jsx(QueueListIcon, { className: "size-4" }) })] })), isSearchable && jsx(SearchField, { filterFields: filterFields }), displayConfig && (jsx("div", { className: "pr-2", children: jsx(PaginationConfiguration, { disabled: displayAs !== "list", store: store, name: displayConfig.name, configName: configName, columns: columns, configs: { ...paginationConfigs, columns: columnsConfigs }, setConfigName: (name) => setConfigName(name), refresh: () => void refetchPaginationConfigs() }) }))] }), (pagination.meta.withoutCount ? pagination.data.length === 0 : pagination.meta.totalItems === 0) ? (jsxs(Fragment, { children: [caption, jsxs("div", { className: "text-center pt-40", children: [jsxs("span", { className: "text-base-content/", children: [t("pagination.noItems"), " ", jsx("span", { className: "align-middle text-3xl ", children: "\uD83D\uDE3F" })] }), addNew && (searchParams.get("search") || "") === "" && (jsx("p", { className: "mt-4", children: jsxs(Link, { className: "btn uppercase btn-outline", href: addLocale(addNew, params.locale), children: [jsx(PlusIcon, { width: 20 }), " ", addNewText || t("pagination.tryCreatingOne")] }) }))] })] })) : (jsxs(Fragment, { children: [jsx("div", { className: "overflow-x-auto max-h-screen w-screen sm:w-[calc(100vw-var(--sidebar-width))]", children: displayAs === "grid" && renderGridItem ? (jsx("div", { className: "grid sm:grid-cols-2 lg:grid-cols-3 gap-4 m-4 2xl:grid-cols-4 pt-28 pb-16", children: pagination.data.map((d) => renderGridItem(d)) })) : (jsxs("table", { className: `${styles$5.table} pb-16 table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`, children: [jsx("caption", { className: "mt-28", children: caption ?? "" }), jsx("thead", { className: "top-28", children: jsxs("tr", { children: [bulkActions && (jsx("th", { children: jsx(IndeterminateCheckbox, { className: "checkbox checkbox-xs", onChange: (e) => {
                                                                 setSelected(e.target.checked ? pagination.data.map((model) => model.id) : []);
                                                             }, indeterminate: selected.length > 0 && selected.length < pagination.data.length, checked: pagination.data.every((model) => selected.includes(model.id)) }) })), columnsConfigs[configName].map((item, i) => {
                                                         const column = columns.find((c) => isActionColumn(c) ? "action" === item.name : c.name === item.name);
@@ -1955,7 +2002,7 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                             return null;
                                                         }
                                                         if (isActionColumn(column)) {
-                                                            return (jsx("th", { className: `${styles$4.thead} ${styles$4.colAction} w-12 max-w-24 text-xs` }, `actions-${i}`));
+                                                            return (jsx("th", { className: `${styles$5.thead} ${styles$5.colAction} w-12 max-w-24 text-xs` }, `actions-${i}`));
                                                         }
                                                         const [sortBy, sortOrder] = Array.isArray(pagination.meta.sortBy)
                                                             ? pagination.meta.sortBy[0]
@@ -1963,14 +2010,14 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                         const Component = column.pin ? "th" : "td";
                                                         if (column.name && Object.values(sortEnum).includes(`${column.name.toString()}:DESC`)) {
                                                             const order = column.name !== sortBy ? "ASC" : sortOrder === "DESC" ? "ASC" : "DESC";
-                                                            return (jsx(Component, { className: `${styles$4.thead} text-xs`, children: jsxs(Link, { prefetch: false, "data-testid": `sort-table-${column.name.toString()}-${order.toLowerCase()}`, ...(sortBy === column.name ? { className: "text-primary" } : {}), href: setPartialParams({
+                                                            return (jsx(Component, { className: `${styles$5.thead} text-xs`, children: jsxs(Link, { prefetch: false, "data-testid": `sort-table-${column.name.toString()}-${order.toLowerCase()}`, ...(sortBy === column.name ? { className: "text-primary" } : {}), href: setPartialParams({
                                                                         page: "1",
                                                                         sortBy: column.name === sortBy
                                                                             ? `${column.name.toString()}:${order}`
                                                                             : `${column.name.toString()}:${order === "ASC" ? "DESC" : "ASC"}`,
                                                                     }, searchParams), children: [column.title, jsx("span", { className: "text-[0.5rem]", children: order === "DESC" ? "▲" : "▼" })] }) }, column.name.toString()));
                                                         }
-                                                        return (jsx(Component, { className: `${styles$4.thead} text-xs`, children: column.title }, column.title.toString()));
+                                                        return (jsx(Component, { className: `${styles$5.thead} text-xs`, children: column.title }, column.title.toString()));
                                                     })] }) }), Object.entries(groupedData).map(([key, entries]) => {
                                             let g = null;
                                             if (group && key !== "") {
@@ -2001,9 +2048,9 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                                     }
                                                                 }
                                                                 : undefined, className: cx({
-                                                                [styles$4.selectedRow]: selected.includes(model.id),
-                                                                [styles$4.rowHref]: rowClickHref,
-                                                                [styles$4.rowHover]: hover === model.id,
+                                                                [styles$5.selectedRow]: selected.includes(model.id),
+                                                                [styles$5.rowHref]: rowClickHref,
+                                                                [styles$5.rowHover]: hover === model.id,
                                                             }), onMouseEnter: () => setHover(model.id), children: [bulkActions && (jsx("th", { className: "action-cell", children: jsx("input", { type: "checkbox", className: "checkbox checkbox-xs", onMouseDown: (e) => {
                                                                             // prevent text selection on shift+click
                                                                             if (e.shiftKey) {
@@ -2017,7 +2064,7 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                                         return null;
                                                                     }
                                                                     if (isActionColumn(column)) {
-                                                                        return (jsx("th", { className: cx("action-cell", styles$4.colAction, column.className ?? "whitespace-nowrap text-right"), children: jsx("div", { className: styles$4.actionCellContent, children: jsx("div", { className: styles$4.moreActionsContainer, children: jsx(MoreActions, { itemClassName: "btn-neutral", rootClassName: "bg-neutral/60 p-1 rounded-field border border-base-300 shadow-lg", actions: column.actions(model) }) }) }) }, `actions-td-${i}`));
+                                                                        return (jsx("th", { className: cx("action-cell", styles$5.colAction, column.className ?? "whitespace-nowrap text-right"), children: jsx("div", { className: styles$5.actionCellContent, children: jsx("div", { className: styles$5.moreActionsContainer, children: jsx(MoreActions, { itemClassName: "btn-neutral", rootClassName: "bg-neutral/60 p-1 rounded-field border border-base-300 shadow-lg", actions: column.actions(model) }) }) }) }, `actions-td-${i}`));
                                                                     }
                                                                     const Component = column.pin ? "th" : "td";
                                                                     if (isFunctionColumn(column)) {
@@ -2047,7 +2094,7 @@ const TableLink = ({ href, children, className, isLink = true, ...rest }) => {
     if (!isLink) {
         return children;
     }
-    return (jsxs(Link, { href: addLocale(href, useParams().locale), ...rest, prefetch: false, className: cx(styles$4.link, className, "link link-primary link-hover"), children: [children, " "] }));
+    return (jsxs(Link, { href: addLocale(href, useParams().locale), ...rest, prefetch: false, className: cx(styles$5.link, className, "link link-primary link-hover"), children: [children, " "] }));
 };
 const FilterLink = ({ children, className, params, href, }) => {
     const t = useTranslations();
@@ -2065,25 +2112,57 @@ const FilterLink = ({ children, className, params, href, }) => {
 };
 const TruncateText = ({ text, length }) => (jsx("div", { "data-tooltip-id": TOOLTIP_GLOBAL_ID, "data-tooltip-content": text, className: "text-left text-ellipsis overflow-hidden", style: { width: length }, children: text }));
 
-const TOOLTIP_PARALLEL_ID = "parallel-tooltip";
-const ParallelDialog = ({ dialogButtons, title, children, onClosed, className, returnDefault, ...rest }) => {
-    const router = useRouter$1();
-    const closeModal = () => {
-        onClosed?.();
-        if (history.length > 2) {
-            router.back();
-            return;
-        }
-        if (returnDefault) {
-            router.replace(addLocale(returnDefault));
-        }
-    };
-    return (jsxs("dialog", { "data-testid": "modal-dialog", open: true, className: "modal modal-bottom modal-middle overflow-y-auto z-1100", ...rest, children: [jsxs("div", { className: cx("modal-box max-h-none overflow-y-visible rounded-field p-4 my-4 relative", className), onKeyDown: (e) => e.key === "Escape" && closeModal(), children: [jsx(Tooltip, { id: TOOLTIP_PARALLEL_ID, place: "top" }), title ? (jsxs("div", { className: "flex gap-2 mb-4", children: [jsx("h3", { className: "grow shrink truncate font-bold text-lg mt-0.5", tabIndex: -1, children: title }), dialogButtons, jsx("button", { type: "button", className: "btn btn-circle btn-sm", onClick: closeModal, children: jsx(XMarkIcon, { className: "size-4" }) })] })) : (jsxs("div", { className: "absolute right-4 top-4 flex gap-2 z-1101", children: [dialogButtons, jsx("a", { href: "#", className: "btn btn-circle btn-sm", onClick: closeModal, children: jsx(XMarkIcon, { className: "size-4" }) })] })), children] }), jsx("form", { method: "dialog", onSubmit: (e) => {
-                    e.preventDefault();
-                    closeModal();
-                }, className: "modal-backdrop", children: jsx("button", { children: "close" }) })] }));
+var styles$2 = {};
+
+const PaginatedTableClient = ({ data, isLoading, columns, sortEnum, }) => {
+    const t = useTranslations();
+    const [paginationOptions, setPaginationOptions] = useState({
+        page: 1,
+        sortBy: null,
+    });
+    return (jsx(Fragment, { children: jsx("div", { className: "overflow-x-auto", children: !isLoading && data?.meta?.totalItems === 0 ? (jsx("div", { className: "px-2 text-gray-500", children: t("pagination.noItems") })) : (jsxs(Fragment, { children: [jsxs("table", { className: "table table-xs", children: [jsx("thead", { children: jsx("tr", { className: "top-28", children: columns.map((column, i) => {
+                                        if (isActionColumn(column)) {
+                                            return (jsx("th", { className: `${styles$2.thead} ${styles$2.colAction} w-12 max-w-24 text-xs` }, `actions-${i}`));
+                                        }
+                                        const [sortBy, sortOrder] = Array.isArray(data?.meta.sortBy) ? data.meta.sortBy[0] : ["id", "DESC"];
+                                        const Component = column.pin ? "th" : "td";
+                                        if (column.name &&
+                                            Object.values(sortEnum).includes(`${column.name.toString()}:DESC`)) {
+                                            const args = {
+                                                className: "inline",
+                                                width: 10,
+                                            };
+                                            return (jsx(Component, { className: `${styles$2.thead} text-xs`, children: jsxs("button", { type: "button", "data-testid": `sort-table-${column.name.toString()}-${sortOrder === "DESC" ? "asc" : "desc"}`, ...(sortBy === column.name ? { className: "text-primary" } : {}), onClick: () => {
+                                                        setPaginationOptions({
+                                                            ...paginationOptions,
+                                                            sortBy: `${column.name.toString()}:${sortOrder === "DESC" ? "ASC" : "DESC"}`,
+                                                            page: 1,
+                                                        });
+                                                    }, children: [column.title, sortOrder === "DESC" ? jsx(ChevronDownIcon, { ...args }) : jsx(ChevronUpIcon, { ...args })] }) }, column.name.toString()));
+                                        }
+                                        return (jsx(Component, { className: `${styles$2.thead} text-xs`, children: column.title }, column.title.toString()));
+                                    }) }) }), jsxs("tbody", { children: [isLoading &&
+                                        [0, 1, 2, 3, 4, 5].map((d) => (jsx("tr", { className: styles$2.loading, children: columns.map((_, i) => (jsx("td", { children: jsx("div", { className: "skeleton h-4" }) }, i))) }, d))), data?.data.map((model, o) => (jsx("tr", { "data-testid": `table-row-${o}`, children: columns.map((column, i) => {
+                                            if (isActionColumn(column)) {
+                                                return (jsx("th", { className: cx("action-cell", styles$2.colAction, column.className ?? "whitespace-nowrap text-right"), children: jsx("div", { className: styles$2.actionCellContent, children: jsx("div", { className: styles$2.moreActionsContainer, children: jsx(MoreActions, { actions: column.actions(model) }) }) }) }, `actions-td-${i}`));
+                                            }
+                                            const Component = column.pin ? "th" : "td";
+                                            if (isFunctionColumn(column)) {
+                                                return (jsx(Component, { className: column.className, children: column.body(model) }, `actions-td-${i}`));
+                                            }
+                                            if (column.type === "date") {
+                                                return (jsx(Component, { className: column.className ?? "text-nowrap", children: model[column.name] &&
+                                                        (column.format ? (jsx(DateTime, { date: model[column.name], format: column.format })) : (jsx(HumanDate, { date: model[column.name] }))) }, `${model.id}-${column.name.toString()}`));
+                                            }
+                                            const translatedValue = column.translate
+                                                ? t(`${column.translate}.${model[column.name]}`)
+                                                : model[column.name];
+                                            if (column.type === "code") {
+                                                return (jsx(Component, { className: column.className, children: model[column.name] && (jsx("div", { className: "badge badge-sm", children: jsx("code", { children: translatedValue }) })) }, column.name.toString()));
+                                            }
+                                            return (jsx(Component, { className: column.className, children: translatedValue }, column.name.toString()));
+                                        }) }, o)))] })] }), data && typeof data?.meta?.totalPages === "number" && data.meta.totalPages > 1 && (jsx("div", { className: "flex", children: jsx(Pagination, { size: "xs", page: data?.meta, visiblePages: 5, onClick: (page) => setPaginationOptions({ ...paginationOptions, page }) }) }))] })) }) }));
 };
-const ParallelDialogButtons = ({ children }) => jsx("div", { className: "p-4 -mx-4 mt-4 -mb-4 bg-base-200 rounded-b-field flex gap-4 justify-end", children: children });
 
 const Error$1 = ({ key, error, translationId }) => {
     const t = useTranslations();
@@ -2100,7 +2179,7 @@ const FormatErrors = ({ errors, translationId }) => {
 };
 const Archive = ({ title, yes, no, message, archive, onClose, formatErrors, translateId, dialogButtons, onSuccess, children, }) => {
     const [isLoading, setIsLoading] = useState(false);
-    const router = useRouter$1();
+    const router = useRouter();
     const t = useTranslations();
     const [errors, setErrors] = useState(null);
     const doArchive = () => {
@@ -2204,7 +2283,7 @@ var styles = {"field":"Filter-module_field__vtsXb","fieldDate":"Filter-module_fi
 
 const FilterNumberRange = ({ filter, fieldsetClassName, from, to, options, onConvertValueSubmit = (v) => v ?? "", onCovertFromValue = (v) => v ?? 0, }) => {
     const searchParams = useSearchParams();
-    const router = useRouter();
+    const router = useRouter$1();
     const stringValue = getFilterParam(searchParams, filter) ?? "";
     let defaultFromValue = 0;
     let defaultToValue = 0;
@@ -2259,7 +2338,7 @@ const parseDateFromUri = (val) => {
 };
 const FilterDate = ({ filter, fieldsetClassName, label, mode, defaultValue = null, }) => {
     const searchParams = useSearchParams();
-    const router = useRouter();
+    const router = useRouter$1();
     const dateString = parseDateFromUri(getFilterParam(searchParams, filter) ?? "");
     const defaultDate = (dateString ? parseDateTime(dateString, null) : null) ?? defaultValue;
     const submit = (date) => {
@@ -2279,7 +2358,7 @@ const FilterDate = ({ filter, fieldsetClassName, label, mode, defaultValue = nul
 };
 const FilterDateRange = ({ filter, fieldsetClassName, label, required, }) => {
     const searchParams = useSearchParams();
-    const router = useRouter();
+    const router = useRouter$1();
     let defaultFromValue = null;
     let defaultToValue = null;
     if (Array.isArray(filter)) {
@@ -2322,7 +2401,7 @@ const FilterDateRange = ({ filter, fieldsetClassName, label, required, }) => {
 const FilterText = ({ filter, label, fieldsetClassName, isLike, }) => {
     const searchParams = useSearchParams();
     const defaultValue = (getFilterParam(searchParams, filter) || "").replace(/^\$(ilike|eq|in):/, "") || "";
-    const router = useRouter();
+    const router = useRouter$1();
     const submit = (val) => router.replace(setPartialParams({ [`filter.${filter}`]: val === "" ? "" : `${isLike ? "$ilike:" : "$eq:"}${val}`, page: "" }, searchParams));
     return (jsxs("label", { className: cx("floating-label", styles.field, fieldsetClassName), children: [jsx("span", { children: label }), jsx("input", { type: "text", className: "input input-xs", placeholder: label, defaultValue: typeof defaultValue === "string" ? defaultValue : "", onKeyUp: (e) => {
                     if (e.code === "Enter" && e.target instanceof HTMLInputElement) {
@@ -2332,7 +2411,7 @@ const FilterText = ({ filter, label, fieldsetClassName, isLike, }) => {
 };
 const FilterPagination = ({ filter, label, queryFn, queryKey, optionLabel, optionValue = (m) => m.id, groupBy, fieldsetClassName, }) => {
     const searchParams = useSearchParams();
-    const router = useRouter();
+    const router = useRouter$1();
     const param = getFilterParam(searchParams, filter);
     const value = param !== null ? (parseInt(param) ?? null) : null;
     return (jsx(SelectPaginatedFromApiField, { label: label, fieldSetClassName: cx(styles.field, fieldsetClassName), name: filter, size: "xs", className: value ? "select-neutral" : undefined, value: value, optionValue: optionValue, portalEnabled: true, minWidth: 200, required: false, queryFn: queryFn, queryKey: queryKey, optionLabel: optionLabel, groupBy: groupBy, onChange: (m) => {
@@ -2346,7 +2425,7 @@ const FilterPagination = ({ filter, label, queryFn, queryKey, optionLabel, optio
 const FilterSelectOptions = ({ filter, label, options, fieldsetClassName, }) => {
     const searchParams = useSearchParams();
     const defaultValue = getFilterParam(searchParams, filter) || "";
-    const router = useRouter();
+    const router = useRouter$1();
     const [value, setValue] = useState(defaultValue ?? null);
     return (jsxs("label", { className: cx("floating-label", styles.field, fieldsetClassName), children: [jsx("span", { children: label }), jsx(Select, { placeholder: label, name: filter, size: "xs", value: options.find((o) => o.value === value) || null, optionLabel: (option) => option.label, required: false, options: options, onChange: (m) => {
                     setValue(m?.label ?? null);
@@ -2436,7 +2515,7 @@ const getOptionValue = (value, values, { equals } = {}) => {
 };
 const FilterDateFromTo = ({ filter, fieldsetClassName, from, to, required, }) => {
     const searchParams = useSearchParams();
-    const router = useRouter();
+    const router = useRouter$1();
     let defaultFromValue = null;
     let defaultToValue = null;
     if (Array.isArray(filter)) {
@@ -2626,7 +2705,7 @@ const getDefaultValues = (searchParams, filter) => {
     return { filterIsActive, defaultValues };
 };
 const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => {
-    const router = useRouter();
+    const router = useRouter$1();
     const t = useTranslations();
     const searchParams = useSearchParams();
     const { filterIsActive, defaultValues } = getDefaultValues(searchParams, filter);
@@ -2777,5 +2856,5 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                                                     }, children: jsx(XMarkIcon, { className: "size-3" }) })] }, JSON.stringify(val) + "_" + i)))] })) })), v.type === FilterType.BOOLEAN && (jsxs("div", { className: "join w-full", children: [jsx("button", { type: "button", className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === true }), onClick: () => (watched[key] === true ? setValue(key, undefined) : setValue(key, true)), children: v.label.toUpperCase() }), jsx("button", { onClick: () => (watched[key] === false ? setValue(key, undefined) : setValue(key, false)), className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === false }), type: "button", children: `${t("general.no").toUpperCase()} ${v.label.toUpperCase()}` })] })), v.type === FilterType.OPTIONS && (jsx("div", { className: cx("join w-full", { "join-vertical": Object.entries(v.options ?? {}).length > 2 }), children: Object.entries(v.options ?? {}).map(([value, label]) => (jsx("button", { className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === value }), type: "button", onClick: () => (watched[key] === value ? setValue(key, undefined) : setValue(key, value)), children: label }, value))) }))] }, `${key}-${i}`))), jsx(SaveButton, { className: "btn-sm w-full", children: t("general.filter") })] }) }));
 };
 
-export { AlertErrors, Archive, ArchiveButtonWithDialog, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Search, Select, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getFilterParam, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, parseSearchFilters, searchFiltersToParams, setPartialParams, useFormSubmit, useScreenSize };
+export { AlertErrors, Archive, ArchiveButtonWithDialog, Backdrop, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, PaginatedTableClient, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Search, Select, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SideDialog, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getFilterParam, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, parseSearchFilters, searchFiltersToParams, setPartialParams, useFormSubmit, useScreenSize };
 //# sourceMappingURL=index.js.map
