@@ -416,7 +416,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                   className={`${styles.table} pb-16 table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`}
                 >
                   <caption className="mt-28">{caption ?? ""}</caption>
-                  <thead className="top-28">
+                  <thead className="[&>tr]:top-28">
                     <tr>
                       {bulkActions && (
                         <th>
@@ -453,7 +453,10 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                         if (column.name && Object.values(sortEnum).includes(`${column.name.toString()}:DESC`)) {
                           const order = column.name !== sortBy ? "ASC" : sortOrder === "DESC" ? "ASC" : "DESC";
                           return (
-                            <Component key={column.name.toString()} className={`${styles.thead} text-xs`}>
+                            <Component
+                              key={column.name.toString()}
+                              className={`${styles.thead} text-xs whitespace-nowrap`}
+                            >
                               <Link
                                 prefetch={false}
                                 data-testid={`sort-table-${column.name.toString()}-${order.toLowerCase()}`}
@@ -488,7 +491,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                     let g: React.ReactNode = null;
                     if (group && key !== "") {
                       g = (
-                        <thead className="top-28">
+                        <thead className="[&>tr]:top-28">
                           {group.render(entries, columnsConfigs[configName].filter((s) => s && s.enabled).length)}
                         </thead>
                       );

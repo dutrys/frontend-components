@@ -2010,7 +2010,7 @@ const PaginatedTable = ({ pagination, title, titleAbove, sortEnum, extraHeading,
                                                         const Component = column.pin ? "th" : "td";
                                                         if (column.name && Object.values(sortEnum).includes(`${column.name.toString()}:DESC`)) {
                                                             const order = column.name !== sortBy ? "ASC" : sortOrder === "DESC" ? "ASC" : "DESC";
-                                                            return (jsx(Component, { className: `${styles$5.thead} text-xs`, children: jsxs(Link, { prefetch: false, "data-testid": `sort-table-${column.name.toString()}-${order.toLowerCase()}`, ...(sortBy === column.name ? { className: "text-primary" } : {}), href: setPartialParams({
+                                                            return (jsx(Component, { className: `${styles$5.thead} text-xs whitespace-nowrap`, children: jsxs(Link, { prefetch: false, "data-testid": `sort-table-${column.name.toString()}-${order.toLowerCase()}`, ...(sortBy === column.name ? { className: "text-primary" } : {}), href: setPartialParams({
                                                                         page: "1",
                                                                         sortBy: column.name === sortBy
                                                                             ? `${column.name.toString()}:${order}`

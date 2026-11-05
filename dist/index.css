@@ -26,11 +26,6 @@
   padding-left: 1rem;
 }
 
-.PaginatedTable-module_table__efs0Y thead td,
-.PaginatedTable-module_table__efs0Y thead th {
-  white-space: normal;
-}
-
 .PaginatedTable-module_table__efs0Y tbody td,
 .PaginatedTable-module_table__efs0Y tbody th,
 .PaginatedTable-module_table__efs0Y thead th,
@@ -42,10 +37,6 @@
 .PaginatedTable-module_table__efs0Y tbody th,
 .PaginatedTable-module_table__efs0Y tbody td {
   font-size: var(--text-xs);
-}
-
-.PaginatedTable-module_table__efs0Y tbody th {
-  font-weight: normal;
 }
 
 .PaginatedTable-module_thead__Jb-pD {

@@ -22,11 +22,6 @@
   padding-left: 1rem;
 }
 
-.table thead td,
-.table thead th {
-  white-space: normal;
-}
-
 .table tbody td,
 .table tbody th,
 .table thead th,
@@ -38,10 +33,6 @@
 .table tbody th,
 .table tbody td {
   font-size: var(--text-xs);
-}
-
-.table tbody th {
-  font-weight: normal;
 }
 
 .thead {
