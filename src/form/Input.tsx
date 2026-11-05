@@ -656,6 +656,7 @@ export const SelectFromApiFormField = <
   <Controller
     control={control}
     name={props.name}
+    disabled={props.disabled}
     rules={{ required: props.required === true }}
     render={({ field }) => (
       <SelectFromApiField<T>

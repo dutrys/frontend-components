@@ -1321,7 +1321,7 @@ const SelectFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model) =
         enabled: !rest.disabled,
         queryKey: [...queryKey, rest.disabled],
         queryFn: () => {
-            if (rest.disabled) {
+            if (rest.disabled && !value) {
                 return Promise.reject();
             }
             return queryFn();
@@ -1486,7 +1486,7 @@ const SelectPaginatedFromApiFormField = ({ optionValue = (model) => model.id, co
             props.onChange?.(model || null);
         } })) }));
 const SelectFromApiField = ({ label, desc, error, className, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] }), jsx(SelectFromApi, { className: cx(className, { "input-error": error }), ...rest, placeholder: rest.required ? `${label}*` : label })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
-const SelectFromApiFormField = ({ control, onChange, optionValue = (model) => model.id, ...props }) => (jsx(Controller, { control: control, name: props.name, rules: { required: props.required === true }, render: ({ field }) => (jsx(SelectFromApiField, { ...props, disabled: field.disabled, optionValue: optionValue, value: field.value, onChange: (model) => {
+const SelectFromApiFormField = ({ control, onChange, optionValue = (model) => model.id, ...props }) => (jsx(Controller, { control: control, name: props.name, disabled: props.disabled, rules: { required: props.required === true }, render: ({ field }) => (jsx(SelectFromApiField, { ...props, disabled: field.disabled, optionValue: optionValue, value: field.value, onChange: (model) => {
             field.onChange(model ? optionValue(model) : null);
             onChange?.(model);
         } })) }));

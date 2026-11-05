@@ -33,7 +33,7 @@ export const SelectFromApi = <TModel = unknown,>({
     enabled: !rest.disabled,
     queryKey: [...queryKey, rest.disabled],
     queryFn: () => {
-      if (rest.disabled) {
+      if (rest.disabled && !value) {
         return Promise.reject();
       }
       return queryFn();
