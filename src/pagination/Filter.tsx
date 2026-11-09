@@ -8,8 +8,8 @@ import { endOfDay, format, parse, startOfDay } from "date-fns";
 import Link from "next/link";
 import { ChevronDoubleDownIcon } from "@heroicons/react/24/outline";
 import { getFilterParam, PaginateQuery, ResponseMeta, setPartialParams } from "../utils/paginate";
-import { SelectPaginatedFromApiField } from "../form/Input";
-import { Select } from "../form/Select";
+import { ComboBoxPaginatedFromApiField } from "../form/Input";
+import { ComboBox } from "../form/ComboBox";
 import { Popover } from "../dialog/Popover";
 import { DateInput, DateRangeInput } from "../form/DateInput";
 import { getBtwDates, parseDateTime } from "../utils/date";
@@ -302,7 +302,7 @@ export const FilterPagination = <T extends { data: unknown[]; meta: ResponseMeta
   const param = getFilterParam(searchParams, filter);
   const value = param !== null ? (parseInt(param) ?? null) : null;
   return (
-    <SelectPaginatedFromApiField<T>
+    <ComboBoxPaginatedFromApiField<T>
       label={label}
       fieldSetClassName={cx(styles.field, fieldsetClassName)}
       name={filter}
@@ -347,7 +347,7 @@ export const FilterSelectOptions = ({
   return (
     <label className={cx("floating-label", styles.field, fieldsetClassName)}>
       <span>{label}</span>
-      <Select<{ label: string; value: string }>
+      <ComboBox<{ label: string; value: string }>
         placeholder={label}
         name={filter}
         size="xs"

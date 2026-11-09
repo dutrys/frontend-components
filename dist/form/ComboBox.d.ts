@@ -3,7 +3,7 @@ export declare const PortalSSR: (props: {
     enabled?: boolean;
     children: React.ReactNode;
 }) => string | number | bigint | boolean | import("react/jsx-runtime").JSX.Element | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined;
-export type SelectProps<T> = {
+export type ComboBoxProps<T> = {
     size?: "sm" | "xs" | "lg";
     name?: string;
     inputRef?: any;
@@ -27,12 +27,13 @@ export type SelectProps<T> = {
     afterInput?: React.ReactNode;
     hideNoItemsOption?: boolean;
     outerClassName?: string;
+    filter?: (model: T, q: string) => boolean;
 };
-export declare const Select: <T = unknown>({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel, value, size, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth, maxHeight, afterInput, hideNoItemsOption, autoFocus, outerClassName, ...rest }: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "onChange" | "defaultValue" | "type" | "value" | "children"> & SelectProps<T>) => import("react/jsx-runtime").JSX.Element;
-export declare const SelectOption: ({ value, size, children, className, ...rest }: {
+export declare const ComboBox: <T = unknown>({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel, value, size, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth, maxHeight, afterInput, hideNoItemsOption, autoFocus, outerClassName, filter, ...rest }: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "onChange" | "defaultValue" | "type" | "value" | "children"> & ComboBoxProps<T>) => import("react/jsx-runtime").JSX.Element;
+export declare const ComboBoxOption: ({ value, size, children, className, ...rest }: {
     children: React.ReactNode;
     value: unknown;
     className?: string;
     size?: "xs" | "sm" | "lg";
 }) => import("react/jsx-runtime").JSX.Element;
-//# sourceMappingURL=Select.d.ts.map
+//# sourceMappingURL=ComboBox.d.ts.map

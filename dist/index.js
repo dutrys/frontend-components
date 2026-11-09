@@ -119,7 +119,7 @@ const SideDialog = ({ dialogButtons, title, index = 0, disableBackdrop, children
                     e.preventDefault();
                     e.stopPropagation();
                     closeModal();
-                }, children: jsx("dialog", { "data-index": index, onClick: closeModal, "data-testid": "side-dialog", style: { left: "unset", right: 0, zIndex: 1099 + index, paddingLeft: index * Math.max(50 - index, 10) }, className: cx("h-screen bg-transparent pt-16", widthClassName), open: true, ...rest, children: jsxs("div", { onClick: (e) => e.stopPropagation(), className: cx("border-l border-gray-400 drop-shadow-xl relative w-full h-full", className, {
+                }, children: jsx("dialog", { "data-index": index, onClick: closeModal, "data-testid": "side-dialog", style: { left: "unset", right: 0, zIndex: 1099 + index, paddingLeft: index * Math.max(50 - index, 10) }, className: cx("h-screen bg-transparent", widthClassName), open: true, ...rest, children: jsxs("div", { onClick: (e) => e.stopPropagation(), className: cx("border-l border-gray-400 drop-shadow-xl relative w-full h-full", className, {
                             "bg-base-200": !className?.includes("bg-"),
                         }), onKeyDown: (e) => e.key === "Escape" && closeModal(), children: [jsx(Tooltip, { id: TOOLTIP_PARALLEL_ID, place: "top" }), jsxs("div", { className: "flex flex-col h-full overflow-y-auto", children: [title ? (jsxs("div", { className: "flex gap-2 m-4", children: [jsx("h3", { className: "grow shrink truncate font-bold text-lg mt-0.5", tabIndex: -1, children: title }), dialogButtons, jsx("button", { type: "button", className: "btn btn-neutral btn-circle btn-sm", onClick: closeModal, children: jsx(XMarkIcon, { className: "size-4" }) })] })) : (jsxs("div", { className: "absolute right-4 top-4 flex gap-2 z-1101", children: [dialogButtons, jsx("button", { type: "button", className: "btn btn-neutral btn-circle btn-sm", onClick: closeModal, children: jsx(XMarkIcon, { className: "size-4" }) })] })), children, buttons && (jsx("div", { className: "sticky z-10 bottom-0 px-4 py-4 flex gap-2 justify-center", children: typeof buttons === "function" ? buttons(closeModal) : buttons }))] })] }) }) }, "modal-dialog-" + index)] }));
 };
@@ -1071,8 +1071,9 @@ const PortalSSR = (props) => {
     }
     return props.children;
 };
-const Select = ({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel = (m) => m.name, value, size: size$1, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth = 100, maxHeight = 500, afterInput, hideNoItemsOption, autoFocus, outerClassName = "w-full", ...rest }) => {
+const ComboBox = ({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel = (m) => m.name, value, size: size$1, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth = 100, maxHeight = 500, afterInput, hideNoItemsOption, autoFocus, outerClassName = "w-full", filter, ...rest }) => {
     const t = useTranslations();
+    const [query, setQuery] = useState("");
     const { refs, floatingStyles } = useFloating({
         placement: "bottom-start",
         middleware: [
@@ -1094,19 +1095,24 @@ const Select = ({ onChange, disabled, required, inputRef, options, name, portalE
                         "input-lg gap-1.5": size$1 === "lg",
                         "input-sm gap-1": size$1 === "sm",
                         "input-xs gap-0.5": size$1 === "xs",
-                    }), ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, autoFocus: autoFocus, displayValue: (model) => (model ? optionLabel(model, false) : ""), onChange: onQueryChange && ((event) => onQueryChange(event.target.value)) }), header, !required && value ? (jsx("button", { className: "z-1 cursor-pointer", type: "button", onClick: () => onChange(null), children: jsx(XMarkIcon, { className: "size-4" }) })) : (!open && afterInput), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "", onClick: (e) => {
+                    }), ref: refs.setReference, children: [jsx(ComboboxInput, { required: required, ref: inputRef, "data-testid": "select-input", placeholder: placeholder, onFocus: (e) => e?.target?.select(), autoComplete: "off", name: name, autoFocus: autoFocus, displayValue: (model) => (model ? optionLabel(model, false) : ""), onChange: (event) => {
+                                setQuery(event.target.value);
+                                onQueryChange?.(event.target.value);
+                            } }), header, !required && value ? (jsx("button", { className: "z-1 cursor-pointer", type: "button", onClick: () => onChange(null), children: jsx(XMarkIcon, { className: "size-4" }) })) : (!open && afterInput), jsx(ComboboxButton, { "data-testid": "select-input-btn", className: "", onClick: (e) => {
                                 e.target?.parentNode?.parentNode?.querySelector("input")?.select();
-                            }, children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(PortalSSR, { enabled: portalEnabled, children: jsx(Transition, { as: Fragment$1, leave: "transition-none", children: jsx("div", { style: floatingStyles, ref: refs.setFloating, className: "z-[2000] bg-base-100 mt-1 w-full border-base-content/10 border overflow-y-auto rounded-box shadow-lg", children: jsxs(ComboboxOptions, { children: [beforeOptions, !required && (jsx(SelectOption, { size: size$1, "data-testid": "select-option-empty", value: null, children: empty || t("selectFromApi.select") }, "empty")), options.length === 0 && !hideNoItemsOption ? (jsx("div", { className: "cursor-default select-none py-2 px-4 text-base-content/60", children: jsx("span", { className: cx({ "text-xs": "xs" === size$1 || "sm" === size$1 }), children: t("selectFromApi.nothingFound") }) })) : (options.map((model, i) => {
+                            }, children: jsx(ChevronUpDownIcon, { className: "h-5 w-5 text-gray-400", "aria-hidden": "true" }) })] }), jsx(PortalSSR, { enabled: portalEnabled, children: jsx(Transition, { as: Fragment$1, leave: "transition-none", children: jsx("div", { style: floatingStyles, ref: refs.setFloating, className: "z-[2000] bg-base-100 mt-1 w-full border-base-content/10 border overflow-y-auto rounded-box shadow-lg", children: jsxs(ComboboxOptions, { children: [beforeOptions, !required && (jsx(ComboBoxOption, { size: size$1, "data-testid": "select-option-empty", value: null, children: empty || t("selectFromApi.select") }, "empty")), options.length === 0 && !hideNoItemsOption ? (jsx("div", { className: "cursor-default select-none py-2 px-4 text-base-content/60", children: jsx("span", { className: cx({ "text-xs": "xs" === size$1 || "sm" === size$1 }), children: t("selectFromApi.nothingFound") }) })) : (options
+                                        .filter((m) => (filter ? filter(m, query) : true))
+                                        .map((model, i) => {
                                         const group = groupBy?.(model);
                                         let groupNode;
                                         if (currentGroupBy !== group) {
                                             currentGroupBy = group;
                                             groupNode = (jsx("div", { className: "sticky top-0 bg-base-100 font-bold z-10 p-2 text-xs text-base-content/40 border-b border-b-base-200 cursor-default select-none truncate", children: group }));
                                         }
-                                        return (jsxs(React__default.Fragment, { children: [groupNode, jsx(SelectOption, { "data-testid": `select-option-${i}`, className: groupBy ? "pl-4" : undefined, value: model, size: size$1, children: optionLabel(model, true) })] }, `${optionLabel(model, true)}-${i}`));
+                                        return (jsxs(React__default.Fragment, { children: [groupNode, jsx(ComboBoxOption, { "data-testid": `select-option-${i}`, className: groupBy ? "pl-4" : undefined, value: model, size: size$1, children: optionLabel(model, true) })] }, `${optionLabel(model, true)}-${i}`));
                                     })), afterOptions] }) }) }) })] })) }));
 };
-const SelectOption = ({ value, size, children, className, ...rest }) => (jsx(ComboboxOption, { ...rest, className: ({ focus }) => cx(`relative cursor-default select-none`, className, {
+const ComboBoxOption = ({ value, size, children, className, ...rest }) => (jsx(ComboboxOption, { ...rest, className: ({ focus }) => cx(`relative cursor-default select-none`, className, {
         "px-2 py-1": size === "xs" || size === "sm",
         "p-2": !size,
         "bg-primary text-white": focus,
@@ -1123,7 +1129,7 @@ const SelectOption = ({ value, size, children, className, ...rest }) => (jsx(Com
                     "text-teal-600": !focus,
                 }), children: jsx(CheckIcon, { className: "h-5 w-5", "aria-hidden": "true" }) }))] })) }));
 
-const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, onInitialChange, staleTime, ...rest }) => {
+const ComboBoxPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, onInitialChange, staleTime, ...rest }) => {
     const [query, setQuery] = useState("");
     const [valueModel, setValueModel] = useState(typeof value === "object" ? value : null);
     const { isLoading, data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
@@ -1222,11 +1228,15 @@ const SelectPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, qu
             void fetchNextPage();
         }
     }, [fetchNextPage, inView]);
-    return (jsx(Select, { ...rest, disabled: rest.disabled, onChange: (v) => {
+    return (jsx(ComboBox, { ...rest, disabled: rest.disabled, onChange: (v) => {
             setValueModel(v);
             onChange(v);
         }, onQueryChange: setQuery, options: data?.pages.flatMap((d) => d?.data || []) ?? [], value: valueModel, optionLabel: optionLabel, afterInput: isLoading && !rest.disabled ? jsx(LoadingComponent, { loadingClassName: "size-4 text-primary" }) : undefined, hideNoItemsOption: isLoading, afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isFetchingNextPage || isLoading ? (jsx(LoadingComponent, { className: "my-2" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }));
 };
+/**
+ * @deprecated use ComboBoxPaginatedFromApi
+ */
+const SelectPaginatedFromApi = ComboBoxPaginatedFromApi;
 
 const parseDateTime = (date, defaultValue) => {
     let parsed = parse(date, "yyyy-MM-dd HH:mm:ss", new Date());
@@ -1314,9 +1324,8 @@ const TimePicker = ({ className, value, onChange, placeholder, required, disable
 var styles$3 = {"desc":"Input-module_desc__3D3hV"};
 
 const ITEMS_PER_PAGE = 50;
-const SelectFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, filter, ...rest }) => {
+const ComboBoxFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, filter, ...rest }) => {
     const t = useTranslations();
-    const [query, setQuery] = useState("");
     const { isLoading, data, refetch } = useQuery({
         enabled: !rest.disabled,
         queryKey: [...queryKey, rest.disabled],
@@ -1339,17 +1348,18 @@ const SelectFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model) =
     }, [hasNextPage]);
     const { ref, inView } = useInView({ threshold: 0.5 });
     useEffect(() => {
-        void refetch();
-    }, [refetch, query]);
-    useEffect(() => {
         if (inView && hasNextPage) {
             setCurrentPage((p) => p + 1);
         }
     }, [inView, hasNextPage]);
-    return (jsx(Select, { ...rest, disabled: rest.disabled, onChange: rest.onChange, optionLabel: optionLabel, options: options.slice(0, currentPage * ITEMS_PER_PAGE), onQueryChange: setQuery, afterInput: isLoading ? jsx(LoadingComponent, { loadingClassName: "size-4 text-primary" }) : undefined, hideNoItemsOption: isLoading, value: typeof value === "number" || typeof value === "string"
+    return (jsx(ComboBox, { ...rest, disabled: rest.disabled, onChange: rest.onChange, optionLabel: optionLabel, options: options.slice(0, currentPage * ITEMS_PER_PAGE), onQueryChange: () => refetch(), afterInput: isLoading ? jsx(LoadingComponent, { loadingClassName: "size-4 text-primary" }) : undefined, hideNoItemsOption: isLoading, value: typeof value === "number" || typeof value === "string"
             ? ((data || []).find((b) => optionValue(b) === value) ?? null)
             : (value ?? null), afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isLoading ? (jsx(LoadingComponent, { className: "my-2" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }));
 };
+/**
+ * @deprecated use ComboBoxFromApi
+ */
+const SelectFromApi = ComboBoxFromApi;
 
 const TextFormField = ({ register, options, name, ref, ...rest }) => {
     const r = register(name, {
@@ -1381,6 +1391,11 @@ const SelectField = ({ error, className, label, size, desc, fieldSetClassName, a
                         "select-lg": size === "lg",
                         "select-error": error,
                     }), ...rest, children: children }), jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$3.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+const ComboBoxField = ({ error, label, desc, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(ComboBox, { ...rest }), jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$3.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+const ComboBoxFormField = ({ control, onChange, optionValue = (m) => m.id, ...rest }) => (jsx(Controller, { disabled: rest.disabled, control: control, rules: { required: rest.required === true }, name: rest.name, render: ({ field }) => (jsx(ComboBoxField, { ...rest, value: field.value, onChange: (m) => {
+            field.onChange(m ? optionValue(m) : null);
+            onChange?.(m);
+        } })) }));
 const SelectFormField = ({ id, fieldSetClassName, register, name, options, ref, ...rest }) => {
     const r = register(name, {
         required: rest.required,
@@ -1481,15 +1496,27 @@ const DateFormField = ({ control, useDate, onChange, ...props }) => (jsx(Control
             onChange?.(value);
         } })) }));
 const DateRangeField = ({ fieldSetClassName, label, error, desc, ...props }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(DateRangeInput, { ...props, className: cx({ "input-error": error }, props.className), placeholder: props.required ? `${label}*` : label }), jsxs("span", { children: [label, "\u00A7", props.required ? jsx(Required, {}) : null] })] }), desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$3.desc}`, children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
-const SelectPaginatedFromApiFormField = ({ optionValue = (model) => model.id, control, ...props }) => (jsx(Controller, { control: control, name: props.name, disabled: props.disabled, rules: { required: props.required === true }, render: ({ field }) => (jsx(SelectPaginatedFromApiField, { ...props, disabled: field.disabled, value: field.value, onChange: (model) => {
+const ComboBoxPaginatedFromApiFormField = ({ optionValue = (model) => model.id, control, ...props }) => (jsx(Controller, { control: control, name: props.name, disabled: props.disabled, rules: { required: props.required === true }, render: ({ field }) => (jsx(ComboBoxPaginatedFromApiField, { ...props, disabled: field.disabled, value: field.value, onChange: (model) => {
             field.onChange(model ? optionValue(model) : null);
             props.onChange?.(model || null);
         } })) }));
-const SelectFromApiField = ({ label, desc, error, className, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] }), jsx(SelectFromApi, { className: cx(className, { "input-error": error }), ...rest, placeholder: rest.required ? `${label}*` : label })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
-const SelectFromApiFormField = ({ control, onChange, optionValue = (model) => model.id, ...props }) => (jsx(Controller, { control: control, name: props.name, disabled: props.disabled, rules: { required: props.required === true }, render: ({ field }) => (jsx(SelectFromApiField, { ...props, disabled: field.disabled, optionValue: optionValue, value: field.value, onChange: (model) => {
+/**
+ * @deprecated
+ */
+const SelectPaginatedFromApiFormField = ComboBoxPaginatedFromApiFormField;
+const ComboBoxFromApiField = ({ label, desc, error, className, fieldSetClassName, ...rest }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, rest.required ? jsx(Required, {}) : null] }), jsx(ComboBoxFromApi, { className: cx(className, { "input-error": error }), ...rest, placeholder: rest.required ? `${label}*` : label })] }), jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+/**
+ * @deprecated
+ */
+const SelectFromApiField = ComboBoxFromApiField;
+const ComboBoxFromApiFormField = ({ control, onChange, optionValue = (model) => model.id, ...props }) => (jsx(Controller, { control: control, name: props.name, disabled: props.disabled, rules: { required: props.required === true }, render: ({ field }) => (jsx(ComboBoxFromApiField, { ...props, disabled: field.disabled, optionValue: optionValue, value: field.value, onChange: (model) => {
             field.onChange(model ? optionValue(model) : null);
             onChange?.(model);
         } })) }));
+/**
+ * @deprecated
+ */
+const SelectFromApiFormField = ComboBoxFromApiFormField;
 const DateTimeFormField = ({ label, desc, control, name, disabled, error, className, fieldSetClassName, useDate, ...props }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("label", { className: "floating-label", children: [jsx(Controller, { control: control, name: name, rules: { required: props.required === true }, disabled: disabled, render: ({ field }) => (jsx(DateTimePicker, { ...props, className: cx(className, { "input-error": error }), placeholder: props.required ? `${label}*` : label, disabled: field.disabled, value: field.value ? (useDate ? field.value : stringToDate(field.value)) || null : null, onChange: (value) => {
                             if (useDate) {
                                 field.onChange(value);
@@ -1509,7 +1536,11 @@ const NumberFormField = ({ options, control, label, desc, error, className, fiel
                             "input-error": error,
                         }), onValueChange: (values) => field.onChange(values.floatValue ?? null) })) })] }), desc && (jsx("div", { className: "text-xs text-gray-500", children: jsx("span", { children: desc }) })), error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
 const Label = ({ text, required }) => (jsx("label", { className: "label", children: jsxs("span", { className: "text-sm", children: [text, required && jsx(Required, {})] }) }));
-const SelectPaginatedFromApiField = ({ label, fieldSetClassName, className, desc, error, ...props }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, props.required ? jsx(Required, {}) : null] }), jsx(SelectPaginatedFromApi, { ...props, className: cx("mx-0", className, { "input-error": error }), placeholder: props.required ? `${label}*` : label })] }), desc, jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+const ComboBoxPaginatedFromApiField = ({ label, fieldSetClassName, className, desc, error, ...props }) => (jsxs("div", { className: fieldSetClassName, children: [jsxs("div", { className: "floating-label", children: [jsxs("span", { children: [label, props.required ? jsx(Required, {}) : null] }), jsx(ComboBoxPaginatedFromApi, { ...props, className: cx("mx-0", className, { "input-error": error }), placeholder: props.required ? `${label}*` : label })] }), desc, jsx(InputErrors, { className: "text-xs text-error mt-1", errors: error })] }));
+/**
+ * @deprecated
+ */
+const SelectPaginatedFromApiField = ComboBoxPaginatedFromApiField;
 const Required = () => jsx("span", { className: "text-error align-bottom", children: "*" });
 const SaveButton = ({ isLoading, icon, disabled, className = "btn-block", onClick, size, color = "btn-primary", children, type = "submit", ...props }) => {
     const t = useTranslations();
@@ -1839,7 +1870,7 @@ const SearchFilterSelects = ({ filter, options, onChange, }) => {
     const optionValue = options.optionValue ?? ((model) => model.id);
     // picked models are kept, so labels are not refetched by id
     const [models, setModels] = useState({});
-    const select = (value, onPick, autoFocus, required) => (jsx(SelectPaginatedFromApi
+    const select = (value, onPick, autoFocus, required) => (jsx(ComboBoxPaginatedFromApi
     // chips are mounted again each time the filters are expanded
     , { 
         // chips are mounted again each time the filters are expanded
@@ -2414,7 +2445,7 @@ const FilterPagination = ({ filter, label, queryFn, queryKey, optionLabel, optio
     const router = useRouter$1();
     const param = getFilterParam(searchParams, filter);
     const value = param !== null ? (parseInt(param) ?? null) : null;
-    return (jsx(SelectPaginatedFromApiField, { label: label, fieldSetClassName: cx(styles.field, fieldsetClassName), name: filter, size: "xs", className: value ? "select-neutral" : undefined, value: value, optionValue: optionValue, portalEnabled: true, minWidth: 200, required: false, queryFn: queryFn, queryKey: queryKey, optionLabel: optionLabel, groupBy: groupBy, onChange: (m) => {
+    return (jsx(ComboBoxPaginatedFromApiField, { label: label, fieldSetClassName: cx(styles.field, fieldsetClassName), name: filter, size: "xs", className: value ? "select-neutral" : undefined, value: value, optionValue: optionValue, portalEnabled: true, minWidth: 200, required: false, queryFn: queryFn, queryKey: queryKey, optionLabel: optionLabel, groupBy: groupBy, onChange: (m) => {
             const value = m ? `${optionValue(m)}` : "";
             if (searchParams.get(filter) === value) {
                 return;
@@ -2427,7 +2458,7 @@ const FilterSelectOptions = ({ filter, label, options, fieldsetClassName, }) => 
     const defaultValue = getFilterParam(searchParams, filter) || "";
     const router = useRouter$1();
     const [value, setValue] = useState(defaultValue ?? null);
-    return (jsxs("label", { className: cx("floating-label", styles.field, fieldsetClassName), children: [jsx("span", { children: label }), jsx(Select, { placeholder: label, name: filter, size: "xs", value: options.find((o) => o.value === value) || null, optionLabel: (option) => option.label, required: false, options: options, onChange: (m) => {
+    return (jsxs("label", { className: cx("floating-label", styles.field, fieldsetClassName), children: [jsx("span", { children: label }), jsx(ComboBox, { placeholder: label, name: filter, size: "xs", value: options.find((o) => o.value === value) || null, optionLabel: (option) => option.label, required: false, options: options, onChange: (m) => {
                     setValue(m?.label ?? null);
                     router.replace(setPartialParams({ page: "", [`filter.${filter}`]: m?.value ? `${m.value}` : "" }, searchParams));
                 } })] }));
@@ -2827,7 +2858,7 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                                         ? { after: watched[key][1] }
                                         : undefined, size: "sm" }), jsx(DateFormField, { useDate: true, className: "join-item", control: control, label: t("general.toWithArgs", { value: v.label.toLowerCase() }), name: `${key}.1`, matcher: Array.isArray(watched[key]) && watched[key][0] instanceof Date
                                         ? { before: watched[key][0] }
-                                        : undefined, size: "sm" })] })), v.type === FilterType.PAGINATION && (jsx(Watch, { control: control, name: key, render: (keyVal) => (jsxs(Fragment, { children: [jsx(SelectPaginatedFromApiField, { value: null, queryFn: v.queryFn, queryKey: v.queryKey, optionLabel: v.optionLabel, optionValue: v.idField ? (c) => c[v.idField] : undefined, groupBy: v.groupBy, portalEnabled: true, label: v.label, name: key, size: "sm", onChange: (val) => {
+                                        : undefined, size: "sm" })] })), v.type === FilterType.PAGINATION && (jsx(Watch, { control: control, name: key, render: (keyVal) => (jsxs(Fragment, { children: [jsx(ComboBoxPaginatedFromApiField, { value: null, queryFn: v.queryFn, queryKey: v.queryKey, optionLabel: v.optionLabel, optionValue: v.idField ? (c) => c[v.idField] : undefined, groupBy: v.groupBy, portalEnabled: true, label: v.label, name: key, size: "sm", onChange: (val) => {
                                             if (typeof keyVal === "undefined" || keyVal === null) {
                                                 keyVal = [];
                                             }
@@ -2856,5 +2887,5 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                                                     }, children: jsx(XMarkIcon, { className: "size-3" }) })] }, JSON.stringify(val) + "_" + i)))] })) })), v.type === FilterType.BOOLEAN && (jsxs("div", { className: "join w-full", children: [jsx("button", { type: "button", className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === true }), onClick: () => (watched[key] === true ? setValue(key, undefined) : setValue(key, true)), children: v.label.toUpperCase() }), jsx("button", { onClick: () => (watched[key] === false ? setValue(key, undefined) : setValue(key, false)), className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === false }), type: "button", children: `${t("general.no").toUpperCase()} ${v.label.toUpperCase()}` })] })), v.type === FilterType.OPTIONS && (jsx("div", { className: cx("join w-full", { "join-vertical": Object.entries(v.options ?? {}).length > 2 }), children: Object.entries(v.options ?? {}).map(([value, label]) => (jsx("button", { className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === value }), type: "button", onClick: () => (watched[key] === value ? setValue(key, undefined) : setValue(key, value)), children: label }, value))) }))] }, `${key}-${i}`))), jsx(SaveButton, { className: "btn-sm w-full", children: t("general.filter") })] }) }));
 };
 
-export { AlertErrors, Archive, ArchiveButtonWithDialog, Backdrop, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, PaginatedTableClient, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Search, Select, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SideDialog, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getFilterParam, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, parseSearchFilters, searchFiltersToParams, setPartialParams, useFormSubmit, useScreenSize };
+export { AlertErrors, Archive, ArchiveButtonWithDialog, Backdrop, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ComboBox, ComboBoxField, ComboBoxFormField, ComboBoxFromApi, ComboBoxFromApiField, ComboBoxFromApiFormField, ComboBoxOption, ComboBoxPaginatedFromApi, ComboBoxPaginatedFromApiField, ComboBoxPaginatedFromApiFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, PaginatedTableClient, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Search, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SideDialog, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getFilterParam, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, parseSearchFilters, searchFiltersToParams, setPartialParams, useFormSubmit, useScreenSize };
 //# sourceMappingURL=index.js.map

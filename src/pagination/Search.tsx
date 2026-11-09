@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import { FunnelIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import cx from "classnames";
 import { useQuery } from "@tanstack/react-query";
-import { SelectPaginatedFromApi, SelectPaginatedFromApiProps } from "../form/SelectPaginatedFromApi";
+import { ComboBoxPaginatedFromApi, SelectPaginatedFromApiProps } from "../form/ComboBoxPaginatedFromApi";
 import { ResponseMeta } from "../utils/paginate";
 
 export type FilterOperator =
@@ -571,7 +571,7 @@ const SearchFilterSelects = <T extends { meta: ResponseMeta; data: unknown[] }>(
   // picked models are kept, so labels are not refetched by id
   const [models, setModels] = useState<Record<string, unknown>>({});
   const select = (value: string | null, onPick: (picked: string) => void, autoFocus: boolean, required: boolean) => (
-    <SelectPaginatedFromApi
+    <ComboBoxPaginatedFromApi
       // chips are mounted again each time the filters are expanded
       staleTime={5 * 60 * 1000}
       minWidth={200}

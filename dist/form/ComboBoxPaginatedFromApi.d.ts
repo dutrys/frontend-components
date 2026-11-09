@@ -1,6 +1,6 @@
 import React from "react";
 import { PaginateQuery, ResponseMeta } from "../utils/paginate";
-import { SelectProps } from "./Select";
+import { ComboBoxProps } from "./ComboBox";
 export type SelectPaginatedFromApiProps<TModel extends {
     meta: ResponseMeta;
     data: unknown[];
@@ -14,9 +14,16 @@ export type SelectPaginatedFromApiProps<TModel extends {
     onInitialChange?: (model: TModel["data"][0]) => void;
     /** How long loaded pages are reused before refetching, e.g. when the select is mounted again */
     staleTime?: number;
-} & Omit<SelectProps<TModel["data"][0]>, "value" | "options">;
+} & Omit<ComboBoxProps<TModel["data"][0]>, "value" | "options">;
+export declare const ComboBoxPaginatedFromApi: <TModel extends {
+    meta: ResponseMeta;
+    data: unknown[];
+}>({ onChange, name, value, searchFromChars, queryKey, queryFn, optionLabel, optionValue, onInitialChange, staleTime, ...rest }: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "defaultValue" | "type" | "value" | "children" | "onChange"> & SelectPaginatedFromApiProps<TModel>) => import("react/jsx-runtime").JSX.Element;
+/**
+ * @deprecated use ComboBoxPaginatedFromApi
+ */
 export declare const SelectPaginatedFromApi: <TModel extends {
     meta: ResponseMeta;
     data: unknown[];
 }>({ onChange, name, value, searchFromChars, queryKey, queryFn, optionLabel, optionValue, onInitialChange, staleTime, ...rest }: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "defaultValue" | "type" | "value" | "children" | "onChange"> & SelectPaginatedFromApiProps<TModel>) => import("react/jsx-runtime").JSX.Element;
-//# sourceMappingURL=SelectPaginatedFromApi.d.ts.map
+//# sourceMappingURL=ComboBoxPaginatedFromApi.d.ts.map

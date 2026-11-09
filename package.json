@@ -15,6 +15,7 @@
     "postversion": "git push && git push --tags",
     "lint:fix": "eslint --ext .ts,.tsx src/ --fix",
     "lint": "eslint --ext .ts,.tsx src/",
+    "tsc": "tsc --noEmit",
     "prepare": "husky"
   },
   "main": "dist/index.js",

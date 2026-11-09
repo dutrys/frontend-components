@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Select, SelectProps } from "./Select";
+import { ComboBox, ComboBoxProps } from "./ComboBox";
 import { LoadingComponent } from "../Loading";
 import { useTranslations } from "next-intl";
 import { useInView } from "react-intersection-observer";
 
-export type SelectFromApiProps<TModel = unknown> = {
+export type ComboBoxFromApiProps<TModel = unknown> = {
   queryFn: () => Promise<TModel[]>;
   queryKey: ReadonlyArray<any>;
   value: number | string | null;
@@ -13,11 +13,11 @@ export type SelectFromApiProps<TModel = unknown> = {
   optionLabel?: (model: TModel, inOptions: boolean) => string;
   optionValue?: (model: TModel) => string | number;
   filter?: (model: TModel, query: string) => boolean;
-} & Omit<SelectProps<TModel>, "onChange" | "optionLabel" | "value" | "options">;
+} & Omit<ComboBoxProps<TModel>, "onChange" | "optionLabel" | "value" | "options">;
 
 const ITEMS_PER_PAGE = 50;
 
-export const SelectFromApi = <TModel = unknown,>({
+export const ComboBoxFromApi = <TModel = unknown,>({
   name,
   value,
   queryKey,
@@ -26,7 +26,7 @@ export const SelectFromApi = <TModel = unknown,>({
   optionValue = (model) => (model as any).id,
   filter,
   ...rest
-}: SelectFromApiProps<TModel>) => {
+}: ComboBoxFromApiProps<TModel>) => {
   const t = useTranslations();
   const [query, setQuery] = useState("");
   const { isLoading, data, refetch } = useQuery<TModel[]>({
@@ -64,7 +64,7 @@ export const SelectFromApi = <TModel = unknown,>({
   }, [inView, hasNextPage]);
 
   return (
-    <Select<TModel>
+    <ComboBox<TModel>
       {...rest}
       disabled={rest.disabled}
       onChange={rest.onChange}
@@ -97,3 +97,8 @@ export const SelectFromApi = <TModel = unknown,>({
     />
   );
 };
+
+/**
+ * @deprecated use ComboBoxFromApi
+ */
+export const SelectFromApi = ComboBoxFromApi;

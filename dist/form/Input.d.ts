@@ -1,13 +1,14 @@
 import { Control, FieldError, FieldPath, FieldValues, Merge, RegisterOptions, UseFormRegister } from "react-hook-form";
 import { DateTimePickerProps } from "./DateTimePicker";
 import { DateInputProps, DateRangeInputProps } from "./DateInput";
-import { SelectPaginatedFromApiProps } from "./SelectPaginatedFromApi";
+import { SelectPaginatedFromApiProps } from "./ComboBoxPaginatedFromApi";
 import { ResponseMeta } from "../utils/paginate";
 import { TimePickerProps } from "./TimePicker";
 import { NumericFormatProps } from "react-number-format/types/types";
 import React, { ChangeEvent, RefObject } from "react";
-import { SelectFromApiProps } from "./SelectFromApi";
+import { ComboBoxFromApiProps } from "./ComboBoxFromApi";
 import { Matcher } from "react-day-picker";
+import { ComboBoxProps } from "./ComboBox";
 export interface IInputProps<TName extends FieldPath<FieldValues>> {
     id?: string;
     label: string;
@@ -45,6 +46,12 @@ export declare const SelectField: <TFieldValues extends FieldValues = FieldValue
     prepend?: React.ReactNode;
     type?: string;
     ref?: ((input: HTMLSelectElement | null) => void) | RefObject<HTMLSelectElement | null>;
+}) => import("react/jsx-runtime").JSX.Element;
+export declare const ComboBoxField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>, TModel = unknown>({ error, label, desc, fieldSetClassName, ...rest }: ComboBoxProps<TModel> & Omit<IInputProps<TName>, "value">) => import("react/jsx-runtime").JSX.Element;
+export declare const ComboBoxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>, TModel = unknown>({ control, onChange, optionValue, ...rest }: Omit<ComboBoxProps<TModel>, "onChange" | "value"> & IInputProps<TName> & {
+    control: Control<TFieldValues>;
+    onChange?: (m: TModel | null) => unknown;
+    optionValue?: (m: TModel) => number | string;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const SelectFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ id, fieldSetClassName, register, name, options, ref, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
     children: React.ReactNode;
@@ -87,6 +94,16 @@ export declare const DateFormField: <TFieldValues extends FieldValues = FieldVal
     onChange?: (date: Date | string | null) => unknown;
 }) => import("react/jsx-runtime").JSX.Element;
 export declare const DateRangeField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, error, desc, ...props }: Omit<IInputProps<TName>, "size"> & DateRangeInputProps) => import("react/jsx-runtime").JSX.Element;
+export declare const ComboBoxPaginatedFromApiFormField: <T extends {
+    data: unknown[];
+    meta: ResponseMeta;
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ optionValue, control, ...props }: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "size" | "onChange" | "multiple" | "defaultValue" | "type" | "value" | "children"> & IInputProps<TName> & {
+    control: Control<TFieldValues>;
+    onChange?: (model: T["data"][number] | null) => void;
+} & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => import("react/jsx-runtime").JSX.Element;
+/**
+ * @deprecated
+ */
 export declare const SelectPaginatedFromApiFormField: <T extends {
     data: unknown[];
     meta: ResponseMeta;
@@ -94,8 +111,19 @@ export declare const SelectPaginatedFromApiFormField: <T extends {
     control: Control<TFieldValues>;
     onChange?: (model: T["data"][number] | null) => void;
 } & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => import("react/jsx-runtime").JSX.Element;
-export declare const SelectFromApiField: <T = unknown, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, error, className, fieldSetClassName, ...rest }: IInputProps<TName> & SelectFromApiProps<T>) => import("react/jsx-runtime").JSX.Element;
-export declare const SelectFromApiFormField: <T = unknown, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, onChange, optionValue, ...props }: IInputProps<TName> & Omit<SelectFromApiProps<T>, "onChange" | "value"> & {
+export declare const ComboBoxFromApiField: <T = unknown, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, error, className, fieldSetClassName, ...rest }: IInputProps<TName> & ComboBoxFromApiProps<T>) => import("react/jsx-runtime").JSX.Element;
+/**
+ * @deprecated
+ */
+export declare const SelectFromApiField: <T = unknown, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, error, className, fieldSetClassName, ...rest }: IInputProps<TName> & ComboBoxFromApiProps<T>) => import("react/jsx-runtime").JSX.Element;
+export declare const ComboBoxFromApiFormField: <T = unknown, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, onChange, optionValue, ...props }: IInputProps<TName> & Omit<ComboBoxFromApiProps<T>, "onChange" | "value"> & {
+    control: Control<TFieldValues>;
+    onChange?: (model: T | null) => unknown;
+}) => import("react/jsx-runtime").JSX.Element;
+/**
+ * @deprecated
+ */
+export declare const SelectFromApiFormField: <T = unknown, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, onChange, optionValue, ...props }: IInputProps<TName> & Omit<ComboBoxFromApiProps<T>, "onChange" | "value"> & {
     control: Control<TFieldValues>;
     onChange?: (model: T | null) => unknown;
 }) => import("react/jsx-runtime").JSX.Element;
@@ -116,6 +144,13 @@ export declare const Label: ({ text, required }: {
     size?: "sm";
     text: React.ReactNode;
 }) => import("react/jsx-runtime").JSX.Element;
+export declare const ComboBoxPaginatedFromApiField: <T extends {
+    data: unknown[];
+    meta: ResponseMeta;
+}>({ label, fieldSetClassName, className, desc, error, ...props }: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "size" | "onChange" | "multiple" | "defaultValue" | "type" | "value" | "children"> & IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => import("react/jsx-runtime").JSX.Element;
+/**
+ * @deprecated
+ */
 export declare const SelectPaginatedFromApiField: <T extends {
     data: unknown[];
     meta: ResponseMeta;

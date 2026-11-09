@@ -16,8 +16,8 @@ import {
   DateFormField,
   NumberFormField,
   SaveButton,
-  SelectPaginatedFromApiField,
-  SelectPaginatedFromApiFormField,
+  ComboBoxPaginatedFromApiField,
+  ComboBoxPaginatedFromApiFormField,
   TextFormField,
 } from "../form/Input";
 
@@ -355,7 +355,7 @@ export const FilterButton = ({
                 name={key}
                 render={(keyVal) => (
                   <>
-                    <SelectPaginatedFromApiField
+                    <ComboBoxPaginatedFromApiField
                       value={null}
                       queryFn={v.queryFn}
                       queryKey={v.queryKey}

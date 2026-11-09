@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useInView } from "react-intersection-observer";
 import { getNextPageParam, getPreviousPageParam, PaginateQuery, ResponseMeta } from "../utils/paginate";
 import { LoadingComponent } from "../Loading";
-import { Select, SelectProps } from "./Select";
+import { ComboBox, ComboBoxProps } from "./ComboBox";
 import { captureException } from "@sentry/nextjs";
 
 export type SelectPaginatedFromApiProps<TModel extends { meta: ResponseMeta; data: unknown[] }> = {
@@ -17,9 +17,9 @@ export type SelectPaginatedFromApiProps<TModel extends { meta: ResponseMeta; dat
   onInitialChange?: (model: TModel["data"][0]) => void;
   /** How long loaded pages are reused before refetching, e.g. when the select is mounted again */
   staleTime?: number;
-} & Omit<SelectProps<TModel["data"][0]>, "value" | "options">;
+} & Omit<ComboBoxProps<TModel["data"][0]>, "value" | "options">;
 
-export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data: unknown[] }>({
+export const ComboBoxPaginatedFromApi = <TModel extends { meta: ResponseMeta; data: unknown[] }>({
   onChange,
   name,
   value,
@@ -149,7 +149,7 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
   }, [fetchNextPage, inView]);
 
   return (
-    <Select<TModel["data"][0]>
+    <ComboBox<TModel["data"][0]>
       {...rest}
       disabled={rest.disabled}
       onChange={(v) => {
@@ -181,3 +181,8 @@ export const SelectPaginatedFromApi = <TModel extends { meta: ResponseMeta; data
     />
   );
 };
+
+/**
+ * @deprecated use ComboBoxPaginatedFromApi
+ */
+export const SelectPaginatedFromApi = ComboBoxPaginatedFromApi;

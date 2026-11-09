@@ -12,7 +12,7 @@ import { DateTimePicker, DateTimePickerProps } from "./DateTimePicker";
 import { DateInput, DateInputProps, DateRangeInput, DateRangeInputProps } from "./DateInput";
 import { InputErrors } from "./UseForm";
 import { format } from "date-fns";
-import { SelectPaginatedFromApi, SelectPaginatedFromApiProps } from "./SelectPaginatedFromApi";
+import { ComboBoxPaginatedFromApi, SelectPaginatedFromApiProps } from "./ComboBoxPaginatedFromApi";
 import { ResponseMeta } from "../utils/paginate";
 import { stringToDate } from "../utils/date";
 import cx from "classnames";
@@ -24,8 +24,9 @@ import React, { ChangeEvent, RefObject, useEffect, useRef, useState } from "reac
 import { useTranslations } from "next-intl";
 import { CheckIcon } from "@heroicons/react/20/solid";
 import { LoadingComponent } from "../Loading";
-import { SelectFromApi, SelectFromApiProps } from "./SelectFromApi";
+import { ComboBoxFromApi, ComboBoxFromApiProps } from "./ComboBoxFromApi";
 import { Matcher } from "react-day-picker";
+import { ComboBox, ComboBoxProps } from "./ComboBox";
 
 export interface IInputProps<TName extends FieldPath<FieldValues>> {
   id?: string;
@@ -201,6 +202,67 @@ export const SelectField = <
     )}
     {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
   </div>
+);
+
+export const ComboBoxField = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TModel = unknown,
+>({
+  error,
+  label,
+  desc,
+  fieldSetClassName,
+  ...rest
+}: ComboBoxProps<TModel> & Omit<IInputProps<TName>, "value">) => (
+  <div className={fieldSetClassName}>
+    <label className="floating-label">
+      <ComboBox<TModel> {...rest} />
+      <span>
+        {label}
+        {rest.required ? <Required /> : null}
+      </span>
+    </label>
+    {desc && (
+      <div className={`text-xs mt-0.5 text-gray-500 ${styles.desc}`}>
+        <span>{desc}</span>
+      </div>
+    )}
+    {error && <InputErrors className="text-xs text-error mt-1" errors={error} />}
+  </div>
+);
+
+export const ComboBoxFormField = <
+  TFieldValues extends FieldValues = FieldValues,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TModel = unknown,
+>({
+  control,
+  onChange,
+  optionValue = (m) => (m as any).id,
+  ...rest
+}: Omit<ComboBoxProps<TModel>, "onChange" | "value"> &
+  IInputProps<TName> & {
+    control: Control<TFieldValues>;
+    onChange?: (m: TModel | null) => unknown;
+    optionValue?: (m: TModel) => number | string;
+  }) => (
+  <Controller
+    disabled={rest.disabled}
+    control={control}
+    rules={{ required: rest.required === true }}
+    name={rest.name}
+    render={({ field }) => (
+      <ComboBoxField<TFieldValues, TName, TModel>
+        {...rest}
+        value={field.value}
+        onChange={(m) => {
+          field.onChange(m ? optionValue(m) : null);
+          onChange?.(m);
+        }}
+      />
+    )}
+  />
 );
 
 export const SelectFormField = <
@@ -576,7 +638,7 @@ export const DateRangeField = <
   </div>
 );
 
-export const SelectPaginatedFromApiFormField = <
+export const ComboBoxPaginatedFromApiFormField = <
   T extends { data: unknown[]; meta: ResponseMeta },
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -598,7 +660,7 @@ export const SelectPaginatedFromApiFormField = <
     disabled={props.disabled}
     rules={{ required: props.required === true }}
     render={({ field }) => (
-      <SelectPaginatedFromApiField<T>
+      <ComboBoxPaginatedFromApiField<T>
         {...props}
         disabled={field.disabled}
         value={field.value}
@@ -611,7 +673,12 @@ export const SelectPaginatedFromApiFormField = <
   />
 );
 
-export const SelectFromApiField = <
+/**
+ * @deprecated
+ */
+export const SelectPaginatedFromApiFormField = ComboBoxPaginatedFromApiFormField;
+
+export const ComboBoxFromApiField = <
   T = unknown,
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -622,14 +689,14 @@ export const SelectFromApiField = <
   className,
   fieldSetClassName,
   ...rest
-}: IInputProps<TName> & SelectFromApiProps<T>) => (
+}: IInputProps<TName> & ComboBoxFromApiProps<T>) => (
   <div className={fieldSetClassName}>
     <div className="floating-label">
       <span>
         {label}
         {rest.required ? <Required /> : null}
       </span>
-      <SelectFromApi<T>
+      <ComboBoxFromApi<T>
         className={cx(className, { "input-error": error })}
         {...rest}
         placeholder={rest.required ? `${label}*` : label}
@@ -639,7 +706,12 @@ export const SelectFromApiField = <
   </div>
 );
 
-export const SelectFromApiFormField = <
+/**
+ * @deprecated
+ */
+export const SelectFromApiField = ComboBoxFromApiField;
+
+export const ComboBoxFromApiFormField = <
   T = unknown,
   TFieldValues extends FieldValues = FieldValues,
   TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
@@ -649,7 +721,7 @@ export const SelectFromApiFormField = <
   optionValue = (model) => (model as any).id,
   ...props
 }: IInputProps<TName> &
-  Omit<SelectFromApiProps<T>, "onChange" | "value"> & {
+  Omit<ComboBoxFromApiProps<T>, "onChange" | "value"> & {
     control: Control<TFieldValues>;
     onChange?: (model: T | null) => unknown;
   }) => (
@@ -659,7 +731,7 @@ export const SelectFromApiFormField = <
     disabled={props.disabled}
     rules={{ required: props.required === true }}
     render={({ field }) => (
-      <SelectFromApiField<T>
+      <ComboBoxFromApiField<T>
         {...props}
         disabled={field.disabled}
         optionValue={optionValue}
@@ -672,6 +744,11 @@ export const SelectFromApiFormField = <
     )}
   />
 );
+
+/**
+ * @deprecated
+ */
+export const SelectFromApiFormField = ComboBoxFromApiFormField;
 
 export const DateTimeFormField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -842,7 +919,7 @@ export const Label = ({ text, required }: { required?: boolean; size?: "sm"; tex
   </label>
 );
 
-export const SelectPaginatedFromApiField = <T extends { data: unknown[]; meta: ResponseMeta }>({
+export const ComboBoxPaginatedFromApiField = <T extends { data: unknown[]; meta: ResponseMeta }>({
   label,
   fieldSetClassName,
   className,
@@ -861,7 +938,7 @@ export const SelectPaginatedFromApiField = <T extends { data: unknown[]; meta: R
         {label}
         {props.required ? <Required /> : null}
       </span>
-      <SelectPaginatedFromApi<T>
+      <ComboBoxPaginatedFromApi<T>
         {...props}
         className={cx("mx-0", className, { "input-error": error })}
         placeholder={props.required ? `${label}*` : label}
@@ -871,6 +948,11 @@ export const SelectPaginatedFromApiField = <T extends { data: unknown[]; meta: R
     <InputErrors className="text-xs text-error mt-1" errors={error} />
   </div>
 );
+
+/**
+ * @deprecated
+ */
+export const SelectPaginatedFromApiField = ComboBoxPaginatedFromApiField;
 
 export const Required = () => <span className="text-error align-bottom">*</span>;
 

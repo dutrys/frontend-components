@@ -158,7 +158,7 @@ declare const PortalSSR: (props: {
     enabled?: boolean;
     children: React__default.ReactNode;
 }) => string | number | bigint | boolean | react_jsx_runtime.JSX.Element | Iterable<React__default.ReactNode> | Promise<string | number | bigint | boolean | React__default.ReactPortal | React__default.ReactElement<unknown, string | React__default.JSXElementConstructor<any>> | Iterable<React__default.ReactNode> | null | undefined> | null | undefined;
-type SelectProps<T> = {
+type ComboBoxProps<T> = {
     size?: "sm" | "xs" | "lg";
     name?: string;
     inputRef?: any;
@@ -182,9 +182,10 @@ type SelectProps<T> = {
     afterInput?: React__default.ReactNode;
     hideNoItemsOption?: boolean;
     outerClassName?: string;
+    filter?: (model: T, q: string) => boolean;
 };
-declare const Select: <T = unknown>({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel, value, size, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth, maxHeight, afterInput, hideNoItemsOption, autoFocus, outerClassName, ...rest }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "onChange" | "defaultValue" | "type" | "value" | "children"> & SelectProps<T>) => react_jsx_runtime.JSX.Element;
-declare const SelectOption: ({ value, size, children, className, ...rest }: {
+declare const ComboBox: <T = unknown>({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel, value, size, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth, maxHeight, afterInput, hideNoItemsOption, autoFocus, outerClassName, filter, ...rest }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "onChange" | "defaultValue" | "type" | "value" | "children"> & ComboBoxProps<T>) => react_jsx_runtime.JSX.Element;
+declare const ComboBoxOption: ({ value, size, children, className, ...rest }: {
     children: React__default.ReactNode;
     value: unknown;
     className?: string;
@@ -204,7 +205,14 @@ type SelectPaginatedFromApiProps<TModel extends {
     onInitialChange?: (model: TModel["data"][0]) => void;
     /** How long loaded pages are reused before refetching, e.g. when the select is mounted again */
     staleTime?: number;
-} & Omit<SelectProps<TModel["data"][0]>, "value" | "options">;
+} & Omit<ComboBoxProps<TModel["data"][0]>, "value" | "options">;
+declare const ComboBoxPaginatedFromApi: <TModel extends {
+    meta: ResponseMeta;
+    data: unknown[];
+}>({ onChange, name, value, searchFromChars, queryKey, queryFn, optionLabel, optionValue, onInitialChange, staleTime, ...rest }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "defaultValue" | "type" | "value" | "children" | "onChange"> & SelectPaginatedFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
+/**
+ * @deprecated use ComboBoxPaginatedFromApi
+ */
 declare const SelectPaginatedFromApi: <TModel extends {
     meta: ResponseMeta;
     data: unknown[];
@@ -482,7 +490,7 @@ type TimePickerProps = {
 };
 declare const TimePicker: ({ className, value, onChange, placeholder, required, disabled }: TimePickerProps) => react_jsx_runtime.JSX.Element;
 
-type SelectFromApiProps<TModel = unknown> = {
+type ComboBoxFromApiProps<TModel = unknown> = {
     queryFn: () => Promise<TModel[]>;
     queryKey: ReadonlyArray<any>;
     value: number | string | null;
@@ -490,8 +498,12 @@ type SelectFromApiProps<TModel = unknown> = {
     optionLabel?: (model: TModel, inOptions: boolean) => string;
     optionValue?: (model: TModel) => string | number;
     filter?: (model: TModel, query: string) => boolean;
-} & Omit<SelectProps<TModel>, "onChange" | "optionLabel" | "value" | "options">;
-declare const SelectFromApi: <TModel = unknown>({ name, value, queryKey, queryFn, optionLabel, optionValue, filter, ...rest }: SelectFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
+} & Omit<ComboBoxProps<TModel>, "onChange" | "optionLabel" | "value" | "options">;
+declare const ComboBoxFromApi: <TModel = unknown>({ name, value, queryKey, queryFn, optionLabel, optionValue, filter, ...rest }: ComboBoxFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
+/**
+ * @deprecated use ComboBoxFromApi
+ */
+declare const SelectFromApi: <TModel = unknown>({ name, value, queryKey, queryFn, optionLabel, optionValue, filter, ...rest }: ComboBoxFromApiProps<TModel>) => react_jsx_runtime.JSX.Element;
 
 interface IInputProps<TName extends FieldPath<FieldValues>> {
     id?: string;
@@ -530,6 +542,12 @@ declare const SelectField: <TFieldValues extends FieldValues = FieldValues, TNam
     prepend?: React__default.ReactNode;
     type?: string;
     ref?: ((input: HTMLSelectElement | null) => void) | RefObject<HTMLSelectElement | null>;
+}) => react_jsx_runtime.JSX.Element;
+declare const ComboBoxField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>, TModel = unknown>({ error, label, desc, fieldSetClassName, ...rest }: ComboBoxProps<TModel> & Omit<IInputProps<TName>, "value">) => react_jsx_runtime.JSX.Element;
+declare const ComboBoxFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>, TModel = unknown>({ control, onChange, optionValue, ...rest }: Omit<ComboBoxProps<TModel>, "onChange" | "value"> & IInputProps<TName> & {
+    control: Control<TFieldValues>;
+    onChange?: (m: TModel | null) => unknown;
+    optionValue?: (m: TModel) => number | string;
 }) => react_jsx_runtime.JSX.Element;
 declare const SelectFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ id, fieldSetClassName, register, name, options, ref, ...rest }: IInputRegisterProps<TFieldValues, TName> & {
     children: React__default.ReactNode;
@@ -572,6 +590,16 @@ declare const DateFormField: <TFieldValues extends FieldValues = FieldValues, TN
     onChange?: (date: Date | string | null) => unknown;
 }) => react_jsx_runtime.JSX.Element;
 declare const DateRangeField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ fieldSetClassName, label, error, desc, ...props }: Omit<IInputProps<TName>, "size"> & DateRangeInputProps) => react_jsx_runtime.JSX.Element;
+declare const ComboBoxPaginatedFromApiFormField: <T extends {
+    data: unknown[];
+    meta: ResponseMeta;
+}, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ optionValue, control, ...props }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "onChange" | "multiple" | "defaultValue" | "type" | "value" | "children"> & IInputProps<TName> & {
+    control: Control<TFieldValues>;
+    onChange?: (model: T["data"][number] | null) => void;
+} & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => react_jsx_runtime.JSX.Element;
+/**
+ * @deprecated
+ */
 declare const SelectPaginatedFromApiFormField: <T extends {
     data: unknown[];
     meta: ResponseMeta;
@@ -579,8 +607,19 @@ declare const SelectPaginatedFromApiFormField: <T extends {
     control: Control<TFieldValues>;
     onChange?: (model: T["data"][number] | null) => void;
 } & Omit<SelectPaginatedFromApiProps<T>, "name" | "placeholder" | "value" | "onChange" | "options">) => react_jsx_runtime.JSX.Element;
-declare const SelectFromApiField: <T = unknown, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, error, className, fieldSetClassName, ...rest }: IInputProps<TName> & SelectFromApiProps<T>) => react_jsx_runtime.JSX.Element;
-declare const SelectFromApiFormField: <T = unknown, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, onChange, optionValue, ...props }: IInputProps<TName> & Omit<SelectFromApiProps<T>, "onChange" | "value"> & {
+declare const ComboBoxFromApiField: <T = unknown, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, error, className, fieldSetClassName, ...rest }: IInputProps<TName> & ComboBoxFromApiProps<T>) => react_jsx_runtime.JSX.Element;
+/**
+ * @deprecated
+ */
+declare const SelectFromApiField: <T = unknown, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ label, desc, error, className, fieldSetClassName, ...rest }: IInputProps<TName> & ComboBoxFromApiProps<T>) => react_jsx_runtime.JSX.Element;
+declare const ComboBoxFromApiFormField: <T = unknown, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, onChange, optionValue, ...props }: IInputProps<TName> & Omit<ComboBoxFromApiProps<T>, "onChange" | "value"> & {
+    control: Control<TFieldValues>;
+    onChange?: (model: T | null) => unknown;
+}) => react_jsx_runtime.JSX.Element;
+/**
+ * @deprecated
+ */
+declare const SelectFromApiFormField: <T = unknown, TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>({ control, onChange, optionValue, ...props }: IInputProps<TName> & Omit<ComboBoxFromApiProps<T>, "onChange" | "value"> & {
     control: Control<TFieldValues>;
     onChange?: (model: T | null) => unknown;
 }) => react_jsx_runtime.JSX.Element;
@@ -601,6 +640,13 @@ declare const Label: ({ text, required }: {
     size?: "sm";
     text: React__default.ReactNode;
 }) => react_jsx_runtime.JSX.Element;
+declare const ComboBoxPaginatedFromApiField: <T extends {
+    data: unknown[];
+    meta: ResponseMeta;
+}>({ label, fieldSetClassName, className, desc, error, ...props }: Omit<React__default.SelectHTMLAttributes<HTMLSelectElement>, "size" | "onChange" | "multiple" | "defaultValue" | "type" | "value" | "children"> & IInputProps<any> & Omit<SelectPaginatedFromApiProps<T>, "placeholder">) => react_jsx_runtime.JSX.Element;
+/**
+ * @deprecated
+ */
 declare const SelectPaginatedFromApiField: <T extends {
     data: unknown[];
     meta: ResponseMeta;
@@ -845,4 +891,4 @@ declare const FilterButton: ({ className, filter, onSubmitParams, onParseParams,
     className?: string;
 }) => react_jsx_runtime.JSX.Element;
 
-export { type ActionColumn, AlertErrors, Archive, ArchiveButtonWithDialog, Backdrop, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, type ColumnType, ConfirmSave, type DateColumn, DateField, DateFormField, DateInput, type DateInputProps, DateRangeField, DateRangeInput, type DateRangeInputProps, DateTime, DateTimeFormField, DateTimePicker, type DateTimePickerProps, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, type FilterField, type FilterFields, FilterLink, FilterNumberRange, type FilterOperator, type FilterOperators, FilterOptions, FilterOptionsExpandable, FilterPagination, type FilterPaginationColumn, FilterSelectOptions, FilterText, FilterType, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MenuItem, type MenuItemWithSubmenu, type MoreActionType, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, type PaginateQuery, PaginatedTable, PaginatedTableClient, Pagination, type PaginationSettings, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, type ResponseMeta, SaveButton, ScreenSize, Search, type SearchFilter, type SearchFilterOptions, type SearchOperator, Select, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, type SelectFromApiProps, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, type SelectPaginatedFromApiProps, type SelectProps, type ServerError, SideDialog, SidebarLayout, SidebarMenu, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, type TimePickerProps, Title, Toaster, addServerErrors, getFilterParam, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, parseSearchFilters, searchFiltersToParams, setPartialParams, useFormSubmit, useScreenSize };
+export { type ActionColumn, AlertErrors, Archive, ArchiveButtonWithDialog, Backdrop, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, type ColumnType, ComboBox, ComboBoxField, ComboBoxFormField, ComboBoxFromApi, ComboBoxFromApiField, ComboBoxFromApiFormField, type ComboBoxFromApiProps, ComboBoxOption, ComboBoxPaginatedFromApi, ComboBoxPaginatedFromApiField, ComboBoxPaginatedFromApiFormField, type ComboBoxProps, ConfirmSave, type DateColumn, DateField, DateFormField, DateInput, type DateInputProps, DateRangeField, DateRangeInput, type DateRangeInputProps, DateTime, DateTimeFormField, DateTimePicker, type DateTimePickerProps, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, type FilterField, type FilterFields, FilterLink, FilterNumberRange, type FilterOperator, type FilterOperators, FilterOptions, FilterOptionsExpandable, FilterPagination, type FilterPaginationColumn, FilterSelectOptions, FilterText, FilterType, type FunctionColumn, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, type IInputProps, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, type MenuItem, type MenuItemWithSubmenu, type MoreActionType, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, type PaginateQuery, PaginatedTable, PaginatedTableClient, Pagination, type PaginationSettings, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, type ResponseMeta, SaveButton, ScreenSize, Search, type SearchFilter, type SearchFilterOptions, type SearchOperator, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, type SelectPaginatedFromApiProps, type ServerError, SideDialog, SidebarLayout, SidebarMenu, type SimpleColumn, type StorageInterface, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, type TimePickerProps, Title, Toaster, addServerErrors, getFilterParam, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, parseSearchFilters, searchFiltersToParams, setPartialParams, useFormSubmit, useScreenSize };

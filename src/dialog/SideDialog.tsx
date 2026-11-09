@@ -97,7 +97,7 @@ export const SideDialog = ({
           onClick={closeModal}
           data-testid="side-dialog"
           style={{ left: "unset", right: 0, zIndex: 1099 + index, paddingLeft: index * Math.max(50 - index, 10) }}
-          className={cx("h-screen bg-transparent pt-16", widthClassName)}
+          className={cx("h-screen bg-transparent", widthClassName)}
           open
           {...rest}
         >

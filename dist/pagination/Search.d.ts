@@ -1,4 +1,4 @@
-import { SelectPaginatedFromApiProps } from "../form/SelectPaginatedFromApi";
+import { SelectPaginatedFromApiProps } from "../form/ComboBoxPaginatedFromApi";
 import { ResponseMeta } from "../utils/paginate";
 export type FilterOperator = "$eq" | "$gt" | "$gte" | "$in" | "$null" | "$lt" | "$lte" | "$btw" | "$ilike" | "$sw" | "$contains" | "$not" | "$and" | "$or";
 export type FilterOperators = Record<string, FilterOperator[]>;

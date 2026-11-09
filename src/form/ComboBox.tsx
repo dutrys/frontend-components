@@ -12,6 +12,7 @@ import {
 } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import cx from "classnames";
+import * as querystring from "node:querystring";
 
 export const PortalSSR = (props: { enabled?: boolean; children: React.ReactNode }) => {
   const [mounted, setMounted] = useState(false);
@@ -24,7 +25,7 @@ export const PortalSSR = (props: { enabled?: boolean; children: React.ReactNode 
   return props.children;
 };
 
-export type SelectProps<T> = {
+export type ComboBoxProps<T> = {
   size?: "sm" | "xs" | "lg";
   name?: string;
   inputRef?: any;
@@ -48,9 +49,10 @@ export type SelectProps<T> = {
   afterInput?: React.ReactNode;
   hideNoItemsOption?: boolean;
   outerClassName?: string;
+  filter?: (model: T, q: string) => boolean;
 };
 
-export const Select = <T = unknown,>({
+export const ComboBox = <T = unknown,>({
   onChange,
   disabled,
   required,
@@ -75,14 +77,15 @@ export const Select = <T = unknown,>({
   hideNoItemsOption,
   autoFocus,
   outerClassName = "w-full",
+  filter,
   ...rest
 }: Omit<
   React.SelectHTMLAttributes<HTMLSelectElement>,
   "size" | "multiple" | "onChange" | "defaultValue" | "type" | "value" | "children"
 > &
-  SelectProps<T>) => {
+  ComboBoxProps<T>) => {
   const t = useTranslations();
-
+  const [query, setQuery] = useState("");
   const { refs, floatingStyles } = useFloating({
     placement: "bottom-start",
     middleware: [
@@ -124,7 +127,10 @@ export const Select = <T = unknown,>({
               name={name}
               autoFocus={autoFocus}
               displayValue={(model) => (model ? optionLabel(model, false) : "")}
-              onChange={onQueryChange && ((event) => onQueryChange(event.target.value))}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                onQueryChange?.(event.target.value);
+              }}
             />
             {header}
             {!required && value ? (
@@ -154,9 +160,9 @@ export const Select = <T = unknown,>({
                 <ComboboxOptions>
                   {beforeOptions}
                   {!required && (
-                    <SelectOption size={size} data-testid="select-option-empty" key="empty" value={null}>
+                    <ComboBoxOption size={size} data-testid="select-option-empty" key="empty" value={null}>
                       {empty || t("selectFromApi.select")}
-                    </SelectOption>
+                    </ComboBoxOption>
                   )}
                   {options.length === 0 && !hideNoItemsOption ? (
                     <div className="cursor-default select-none py-2 px-4 text-base-content/60">
@@ -165,31 +171,33 @@ export const Select = <T = unknown,>({
                       </span>
                     </div>
                   ) : (
-                    options.map((model: T, i: number) => {
-                      const group = groupBy?.(model);
-                      let groupNode: React.ReactNode;
-                      if (currentGroupBy !== group) {
-                        currentGroupBy = group;
-                        groupNode = (
-                          <div className="sticky top-0 bg-base-100 font-bold z-10 p-2 text-xs text-base-content/40 border-b border-b-base-200 cursor-default select-none truncate">
-                            {group}
-                          </div>
+                    options
+                      .filter((m) => (filter ? filter(m, query) : true))
+                      .map((model: T, i: number) => {
+                        const group = groupBy?.(model);
+                        let groupNode: React.ReactNode;
+                        if (currentGroupBy !== group) {
+                          currentGroupBy = group;
+                          groupNode = (
+                            <div className="sticky top-0 bg-base-100 font-bold z-10 p-2 text-xs text-base-content/40 border-b border-b-base-200 cursor-default select-none truncate">
+                              {group}
+                            </div>
+                          );
+                        }
+                        return (
+                          <React.Fragment key={`${optionLabel(model, true)}-${i}`}>
+                            {groupNode}
+                            <ComboBoxOption
+                              data-testid={`select-option-${i}`}
+                              className={groupBy ? "pl-4" : undefined}
+                              value={model}
+                              size={size}
+                            >
+                              {optionLabel(model, true)}
+                            </ComboBoxOption>
+                          </React.Fragment>
                         );
-                      }
-                      return (
-                        <React.Fragment key={`${optionLabel(model, true)}-${i}`}>
-                          {groupNode}
-                          <SelectOption
-                            data-testid={`select-option-${i}`}
-                            className={groupBy ? "pl-4" : undefined}
-                            value={model}
-                            size={size}
-                          >
-                            {optionLabel(model, true)}
-                          </SelectOption>
-                        </React.Fragment>
-                      );
-                    })
+                      })
                   )}
 
                   {afterOptions}
@@ -203,7 +211,7 @@ export const Select = <T = unknown,>({
   );
 };
 
-export const SelectOption = ({
+export const ComboBoxOption = ({
   value,
   size,
   children,
