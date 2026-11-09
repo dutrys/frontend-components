@@ -416,7 +416,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                   className={`${styles.table} pb-16 table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols`}
                 >
                   <caption className="mt-28">{caption ?? ""}</caption>
-                  <thead className="[&>tr]:top-28">
+                  <thead className="top-28 [&>tr]:top-28">
                     <tr>
                       {bulkActions && (
                         <th>
@@ -491,7 +491,7 @@ export const PaginatedTable = <TModel extends { data: { id: number }[]; meta: Re
                     let g: React.ReactNode = null;
                     if (group && key !== "") {
                       g = (
-                        <thead className="[&>tr]:top-28">
+                        <thead className="top-28 [&>tr]:top-28">
                           {group.render(entries, columnsConfigs[configName].filter((s) => s && s.enabled).length)}
                         </thead>
                       );
