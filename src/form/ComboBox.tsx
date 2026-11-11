@@ -263,3 +263,18 @@ export const ComboBoxOption = ({
     )}
   </ComboboxOption>
 );
+
+/**
+ * @deprecated use ComboBox
+ */
+export const Select = ComboBox;
+
+/**
+ * @deprecated use ComboBoxOption
+ */
+export const SelectOption = ComboBoxOption;
+
+/**
+ * @deprecated use ComboBoxProps
+ */
+export type SelectProps<T> = ComboBoxProps<T>;

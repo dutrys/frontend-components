@@ -1128,6 +1128,14 @@ const ComboBoxOption = ({ value, size, children, className, ...rest }) => (jsx(C
                     "text-white": focus,
                     "text-teal-600": !focus,
                 }), children: jsx(CheckIcon, { className: "h-5 w-5", "aria-hidden": "true" }) }))] })) }));
+/**
+ * @deprecated use ComboBox
+ */
+const Select = ComboBox;
+/**
+ * @deprecated use ComboBoxOption
+ */
+const SelectOption = ComboBoxOption;
 
 const ComboBoxPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, onInitialChange, staleTime, ...rest }) => {
     const [query, setQuery] = useState("");
@@ -1231,7 +1239,7 @@ const ComboBoxPaginatedFromApi = ({ onChange, name, value, searchFromChars = 3, 
     return (jsx(ComboBox, { ...rest, disabled: rest.disabled, onChange: (v) => {
             setValueModel(v);
             onChange(v);
-        }, onQueryChange: setQuery, options: data?.pages.flatMap((d) => d?.data || []) ?? [], value: valueModel, optionLabel: optionLabel, afterInput: isLoading && !rest.disabled ? jsx(LoadingComponent, { loadingClassName: "size-4 text-primary" }) : undefined, hideNoItemsOption: isLoading, afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isFetchingNextPage || isLoading ? (jsx(LoadingComponent, { className: "my-2" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }));
+        }, onQueryChange: setQuery, options: data?.pages.flatMap((d) => d?.data || []) ?? [], value: valueModel, optionLabel: optionLabel, afterInput: isLoading && !rest.disabled ? jsx(LoadingComponent, { loadingClassName: "loading-xs text-primary" }) : undefined, hideNoItemsOption: isLoading, afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isFetchingNextPage || isLoading ? (jsx(LoadingComponent, { className: "my-2", loadingClassName: "loading-xs" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }));
 };
 /**
  * @deprecated use ComboBoxPaginatedFromApi
@@ -1326,20 +1334,23 @@ var styles$3 = {"desc":"Input-module_desc__3D3hV"};
 const ITEMS_PER_PAGE = 50;
 const ComboBoxFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, filter, ...rest }) => {
     const t = useTranslations();
-    const { isLoading, data, refetch } = useQuery({
+    const [query, setQuery] = useState("");
+    // The key is used as is, so other queries with the same key (e.g. a persisted list) share its cache.
+    const { isLoading, data } = useQuery({
         enabled: !rest.disabled,
-        queryKey: [...queryKey, rest.disabled],
-        queryFn: () => {
-            if (rest.disabled && !value) {
-                return Promise.reject();
-            }
-            return queryFn();
-        },
+        queryKey,
+        queryFn: () => queryFn(),
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
     });
     const [currentPage, setCurrentPage] = useState(1);
-    const options = filter && data ? data.filter((model) => filter(model, query)) : (data ?? []);
+    const onQueryChange = useCallback((q) => {
+        setQuery(q);
+        setCurrentPage(1);
+    }, []);
+    // All models are loaded at once, so the search filters them locally: by label unless `filter` is given.
+    const matches = filter ?? ((model, q) => optionLabel(model, true).toLowerCase().includes(q.trim().toLowerCase()));
+    const options = data ? data.filter((model) => matches(model, query)) : [];
     const hasNextPage = currentPage * ITEMS_PER_PAGE < options.length;
     const fetchNextPage = useCallback(() => {
         if (hasNextPage) {
@@ -1352,9 +1363,13 @@ const ComboBoxFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model)
             setCurrentPage((p) => p + 1);
         }
     }, [inView, hasNextPage]);
-    return (jsx(ComboBox, { ...rest, disabled: rest.disabled, onChange: rest.onChange, optionLabel: optionLabel, options: options.slice(0, currentPage * ITEMS_PER_PAGE), onQueryChange: () => refetch(), afterInput: isLoading ? jsx(LoadingComponent, { loadingClassName: "size-4 text-primary" }) : undefined, hideNoItemsOption: isLoading, value: typeof value === "number" || typeof value === "string"
+    const loadingClassName = cx("text-primary", {
+        "loading-sm": !rest.size,
+        "loading-xs": rest.size === "xs" || rest.size === "sm",
+    });
+    return (jsx(ComboBox, { ...rest, disabled: rest.disabled, onChange: rest.onChange, optionLabel: optionLabel, options: options.slice(0, currentPage * ITEMS_PER_PAGE), onQueryChange: onQueryChange, afterInput: isLoading ? jsx(LoadingComponent, { loadingClassName: loadingClassName }) : undefined, hideNoItemsOption: isLoading, value: typeof value === "number" || typeof value === "string"
             ? ((data || []).find((b) => optionValue(b) === value) ?? null)
-            : (value ?? null), afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isLoading ? (jsx(LoadingComponent, { className: "my-2" })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }));
+            : (value ?? null), afterOptions: jsxs(Fragment, { children: [rest.afterOptions, isLoading ? (jsx(LoadingComponent, { className: "my-2", loadingClassName: loadingClassName })) : (hasNextPage && (jsx("div", { className: "text-center", children: jsx("button", { ref: ref, className: "btn btn-ghost btn-xs my-1 btn-wide", onClick: () => fetchNextPage(), children: t("infiniteScroll.loadMore") }) })))] }) }));
 };
 /**
  * @deprecated use ComboBoxFromApi
@@ -1545,7 +1560,7 @@ const Required = () => jsx("span", { className: "text-error align-bottom", child
 const SaveButton = ({ isLoading, icon, disabled, className = "btn-block", onClick, size, color = "btn-primary", children, type = "submit", ...props }) => {
     const t = useTranslations();
     const Icon = icon || CheckIcon$1;
-    const iconClassName = cx({ "size-4": !size || size === "sm", "size-6": size === "lg" });
+    const iconClassName = cx({ "loading-xs": !size || size === "sm" });
     return (jsxs("button", { type: type, className: cx(`btn`, color, className, {
             "btn-sm": size === "sm",
             "btn-lg": size === "lg",
@@ -2887,5 +2902,5 @@ const FilterButton = ({ className, filter, onSubmitParams, onParseParams, }) => 
                                                     }, children: jsx(XMarkIcon, { className: "size-3" }) })] }, JSON.stringify(val) + "_" + i)))] })) })), v.type === FilterType.BOOLEAN && (jsxs("div", { className: "join w-full", children: [jsx("button", { type: "button", className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === true }), onClick: () => (watched[key] === true ? setValue(key, undefined) : setValue(key, true)), children: v.label.toUpperCase() }), jsx("button", { onClick: () => (watched[key] === false ? setValue(key, undefined) : setValue(key, false)), className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === false }), type: "button", children: `${t("general.no").toUpperCase()} ${v.label.toUpperCase()}` })] })), v.type === FilterType.OPTIONS && (jsx("div", { className: cx("join w-full", { "join-vertical": Object.entries(v.options ?? {}).length > 2 }), children: Object.entries(v.options ?? {}).map(([value, label]) => (jsx("button", { className: cx("btn grow btn-xs join-item", { "btn-neutral": watched[key] === value }), type: "button", onClick: () => (watched[key] === value ? setValue(key, undefined) : setValue(key, value)), children: label }, value))) }))] }, `${key}-${i}`))), jsx(SaveButton, { className: "btn-sm w-full", children: t("general.filter") })] }) }));
 };
 
-export { AlertErrors, Archive, ArchiveButtonWithDialog, Backdrop, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ComboBox, ComboBoxField, ComboBoxFormField, ComboBoxFromApi, ComboBoxFromApiField, ComboBoxFromApiFormField, ComboBoxOption, ComboBoxPaginatedFromApi, ComboBoxPaginatedFromApiField, ComboBoxPaginatedFromApiFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, PaginatedTableClient, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Search, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SideDialog, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getFilterParam, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, parseSearchFilters, searchFiltersToParams, setPartialParams, useFormSubmit, useScreenSize };
+export { AlertErrors, Archive, ArchiveButtonWithDialog, Backdrop, BulkActions, BulkDropDownActions, CheckboxField, CheckboxFormField, ComboBox, ComboBoxField, ComboBoxFormField, ComboBoxFromApi, ComboBoxFromApiField, ComboBoxFromApiFormField, ComboBoxOption, ComboBoxPaginatedFromApi, ComboBoxPaginatedFromApiField, ComboBoxPaginatedFromApiFormField, ConfirmSave, DateField, DateFormField, DateInput, DateRangeField, DateRangeInput, DateTime, DateTimeFormField, DateTimePicker, FilterButton, FilterDate, FilterDateFromTo, FilterDateRange, FilterLink, FilterNumberRange, FilterOptions, FilterOptionsExpandable, FilterPagination, FilterSelectOptions, FilterText, FilterType, GeneralErrors, GeneralErrorsInToast, HeaderResponsive, HeaderResponsivePaginated, HumanDate, IndeterminateCheckbox, InputErrors, Label, LoadingComponent, LocalStorage, MoreActions, NoCountPagination, NumberFormField, PAGINATED_IGNORE_ROW_CLICK, PaginatedTable, PaginatedTableClient, Pagination, ParallelDialog, ParallelDialogButtons, Popover, PortalSSR, RadioBoxFormField, Required, SaveButton, ScreenSize, Search, Select, SelectField, SelectFormField, SelectFromApi, SelectFromApiField, SelectFromApiFormField, SelectOption, SelectPaginatedFromApi, SelectPaginatedFromApiField, SelectPaginatedFromApiFormField, SideDialog, SidebarLayout, SidebarMenu, TOOLTIP_GLOBAL_ID, TOOLTIP_PARALLEL_ID, TOOLTIP_SIDEBAR_ID, TableLink, TextField, TextFormField, TextareaFormField, TimeFormField, TimePicker, Title, Toaster, addServerErrors, getFilterParam, getNextPageParam, getPreviousPageParam, isActionColumn, isFunctionColumn, isParamActive, isServerError, mapToDot, parseSearchFilters, searchFiltersToParams, setPartialParams, useFormSubmit, useScreenSize };
 //# sourceMappingURL=index.js.map

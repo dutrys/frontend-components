@@ -160,13 +160,15 @@ export const ComboBoxPaginatedFromApi = <TModel extends { meta: ResponseMeta; da
       options={data?.pages.flatMap((d) => d?.data || []) ?? []}
       value={valueModel}
       optionLabel={optionLabel}
-      afterInput={isLoading && !rest.disabled ? <LoadingComponent loadingClassName="size-4 text-primary" /> : undefined}
+      afterInput={
+        isLoading && !rest.disabled ? <LoadingComponent loadingClassName="loading-xs text-primary" /> : undefined
+      }
       hideNoItemsOption={isLoading}
       afterOptions={
         <>
           {rest.afterOptions}
           {isFetchingNextPage || isLoading ? (
-            <LoadingComponent className="my-2" />
+            <LoadingComponent className="my-2" loadingClassName="loading-xs" />
           ) : (
             hasNextPage && (
               <div className="text-center">

@@ -36,4 +36,21 @@ export declare const ComboBoxOption: ({ value, size, children, className, ...res
     className?: string;
     size?: "xs" | "sm" | "lg";
 }) => import("react/jsx-runtime").JSX.Element;
+/**
+ * @deprecated use ComboBox
+ */
+export declare const Select: <T = unknown>({ onChange, disabled, required, inputRef, options, name, portalEnabled, optionLabel, value, size, className, placeholder, groupBy, empty, beforeOptions, header, afterOptions, onQueryChange, minWidth, maxHeight, afterInput, hideNoItemsOption, autoFocus, outerClassName, filter, ...rest }: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, "size" | "multiple" | "onChange" | "defaultValue" | "type" | "value" | "children"> & ComboBoxProps<T>) => import("react/jsx-runtime").JSX.Element;
+/**
+ * @deprecated use ComboBoxOption
+ */
+export declare const SelectOption: ({ value, size, children, className, ...rest }: {
+    children: React.ReactNode;
+    value: unknown;
+    className?: string;
+    size?: "xs" | "sm" | "lg";
+}) => import("react/jsx-runtime").JSX.Element;
+/**
+ * @deprecated use ComboBoxProps
+ */
+export type SelectProps<T> = ComboBoxProps<T>;
 //# sourceMappingURL=ComboBox.d.ts.map

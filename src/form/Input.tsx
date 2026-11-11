@@ -981,7 +981,7 @@ export const SaveButton = ({
   const t = useTranslations();
   const Icon = icon || CheckIcon;
 
-  const iconClassName = cx({ "size-4": !size || size === "sm", "size-6": size === "lg" });
+  const iconClassName = cx({ "loading-xs": !size || size === "sm" });
   return (
     <button
       type={type}
