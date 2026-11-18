@@ -573,7 +573,8 @@ declare const SelectFormField: <TFieldValues extends FieldValues = FieldValues, 
 declare const TextareaFormField: <TFieldValues extends FieldValues = FieldValues, TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>>(props: IInputRegisterProps<TFieldValues, TName> & {
     maxLength?: number;
 }) => react_jsx_runtime.JSX.Element;
-declare const RadioBoxFormField: <T extends string>({ name, options, label, value, onChange, }: {
+declare const RadioBoxFormField: <T extends string>({ name, options, label, value, onChange, size, }: {
+    size: "sm" | "xs" | "lg";
     name: string;
     value: T;
     label?: string;

@@ -364,14 +364,22 @@ export const RadioBoxFormField = <T extends string>({
   label = "",
   value,
   onChange,
+  size,
 }: {
+  size: "sm" | "xs" | "lg";
   name: string;
   value: T;
   label?: string;
   options: Record<T, string>;
   onChange: (value: T) => void;
 }) => (
-  <div>
+  <div
+    className={cx({
+      "text-sm": size === "sm",
+      "text-lg": size === "lg",
+      "text-xs": size === "xs",
+    })}
+  >
     {label || ""}
     <div className="flex flex-col pt-2 gap-2">
       {Object.entries(options).map(([key, label]) => (
@@ -383,7 +391,11 @@ export const RadioBoxFormField = <T extends string>({
             name={name}
             value={key}
             onChange={() => onChange(key as T)}
-            className="radio radio-primary"
+            className={cx("radio radio-primary", {
+              "radio-sm": size === "sm",
+              "radio-lg": size === "lg",
+              "radio-xs": size === "xs",
+            })}
           />{" "}
           {typeof label === "string" ? label : null}
         </label>

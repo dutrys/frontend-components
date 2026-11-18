@@ -1335,11 +1335,10 @@ const ITEMS_PER_PAGE = 50;
 const ComboBoxFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model) => model.name, optionValue = (model) => model.id, filter, ...rest }) => {
     const t = useTranslations();
     const [query, setQuery] = useState("");
-    // The key is used as is, so other queries with the same key (e.g. a persisted list) share its cache.
     const { isLoading, data } = useQuery({
         enabled: !rest.disabled,
         queryKey,
-        queryFn: () => queryFn(),
+        queryFn,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
     });
@@ -1348,7 +1347,6 @@ const ComboBoxFromApi = ({ name, value, queryKey, queryFn, optionLabel = (model)
         setQuery(q);
         setCurrentPage(1);
     }, []);
-    // All models are loaded at once, so the search filters them locally: by label unless `filter` is given.
     const matches = filter ?? ((model, q) => optionLabel(model, true).toLowerCase().includes(q.trim().toLowerCase()));
     const options = data ? data.filter((model) => matches(model, query)) : [];
     const hasNextPage = currentPage * ITEMS_PER_PAGE < options.length;
@@ -1448,7 +1446,15 @@ const TextareaFormField = (props) => {
                             return r.onChange(e);
                         } }), props.maxLength && (jsx("div", { className: "badge badge-xs badge-ghost absolute right-1 bottom-1", children: `${length}/${props.maxLength}` })), jsxs("span", { children: [props.label, props.required ? jsx(Required, {}) : null] })] }), props.desc && (jsx("div", { className: `text-xs mt-0.5 text-gray-500 ${styles$3.desc}`, children: jsx("span", { children: props.desc }) })), props.error && jsx(InputErrors, { className: "text-xs text-error mt-1", errors: props.error })] }));
 };
-const RadioBoxFormField = ({ name, options, label = "", value, onChange, }) => (jsxs("div", { children: [label || "", jsx("div", { className: "flex flex-col pt-2 gap-2", children: Object.entries(options).map(([key, label]) => (jsxs("label", { children: [jsx("input", { type: "radio", checked: value === key, name: name, value: key, onChange: () => onChange(key), className: "radio radio-primary" }, key), " ", typeof label === "string" ? label : null] }, key))) })] }));
+const RadioBoxFormField = ({ name, options, label = "", value, onChange, size, }) => (jsxs("div", { className: cx({
+        "text-sm": size === "sm",
+        "text-lg": size === "lg",
+        "text-xs": size === "xs",
+    }), children: [label || "", jsx("div", { className: "flex flex-col pt-2 gap-2", children: Object.entries(options).map(([key, label]) => (jsxs("label", { children: [jsx("input", { type: "radio", checked: value === key, name: name, value: key, onChange: () => onChange(key), className: cx("radio radio-primary", {
+                            "radio-sm": size === "sm",
+                            "radio-lg": size === "lg",
+                            "radio-xs": size === "xs",
+                        }) }, key), " ", typeof label === "string" ? label : null] }, key))) })] }));
 const IndeterminateCheckbox = ({ checked, className = "checkbox checkbox-xs", indeterminate, onChange, disabled, id, ref, }) => {
     const checkboxRef = useRef(null);
     useEffect(() => {
