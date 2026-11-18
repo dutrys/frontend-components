@@ -981,7 +981,7 @@ export const SaveButton = ({
   ...props
 }: {
   type?: "submit" | "button";
-  size?: "sm" | "lg";
+  size?: "sm" | "lg" | "xs";
   color?: "btn-primary" | "btn-secondary" | "btn-warning" | "btn-error" | "btn-success" | "btn-neutral" | "btn-info";
   onClick?: () => unknown;
   className?: string;
@@ -993,11 +993,20 @@ export const SaveButton = ({
   const t = useTranslations();
   const Icon = icon || CheckIcon;
 
-  const iconClassName = cx({ "loading-xs": !size || size === "sm" });
+  const sizes: Record<
+    "xs" | "sm" | "lg" | "normal",
+    { iconSize: string; loadingSize: "loading-lg" | "loading-md" | "loading-sm" | "loading-xs" | undefined }
+  > = {
+    sm: { iconSize: "size-5", loadingSize: "loading-sm" },
+    xs: { iconSize: "size-4", loadingSize: "loading-xs" },
+    lg: { iconSize: "size-8", loadingSize: "loading-lg" },
+    normal: { iconSize: "size-6", loadingSize: undefined },
+  };
   return (
     <button
       type={type}
       className={cx(`btn`, color, className, {
+        "btn-xs": size === "xs",
         "btn-sm": size === "sm",
         "btn-lg": size === "lg",
       })}
@@ -1014,7 +1023,11 @@ export const SaveButton = ({
       {...props}
     >
       {children ?? t("general.saveButton")}
-      {isLoading ? <LoadingComponent className={iconClassName} /> : <Icon className={iconClassName} />}
+      {isLoading ? (
+        <LoadingComponent size={sizes[size ?? "normal"].loadingSize} />
+      ) : (
+        <Icon className={sizes[size ?? "normal"].iconSize} />
+      )}
     </button>
   );
 };

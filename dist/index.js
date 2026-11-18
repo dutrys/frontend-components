@@ -29,7 +29,7 @@ import { NumericFormat } from 'react-number-format';
 import { CheckIcon as CheckIcon$1 } from '@heroicons/react/20/solid';
 import { lt as lt$1 } from 'date-fns/locale';
 
-const LoadingComponent = ({ style, className, loadingClassName, size, }) => (jsx("div", { className: `flex justify-center ${className}`, style: style, children: jsx("span", { className: `${loadingClassName || "text-primary"} loading loading-spinner ${size}` }) }));
+const LoadingComponent = ({ style, className, loadingClassName, size, }) => (jsx("div", { className: `flex justify-center ${className ?? ""}`, style: style, children: jsx("span", { className: `${loadingClassName ?? "text-primary"} loading loading-spinner ${size ?? ""}` }) }));
 
 const Popover = ({ title, children, popoverClassName, onShow, open: openProp, showOnHover = true, showOnClick = false, showOnFocus = false, backgroundColor = "bg-slate-800", borderColor, disabled, placement, arrowSize, }) => {
     const [isOpen, setIsOpen] = useState(openProp || false);
@@ -1566,8 +1566,14 @@ const Required = () => jsx("span", { className: "text-error align-bottom", child
 const SaveButton = ({ isLoading, icon, disabled, className = "btn-block", onClick, size, color = "btn-primary", children, type = "submit", ...props }) => {
     const t = useTranslations();
     const Icon = icon || CheckIcon$1;
-    const iconClassName = cx({ "loading-xs": !size || size === "sm" });
+    const sizes = {
+        sm: { iconSize: "size-5", loadingSize: "loading-sm" },
+        xs: { iconSize: "size-4", loadingSize: "loading-xs" },
+        lg: { iconSize: "size-8", loadingSize: "loading-lg" },
+        normal: { iconSize: "size-6", loadingSize: undefined },
+    };
     return (jsxs("button", { type: type, className: cx(`btn`, color, className, {
+            "btn-xs": size === "xs",
             "btn-sm": size === "sm",
             "btn-lg": size === "lg",
         }), color: "primary", disabled: isLoading || disabled, "data-testid": type === "submit" ? "submit" : undefined, onClick: (e) => {
@@ -1576,7 +1582,7 @@ const SaveButton = ({ isLoading, icon, disabled, className = "btn-block", onClic
                 e.preventDefault();
                 onClick();
             }
-        }, ...props, children: [children ?? t("general.saveButton"), isLoading ? jsx(LoadingComponent, { className: iconClassName }) : jsx(Icon, { className: iconClassName })] }));
+        }, ...props, children: [children ?? t("general.saveButton"), isLoading ? (jsx(LoadingComponent, { size: sizes[size ?? "normal"].loadingSize })) : (jsx(Icon, { className: sizes[size ?? "normal"].iconSize }))] }));
 };
 
 const DateTime = ({ date, format: format$1 = "yyyy-MM-dd HH:mm:ss" }) => {

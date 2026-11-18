@@ -672,7 +672,7 @@ declare const SelectPaginatedFromApiField: <T extends {
 declare const Required: () => react_jsx_runtime.JSX.Element;
 declare const SaveButton: ({ isLoading, icon, disabled, className, onClick, size, color, children, type, ...props }: {
     type?: "submit" | "button";
-    size?: "sm" | "lg";
+    size?: "sm" | "lg" | "xs";
     color?: "btn-primary" | "btn-secondary" | "btn-warning" | "btn-error" | "btn-success" | "btn-neutral" | "btn-info";
     onClick?: () => unknown;
     className?: string;
